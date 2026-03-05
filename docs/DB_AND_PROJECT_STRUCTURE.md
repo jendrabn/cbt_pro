@@ -22,7 +22,7 @@
 
 ### Table Categories
 
-1. **Core Tables**: Users, Roles
+1. **Core Tables**: Django `auth_user`, User Profiles
 2. **Question Management**: Questions, Options, Categories
 3. **Exam Management**: Exams, Exam Questions, Assignments
 4. **Exam Execution**: Exam Attempts, Answers, Violations
@@ -47,30 +47,16 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- 1. CORE TABLES (Users & Authentication)
 -- ============================================================================
 
--- Users Table
-CREATE TABLE users (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    username VARCHAR(150) UNIQUE NOT NULL,
-    email VARCHAR(254) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
-    first_name VARCHAR(150) NOT NULL,
-    last_name VARCHAR(150) NOT NULL,
-    role VARCHAR(20) NOT NULL CHECK (role IN ('admin', 'teacher', 'student')),
-    is_active BOOLEAN DEFAULT TRUE,
-    is_deleted BOOLEAN DEFAULT FALSE,
-    last_login TIMESTAMP WITH TIME ZONE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE INDEX idx_users_username ON users(username) WHERE is_deleted = FALSE;
-CREATE INDEX idx_users_email ON users(email) WHERE is_deleted = FALSE;
-CREATE INDEX idx_users_role ON users(role) WHERE is_deleted = FALSE;
+-- Note:
+-- Tabel auth_user dikelola oleh migration Django (django.contrib.auth),
+-- sehingga tidak didefinisikan ulang pada DDL ini.
+-- Jalankan `python manage.py migrate` terlebih dahulu sebelum menjalankan
+-- DDL kustom ini agar tabel auth_user sudah tersedia.
 
 -- User Profiles Table (Role-specific information)
 CREATE TABLE user_profiles (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID NOT NULL UNIQUE,
+    user_id BIGINT NOT NULL UNIQUE,
     teacher_id VARCHAR(50), -- NIP for teachers
     student_id VARCHAR(50), -- NIS for students
     phone_number VARCHAR(20),
@@ -80,7 +66,7 @@ CREATE TABLE user_profiles (
     bio TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES auth_user(id) ON DELETE CASCADE
 );
 
 CREATE INDEX idx_user_profiles_user_id ON user_profiles(user_id);
@@ -90,13 +76,13 @@ CREATE INDEX idx_user_profiles_teacher_id ON user_profiles(teacher_id);
 -- User Activity Logs
 CREATE TABLE user_activity_logs (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID NOT NULL,
+    user_id BIGINT NOT NULL,
     action VARCHAR(100) NOT NULL,
     description TEXT,
     ip_address INET,
     user_agent TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES auth_user(id) ON DELETE CASCADE
 );
 
 CREATE INDEX idx_activity_logs_user_id ON user_activity_logs(user_id);
@@ -105,7 +91,7 @@ CREATE INDEX idx_activity_logs_created_at ON user_activity_logs(created_at);
 -- User Import Logs Table (v1.3.0 - Import Users from Excel)
 CREATE TABLE user_import_logs (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    imported_by UUID NOT NULL,
+    imported_by BIGINT NOT NULL,
     original_filename VARCHAR(255) NOT NULL,
     file_size_kb INTEGER NOT NULL,
     total_rows INTEGER DEFAULT 0,
@@ -120,7 +106,7 @@ CREATE TABLE user_import_logs (
     finished_at TIMESTAMP WITH TIME ZONE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     
-    FOREIGN KEY (imported_by) REFERENCES users(id) ON DELETE RESTRICT
+    FOREIGN KEY (imported_by) REFERENCES auth_user(id) ON DELETE RESTRICT
 );
 
 CREATE INDEX idx_user_import_logs_imported_by ON user_import_logs(imported_by);
@@ -167,7 +153,7 @@ CREATE INDEX idx_question_categories_parent_id ON question_categories(parent_id)
 -- Questions Table
 CREATE TABLE questions (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    created_by UUID NOT NULL,
+    created_by BIGINT NOT NULL,
     subject_id UUID NOT NULL,
     category_id UUID,
     question_type VARCHAR(20) NOT NULL CHECK (question_type IN ('multiple_choice', 'essay', 'short_answer')),
@@ -190,7 +176,7 @@ CREATE TABLE questions (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     
-    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE RESTRICT,
+    FOREIGN KEY (created_by) REFERENCES auth_user(id) ON DELETE RESTRICT,
     FOREIGN KEY (subject_id) REFERENCES subjects(id) ON DELETE RESTRICT,
     FOREIGN KEY (category_id) REFERENCES question_categories(id) ON DELETE SET NULL
 );
@@ -256,7 +242,7 @@ CREATE TABLE question_tag_relations (
 -- Exams Table
 CREATE TABLE exams (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    created_by UUID NOT NULL,
+    created_by BIGINT NOT NULL,
     subject_id UUID NOT NULL,
     title VARCHAR(255) NOT NULL,
     description TEXT,
@@ -306,7 +292,7 @@ CREATE TABLE exams (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     
-    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE RESTRICT,
+    FOREIGN KEY (created_by) REFERENCES auth_user(id) ON DELETE RESTRICT,
     FOREIGN KEY (subject_id) REFERENCES subjects(id) ON DELETE RESTRICT
 );
 
@@ -359,11 +345,11 @@ CREATE INDEX idx_classes_name ON classes(name) WHERE is_active = TRUE;
 -- Class Students Table (Many-to-Many)
 CREATE TABLE class_students (
     class_id UUID NOT NULL,
-    student_id UUID NOT NULL,
+    student_id BIGINT NOT NULL,
     enrolled_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (class_id, student_id),
     FOREIGN KEY (class_id) REFERENCES classes(id) ON DELETE CASCADE,
-    FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (student_id) REFERENCES auth_user(id) ON DELETE CASCADE
 );
 
 CREATE INDEX idx_class_students_student_id ON class_students(student_id);
@@ -374,12 +360,12 @@ CREATE TABLE exam_assignments (
     exam_id UUID NOT NULL,
     assigned_to_type VARCHAR(20) NOT NULL CHECK (assigned_to_type IN ('class', 'student')),
     class_id UUID,
-    student_id UUID,
+    student_id BIGINT,
     assigned_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     
     FOREIGN KEY (exam_id) REFERENCES exams(id) ON DELETE CASCADE,
     FOREIGN KEY (class_id) REFERENCES classes(id) ON DELETE CASCADE,
-    FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (student_id) REFERENCES auth_user(id) ON DELETE CASCADE,
     
     CHECK (
         (assigned_to_type = 'class' AND class_id IS NOT NULL AND student_id IS NULL) OR
@@ -399,7 +385,7 @@ CREATE INDEX idx_exam_assignments_student_id ON exam_assignments(student_id);
 CREATE TABLE exam_attempts (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     exam_id UUID NOT NULL,
-    student_id UUID NOT NULL,
+    student_id BIGINT NOT NULL,
     
     -- Attempt Info
     attempt_number INTEGER DEFAULT 1,
@@ -428,7 +414,7 @@ CREATE TABLE exam_attempts (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     
     FOREIGN KEY (exam_id) REFERENCES exams(id) ON DELETE RESTRICT,
-    FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE RESTRICT,
+    FOREIGN KEY (student_id) REFERENCES auth_user(id) ON DELETE RESTRICT,
     UNIQUE (exam_id, student_id, attempt_number)
 );
 
@@ -477,13 +463,13 @@ CREATE INDEX idx_student_answers_question_id ON student_answers(question_id);
 CREATE TABLE essay_gradings (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     answer_id UUID NOT NULL UNIQUE,
-    graded_by UUID NOT NULL,
+    graded_by BIGINT NOT NULL,
     points_awarded DECIMAL(5,2) NOT NULL,
     feedback TEXT,
     graded_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     
     FOREIGN KEY (answer_id) REFERENCES student_answers(id) ON DELETE CASCADE,
-    FOREIGN KEY (graded_by) REFERENCES users(id) ON DELETE RESTRICT
+    FOREIGN KEY (graded_by) REFERENCES auth_user(id) ON DELETE RESTRICT
 );
 
 CREATE INDEX idx_essay_gradings_answer_id ON essay_gradings(answer_id);
@@ -531,7 +517,7 @@ CREATE TABLE exam_results (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     attempt_id UUID NOT NULL UNIQUE,
     exam_id UUID NOT NULL,
-    student_id UUID NOT NULL,
+    student_id BIGINT NOT NULL,
     
     -- Scores
     total_score DECIMAL(7,2) NOT NULL,
@@ -561,7 +547,7 @@ CREATE TABLE exam_results (
     
     FOREIGN KEY (attempt_id) REFERENCES exam_attempts(id) ON DELETE CASCADE,
     FOREIGN KEY (exam_id) REFERENCES exams(id) ON DELETE RESTRICT,
-    FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE RESTRICT
+    FOREIGN KEY (student_id) REFERENCES auth_user(id) ON DELETE RESTRICT
 );
 
 CREATE INDEX idx_exam_results_exam_id ON exam_results(exam_id);
@@ -675,11 +661,11 @@ CREATE TABLE system_settings (
     category VARCHAR(50) NOT NULL,
     description TEXT,
     is_public BOOLEAN DEFAULT FALSE,
-    updated_by UUID,
+    updated_by BIGINT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     
-    FOREIGN KEY (updated_by) REFERENCES users(id) ON DELETE SET NULL
+    FOREIGN KEY (updated_by) REFERENCES auth_user(id) ON DELETE SET NULL
 );
 
 CREATE INDEX idx_system_settings_key ON system_settings(setting_key);
@@ -693,7 +679,7 @@ CREATE INDEX idx_system_settings_category ON system_settings(category);
 -- Notifications Table
 CREATE TABLE notifications (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID NOT NULL,
+    user_id BIGINT NOT NULL,
     title VARCHAR(255) NOT NULL,
     message TEXT NOT NULL,
     notification_type VARCHAR(50) NOT NULL CHECK (notification_type IN ('info', 'success', 'warning', 'error', 'announcement')),
@@ -703,7 +689,7 @@ CREATE TABLE notifications (
     read_at TIMESTAMP WITH TIME ZONE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES auth_user(id) ON DELETE CASCADE
 );
 
 CREATE INDEX idx_notifications_user_id ON notifications(user_id);
@@ -720,11 +706,11 @@ CREATE TABLE system_logs (
     function_name VARCHAR(100),
     line_number INTEGER,
     exception_info TEXT,
-    user_id UUID,
+    user_id BIGINT,
     ip_address INET,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+    FOREIGN KEY (user_id) REFERENCES auth_user(id) ON DELETE SET NULL
 );
 
 CREATE INDEX idx_system_logs_level ON system_logs(log_level);
@@ -762,9 +748,6 @@ END;
 $$ language 'plpgsql';
 
 -- Apply trigger to all tables with updated_at
-CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
 CREATE TRIGGER update_user_profiles_updated_at BEFORE UPDATE ON user_profiles
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
@@ -825,7 +808,7 @@ SELECT
     s.name AS subject_name,
     COUNT(DISTINCT eq.question_id) AS question_count
 FROM exams e
-JOIN users u ON e.created_by = u.id
+JOIN auth_user u ON e.created_by = u.id
 JOIN subjects s ON e.subject_id = s.id
 LEFT JOIN exam_questions eq ON e.id = eq.exam_id
 WHERE e.is_deleted = FALSE 
@@ -847,7 +830,7 @@ FROM exam_results er
 JOIN exam_attempts ea ON er.attempt_id = ea.id
 JOIN exams e ON er.exam_id = e.id
 JOIN subjects s ON e.subject_id = s.id
-JOIN users u ON er.student_id = u.id;
+JOIN auth_user u ON er.student_id = u.id;
 
 -- View: Nilai Final per Siswa per Ujian (retake-aware)
 -- Menampilkan satu baris per (exam_id, student_id) berisi nilai final
@@ -886,7 +869,7 @@ FROM exam_results er
 JOIN exam_attempts ea ON er.attempt_id = ea.id
 JOIN exams e ON er.exam_id = e.id
 JOIN subjects s ON e.subject_id = s.id
-JOIN users u ON er.student_id = u.id
+JOIN auth_user u ON er.student_id = u.id
 WHERE ea.status IN ('submitted', 'auto_submitted', 'completed')
 ORDER BY
     er.exam_id,
@@ -928,17 +911,9 @@ WHERE q.is_deleted = FALSE;
 -- INITIAL DATA (Optional - for development)
 -- ============================================================================
 
--- Insert default admin user (password: admin123 - CHANGE IN PRODUCTION!)
-INSERT INTO users (username, email, password_hash, first_name, last_name, role, is_active)
-VALUES (
-    'admin',
-    'admin@cbt.com',
-    '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYIxF6O5uGi', -- bcrypt hash of 'admin123'
-    'System',
-    'Administrator',
-    'admin',
-    TRUE
-);
+-- Admin user sebaiknya dibuat via Django command agar format password dan field
+-- auth_user kustom (misalnya role/group) valid:
+-- python manage.py createsuperuser
 
 -- Insert sample subjects
 INSERT INTO subjects (name, code, description) VALUES
@@ -977,7 +952,7 @@ INSERT INTO system_settings (setting_key, setting_value, setting_type, category,
 -- COMMENTS ON TABLES (Documentation)
 -- ============================================================================
 
-COMMENT ON TABLE users IS 'Core users table for authentication and authorization';
+COMMENT ON TABLE auth_user IS 'Django default authentication table (managed by Django migrations)';
 COMMENT ON TABLE user_profiles IS 'Extended user profile information specific to roles';
 COMMENT ON TABLE questions IS 'Question bank with support for multiple question types';
 COMMENT ON TABLE exam_questions IS 'Junction table linking exams to questions with custom settings';

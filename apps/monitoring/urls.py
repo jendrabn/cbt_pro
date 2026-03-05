@@ -21,7 +21,7 @@ urlpatterns = [
         name="monitoring_snapshot",
     ),
     path(
-        "teacher/monitoring/<uuid:exam_id>/student/<uuid:student_id>/",
+        "teacher/monitoring/<uuid:exam_id>/student/<int:student_id>/",
         StudentDetailView.as_view(),
         name="student_detail",
     ),
@@ -41,4 +41,3 @@ urlpatterns = [
         name="monitoring_announcement",
     ),
 ]
-

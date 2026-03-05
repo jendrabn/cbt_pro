@@ -52,7 +52,19 @@ A comprehensive Django-based Computer-Based Testing system with advanced feature
 
 2. **Install dependencies**
    ```bash
-   pip install -r requirements.txt
+   pip install django python-dotenv
+
+   # Database driver (MySQL)
+   pip install mysqlclient
+   # OR use pymysql if mysqlclient fails on Windows:
+   # pip install pymysql
+
+   # For PostgreSQL instead of MySQL:
+   # pip install psycopg
+
+   # Django packages
+   pip install djangorestframework django-cors-headers django-environ django-extensions
+   pip install django-crispy-forms crispy-bootstrap5 django-allauth django-import-export
    ```
 
 3. **Configure environment variables**

@@ -1,81 +1,55 @@
 import uuid
-from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
+from django.contrib.auth.models import AbstractUser, UserManager as DjangoUserManager
 from django.db import models
-from django.utils import timezone
 from apps.core.models import BaseModel
 
 
-class UserManager(BaseUserManager):
-    """Custom user manager"""
-    
-    def create_user(self, username, email, password=None, **extra_fields):
-        if not username:
-            raise ValueError('Users must have a username')
-        if not email:
-            raise ValueError('Users must have an email address')
-        
-        email = self.normalize_email(email)
-        user = self.model(username=username, email=email, **extra_fields)
-        user.set_password(password)
-        user.save(using=self._db)
-        return user
-    
-    def create_superuser(self, username, email, password=None, **extra_fields):
-        extra_fields.setdefault('is_staff', True)
-        extra_fields.setdefault('is_superuser', True)
-        extra_fields.setdefault('is_active', True)
-        extra_fields.setdefault('role', 'admin')
-        
-        if extra_fields.get('is_staff') is not True:
-            raise ValueError('Superuser must have is_staff=True.')
-        if extra_fields.get('is_superuser') is not True:
-            raise ValueError('Superuser must have is_superuser=True.')
-        
-        return self.create_user(username, email, password, **extra_fields)
+class UserManager(DjangoUserManager):
+    """Custom user manager with role default for superuser."""
+
+    def create_superuser(self, username, email=None, password=None, **extra_fields):
+        extra_fields.setdefault("role", "admin")
+        return super().create_superuser(username, email=email, password=password, **extra_fields)
 
 
-class User(AbstractBaseUser, PermissionsMixin):
-    """Custom User model dengan UUID"""
-    
+class User(AbstractUser):
+    """Custom User model using Django auth_user table."""
+
     ROLE_CHOICES = [
-        ('admin', 'Admin'),
-        ('teacher', 'Teacher'),
-        ('student', 'Student'),
+        ("admin", "Admin"),
+        ("teacher", "Teacher"),
+        ("student", "Student"),
     ]
-    
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    username = models.CharField(max_length=150, unique=True)
+
     email = models.EmailField(max_length=254, unique=True)
-    first_name = models.CharField(max_length=150)
-    last_name = models.CharField(max_length=150)
-    role = models.CharField(max_length=20, choices=ROLE_CHOICES)
-    is_active = models.BooleanField(default=True)
-    is_staff = models.BooleanField(default=False)
-    is_superuser = models.BooleanField(default=False)
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default="student")
     is_deleted = models.BooleanField(default=False)
-    last_login = models.DateTimeField(null=True, blank=True)
-    date_joined = models.DateTimeField(default=timezone.now)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    
-    USERNAME_FIELD = 'username'
-    REQUIRED_FIELDS = ['email', 'first_name', 'last_name']
-    
+
+    REQUIRED_FIELDS = ["email", "first_name", "last_name"]
+
     objects = UserManager()
-    
+
     class Meta:
-        db_table = 'users'
+        db_table = "auth_user"
         indexes = [
-            models.Index(fields=['username'], condition=models.Q(is_deleted=False), name='idx_users_username'),
-            models.Index(fields=['email'], condition=models.Q(is_deleted=False), name='idx_users_email'),
-            models.Index(fields=['role'], condition=models.Q(is_deleted=False), name='idx_users_role'),
+            models.Index(fields=["role"], name="idx_auth_user_role"),
+            models.Index(fields=["is_active"], name="idx_auth_user_active"),
         ]
-    
+
     def __str__(self):
         return f"{self.username} ({self.role})"
-    
-    def get_full_name(self):
-        return f"{self.first_name} {self.last_name}"
+
+    @property
+    def is_admin(self):
+        return self.role == "admin"
+
+    @property
+    def is_teacher(self):
+        return self.role == "teacher"
+
+    @property
+    def is_student(self):
+        return self.role == "student"
 
 
 class UserProfile(BaseModel):

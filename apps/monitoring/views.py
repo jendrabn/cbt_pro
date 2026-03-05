@@ -52,7 +52,7 @@ class MonitoringDashboardView(TeacherMonitoringBaseView, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         snapshot = build_monitoring_snapshot(self.exam)
-        student_placeholder = "00000000-0000-0000-0000-000000000000"
+        student_placeholder = 1
         attempt_placeholder = "00000000-0000-0000-0000-000000000000"
         student_detail_url_template = reverse(
             "student_detail",
@@ -60,7 +60,7 @@ class MonitoringDashboardView(TeacherMonitoringBaseView, TemplateView):
                 "exam_id": self.exam.id,
                 "student_id": student_placeholder,
             },
-        ).replace(student_placeholder, "__student_id__")
+        ).replace("/1/", "/__student_id__/")
         force_submit_url_template = reverse(
             "force_submit",
             kwargs={"attempt_id": attempt_placeholder},

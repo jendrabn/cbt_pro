@@ -5,7 +5,19 @@
 ### 1. Install Dependencies
 
 ```bash
-pip install -r requirements.txt
+pip install django python-dotenv mysqlclient
+```
+
+**Note:** If you encounter issues with `mysqlclient` on Windows, install Visual C++ Build Tools first, or use:
+```bash
+pip install pymysql
+pip install django pymysql
+```
+
+Then add this to your `config/settings.py` (at the top):
+```python
+import pymysql
+pymysql.install_as_MySQLdb()
 ```
 
 ### 2. Configure Environment Variables
@@ -104,7 +116,7 @@ DB_PORT=5432
 Install PostgreSQL driver:
 
 ```bash
-pip install psycopg2-binary
+pip install psycopg
 ```
 
 ## Database Schema

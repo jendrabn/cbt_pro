@@ -1705,8 +1705,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     npm \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Install Python dependencies
+RUN pip install --no-cache-dir \
+    django python-dotenv \
+    djangorestframework django-cors-headers django-environ django-extensions \
+    django-crispy-forms crispy-bootstrap5 django-allauth django-import-export \
+    django-model-utils django-timezone-field django-tinymce \
+    celery django-celery-beat django_celery_results channels channels_redis \
+    mysqlclient redis \
+    pillow openpyxl python-magic reportlab weasyprint \
+    pytest pytest-django pytest-cov factory_boy faker \
+    black flake8 isort mypy pylint
 
 COPY . .
 

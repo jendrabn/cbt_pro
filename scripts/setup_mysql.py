@@ -74,7 +74,7 @@ SELECT 'Database and user created successfully!' AS Status;
             print("✅ Database setup completed successfully!")
             print()
             print("Next steps:")
-            print("1. Install requirements: pip install -r requirements.txt")
+            print("1. Install dependencies: pip install django python-dotenv mysqlclient")
             print("2. Run migrations: python manage.py migrate")
             print("3. Seed database: python manage.py seed")
             print("4. Create superuser: python manage.py createsuperuser")

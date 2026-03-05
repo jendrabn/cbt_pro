@@ -21,7 +21,7 @@ urlpatterns = [
     path("teacher/results/<uuid:result_id>/review/", AnswerReviewView.as_view(), name="answer_review"),
     path("teacher/results/<uuid:exam_id>/export/", ExportResultsView.as_view(), name="export_results"),
     path(
-        "teacher/results/<uuid:exam_id>/student/<uuid:student_id>/attempts/",
+        "teacher/results/<uuid:exam_id>/student/<int:student_id>/attempts/",
         RetakeHistoryView.as_view(),
         name="retake_history",
     ),
