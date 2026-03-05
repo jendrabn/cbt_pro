@@ -32,8 +32,8 @@
             <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#landingMenu" aria-controls="landingMenu" aria-expanded="false" aria-label="Toggle navigation">
                 <i class="ri-menu-line fs-4"></i>
             </button>
-            <div class="collapse navbar-collapse" id="landingMenu">
-                <ul class="navbar-nav ms-auto me-lg-3 mb-3 mb-lg-0">
+            <div class="collapse navbar-collapse landing-nav-collapse" id="landingMenu">
+                <ul class="navbar-nav mb-3 mb-lg-0">
                     <li class="nav-item">
                         <a class="nav-link landing-nav-link active" href="#home">Beranda</a>
                     </li>
@@ -44,7 +44,7 @@
                         <a class="nav-link landing-nav-link" href="#about">Tentang</a>
                     </li>
                 </ul>
-                <a href="{{ dashboard_url }}" class="btn btn-primary rounded-pill px-4">
+                <a href="{{ dashboard_url }}" class="btn btn-primary rounded-pill px-4 mt-2 mt-lg-0">
                     <i class="{{ dashboard_icon }} me-1"></i>{{ dashboard_label }}
                 </a>
             </div>
@@ -55,11 +55,10 @@
         <section id="home" class="hero-section">
             <div class="container">
                 <div class="row align-items-center gy-5">
-                    <div class="col-lg-7" data-reveal>
-                        <span class="hero-badge">Lebih tenang saat ujian berlangsung</span>
-                        <h1 class="hero-title mt-3 mb-3">
-                            Platform Ujian Berbasis
-                            <span class="d-block text-gradient">Komputer yang Modern</span>
+                    <div class="col-lg-7 pe-lg-4 pe-xl-5" data-reveal>
+                        <h1 class="hero-title mb-3 text-primary fw-bolder">
+                            <span class="d-block hero-title-line">Platform Ujian Berbasis</span>
+                            <span class="d-block hero-title-line">Komputer yang Modern</span>
                         </h1>
                         <p class="hero-lead mb-4">
                             CBT Pro membantu sekolah dan institusi menyelenggarakan ujian digital yang cepat, aman,
@@ -158,21 +157,27 @@
             </div>
         </section>
 
-        <section class="section-space section-stats">
+        <section class="section-space section-stats text-white">
             <div class="container">
-                <div class="row g-3 g-md-4">
-                    {% for item in stats %}
-                    <div class="col-6 col-lg-3" data-reveal>
-                        <div class="card border-0 shadow-sm stat-card h-100">
-                            <div class="card-body p-3 p-md-4">
-                                <p class="text-muted mb-2">{{ item.label }}</p>
-                                <p class="display-6 fw-bold mb-0">
+                <div class="stats-shell" data-reveal>
+                    <div class="stats-head text-center mx-auto">
+                        <h2 class="stats-title mb-2">Teruji untuk Skala Besar</h2>
+                        <p class="stats-subtitle mb-0">
+                            Stabil saat puncak pelaksanaan ujian, tetap nyaman digunakan tim akademik.
+                        </p>
+                    </div>
+                    <div class="row g-0 stats-grid">
+                        {% for item in stats %}
+                        <div class="col-6 col-lg" data-reveal>
+                            <div class="stats-item text-center">
+                                <p class="stats-value mb-1">
                                     <span data-counter data-target="{{ item.value }}" data-suffix="{{ item.suffix }}">0</span>
                                 </p>
+                                <p class="stats-label mb-0">{{ item.label }}</p>
                             </div>
                         </div>
+                        {% endfor %}
                     </div>
-                    {% endfor %}
                 </div>
             </div>
         </section>
@@ -236,14 +241,14 @@
 
     <footer class="landing-footer">
         <div class="container d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-4">
-            <p class="footer-copy">
+            <p class="mb-0 text-body-secondary small">
                 &copy; {{ current_year }} CBT Pro. Hak cipta dilindungi.
             </p>
-            <div class="footer-socials">
-                <a href="#" class="btn btn-ghost footer-icon-btn" aria-label="Instagram"><i class="ri-instagram-line"></i></a>
-                <a href="#" class="btn btn-ghost footer-icon-btn" aria-label="Facebook"><i class="ri-facebook-line"></i></a>
-                <a href="#" class="btn btn-ghost footer-icon-btn" aria-label="YouTube"><i class="ri-youtube-line"></i></a>
-                <a href="#" class="btn btn-ghost footer-icon-btn" aria-label="WhatsApp"><i class="ri-whatsapp-line"></i></a>
+            <div class="d-flex align-items-center gap-2">
+                <a href="#" class="btn btn-ghost footer-icon-btn" aria-label="Instagram"><i class="ri-instagram-line fs-4"></i></a>
+                <a href="#" class="btn btn-ghost footer-icon-btn" aria-label="Facebook"><i class="ri-facebook-line fs-4"></i></a>
+                <a href="#" class="btn btn-ghost footer-icon-btn" aria-label="YouTube"><i class="ri-youtube-line fs-4"></i></a>
+                <a href="#" class="btn btn-ghost footer-icon-btn" aria-label="WhatsApp"><i class="ri-whatsapp-line fs-4"></i></a>
             </div>
         </div>
     </footer>
