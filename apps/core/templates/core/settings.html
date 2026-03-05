@@ -1,0 +1,569 @@
+{% extends "layouts/admin.html" %}
+{% load static %}
+
+{% block title %}Pengaturan Sistem - CBT{% endblock %}
+
+{% block topbar %}
+    {% include "layouts/partials/topbar_admin.html" with current_label="Pengaturan Sistem" %}
+{% endblock %}
+
+{% block main_attrs %}class="container-fluid px-3 px-md-4 py-4"{% endblock %}
+
+{% block page_header %}
+    <section class="cbt-page-header">
+        <div class="cbt-page-header-body">
+            {% include "layouts/partials/page_header.html" with eyebrow="Panel Admin" title="Pengaturan Sistem" %}
+            <div class="d-flex align-items-center gap-2 cbt-page-header-actions">
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block content %}
+        {% if messages %}
+            <div class="mb-3">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'info' }} py-2 mb-2" role="alert">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <section class="row g-4">
+            <div class="col-xl-3">
+                <div class="card border-0 shadow-sm section-card">
+                    <div class="card-body">
+<div class="nav flex-column nav-pills settings-nav gap-2">
+                            <a href="?tab=general" class="nav-link {% if active_tab == 'general' %}active{% endif %}">
+                                <i class="ri-settings-3-line me-1"></i>Umum
+                            </a>
+                            <a href="?tab=branding" class="nav-link {% if active_tab == 'branding' %}active{% endif %}">
+                                <i class="ri-palette-line me-1"></i>Branding
+                            </a>
+                            <a href="?tab=email" class="nav-link {% if active_tab == 'email' %}active{% endif %}">
+                                <i class="ri-mail-settings-line me-1"></i>Email
+                            </a>
+                            <a href="?tab=security" class="nav-link {% if active_tab == 'security' %}active{% endif %}">
+                                <i class="ri-shield-keyhole-line me-1"></i>Keamanan
+                            </a>
+                            <a href="?tab=exam_defaults" class="nav-link {% if active_tab == 'exam_defaults' %}active{% endif %}">
+                                <i class="ri-file-list-3-line me-1"></i>Default Ujian
+                            </a>
+                            <a href="?tab=notifications" class="nav-link {% if active_tab == 'notifications' %}active{% endif %}">
+                                <i class="ri-notification-3-line me-1"></i>Notifikasi
+                            </a>
+                            <a href="?tab=backup" class="nav-link {% if active_tab == 'backup' %}active{% endif %}">
+                                <i class="ri-database-2-line me-1"></i>Backup
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-9">
+                {% if active_tab == 'general' %}
+                <div class="card border-0 shadow-sm section-card">
+                    <div class="card-header bg-white border-0 pt-3">
+                        <h2 class="h6 mb-0">Pengaturan Umum</h2>
+                    </div>
+                    <div class="card-body">
+                        <form method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="save_general">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label required">{{ general_form.language.label }}</label>
+                                    {{ general_form.language }}
+                                    {% for error in general_form.language.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label required">{{ general_form.timezone.label }}</label>
+                                    {{ general_form.timezone }}
+                                    {% for error in general_form.timezone.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                                </div>
+                            </div>
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                                <button type="submit" class="btn btn-primary" title="Simpan pengaturan umum">
+                                    <i class="ri-save-line me-1"></i>Simpan
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if active_tab == 'branding' %}
+                <div class="card border-0 shadow-sm section-card">
+<div class="card-header bg-white border-0 pt-3 d-flex align-items-center justify-content-between">
+                        <h2 class="h6 mb-0">Pengaturan Branding</h2>
+                    </div>
+                    <div class="card-body">
+                        <form method="post" enctype="multipart/form-data" id="brandingForm">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="save_branding">
+                            <input type="hidden" name="landing_enabled_initial" value="{% if branding_landing_enabled %}1{% else %}0{% endif %}">
+
+                            <h3 class="h6">Identitas Lembaga</h3>
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6">
+                                    <label class="form-label">{{ branding_form.institution_name.label }}</label>
+                                    {{ branding_form.institution_name }}
+                                    {% for error in branding_form.institution_name.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">{{ branding_form.institution_type.label }}</label>
+                                    {{ branding_form.institution_type }}
+                                    {% for error in branding_form.institution_type.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                                </div>
+                                <div class="col-md-12">
+                                    <label class="form-label">{{ branding_form.institution_address.label }}</label>
+                                    {{ branding_form.institution_address }}
+                                    {% for error in branding_form.institution_address.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">{{ branding_form.institution_phone.label }}</label>
+                                    {{ branding_form.institution_phone }}
+                                    {% for error in branding_form.institution_phone.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">{{ branding_form.institution_email.label }}</label>
+                                    {{ branding_form.institution_email }}
+                                    {% for error in branding_form.institution_email.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">{{ branding_form.institution_website.label }}</label>
+                                    {{ branding_form.institution_website }}
+                                    {% for error in branding_form.institution_website.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                                </div>
+                            </div>
+
+                            <h3 class="h6">Visual & Logo</h3>
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6">
+                                    <label class="form-label">{{ branding_form.institution_logo_url.label }}</label>
+                                    {{ branding_form.institution_logo_url }}
+                                    <small class="text-muted d-block">PNG/JPG/SVG, maksimum 2 MB.</small>
+                                    {% for error in branding_form.institution_logo_url.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                                </div>
+                                <div class="col-md-6 d-flex align-items-end">
+                                    {% if branding_logo_url %}
+                                    <img src="{{ branding_logo_url }}" alt="Logo Utama" class="logo-preview">
+                                    {% else %}
+                                    <div class="logo-preview d-flex align-items-center justify-content-center text-muted"><i class="ri-image-line"></i></div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">{{ branding_form.institution_logo_dark_url.label }}</label>
+                                    {{ branding_form.institution_logo_dark_url }}
+                                    {% for error in branding_form.institution_logo_dark_url.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                                </div>
+                                <div class="col-md-6 d-flex align-items-end">
+                                    {% if branding_logo_dark_url %}
+                                    <img src="{{ branding_logo_dark_url }}" alt="Logo Dark" class="logo-preview">
+                                    {% else %}
+                                    <div class="logo-preview d-flex align-items-center justify-content-center text-muted"><i class="ri-image-line"></i></div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">{{ branding_form.institution_favicon_url.label }}</label>
+                                    {{ branding_form.institution_favicon_url }}
+                                    <small class="text-muted d-block">ICO/PNG, disarankan 32x32 px.</small>
+                                    {% for error in branding_form.institution_favicon_url.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                                </div>
+                                <div class="col-md-6 d-flex align-items-end">
+                                    {% if branding_favicon_url %}
+                                    <img src="{{ branding_favicon_url }}" alt="Favicon" class="logo-preview">
+                                    {% else %}
+                                    <div class="logo-preview d-flex align-items-center justify-content-center text-muted"><i class="ri-image-line"></i></div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">{{ branding_form.primary_color.label }}</label>
+                                    {{ branding_form.primary_color }}
+                                    {% for error in branding_form.primary_color.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                                </div>
+                                <div class="col-md-6 d-flex align-items-end gap-2">
+                                    <div style="width:40px;height:40px;border-radius:8px;border:1px solid #ced4da;background:{{ branding_form.primary_color.value|default:'#0d6efd' }};"></div>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" id="resetPrimaryColor">Reset ke #0d6efd</button>
+                                </div>
+                            </div>
+
+                            <h3 class="h6">Halaman Login</h3>
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6">
+                                    <label class="form-label">{{ branding_form.login_page_headline.label }}</label>
+                                    {{ branding_form.login_page_headline }}
+                                    {% for error in branding_form.login_page_headline.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">{{ branding_form.login_page_subheadline.label }}</label>
+                                    {{ branding_form.login_page_subheadline }}
+                                    {% for error in branding_form.login_page_subheadline.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">{{ branding_form.login_page_background_url.label }}</label>
+                                    {{ branding_form.login_page_background_url }}
+                                    <small class="text-muted d-block">JPG/PNG, maksimum 5 MB.</small>
+                                    {% for error in branding_form.login_page_background_url.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                                </div>
+                                <div class="col-md-6 d-flex align-items-end">
+                                    {% if branding_login_background_url %}
+                                    <img src="{{ branding_login_background_url }}" alt="Background Login" class="logo-preview">
+                                    {% else %}
+                                    <div class="logo-preview d-flex align-items-center justify-content-center text-muted"><i class="ri-image-line"></i></div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <h3 class="h6">Landing Page</h3>
+                            <div class="form-check mb-4">
+                                {{ branding_form.landing_page_enabled }}
+                                <label class="form-check-label" for="{{ branding_form.landing_page_enabled.id_for_label }}">
+                                    {{ branding_form.landing_page_enabled.label }}
+                                </label>
+                                {% for error in branding_form.landing_page_enabled.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                            </div>
+
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                                <button type="submit" class="btn btn-primary" title="Simpan pengaturan branding">
+                                    <i class="ri-save-line me-1"></i>Simpan Pengaturan
+                                </button>
+                                <button type="submit" form="resetBrandingDefaultsForm" class="btn btn-outline-secondary" title="Reset branding ke default">
+                                    <i class="ri-refresh-line me-1"></i>Reset Semua ke Default
+                                </button>
+                            </div>
+                        </form>
+
+                        <form method="post" id="resetBrandingDefaultsForm" class="d-none">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="reset_branding_defaults">
+                        </form>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if active_tab == 'email' %}
+                <div class="card border-0 shadow-sm section-card">
+                    <div class="card-header bg-white border-0 pt-3">
+                        <h2 class="h6 mb-0">Pengaturan Email</h2>
+                    </div>
+                    <div class="card-body">
+                        <form method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="save_email">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label required">{{ email_form.smtp_host.label }}</label>
+                                    {{ email_form.smtp_host }}
+                                    {% for error in email_form.smtp_host.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label required">{{ email_form.smtp_port.label }}</label>
+                                    {{ email_form.smtp_port }}
+                                    {% for error in email_form.smtp_port.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                                </div>
+                                <div class="col-md-3 d-flex align-items-end">
+                                    <div class="form-check mb-2">
+                                        {{ email_form.smtp_use_tls }}
+                                        <label class="form-check-label" for="{{ email_form.smtp_use_tls.id_for_label }}">{{ email_form.smtp_use_tls.label }}</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">{{ email_form.smtp_username.label }}</label>
+                                    {{ email_form.smtp_username }}
+                                    {% for error in email_form.smtp_username.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">{{ email_form.smtp_password.label }}</label>
+                                    {{ email_form.smtp_password }}
+                                    {% for error in email_form.smtp_password.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                                </div>
+                                <div class="col-md-12">
+                                    <label class="form-label required">{{ email_form.default_from_email.label }}</label>
+                                    {{ email_form.default_from_email }}
+                                    {% for error in email_form.default_from_email.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                                </div>
+                            </div>
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                                <button type="submit" class="btn btn-primary" title="Simpan konfigurasi email">
+                                    <i class="ri-save-line me-1"></i>Simpan
+                                </button>
+                            </div>
+                        </form>
+
+                        <hr class="my-4">
+                        <h3 class="h6">Kirim Email Uji</h3>
+                        <form method="post" class="row g-2 align-items-end">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="test_email">
+                            <input type="hidden" name="smtp_host" value="{{ email_form.smtp_host.value|default:'' }}">
+                            <input type="hidden" name="smtp_port" value="{{ email_form.smtp_port.value|default:'' }}">
+                            <input type="hidden" name="smtp_username" value="{{ email_form.smtp_username.value|default:'' }}">
+                            <input type="hidden" name="smtp_password" value="{{ email_form.smtp_password.value|default:'' }}">
+                            <input type="hidden" name="default_from_email" value="{{ email_form.default_from_email.value|default:'' }}">
+                            {% if email_form.smtp_use_tls.value %}<input type="hidden" name="smtp_use_tls" value="on">{% endif %}
+                            <div class="col-md-8">
+                                <label class="form-label">{{ email_form.test_email_recipient.label }}</label>
+                                {{ email_form.test_email_recipient }}
+                                {% for error in email_form.test_email_recipient.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                            </div>
+                            <div class="col-md-4">
+                                <button type="submit" class="btn btn-outline-primary w-100" title="Kirim email percobaan">
+                                    <i class="ri-mail-send-line me-1"></i>Kirim Email Uji
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if active_tab == 'security' %}
+                <div class="card border-0 shadow-sm section-card">
+                    <div class="card-header bg-white border-0 pt-3">
+                        <h2 class="h6 mb-0">Pengaturan Keamanan</h2>
+                    </div>
+                    <div class="card-body">
+                        <form method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="save_security">
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label class="form-label required">{{ security_form.password_min_length.label }}</label>
+                                    {{ security_form.password_min_length }}
+                                    {% for error in security_form.password_min_length.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label required">{{ security_form.session_timeout_minutes.label }}</label>
+                                    {{ security_form.session_timeout_minutes }}
+                                    {% for error in security_form.session_timeout_minutes.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label required">{{ security_form.max_login_attempts.label }}</label>
+                                    {{ security_form.max_login_attempts }}
+                                    {% for error in security_form.max_login_attempts.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                                </div>
+                                <div class="col-md-12">
+                                    <label class="form-label">{{ security_form.ip_whitelist.label }}</label>
+                                    {{ security_form.ip_whitelist }}
+                                    {% for error in security_form.ip_whitelist.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                                </div>
+                            </div>
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                                <button type="submit" class="btn btn-primary" title="Simpan pengaturan keamanan">
+                                    <i class="ri-save-line me-1"></i>Simpan
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if active_tab == 'exam_defaults' %}
+                <div class="card border-0 shadow-sm section-card">
+                    <div class="card-header bg-white border-0 pt-3">
+                        <h2 class="h6 mb-0">Default Ujian</h2>
+                    </div>
+                    <div class="card-body">
+                        <form method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="save_exam_defaults">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label required">{{ exam_defaults_form.default_exam_duration.label }}</label>
+                                    {{ exam_defaults_form.default_exam_duration }}
+                                    {% for error in exam_defaults_form.default_exam_duration.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label required">{{ exam_defaults_form.default_passing_score.label }}</label>
+                                    {{ exam_defaults_form.default_passing_score }}
+                                    {% for error in exam_defaults_form.default_passing_score.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                                </div>
+                                <div class="col-md-4 d-flex align-items-end">
+                                    <div class="form-check mb-2">
+                                        {{ exam_defaults_form.require_fullscreen_default }}
+                                        <label class="form-check-label" for="{{ exam_defaults_form.require_fullscreen_default.id_for_label }}">
+                                            {{ exam_defaults_form.require_fullscreen_default.label }}
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 d-flex align-items-end">
+                                    <div class="form-check mb-2">
+                                        {{ exam_defaults_form.detect_tab_switch_default }}
+                                        <label class="form-check-label" for="{{ exam_defaults_form.detect_tab_switch_default.id_for_label }}">
+                                            {{ exam_defaults_form.detect_tab_switch_default.label }}
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">{{ exam_defaults_form.max_violations_allowed_default.label }}</label>
+                                    {{ exam_defaults_form.max_violations_allowed_default }}
+                                    {% for error in exam_defaults_form.max_violations_allowed_default.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                                </div>
+                            </div>
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                                <button type="submit" class="btn btn-primary" title="Simpan default ujian">
+                                    <i class="ri-save-line me-1"></i>Simpan
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if active_tab == 'notifications' %}
+                <div class="card border-0 shadow-sm section-card">
+                    <div class="card-header bg-white border-0 pt-3">
+                        <h2 class="h6 mb-0">Preferensi Notifikasi</h2>
+                    </div>
+                    <div class="card-body">
+                        <form method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="save_notifications">
+                            <div class="d-grid gap-3">
+                                <div class="form-check">
+                                    {{ notification_form.notify_exam_published_email }}
+                                    <label class="form-check-label" for="{{ notification_form.notify_exam_published_email.id_for_label }}">
+                                        {{ notification_form.notify_exam_published_email.label }}
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    {{ notification_form.notify_exam_result_email }}
+                                    <label class="form-check-label" for="{{ notification_form.notify_exam_result_email.id_for_label }}">
+                                        {{ notification_form.notify_exam_result_email.label }}
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    {{ notification_form.notify_system_announcement }}
+                                    <label class="form-check-label" for="{{ notification_form.notify_system_announcement.id_for_label }}">
+                                        {{ notification_form.notify_system_announcement.label }}
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    {{ notification_form.notify_daily_summary }}
+                                    <label class="form-check-label" for="{{ notification_form.notify_daily_summary.id_for_label }}">
+                                        {{ notification_form.notify_daily_summary.label }}
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                                <button type="submit" class="btn btn-primary" title="Simpan preferensi notifikasi">
+                                    <i class="ri-save-line me-1"></i>Simpan
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if active_tab == 'backup' %}
+                <div class="card border-0 shadow-sm section-card mb-4">
+                    <div class="card-header bg-white border-0 pt-3">
+                        <h2 class="h6 mb-0">Backup & Restore</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mb-3">
+                            <form method="post" class="m-0">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="create_backup">
+                                <button type="submit" class="btn btn-primary" title="Buat backup pengaturan saat ini">
+                                    <i class="ri-download-cloud-2-line me-1"></i>Buat Backup
+                                </button>
+                            </form>
+                        </div>
+
+                        <form method="post" enctype="multipart/form-data" class="row g-2 align-items-end">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="restore_backup">
+                            <div class="col-md-9">
+                                <label class="form-label">{{ backup_form.backup_file.label }}</label>
+                                {{ backup_form.backup_file }}
+                                {% for error in backup_form.backup_file.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                            </div>
+                            <div class="col-md-3">
+                                <button type="submit" class="btn btn-outline-warning w-100" title="Restore file backup yang dipilih">
+                                    <i class="ri-upload-cloud-2-line me-1"></i>Restore Backup
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm section-card">
+                    <div class="card-header bg-white border-0 pt-3">
+                        <h3 class="h6 mb-0">Riwayat Backup</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="ps-3">Nama File</th>
+                                        <th>Dibuat Pada</th>
+                                        <th>Ukuran</th>
+                                        <th class="pe-3">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for row in backup_history %}
+                                    <tr>
+                                        <td class="ps-3">{{ row.filename }}</td>
+                                        <td>{{ row.created_at|date:"d M Y H:i:s" }}</td>
+                                        <td>{{ row.size_kb }} KB</td>
+                                        <td class="pe-3">
+                                            <a href="{{ row.download_url }}" class="btn btn-sm btn-outline-primary" title="Download file backup ini">
+                                                <i class="ri-download-2-line me-1"></i>Unduh
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted py-4">Belum ada file backup.</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </section>
+{% endblock %}
+
+{% block vendor_js %}
+<script>
+        (function () {
+            const resetBtn = document.getElementById("resetPrimaryColor");
+            const primaryInput = document.getElementById("id_primary_color");
+            if (resetBtn && primaryInput) {
+                resetBtn.addEventListener("click", function () {
+                    primaryInput.value = "#0d6efd";
+                });
+            }
+
+            const brandingForm = document.getElementById("brandingForm");
+            if (!brandingForm) {
+                return;
+            }
+            brandingForm.addEventListener("submit", function (event) {
+                const initialInput = brandingForm.querySelector("input[name='landing_enabled_initial']");
+                const toggle = document.getElementById("id_landing_page_enabled");
+                const wasEnabled = initialInput && initialInput.value === "1";
+                const isEnabled = toggle ? Boolean(toggle.checked) : true;
+                if (wasEnabled && !isEnabled) {
+const ok = window.confirm(
+                        "Menonaktifkan Landing Page akan membuat URL utama (/) langsung mengarah ke halaman login. Lanjutkan?"
+                    );
+                    if (!ok) {
+                        event.preventDefault();
+                    }
+                }
+            });
+        })();
+    </script>
+{% endblock %}
+

@@ -1,0 +1,65 @@
+{% extends "layouts/student.html" %}
+{% load static %}
+
+{% block title %}Konfirmasi Retake - CBT{% endblock %}
+
+{% block topbar %}
+    {% include "layouts/partials/topbar_student.html" with parent_label="Daftar Ujian" parent_url="/student/exams/" current_label="Konfirmasi Retake" %}
+{% endblock %}
+
+{% block main_attrs %}class="container py-4"{% endblock %}
+
+{% block page_header %}
+    <section class="cbt-page-header">
+        <div class="cbt-page-header-body">
+            {% include "layouts/partials/page_header.html" with eyebrow="Panel Siswa" title="Konfirmasi Retake" %}
+            <div class="d-flex align-items-center gap-2 cbt-page-header-actions">
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block content %}
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h1 class="h5 mb-0">Konfirmasi Ujian Ulang</h1>
+                <a href="{{ back_url }}" class="btn btn-sm btn-outline-secondary">
+                    <i class="ri-arrow-left-line me-1"></i>Daftar Ujian
+                </a>
+            </div>
+            <div class="card-body">
+                <h2 class="h6 mb-1">{{ exam.title }}</h2>
+                <p class="small text-muted mb-3">
+                    Kebijakan nilai: <strong>{{ exam.get_retake_score_policy_display }}</strong>.
+                </p>
+
+                <ul class="small">
+                    <li>Percobaan terpakai: {{ retake_check.attempts_used }} / {{ retake_check.max_attempts }}</li>
+                    <li>Sisa percobaan: {{ retake_check.remaining_attempts }}</li>
+                    <li>Cooldown: {{ exam.retake_cooldown_minutes }} menit</li>
+                </ul>
+
+                {% if retake_check.eligible %}
+                <form method="post" onsubmit="return window.confirm('Mulai attempt retake sekarang?');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary">
+                        <i class="ri-refresh-line me-1"></i>Mulai Retake
+                    </button>
+                </form>
+                {% else %}
+                <div
+                    class="alert alert-warning py-2 mb-0"
+                    data-retake-countdown
+                    {% if retake_check.next_available_at %}data-next-available="{{ retake_check.next_available_at|date:'c' }}"{% endif %}
+                >
+                    {{ retake_check.reason }}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+{% endblock %}
+
+{% block vendor_js %}
+<script src="{% static 'attempts/js/retake_cooldown.js' %}"></script>
+{% endblock %}
+

@@ -1,0 +1,107 @@
+{% extends "layouts/student.html" %}
+{% load static %}
+
+{% block title %}Konfirmasi Submit Ujian - CBT{% endblock %}
+
+{% block topbar %}
+    {% include "layouts/partials/topbar_student.html" with parent_label="Daftar Ujian" parent_url="/student/exams/" current_label="Konfirmasi Submit Ujian" %}
+{% endblock %}
+
+{% block main_attrs %}class="container py-4"{% endblock %}
+
+{% block page_header %}
+    <section class="cbt-page-header">
+        <div class="cbt-page-header-body">
+            {% include "layouts/partials/page_header.html" with eyebrow="Panel Siswa" title="Konfirmasi Submit Ujian" %}
+            <div class="d-flex align-items-center gap-2 cbt-page-header-actions">
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block content %}
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h1 class="h5 mb-0">Ujian Berhasil Dikirim</h1>
+                <a href="{{ back_url }}" class="btn btn-sm btn-outline-secondary" title="Kembali ke daftar ujian">
+                    <i class="ri-arrow-left-line me-1"></i>Daftar Ujian
+                </a>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-success py-2">
+                    <i class="ri-checkbox-circle-line me-1"></i>
+                    Jawaban untuk ujian <strong>{{ exam.title }}</strong> telah dikirim dengan status <strong>{{ summary.status_label }}</strong>.
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-3">
+                        <div class="border rounded-3 p-3 h-100">
+                            <p class="small text-muted mb-1">Total Soal</p>
+                            <p class="mb-0 fw-semibold">{{ summary.total_questions }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="border rounded-3 p-3 h-100">
+                            <p class="small text-muted mb-1">Terjawab</p>
+                            <p class="mb-0 fw-semibold">{{ summary.answered_count }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="border rounded-3 p-3 h-100">
+                            <p class="small text-muted mb-1">Belum Dijawab</p>
+                            <p class="mb-0 fw-semibold">{{ summary.unanswered_count }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="border rounded-3 p-3 h-100">
+                            <p class="small text-muted mb-1">Ditandai</p>
+                            <p class="mb-0 fw-semibold">{{ summary.marked_count }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-4">
+                        <div class="border rounded-3 p-3 h-100">
+                            <p class="small text-muted mb-1">Waktu Mulai</p>
+                            <p class="mb-0">{{ summary.start_time_label }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="border rounded-3 p-3 h-100">
+                            <p class="small text-muted mb-1">Waktu Submit</p>
+                            <p class="mb-0">{{ summary.submit_time_label }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="border rounded-3 p-3 h-100">
+                            <p class="small text-muted mb-1">Durasi Pengerjaan</p>
+                            <p class="mb-0">{{ summary.duration_used_label }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="small text-muted mb-0">
+                    Nilai dan analitik akan tampil setelah proses penilaian selesai.
+                </p>
+
+                {% if exam.allow_retake and retake_eligibility.remaining_attempts > 0 %}
+                <div class="alert alert-info py-2 mt-3 mb-0" data-retake-countdown {% if retake_eligibility.next_available_at %}data-next-available="{{ retake_eligibility.next_available_at|date:'c' }}"{% endif %}>
+                    Setelah submit, kamu masih punya {{ retake_eligibility.remaining_attempts }} kesempatan ujian ulang.
+                </div>
+                <div class="mt-2">
+                    {% if exam.retake_show_review %}
+                    <a href="{% url 'pre_retake_review' exam.id %}" class="btn btn-sm btn-outline-primary"><i class="ri-repeat-line me-1"></i>Lanjut ke Retake</a>
+                    {% else %}
+                    <a href="{% url 'retake_start' exam.id %}" class="btn btn-sm btn-outline-primary"><i class="ri-repeat-line me-1"></i>Lanjut ke Retake</a>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+{% endblock %}
+
+{% block vendor_js %}
+<script src="{% static 'attempts/js/retake_cooldown.js' %}"></script>
+{% endblock %}
+

@@ -1,0 +1,213 @@
+{% extends "layouts/base_dashboard.html" %}
+{% load cbt_extras %}
+
+{% block title %}Profil Pengguna - CBT Pro{% endblock %}
+
+{% block body_classes %}
+    {% if request.user.role == 'admin' or request.user.role == 'teacher' or request.user.role == 'student' %} cbt-has-sidebar{% endif %}
+{% endblock %}
+
+{% block topbar %}
+    {% if request.user.role == 'admin' %}
+        {% include "layouts/partials/topbar_admin.html" with current_label="Profil Saya" %}
+    {% elif request.user.role == 'teacher' %}
+        {% include "layouts/partials/topbar_teacher.html" with current_label="Profil Saya" %}
+    {% else %}
+        {% include "layouts/partials/topbar_student.html" with current_label="Profil Saya" %}
+    {% endif %}
+{% endblock %}
+
+{% block sidebar %}
+    {% if request.user.role == 'admin' %}
+        {% include "layouts/partials/sidebar_admin.html" %}
+    {% elif request.user.role == 'teacher' %}
+        {% include "layouts/partials/sidebar_teacher.html" %}
+    {% elif request.user.role == 'student' %}
+        {% include "layouts/partials/sidebar_student.html" %}
+    {% endif %}
+{% endblock %}
+
+{% block sidebar_overlay %}
+    {% if request.user.role == 'admin' or request.user.role == 'teacher' or request.user.role == 'student' %}
+        <div class="cbt-sidebar-overlay"></div>
+    {% endif %}
+{% endblock %}
+
+{% block main_attrs %}class="container-fluid px-3 px-md-4 py-4"{% endblock %}
+
+{% block page_header %}
+    <section class="cbt-page-header">
+        <div class="cbt-page-header-body">
+            {% include "layouts/partials/page_header.html" with eyebrow="Akun" title="Profil Saya" %}
+        </div>
+    </section>
+{% endblock %}
+
+{% block content %}
+    {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    {% endif %}
+
+    <section class="card border-0 shadow-sm">
+        <form method="post" action="{% url 'profile' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="card-header bg-white border-0 pt-4 px-4">
+                <h2 class="h5 mb-1">Profil Saya</h2>
+                <p class="text-muted small mb-0">Perbarui data pribadi dan foto profil Anda.</p>
+            </div>
+
+            <div class="card-body p-4 pt-3">
+                <div class="row g-4">
+                    <div class="col-lg-8">
+                        <h3 class="h6 mb-3">Data Pribadi</h3>
+
+                        <div class="row g-3">
+                            <div class="col-sm-6">
+                                <label class="form-label required">{{ profile_form.first_name.label }}</label>
+                                {{ profile_form.first_name }}
+                                {% for error in profile_form.first_name.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-label">{{ profile_form.last_name.label }}</label>
+                                {{ profile_form.last_name }}
+                                {% for error in profile_form.last_name.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label required">{{ profile_form.email.label }}</label>
+                                {{ profile_form.email }}
+                                {% for error in profile_form.email.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-label">{{ profile_form.phone_number.label }}</label>
+                                {{ profile_form.phone_number }}
+                                {% for error in profile_form.phone_number.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-label">{{ profile_form.bio.label }}</label>
+                                {{ profile_form.bio }}
+                                {% for error in profile_form.bio.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+                        <h3 class="h6 mb-3">Informasi Akun</h3>
+
+                        <div class="row g-3">
+                            <div class="col-sm-6">
+                                <label class="form-label small text-muted mb-1">Username</label>
+                                <input type="text" class="form-control profile-readonly-input" value="{{ request.user.username }}" readonly>
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-label small text-muted mb-1">Peran</label>
+                                <input type="text" class="form-control profile-readonly-input" value="{{ request.user.get_role_display }}" readonly>
+                            </div>
+                            {% if request.user.role == 'teacher' %}
+                            <div class="col-sm-6">
+                                <label class="form-label small text-muted mb-1">NIP</label>
+                                <input type="text" class="form-control profile-readonly-input" value="{{ profile.teacher_id|default:'-' }}" readonly>
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-label small text-muted mb-1">Mata Pelajaran</label>
+                                <input type="text" class="form-control profile-readonly-input" value="{{ profile.subject_specialization|default:'-' }}" readonly>
+                            </div>
+                            {% elif request.user.role == 'student' %}
+                            <div class="col-sm-6">
+                                <label class="form-label small text-muted mb-1">NIS</label>
+                                <input type="text" class="form-control profile-readonly-input" value="{{ profile.student_id|default:'-' }}" readonly>
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-label small text-muted mb-1">Kelas</label>
+                                <input type="text" class="form-control profile-readonly-input" value="{{ profile.class_grade|default:'-' }}" readonly>
+                            </div>
+                            {% endif %}
+
+                            <div class="col-sm-6">
+                                <label class="form-label small text-muted mb-1">Terakhir Login</label>
+                                <input type="text" class="form-control profile-readonly-input" value="{{ request.user.last_login|date:'d M Y H:i'|default:'-' }}" readonly>
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-label small text-muted mb-1">Bergabung Sejak</label>
+                                <input type="text" class="form-control profile-readonly-input" value="{{ request.user.date_joined|date:'d M Y H:i' }}" readonly>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4">
+                        <h3 class="h6 mb-3">Foto Profil</h3>
+
+                        <div class="profile-avatar-picker mx-auto">
+                            <img
+                                id="profileAvatarImage"
+                                src="{% if profile.profile_picture %}{{ profile.profile_picture.url }}{% else %}{{ request.user.get_full_name|default:request.user.username|avatar_url }}{% endif %}"
+                                alt="Avatar"
+                                class="profile-avatar-image"
+                            >
+                        </div>
+
+                        <input id="id_profile_picture" type="file" name="profile_picture" accept="image/jpeg,image/png,image/gif" class="d-none">
+
+                        <p id="avatarFileName" class="small text-muted text-center mt-3 mb-0"></p>
+
+                        {% for error in avatar_form.profile_picture.errors %}
+                        <div class="text-danger small mt-2 text-center">{{ error }}</div>
+                        {% endfor %}
+
+                        <div class="d-flex justify-content-center mt-3">
+                            <button type="button" id="avatarChooseBtn" class="btn btn-outline-primary btn-sm px-3">
+                                <i class="ri-image-add-line me-1"></i>Pilih Gambar
+                            </button>
+                        </div>
+
+                        <div class="form-text text-center mt-2">Format JPG, PNG, atau GIF. Maksimal 2MB.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-footer bg-white border-0 px-4 pb-4 d-flex justify-content-end">
+                <button type="submit" class="btn btn-primary">
+                    <i class="ri-save-line me-1"></i>Simpan Perubahan
+                </button>
+            </div>
+        </form>
+    </section>
+{% endblock %}
+{% block extra_js %}
+<script>
+(function () {
+    const avatarInput = document.getElementById("id_profile_picture");
+    const avatarChooseBtn = document.getElementById("avatarChooseBtn");
+    const avatarImage = document.getElementById("profileAvatarImage");
+    const avatarFileName = document.getElementById("avatarFileName");
+
+    if (!avatarInput || !avatarChooseBtn || !avatarImage) return;
+
+    avatarChooseBtn.addEventListener("click", function () {
+        avatarInput.click();
+    });
+
+    avatarInput.addEventListener("change", function (event) {
+        const file = event.target.files && event.target.files[0];
+        if (!file) return;
+
+        if (avatarFileName) {
+            avatarFileName.textContent = "Gambar dipilih: " + file.name;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function (loadEvent) {
+            const target = loadEvent.target;
+            if (target && typeof target.result === "string") {
+                avatarImage.src = target.result;
+            }
+        };
+        reader.readAsDataURL(file);
+    });
+})();
+</script>
+{% endblock %}

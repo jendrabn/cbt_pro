@@ -1,0 +1,27 @@
+{% load cbt_extras static %}
+<aside class="cbt-sidebar">
+    <div class="cbt-sidebar-header">
+        {% with sidebar_logo=branding.institution_logo_dark_url|default:branding.institution_logo_url|default:'/static/images/logo-light.png' %}
+        <img
+            src="{{ sidebar_logo }}"
+            alt="{{ branding.institution_name|default:'Logo Institusi' }}"
+            class="cbt-sidebar-brand-image"
+            onerror="this.onerror=null;this.src='{% static 'images/logo-light.png' %}';"
+        >
+        {% endwith %}
+    </div>
+    <nav class="cbt-sidebar-nav" aria-label="Sidebar navigation">
+        <a class="cbt-sidebar-link {% cbt_active 'student_dashboard' %}" href="/student/dashboard/">
+            <i class="ri-dashboard-line" aria-hidden="true"></i>
+            <span>Dashboard</span>
+        </a>
+        <a class="cbt-sidebar-link {% cbt_active 'student_exam_list' 'exam_start' 'exam_room' 'exam_submit' 'retake_check' 'pre_retake_review' 'retake_start' %}" href="/student/exams/">
+            <i class="ri-file-list-3-line" aria-hidden="true"></i>
+            <span>Daftar Ujian</span>
+        </a>
+        <a class="cbt-sidebar-link {% cbt_active 'student_results' 'student_result_detail' 'student_attempt_history' 'student_answer_review' 'student_certificate_download' %}" href="/student/results/">
+            <i class="ri-medal-line" aria-hidden="true"></i>
+            <span>Hasil Ujian</span>
+        </a>
+    </nav>
+</aside>

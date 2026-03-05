@@ -1,0 +1,204 @@
+{% extends "layouts/student.html" %}
+{% load static %}
+
+{% block title %}Dashboard Siswa - CBT{% endblock %}
+
+{% block topbar %}
+    {% include "layouts/partials/topbar_student.html" with current_label="Dashboard Siswa" %}
+{% endblock %}
+
+{% block main_attrs %}class="container-fluid px-3 px-md-4 py-4"{% endblock %}
+
+{% block page_header %}
+    <section class="cbt-page-header">
+        <div class="cbt-page-header-body">
+            {% include "layouts/partials/page_header.html" with eyebrow="Dashboard Siswa" title="Dashboard Siswa" %}
+            <div class="d-flex align-items-center gap-2 cbt-page-header-actions">
+                <div class="d-flex align-items-center gap-2">
+                                <a href="{% url 'student_exam_list' %}" class="btn btn-sm btn-outline-primary">
+                                    <i class="ri-file-list-line me-1"></i>Daftar Ujian
+                                </a>
+                                <a href="{% url 'student_results' %}" class="btn btn-sm btn-outline-info">
+                                    <i class="ri-bar-chart-line me-1"></i>Hasil & Review
+                                </a>
+                            </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block content %}
+        <section class="row g-3 mb-4">
+            <div class="col-6 col-xl-3">
+                <article class="card metric-card h-100 border-0 shadow-sm">
+                    <div class="card-body">
+                        <p class="metric-label mb-1">Total Ujian Diikuti</p>
+                        <h2 class="metric-value mb-0">{{ total_exam_taken }}</h2>
+                    </div>
+                </article>
+            </div>
+            <div class="col-6 col-xl-3">
+                <article class="card metric-card h-100 border-0 shadow-sm">
+                    <div class="card-body">
+                        <p class="metric-label mb-1">Attempt Selesai</p>
+                        <h2 class="metric-value mb-0">{{ completed_attempts }}</h2>
+                    </div>
+                </article>
+            </div>
+            <div class="col-6 col-xl-3">
+                <article class="card metric-card h-100 border-0 shadow-sm">
+                    <div class="card-body">
+                        <p class="metric-label mb-1">Rata-rata Nilai</p>
+                        <h2 class="metric-value mb-0">{{ average_score }}%</h2>
+                    </div>
+                </article>
+            </div>
+            <div class="col-6 col-xl-3">
+                <article class="card metric-card h-100 border-0 shadow-sm">
+                    <div class="card-body">
+                        <p class="metric-label mb-1">Nilai Terbaik</p>
+                        <h2 class="metric-value mb-0">{{ best_score }}%</h2>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <section class="row g-4 mb-4">
+            <div class="col-xl-8">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white border-0 pt-3 px-3 px-md-4">
+                        <h3 class="h6 mb-0">Ujian Mendatang</h3>
+                    </div>
+                    <div class="card-body px-3 px-md-4">
+                        <div class="row g-3">
+                            {% for exam in upcoming_exams %}
+                            <div class="col-md-6 d-flex">
+                                <article class="card border exam-card w-100">
+                                    <div class="card-body">
+                                        <p class="small text-muted mb-1">{{ exam.subject.name }}</p>
+                                        <h4 class="h6 mb-2">{{ exam.title }}</h4>
+                                        <p class="mb-2 small">
+                                            <i class="ri-time-line me-1"></i>
+                                            {{ exam.start_time|date:"d M Y H:i" }} - {{ exam.end_time|date:"H:i" }}
+                                        </p>
+                                        <p class="countdown-chip mb-3"
+                                           data-countdown
+                                           data-start-time="{{ exam.start_time|date:'c' }}"
+                                           data-end-time="{{ exam.end_time|date:'c' }}">
+                                            Menghitung waktu...
+                                        </p>
+                                        {% if exam.start_time <= now and exam.end_time >= now %}
+                                        <a href="{% url 'exam_start' exam.id %}" class="btn btn-sm btn-success w-100">
+                                            <i class="ri-play-circle-line me-1"></i>Mulai Ujian
+                                        </a>
+                                        {% else %}
+                                        <button class="btn btn-sm btn-outline-secondary w-100" disabled>
+                                            <i class="ri-lock-line me-1"></i>Belum Bisa Dimulai
+                                        </button>
+                                        {% endif %}
+                                    </div>
+                                </article>
+                            </div>
+                            {% empty %}
+                            <div class="col-12">
+                                <div class="text-center text-muted py-4">Belum ada ujian yang dijadwalkan untuk Anda.</div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white border-0 pt-3 px-3 px-md-4 d-flex justify-content-between align-items-center">
+                        <h3 class="h6 mb-0">Notifikasi</h3>
+                        <span class="badge text-bg-danger">{{ unread_notifications }} belum dibaca</span>
+                    </div>
+                    <div class="card-body px-3 px-md-4">
+                        <div class="notification-list">
+                            {% for notification in notifications %}
+                            <article class="notification-item {% if not notification.is_read %}is-unread{% endif %}">
+                                <div class="d-flex align-items-start justify-content-between gap-2">
+                                    <strong class="small">{{ notification.title }}</strong>
+                                    <small class="text-muted">{{ notification.created_at|date:"d M H:i" }}</small>
+                                </div>
+                                <p class="small text-muted mb-0">{{ notification.message|truncatechars:90 }}</p>
+                            </article>
+                            {% empty %}
+                            <p class="text-muted small mb-0">Belum ada notifikasi.</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="row g-4">
+            <div class="col-xl-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white border-0 pt-3 px-3 px-md-4">
+                        <h3 class="h6 mb-0">Hasil Ujian Terbaru</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Ujian</th>
+                                        <th>Nilai</th>
+                                        <th>Status</th>
+                                        <th class="text-end">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for row in recent_result_rows %}
+                                    <tr>
+                                        <td>
+                                            {{ row.exam.title|truncatechars:30 }}
+                                            {% if row.allow_retake %}
+                                            <span class="badge text-bg-secondary ms-1"><i class="ri-repeat-line me-1"></i>Retake</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ row.percentage }}%</td>
+                                        <td>
+                                            {% if row.passed %}
+                                            <span class="badge text-bg-success">Lulus</span>
+                                            {% else %}
+                                            <span class="badge text-bg-danger">Belum Lulus</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-end">
+                                            <a href="{% url 'student_result_detail' row.id %}" class="btn btn-sm btn-outline-primary" title="Lihat detail hasil ujian">
+                                                <i class="ri-file-chart-line"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted py-4">Belum ada hasil ujian.</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white border-0 pt-3 px-3 px-md-4">
+                        <h3 class="h6 mb-0">Tren Performa</h3>
+                    </div>
+                    <div class="card-body px-3 px-md-4">
+                        <canvas id="studentTrendChart" height="120"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+{% endblock %}
+
+{% block vendor_js %}
+{{ trend_chart|json_script:"student-trend-data" }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+{% endblock %}
+

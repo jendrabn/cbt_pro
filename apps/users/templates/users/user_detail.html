@@ -1,0 +1,190 @@
+{% extends "layouts/admin.html" %}
+{% load static %}
+
+{% block title %}Detail Pengguna - CBT{% endblock %}
+
+{% block topbar %}
+    {% include "layouts/partials/topbar_admin.html" with parent_label="Manajemen Pengguna" parent_url="/admin/users/" current_label="Detail Pengguna" %}
+{% endblock %}
+
+{% block main_attrs %}class="container-fluid px-3 px-md-4 py-4"{% endblock %}
+
+{% block page_header %}
+    <section class="cbt-page-header">
+        <div class="cbt-page-header-body">
+            {% include "layouts/partials/page_header.html" with eyebrow="Manajemen Pengguna" title="Detail Pengguna" %}
+            <div class="d-flex align-items-center gap-2 cbt-page-header-actions">
+                <a href="{% url 'user_list' %}" class="btn btn-sm btn-outline-primary" title="Kembali ke daftar pengguna">
+                                <i class="ri-arrow-left-line me-1"></i>Kembali ke List
+                            </a>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block content %}
+        {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags|default:'info' }} py-2 mb-3" role="alert">
+                {{ message }}
+            </div>
+            {% endfor %}
+        {% endif %}
+
+        <section class="row g-4 mb-4">
+            <div class="col-xl-8">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white border-0 pt-3">
+                        <h2 class="h6 mb-0">Informasi Utama</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <small class="text-muted d-block">Nama Lengkap</small>
+                                <strong>{{ target_user.get_full_name|default:"-" }}</strong>
+                            </div>
+                            <div class="col-md-6">
+                                <small class="text-muted d-block">Username</small>
+                                <strong>{{ target_user.username }}</strong>
+                            </div>
+                            <div class="col-md-6">
+                                <small class="text-muted d-block">Email</small>
+                                <strong>{{ target_user.email }}</strong>
+                            </div>
+                            <div class="col-md-6">
+                                <small class="text-muted d-block">Role</small>
+                                <span class="badge text-bg-primary">{{ target_user.get_role_display }}</span>
+                            </div>
+                            <div class="col-md-6">
+                                <small class="text-muted d-block">Status</small>
+                                {% if target_user.is_active %}
+                                <span class="badge text-bg-success">Aktif</span>
+                                {% else %}
+                                <span class="badge text-bg-secondary">Nonaktif</span>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <small class="text-muted d-block">Tanggal Gabung</small>
+                                <strong>{{ target_user.date_joined|date:"d M Y H:i" }}</strong>
+                            </div>
+                            <div class="col-md-6">
+                                <small class="text-muted d-block">Login Terakhir</small>
+                                <strong>{{ target_user.last_login|date:"d M Y H:i"|default:"-" }}</strong>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+                        <h3 class="h6">Informasi Profil</h3>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <small class="text-muted d-block">Nomor Telepon</small>
+                                <strong>{{ profile.phone_number|default:"-" }}</strong>
+                            </div>
+                            <div class="col-md-6">
+                                <small class="text-muted d-block">NIP</small>
+                                <strong>{{ profile.teacher_id|default:"-" }}</strong>
+                            </div>
+                            <div class="col-md-6">
+                                <small class="text-muted d-block">Spesialisasi</small>
+                                <strong>{{ profile.subject_specialization|default:"-" }}</strong>
+                            </div>
+                            <div class="col-md-6">
+                                <small class="text-muted d-block">NIS</small>
+                                <strong>{{ profile.student_id|default:"-" }}</strong>
+                            </div>
+                            <div class="col-md-6">
+                                <small class="text-muted d-block">Kelas</small>
+                                <strong>{{ profile.class_grade|default:"-" }}</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-4">
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white border-0 pt-3">
+                        <h2 class="h6 mb-0">Aksi Cepat</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'user_edit' target_user.id %}" class="btn btn-outline-secondary text-start" title="Edit data pengguna ini">
+                                <i class="ri-edit-line me-2"></i>Edit Pengguna
+                            </a>
+                            <form method="post" action="{% url 'user_toggle_status' target_user.id %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                <button type="submit" class="btn {% if target_user.is_active %}btn-outline-dark{% else %}btn-outline-success{% endif %} text-start w-100" title="{% if target_user.is_active %}Nonaktifkan pengguna ini{% else %}Aktifkan pengguna ini{% endif %}">
+                                    {% if target_user.is_active %}
+                                    <i class="ri-user-unfollow-line me-2"></i>Nonaktifkan Pengguna
+                                    {% else %}
+                                    <i class="ri-user-follow-line me-2"></i>Aktifkan Pengguna
+                                    {% endif %}
+                                </button>
+                            </form>
+                            <form method="post" action="{% url 'user_delete' target_user.id %}" onsubmit="return confirm('Hapus pengguna ini?');">
+                                {% csrf_token %}
+                                <input type="hidden" name="next" value="{% url 'user_list' %}">
+                                <button type="submit" class="btn btn-outline-danger text-start w-100" title="Hapus pengguna ini">
+                                    <i class="ri-delete-bin-line me-2"></i>Hapus Pengguna
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white border-0 pt-3">
+                        <h2 class="h6 mb-0">Ringkasan Aktivitas Ujian</h2>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-2">
+                            <span class="text-muted">Total ujian dibuat:</span>
+                            <strong>{{ stats.exam_created_count }}</strong>
+                        </p>
+                        <p class="mb-2">
+                            <span class="text-muted">Total attempt siswa:</span>
+                            <strong>{{ stats.exam_attempt_count }}</strong>
+                        </p>
+                        <p class="mb-0">
+                            <span class="text-muted">Attempt selesai:</span>
+                            <strong>{{ stats.completed_attempt_count }}</strong>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-0 pt-3 d-flex justify-content-between align-items-center">
+                <h2 class="h6 mb-0">Log Aktivitas Pengguna</h2>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-3">Waktu</th>
+                                <th>Aksi</th>
+                                <th class="pe-3">Deskripsi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for log in activity_logs %}
+                            <tr>
+                                <td class="ps-3">{{ log.created_at|date:"d M Y H:i" }}</td>
+                                <td><span class="badge text-bg-primary">{{ log.action }}</span></td>
+                                <td class="pe-3 text-muted">{{ log.description|default:"-" }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3" class="text-center text-muted py-4">Belum ada aktivitas tercatat.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+{% endblock %}
+

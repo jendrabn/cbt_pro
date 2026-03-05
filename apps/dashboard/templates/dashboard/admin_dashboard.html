@@ -1,0 +1,193 @@
+{% extends "layouts/admin.html" %}
+{% load static %}
+
+{% block title %}Dashboard Admin - CBT{% endblock %}
+
+{% block topbar %}
+    {% include "layouts/partials/topbar_admin.html" with current_label="Ringkasan Sistem CBT" %}
+{% endblock %}
+
+{% block main_attrs %}class="container-fluid px-3 px-md-4 py-4"{% endblock %}
+
+{% block page_header %}
+    <section class="cbt-page-header">
+        <div class="cbt-page-header-body">
+            {% include "layouts/partials/page_header.html" with eyebrow="Panel Kontrol Admin" title="Ringkasan Sistem CBT" %}
+            <div class="d-flex align-items-center gap-2 cbt-page-header-actions">
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block content %}
+        <section class="row g-3 mb-4">
+            <div class="col-6 col-xl">
+                <article class="card metric-card h-100 border-0 shadow-sm">
+                    <div class="card-body">
+                        <p class="metric-label mb-1">Total Pengguna Aktif</p>
+                        <h2 class="metric-value mb-0">{{ total_users }}</h2>
+                        <p class="small text-muted mb-0">Guru: {{ teacher_count }} | Siswa: {{ student_count }}</p>
+                    </div>
+                </article>
+            </div>
+            <div class="col-6 col-xl">
+                <article class="card metric-card h-100 border-0 shadow-sm">
+                    <div class="card-body">
+                        <p class="metric-label mb-1">Total Soal</p>
+                        <h2 class="metric-value mb-0">{{ total_questions }}</h2>
+                    </div>
+                </article>
+            </div>
+            <div class="col-6 col-xl">
+                <article class="card metric-card h-100 border-0 shadow-sm">
+                    <div class="card-body">
+                        <p class="metric-label mb-1">Total Mata Pelajaran Aktif</p>
+                        <h2 class="metric-value mb-0">{{ total_active_subjects }}</h2>
+                    </div>
+                </article>
+            </div>
+            <div class="col-6 col-xl">
+                <article class="card metric-card h-100 border-0 shadow-sm">
+                    <div class="card-body">
+                        <p class="metric-label mb-1">Total Ujian Aktif</p>
+                        <h2 class="metric-value mb-0">{{ active_exams }}</h2>
+                    </div>
+                </article>
+            </div>
+            <div class="col-6 col-xl">
+                <article class="card metric-card h-100 border-0 shadow-sm">
+                    <div class="card-body">
+                        <p class="metric-label mb-1">Total Ujian Selesai</p>
+                        <h2 class="metric-value mb-0">{{ completed_exams }}</h2>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <section class="row g-4 mb-4">
+            <div class="col-xl-8">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white border-0 pt-3 px-3 px-md-4">
+                        <h3 class="h6 mb-0">Visualisasi Pertumbuhan Pengguna</h3>
+                    </div>
+                    <div class="card-body px-3 px-md-4">
+                        <canvas id="adminUserGrowthChart" height="110"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white border-0 pt-3 px-3 px-md-4">
+                        <h3 class="h6 mb-0">Distribusi Status Ujian</h3>
+                    </div>
+                    <div class="card-body px-3 px-md-4">
+                        <canvas id="adminExamStatusChart" height="180"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="row g-4 mb-4">
+            <div class="col-xl-8">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white border-0 px-3 px-md-4 pt-3 d-flex flex-wrap gap-2 align-items-center justify-content-between">
+                        <h3 class="h6 mb-0">Aktivitas Terbaru</h3>
+                        <div class="input-group input-group-sm activity-filter-wrap">
+                            <span class="input-group-text"><i class="ri-search-line"></i></span>
+                            <input id="activityFilterInput" type="search" class="form-control" placeholder="Cari user/aksi">
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0" id="activityTable">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="ps-3">Waktu</th>
+                                        <th>User</th>
+                                        <th>Aksi</th>
+                                        <th class="pe-3">Deskripsi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for activity in recent_activities %}
+                                    <tr>
+                                        <td class="ps-3">{{ activity.created_at|date:"d M Y H:i" }}</td>
+                                        <td>{{ activity.user.username }}</td>
+                                        <td><span class="badge text-bg-primary">{{ activity.action }}</span></td>
+                                        <td class="pe-3 text-muted">{{ activity.description|default:"-"|truncatechars:70 }}</td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted py-4">Belum ada log aktivitas.</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-4">
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white border-0 pt-3 px-3 px-md-4">
+                        <h3 class="h6 mb-0">Aksi Cepat</h3>
+                    </div>
+                    <div class="card-body px-3 px-md-4">
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'user_list' %}" class="btn btn-outline-primary btn-sm text-start">
+                                <i class="ri-user-add-line me-2"></i>Tambah/Pengelolaan User
+                            </a>
+                            <a href="{% url 'subject_list' %}" class="btn btn-outline-primary btn-sm text-start">
+                                <i class="ri-book-open-line me-2"></i>Kelola Mata Pelajaran
+                            </a>
+                            <a href="{% url 'admin_analytics' %}" class="btn btn-outline-primary btn-sm text-start">
+                                <i class="ri-file-chart-line me-2"></i>Lihat Laporan
+                            </a>
+                            <a href="{% url 'system_settings' %}" class="btn btn-outline-primary btn-sm text-start">
+                                <i class="ri-settings-3-line me-2"></i>Pengaturan Sistem
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white border-0 pt-3 px-3 px-md-4">
+                        <h3 class="h6 mb-0">Kesehatan Sistem</h3>
+                    </div>
+                    <div class="card-body px-3 px-md-4">
+                        <div class="health-row">
+                            <span>Status Server</span>
+                            <span class="badge {% if server_status == 'Sehat' %}text-bg-success{% else %}text-bg-warning{% endif %}">
+                                {{ server_status }}
+                            </span>
+                        </div>
+                        <div class="health-row">
+                            <span>Status Database</span>
+                            <span class="badge {% if database_status == 'Sehat' %}text-bg-success{% else %}text-bg-danger{% endif %}">
+                                {{ database_status }}
+                            </span>
+                        </div>
+                        <div class="health-row">
+                            <span>Sesi Aktif</span>
+                            <span class="fw-semibold">{{ active_sessions }}</span>
+                        </div>
+                        <div class="mt-3">
+                            <div class="d-flex justify-content-between small text-muted mb-1">
+                                <span>Penggunaan Storage</span>
+                                <span>{{ storage_usage }}%</span>
+                            </div>
+                            <div class="progress" role="progressbar" aria-label="Penggunaan storage">
+                                <div class="progress-bar {% if storage_usage >= 85 %}bg-danger{% elif storage_usage >= 70 %}bg-warning{% else %}bg-success{% endif %}" style="width: {{ storage_usage }}%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+{% endblock %}
+
+{% block vendor_js %}
+{{ user_growth_chart|json_script:"admin-user-growth-data" }}
+    {{ exam_status_chart|json_script:"admin-exam-status-data" }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+{% endblock %}
+

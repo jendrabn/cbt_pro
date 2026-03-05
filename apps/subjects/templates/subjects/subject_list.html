@@ -1,0 +1,387 @@
+{% extends "layouts/admin.html" %}
+{% load static %}
+
+{% block title %}Manajemen Mata Pelajaran - CBT{% endblock %}
+
+{% block topbar %}
+    {% include "layouts/partials/topbar_admin.html" with current_label="Manajemen Mata Pelajaran" %}
+{% endblock %}
+
+{% block main_attrs %}class="container-fluid px-3 px-md-4 py-4"{% endblock %}
+
+{% block page_header %}
+    <section class="cbt-page-header">
+        <div class="cbt-page-header-body">
+            {% include "layouts/partials/page_header.html" with eyebrow="Admin Panel" title="Manajemen Mata Pelajaran" %}
+            <div class="d-flex align-items-center gap-2 cbt-page-header-actions">
+                <div class="d-flex align-items-center gap-2">
+                                <button type="button" class="btn btn-sm btn-primary" id="openCreateModalBtn" title="Tambah mata pelajaran baru">
+                                    <i class="ri-add-line me-1"></i>Tambah Mata Pelajaran
+                                </button>
+                            </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block content %}
+        {% if messages %}
+            <div class="mb-3">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'info' }} py-2 mb-2">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <section class="row g-3 mb-4">
+            <div class="col-6 col-xl-2">
+                <article class="card summary-card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <p class="text-muted small mb-1">Total Mata Pelajaran</p>
+                        <h2 class="h4 mb-0">{{ summary.total }}</h2>
+                    </div>
+                </article>
+            </div>
+            <div class="col-6 col-xl-2">
+                <article class="card summary-card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <p class="text-muted small mb-1">Aktif</p>
+                        <h2 class="h4 mb-0">{{ summary.active }}</h2>
+                    </div>
+                </article>
+            </div>
+            <div class="col-6 col-xl-2">
+                <article class="card summary-card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <p class="text-muted small mb-1">Nonaktif</p>
+                        <h2 class="h4 mb-0">{{ summary.inactive }}</h2>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <section class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+                <form method="get" class="row g-2 g-md-3 align-items-end">
+                    <div class="col-12 col-md-6 col-xl-4">
+                        <label class="form-label small mb-1">Pencarian</label>
+                        <input type="search" name="q" value="{{ filters.q }}" class="form-control" placeholder="Cari nama atau kode mata pelajaran">
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <label class="form-label small mb-1">Status</label>
+                        <select name="status" class="form-select">
+                            <option value="">Semua Status</option>
+                            <option value="active" {% if filters.status == 'active' %}selected{% endif %}>Aktif</option>
+                            <option value="inactive" {% if filters.status == 'inactive' %}selected{% endif %}>Nonaktif</option>
+                        </select>
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <label class="form-label small mb-1">Urutkan</label>
+                        <select name="sort" class="form-select">
+                            <option value="name" {% if filters.sort == 'name' %}selected{% endif %}>Nama A-Z</option>
+                            <option value="-name" {% if filters.sort == '-name' %}selected{% endif %}>Nama Z-A</option>
+                            <option value="code" {% if filters.sort == 'code' %}selected{% endif %}>Kode A-Z</option>
+                            <option value="-code" {% if filters.sort == '-code' %}selected{% endif %}>Kode Z-A</option>
+                            <option value="-updated" {% if filters.sort == '-updated' %}selected{% endif %}>Terbaru</option>
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-auto d-flex gap-2">
+                        <button type="submit" class="btn btn-primary" title="Terapkan filter mata pelajaran">
+                            <i class="ri-filter-3-line me-1"></i>Terapkan
+                        </button>
+                        <a href="{% url 'subject_list' %}" class="btn btn-outline-secondary" title="Reset semua filter">
+                            Reset
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <section class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 100px;">ID</th>
+                                <th>Nama</th>
+                                <th style="width: 120px;">Kode</th>
+                                <th style="width: 140px;">Status</th>
+                                <th style="width: 140px;">Jumlah Soal</th>
+                                <th style="width: 140px;">Jumlah Ujian</th>
+                                <th class="text-end" style="width: 180px;">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in subject_rows %}
+                            <tr
+                                data-subject-name="{{ row.subject.name }}"
+                                data-subject-code="{{ row.subject.code }}"
+                                data-subject-description="{{ row.subject.description|default_if_none:'' }}"
+                                data-subject-active="{{ row.subject.is_active|yesno:'1,0' }}"
+                                data-edit-url="{% url 'subject_edit' row.subject.id %}"
+                                data-delete-url="{% url 'subject_delete' row.subject.id %}"
+                                data-questions="{{ row.usage.questions_count }}"
+                                data-exams="{{ row.usage.exams_count }}"
+                                data-attempts="{{ row.usage.exam_attempts_count }}"
+                            >
+                                <td><small class="text-muted" title="{{ row.subject.id }}">{{ row.subject.id|truncatechars:8 }}</small></td>
+                                <td class="fw-semibold">{{ row.subject.name }}</td>
+                                <td><span class="badge text-bg-light">{{ row.subject.code }}</span></td>
+                                <td>
+                                    {% if row.subject.is_active %}
+                                        <span class="cbt-status-badge is-success">Aktif</span>
+                                    {% else %}
+                                        <span class="cbt-status-badge is-secondary">Nonaktif</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ row.question_count }}</td>
+                                <td>{{ row.exam_count }}</td>
+                                <td class="text-end">
+                                    <div class="d-flex justify-content-end gap-1">
+                                        <button type="button" class="btn btn-sm btn-outline-primary edit-subject-btn" title="Edit mata pelajaran">
+                                            <i class="ri-edit-line"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-danger delete-subject-btn" title="Hapus mata pelajaran">
+                                            <i class="ri-delete-bin-line"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center text-muted py-5">Belum ada mata pelajaran untuk filter saat ini.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {% if is_paginated %}
+            <div class="card-footer bg-white">
+                <nav aria-label="Paginasi mata pelajaran">
+                    <ul class="pagination pagination-sm mb-0">
+                        {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.previous_page_number }}">Sebelumnya</a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled"><span class="page-link">Sebelumnya</span></li>
+                        {% endif %}
+
+                        {% for num in paginator.page_range %}
+                            {% if page_obj.number == num %}
+                            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                            {% elif num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
+                            <li class="page-item">
+                                <a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ num }}">{{ num }}</a>
+                            </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.next_page_number }}">Berikutnya</a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled"><span class="page-link">Berikutnya</span></li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+            {% endif %}
+        </section>
+{% endblock %}
+
+{% block vendor_js %}
+<div class="modal fade" id="subjectFormModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="h6 mb-0" id="subjectFormModalTitle">Tambah Mata Pelajaran</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                </div>
+                <form method="post" id="subjectFormModalForm" action="{% url 'subject_create' %}">
+                    <div class="modal-body">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label required">Nama Mata Pelajaran</label>
+                            <input type="text" class="form-control" name="name" id="subjectFormName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label required">Kode</label>
+                            <input type="text" class="form-control text-uppercase" name="code" id="subjectFormCode" required maxlength="20">
+                            <div class="form-text">Kode harus unik. Contoh: MTK, BIO, ENG.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Deskripsi</label>
+                            <textarea class="form-control" name="description" id="subjectFormDescription" rows="3"></textarea>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="is_active" id="subjectFormIsActive" checked>
+                            <label class="form-check-label" for="subjectFormIsActive">Status Aktif</label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary" id="subjectFormSubmitBtn">Simpan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="subjectDeleteModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content border-danger">
+                <div class="modal-header">
+                    <h2 class="h6 mb-0 warning-title"><i class="ri-error-warning-line me-1"></i>Hapus Mata Pelajaran - Tindakan Tidak Dapat Dibatalkan</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                </div>
+                <form method="post" id="subjectDeleteForm" action="">
+                    <div class="modal-body">
+                        {% csrf_token %}
+
+                        <p class="mb-2">Anda akan menghapus permanen:</p>
+                        <p class="fw-semibold mb-3" id="deleteTargetName">-</p>
+
+                        <div class="border rounded p-3 bg-light">
+                            <p class="mb-2 fw-semibold">Ringkasan data terdampak:</p>
+                            <ul class="mb-0 ps-3">
+                                <li>Jumlah soal terdampak: <strong id="deleteQuestionsCount">0</strong></li>
+                                <li>Jumlah ujian terdampak: <strong id="deleteExamsCount">0</strong></li>
+                                <li>Jumlah attempt/sesi ujian siswa terdampak: <strong id="deleteAttemptsCount">0</strong></li>
+                            </ul>
+                        </div>
+
+                        <p class="text-danger fw-semibold mt-3 mb-2">
+                            Semua data di atas akan dihapus permanen dan tidak dapat dipulihkan.
+                        </p>
+
+                        <label class="form-label small mb-1 required" id="deleteConfirmLabel">Ketik ulang nama mata pelajaran untuk konfirmasi</label>
+                        <input type="text" class="form-control" name="confirm_name" id="deleteConfirmInput" autocomplete="off" required>
+                        <div class="form-text">Konfirmasi harus sama persis dengan teks yang diminta.</div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-danger" id="confirmDeleteBtn" disabled>Hapus Permanen</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+<script>
+        (function () {
+            var subjectFormModalEl = document.getElementById("subjectFormModal");
+            var subjectFormModal = subjectFormModalEl ? new bootstrap.Modal(subjectFormModalEl) : null;
+            var deleteModalEl = document.getElementById("subjectDeleteModal");
+            var deleteModal = deleteModalEl ? new bootstrap.Modal(deleteModalEl) : null;
+
+            var subjectForm = document.getElementById("subjectFormModalForm");
+            var subjectModalTitle = document.getElementById("subjectFormModalTitle");
+            var subjectFormSubmitBtn = document.getElementById("subjectFormSubmitBtn");
+            var subjectNameInput = document.getElementById("subjectFormName");
+            var subjectCodeInput = document.getElementById("subjectFormCode");
+            var subjectDescriptionInput = document.getElementById("subjectFormDescription");
+            var subjectActiveInput = document.getElementById("subjectFormIsActive");
+
+            var deleteForm = document.getElementById("subjectDeleteForm");
+            var deleteTargetName = document.getElementById("deleteTargetName");
+            var deleteQuestionsCount = document.getElementById("deleteQuestionsCount");
+            var deleteExamsCount = document.getElementById("deleteExamsCount");
+            var deleteAttemptsCount = document.getElementById("deleteAttemptsCount");
+            var deleteConfirmLabel = document.getElementById("deleteConfirmLabel");
+            var deleteConfirmInput = document.getElementById("deleteConfirmInput");
+            var confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
+            var expectedConfirmText = "";
+
+            function resetSubjectForm() {
+                if (!subjectForm) {
+                    return;
+                }
+                subjectForm.action = "{% url 'subject_create' %}";
+                subjectModalTitle.textContent = "Tambah Mata Pelajaran";
+                subjectFormSubmitBtn.textContent = "Simpan";
+                subjectNameInput.value = "";
+                subjectCodeInput.value = "";
+                subjectDescriptionInput.value = "";
+                subjectActiveInput.checked = true;
+            }
+
+            function openEditModal(row) {
+                if (!subjectForm || !row || !subjectFormModal) {
+                    return;
+                }
+                subjectForm.action = row.getAttribute("data-edit-url");
+                subjectModalTitle.textContent = "Edit Mata Pelajaran";
+                subjectFormSubmitBtn.textContent = "Simpan Perubahan";
+                subjectNameInput.value = row.getAttribute("data-subject-name") || "";
+                subjectCodeInput.value = row.getAttribute("data-subject-code") || "";
+                subjectDescriptionInput.value = row.getAttribute("data-subject-description") || "";
+                subjectActiveInput.checked = (row.getAttribute("data-subject-active") === "1");
+                subjectFormModal.show();
+            }
+
+            function parseIntSafe(value) {
+                var parsed = parseInt(value || "0", 10);
+                return Number.isNaN(parsed) ? 0 : parsed;
+            }
+
+            function setupDeleteModal(options) {
+                if (!deleteForm || !deleteModal) {
+                    return;
+                }
+                deleteForm.action = options.actionUrl;
+                deleteTargetName.textContent = options.targetLabel;
+                deleteQuestionsCount.textContent = String(options.questionCount || 0);
+                deleteExamsCount.textContent = String(options.examCount || 0);
+                deleteAttemptsCount.textContent = String(options.attemptCount || 0);
+                deleteConfirmLabel.textContent = "Ketik persis: " + options.expectedConfirmText;
+                deleteConfirmInput.value = "";
+                expectedConfirmText = options.expectedConfirmText;
+                confirmDeleteBtn.disabled = true;
+                deleteModal.show();
+            }
+
+            if (document.getElementById("openCreateModalBtn")) {
+                document.getElementById("openCreateModalBtn").addEventListener("click", function () {
+                    resetSubjectForm();
+                    if (subjectFormModal) {
+                        subjectFormModal.show();
+                    }
+                });
+            }
+
+            document.querySelectorAll(".edit-subject-btn").forEach(function (button) {
+                button.addEventListener("click", function () {
+                    openEditModal(button.closest("tr"));
+                });
+            });
+
+            document.querySelectorAll(".delete-subject-btn").forEach(function (button) {
+                button.addEventListener("click", function () {
+                    var row = button.closest("tr");
+                    if (!row) {
+                        return;
+                    }
+                    setupDeleteModal({
+                        actionUrl: row.getAttribute("data-delete-url"),
+                        targetLabel: row.getAttribute("data-subject-name") || "-",
+                        questionCount: parseIntSafe(row.getAttribute("data-questions")),
+                        examCount: parseIntSafe(row.getAttribute("data-exams")),
+                        attemptCount: parseIntSafe(row.getAttribute("data-attempts")),
+                        expectedConfirmText: row.getAttribute("data-subject-name") || "",
+                    });
+                });
+            });
+
+            if (deleteConfirmInput) {
+                deleteConfirmInput.addEventListener("input", function () {
+                    confirmDeleteBtn.disabled = (deleteConfirmInput.value !== expectedConfirmText);
+                });
+            }
+        })();
+    </script>
+{% endblock %}
+

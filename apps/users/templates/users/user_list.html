@@ -1,0 +1,291 @@
+{% extends "layouts/admin.html" %}
+{% load static %}
+
+{% block title %}Manajemen Pengguna - CBT{% endblock %}
+
+{% block topbar %}
+    {% include "layouts/partials/topbar_admin.html" with current_label="Manajemen Pengguna" %}
+{% endblock %}
+
+{% block main_attrs %}class="container-fluid px-3 px-md-4 py-4"{% endblock %}
+
+{% block page_header %}
+    <section class="cbt-page-header">
+        <div class="cbt-page-header-body">
+            {% include "layouts/partials/page_header.html" with eyebrow="Admin Panel" title="Manajemen Pengguna" %}
+            <div class="d-flex align-items-center gap-2 cbt-page-header-actions">
+                <div class="d-flex align-items-center gap-2">
+                                <a href="{% url 'user_create' %}" class="btn btn-sm btn-primary" title="Tambah pengguna baru">
+                                    <i class="ri-user-add-line me-1"></i>Tambah Pengguna
+                                </a>
+                                <a href="{% url 'user_import' %}" class="btn btn-sm btn-success" title="Impor pengguna">
+                                    <i class="ri-upload-2-line me-1"></i>Impor Pengguna
+                                </a>
+                            </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block content %}
+        {% if messages %}
+            <div class="mb-3">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'info' }} py-2 mb-2" role="alert">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <section class="row g-3 mb-4">
+            <div class="col-6 col-xl-2">
+                <article class="card summary-card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <p class="text-muted small mb-1">Total Pengguna</p>
+                        <h2 class="h4 mb-0">{{ summary.total }}</h2>
+                    </div>
+                </article>
+            </div>
+            <div class="col-6 col-xl-2">
+                <article class="card summary-card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <p class="text-muted small mb-1">Aktif</p>
+                        <h2 class="h4 mb-0">{{ summary.active }}</h2>
+                    </div>
+                </article>
+            </div>
+            <div class="col-6 col-xl-2">
+                <article class="card summary-card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <p class="text-muted small mb-1">Nonaktif</p>
+                        <h2 class="h4 mb-0">{{ summary.inactive }}</h2>
+                    </div>
+                </article>
+            </div>
+            <div class="col-6 col-xl-2">
+                <article class="card summary-card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <p class="text-muted small mb-1">Guru</p>
+                        <h2 class="h4 mb-0">{{ summary.teacher }}</h2>
+                    </div>
+                </article>
+            </div>
+            <div class="col-6 col-xl-2">
+                <article class="card summary-card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <p class="text-muted small mb-1">Siswa</p>
+                        <h2 class="h4 mb-0">{{ summary.student }}</h2>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <section class="card filter-card border-0 shadow-sm mb-4">
+            <div class="card-body">
+                <form method="get" class="row g-2 g-md-3 align-items-end">
+                    <div class="col-12 col-md-4 col-xl-3">
+                        <label class="form-label small mb-1">Pencarian</label>
+                        <input type="search" name="q" value="{{ filters.q }}" class="form-control" placeholder="Nama, username, email">
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <label class="form-label small mb-1">Role</label>
+                        <select name="role" class="form-select">
+                            <option value="">Semua Role</option>
+                            {% for role_value, role_label in role_choices %}
+                            <option value="{{ role_value }}" {% if filters.role == role_value %}selected{% endif %}>{{ role_label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <label class="form-label small mb-1">Status</label>
+                        <select name="status" class="form-select">
+                            <option value="">Semua Status</option>
+                            <option value="active" {% if filters.status == 'active' %}selected{% endif %}>Aktif</option>
+                            <option value="inactive" {% if filters.status == 'inactive' %}selected{% endif %}>Nonaktif</option>
+                        </select>
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <label class="form-label small mb-1">Gabung Dari</label>
+                        <input type="date" name="date_from" value="{{ filters.date_from }}" class="form-control">
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <label class="form-label small mb-1">Sampai</label>
+                        <input type="date" name="date_to" value="{{ filters.date_to }}" class="form-control">
+                    </div>
+                    <div class="col-12 col-md-auto d-flex gap-2">
+                        <button type="submit" class="btn btn-primary" title="Terapkan filter pencarian">
+                            <i class="ri-filter-3-line me-1"></i>Terapkan
+                        </button>
+                        <a href="{% url 'user_list' %}" class="btn btn-outline-secondary" title="Reset semua filter">Reset</a>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <section class="card border-0 shadow-sm">
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                    <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-3">
+                        <div class="d-flex flex-wrap gap-2">
+                            <select class="form-select form-select-sm" name="action" style="width: 210px;">
+                                <option value="">Pilih Aksi Bulk</option>
+                                <option value="activate">Aktifkan</option>
+                                <option value="deactivate">Nonaktifkan</option>
+                                <option value="delete">Hapus (Soft Delete)</option>
+                                <option value="export_csv">Ekspor CSV</option>
+                                <option value="export_excel">Ekspor Excel</option>
+                            </select>
+                            <button type="submit" class="btn btn-sm btn-outline-primary" title="Terapkan aksi bulk ke pengguna terpilih">
+                                <i class="ri-check-line me-1"></i>Terapkan
+                            </button>
+                        </div>
+                        <div class="d-flex flex-wrap gap-2">
+                            <a href="{% url 'user_export' %}?format=csv{% if querystring %}&{{ querystring }}{% endif %}" class="btn btn-sm btn-outline-success" title="Ekspor semua data pengguna ke CSV">
+                                <i class="ri-file-excel-2-line me-1"></i>Ekspor Semua CSV
+                            </a>
+                            <a href="{% url 'user_export' %}?format=xlsx{% if querystring %}&{{ querystring }}{% endif %}" class="btn btn-sm btn-outline-success" title="Ekspor semua data pengguna ke Excel">
+                                <i class="ri-file-excel-line me-1"></i>Ekspor Semua Excel
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>
+                                        <input class="form-check-input" type="checkbox" id="select-all">
+                                    </th>
+                                    <th>ID</th>
+                                    <th>
+                                        <a class="text-decoration-none text-dark" href="?{% if sort_querystring %}{{ sort_querystring }}&{% endif %}sort=username">Username</a>
+                                    </th>
+                                    <th>Nama</th>
+                                    <th>
+                                        <a class="text-decoration-none text-dark" href="?{% if sort_querystring %}{{ sort_querystring }}&{% endif %}sort=email">Email</a>
+                                    </th>
+                                    <th>
+                                        <a class="text-decoration-none text-dark" href="?{% if sort_querystring %}{{ sort_querystring }}&{% endif %}sort=role">Role</a>
+                                    </th>
+                                    <th>
+                                        <a class="text-decoration-none text-dark" href="?{% if sort_querystring %}{{ sort_querystring }}&{% endif %}sort=is_active">Status</a>
+                                    </th>
+                                    <th>
+                                        <a class="text-decoration-none text-dark" href="?{% if sort_querystring %}{{ sort_querystring }}&{% endif %}sort=-date_joined">Gabung</a>
+                                    </th>
+                                    <th>Login Terakhir</th>
+                                    <th class="action-cell">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in users %}
+                                <tr>
+                                    <td><input class="form-check-input row-check" type="checkbox" name="selected_ids" value="{{ user.id }}"></td>
+                                    <td><small class="text-muted" title="{{ user.id }}">{{ user.id|truncatechars:8 }}</small></td>
+                                    <td class="fw-semibold">{{ user.username }}</td>
+                                    <td>{{ user.get_full_name|default:"-" }}</td>
+                                    <td>{{ user.email }}</td>
+                                    <td><span class="badge text-bg-primary">{{ user.get_role_display }}</span></td>
+                                    <td>
+                                        {% if user.is_active %}
+                                        <span class="badge text-bg-success">Aktif</span>
+                                        {% else %}
+                                        <span class="badge text-bg-secondary">Nonaktif</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ user.date_joined|date:"d M Y" }}</td>
+                                    <td>{{ user.last_login|date:"d M Y H:i"|default:"-" }}</td>
+                                    <td class="action-cell">
+                                        <div class="d-flex flex-wrap gap-1">
+                                            <a href="{% url 'user_detail' user.id %}" class="btn btn-sm btn-outline-primary" title="Lihat detail pengguna">
+                                                <i class="ri-eye-line"></i>
+                                            </a>
+                                            <a href="{% url 'user_edit' user.id %}" class="btn btn-sm btn-outline-secondary" title="Edit data pengguna">
+                                                <i class="ri-edit-line"></i>
+                                            </a>
+                                            <button
+                                                type="submit"
+                                                formaction="{% url 'user_toggle_status' user.id %}"
+                                                formmethod="post"
+                                                class="btn btn-sm {% if user.is_active %}btn-outline-dark{% else %}btn-outline-success{% endif %}"
+                                                title="{% if user.is_active %}Nonaktifkan pengguna{% else %}Aktifkan pengguna{% endif %}">
+                                                {% if user.is_active %}
+                                                <i class="ri-user-unfollow-line"></i>
+                                                {% else %}
+                                                <i class="ri-user-follow-line"></i>
+                                                {% endif %}
+                                            </button>
+                                            <button
+                                                type="submit"
+                                                formaction="{% url 'user_delete' user.id %}"
+                                                formmethod="post"
+                                                class="btn btn-sm btn-outline-danger"
+                                                title="Hapus pengguna"
+                                                onclick="return confirm('Hapus pengguna ini?');">
+                                                <i class="ri-delete-bin-line"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="10" class="text-center py-4 text-muted">Data pengguna tidak ditemukan.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </form>
+            </div>
+
+            {% if is_paginated %}
+            <div class="card-footer bg-white">
+                <nav aria-label="Pagination user">
+                    <ul class="pagination pagination-sm mb-0">
+                        {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.previous_page_number }}">Sebelumnya</a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled"><span class="page-link">Sebelumnya</span></li>
+                        {% endif %}
+
+                        {% for num in paginator.page_range %}
+                            {% if page_obj.number == num %}
+                            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                            {% elif num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
+                            <li class="page-item">
+                                <a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ num }}">{{ num }}</a>
+                            </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.next_page_number }}">Berikutnya</a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled"><span class="page-link">Berikutnya</span></li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+            {% endif %}
+        </section>
+{% endblock %}
+
+{% block vendor_js %}
+<script>
+        const selectAll = document.getElementById('select-all');
+        const rowChecks = document.querySelectorAll('.row-check');
+        if (selectAll) {
+            selectAll.addEventListener('change', function () {
+                rowChecks.forEach((item) => { item.checked = this.checked; });
+            });
+        }
+    </script>
+{% endblock %}
+

@@ -1,0 +1,257 @@
+{% extends "layouts/student.html" %}
+{% load static %}
+
+{% block title %}Detail Hasil Ujian - Siswa{% endblock %}
+
+{% block topbar %}
+    {% include "layouts/partials/topbar_student.html" with parent_label="Hasil Ujian" parent_url="/student/results/" current_label=exam.title %}
+{% endblock %}
+
+{% block main_attrs %}class="container-fluid px-3 px-md-4 py-4"{% endblock %}
+
+{% block page_header %}
+    <section class="cbt-page-header">
+        <div class="cbt-page-header-body">
+            {% include "layouts/partials/page_header.html" with eyebrow="Detail Hasil Ujian" title=exam.title %}
+            <div class="d-flex align-items-center gap-2 cbt-page-header-actions">
+                <div class="d-flex flex-wrap gap-2">
+                                <a href="{{ back_url }}" class="btn btn-sm btn-outline-primary" title="Kembali ke daftar hasil ujian">
+                                    <i class="ri-arrow-left-line me-1"></i>Kembali
+                                </a>
+                                {% if review_enabled %}
+                                <a href="{{ review_url }}?next={{ request.get_full_path|urlencode }}" class="btn btn-sm btn-outline-info" title="Buka review jawaban lengkap">
+                                    <i class="ri-file-list-3-line me-1"></i>Review Jawaban
+                                </a>
+                                {% endif %}
+                                {% if certificate_available %}
+                                <a href="{{ certificate_download_url }}" class="btn btn-sm btn-outline-success" title="Unduh sertifikat hasil ujian">
+                                    <i class="ri-award-line me-1"></i>Unduh Sertifikat
+                                </a>
+                                {% endif %}
+                            </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block content %}
+        {% if messages %}
+            <div class="mb-3">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'info' }} py-2 mb-2">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <section class="card border-0 shadow-sm mb-4 result-score-hero">
+            <div class="card-body p-4">
+                <div class="row g-3 align-items-center">
+                    <div class="col-lg-5">
+                        <p class="small text-muted mb-1">Skor Akhir</p>
+                        <h2 class="display-6 mb-1">{{ score_total }} <small class="fs-5 text-muted">/ {{ score_max }}</small></h2>
+                        <p class="mb-0">
+                            <span class="badge {{ status_badge }}">{{ status_label }}</span>
+                        </p>
+                        {% if allow_retake %}
+                        <p class="small text-muted mt-2 mb-0">
+                            Nilai ini adalah <strong>{{ final_policy_label }}</strong> dari {{ attempts_used }} percobaan.
+                        </p>
+                        {% endif %}
+                    </div>
+                    <div class="col-lg-7">
+                        <div class="row g-2">
+                            <div class="col-6 col-md-3">
+                                <div class="p-3 border rounded-3 bg-light-subtle h-100">
+                                    <div class="small text-muted">Persentase</div>
+                                    <div class="fw-semibold">{{ percentage_value }}%</div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="p-3 border rounded-3 bg-light-subtle h-100">
+                                    <div class="small text-muted">Peringkat</div>
+                                    <div class="fw-semibold">{{ rank_label }}</div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="p-3 border rounded-3 bg-light-subtle h-100">
+                                    <div class="small text-muted">Waktu Pengerjaan</div>
+                                    <div class="fw-semibold">{{ time_taken_human }}</div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="p-3 border rounded-3 bg-light-subtle h-100">
+                                    <div class="small text-muted">Efisiensi Waktu</div>
+                                    <div class="fw-semibold">{{ time_efficiency }}%</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="row g-4 mb-4">
+            <div class="col-xl-8">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white border-0 pt-3 px-3 px-md-4">
+                        <h3 class="h6 mb-0">Ringkasan Jawaban</h3>
+                    </div>
+                    <div class="card-body px-3 px-md-4">
+                        <div class="row g-3 mb-3">
+                            <div class="col-6 col-md-3">
+                                <div class="result-stat-card">
+                                    <p class="small text-muted mb-1">Benar</p>
+                                    <h4 class="h5 mb-0 text-success">{{ result.correct_answers }}</h4>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="result-stat-card">
+                                    <p class="small text-muted mb-1">Salah</p>
+                                    <h4 class="h5 mb-0 text-danger">{{ result.wrong_answers }}</h4>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="result-stat-card">
+                                    <p class="small text-muted mb-1">Tidak Dijawab</p>
+                                    <h4 class="h5 mb-0 text-secondary">{{ result.unanswered }}</h4>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="result-stat-card">
+                                    <p class="small text-muted mb-1">Total Soal</p>
+                                    <h4 class="h5 mb-0">{{ result.total_questions }}</h4>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-sm align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Soal</th>
+                                        <th>Status</th>
+                                        <th>Skor</th>
+                                        <th>Waktu</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for row in answer_rows_preview %}
+                                    <tr>
+                                        <td>Soal {{ row.display_order }}</td>
+                                        <td><span class="badge text-bg-{{ row.status_type }}">{{ row.status_label }}</span></td>
+                                        <td>{{ row.points_earned }} / {{ row.points_possible }}</td>
+                                        <td>{{ row.time_spent_human }}</td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="4" class="text-muted text-center py-3">Belum ada data jawaban.</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {% if rows|length > answer_rows_preview|length and review_enabled %}
+                        <p class="small text-muted mt-3 mb-0">
+                            Menampilkan 5 soal pertama. Buka menu review untuk melihat semua jawaban.
+                        </p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white border-0 pt-3 px-3 px-md-4">
+                        <h3 class="h6 mb-0">Distribusi Jawaban</h3>
+                    </div>
+                    <div class="card-body px-3 px-md-4">
+                        <canvas id="studentResultAnswerBreakdownChart" height="180"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="card border-0 shadow-sm">
+            <div class="card-body">
+                <h3 class="h6 mb-3">Informasi Ujian</h3>
+                <div class="row g-2 small">
+                    <div class="col-md-4"><span class="text-muted">Mata Pelajaran:</span> <strong>{{ exam.subject.name }}</strong></div>
+                    <div class="col-md-4"><span class="text-muted">Durasi:</span> <strong>{{ exam.duration_minutes }} menit</strong></div>
+                    <div class="col-md-4"><span class="text-muted">Passing Score:</span> <strong>{{ exam.passing_score }}%</strong></div>
+                    <div class="col-md-4"><span class="text-muted">Mulai:</span> <strong>{{ exam.start_time|date:"d M Y H:i" }}</strong></div>
+                    <div class="col-md-4"><span class="text-muted">Selesai:</span> <strong>{{ exam.end_time|date:"d M Y H:i" }}</strong></div>
+                    <div class="col-md-4">
+                        <span class="text-muted">Review Jawaban:</span>
+                        {% if review_enabled %}
+                        <strong class="text-success">Diizinkan</strong>
+                        {% else %}
+                        <strong class="text-danger">Tidak Diizinkan</strong>
+                        {% endif %}
+                    </div>
+                    {% if percentile_label is not None %}
+                    <div class="col-md-4"><span class="text-muted">Persentil:</span> <strong>{{ percentile_label }}</strong></div>
+                    {% endif %}
+                    <div class="col-md-8">
+                        <span class="text-muted">Penjelasan Soal Tersedia:</span>
+                        <strong>{{ explanation_total }} dari {{ result.total_questions }} soal</strong>
+                    </div>
+                    {% if allow_retake %}
+                    <div class="col-md-12">
+                        <span class="text-muted">Retake:</span>
+                        <strong>Aktif - {{ attempts_used }} attempt tercatat</strong>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+
+        {% if allow_retake %}
+        <section class="card border-0 shadow-sm mt-4">
+            <div class="card-header bg-white border-0 pt-3 px-3 px-md-4 d-flex justify-content-between align-items-center">
+                <h3 class="h6 mb-0">Riwayat Attempt</h3>
+                <a href="{{ attempt_history_url }}" class="btn btn-sm btn-outline-secondary">Lihat Halaman Riwayat</a>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-3">ID</th>
+                                <th>Waktu</th>
+                                <th>Nilai</th>
+                                <th>%</th>
+                                <th>Status</th>
+                                <th>Durasi</th>
+                                <th class="pe-3">Ket.</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in retake_history_rows %}
+                            <tr>
+                                <td class="ps-3"><small class="text-muted" title="{{ row.result_id }}">{{ row.result_id|truncatechars:8 }}</small></td>
+                                <td>{{ row.submit_time_label }}</td>
+                                <td>{{ row.total_score }}</td>
+                                <td>{{ row.percentage }}%</td>
+                                <td>{{ row.status_label }}</td>
+                                <td>{{ row.duration_label }}</td>
+                                <td class="pe-3">{% if row.is_final %}★ Final{% else %}-{% endif %}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center text-muted py-3">Belum ada riwayat attempt.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+        {% endif %}
+{% endblock %}
+
+{% block vendor_js %}
+{{ answer_breakdown_chart|json_script:"student-result-answer-breakdown-data" }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="{% static 'results/js/student_results.js' %}"></script>
+{% endblock %}
+

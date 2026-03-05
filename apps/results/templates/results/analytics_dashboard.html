@@ -1,0 +1,226 @@
+{% extends "layouts/teacher.html" %}
+{% load static %}
+
+{% block title %}Dashboard Analitik Hasil - CBT{% endblock %}
+
+{% block topbar %}
+    {% include "layouts/partials/topbar_teacher.html" with parent_label="Hasil Ujian" parent_url="/teacher/results/" current_label="Dashboard Analitik Hasil" %}
+{% endblock %}
+
+{% block main_attrs %}class="container-fluid px-3 px-md-4 py-4"{% endblock %}
+
+{% block page_header %}
+    <section class="cbt-page-header">
+        <div class="cbt-page-header-body">
+            {% include "layouts/partials/page_header.html" with eyebrow="Panel Guru" title="Dashboard Analitik Hasil" %}
+            <div class="d-flex align-items-center gap-2 cbt-page-header-actions">
+                <div class="d-flex flex-wrap gap-2">
+                                <a href="{{ results_url }}" class="btn btn-sm btn-outline-primary" title="Kembali ke daftar results & analytics">
+                                    <i class="ri-arrow-left-line me-1"></i>Daftar Hasil
+                                </a>
+                            </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block content %}
+        <section class="row g-3 mb-4">
+            <div class="col-6 col-xl-3">
+                <article class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <p class="small text-muted mb-1">Total Ujian</p>
+                        <h2 class="h4 mb-0">{{ summary.total_exam }}</h2>
+                    </div>
+                </article>
+            </div>
+            <div class="col-6 col-xl-3">
+                <article class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <p class="small text-muted mb-1">Total Peserta</p>
+                        <h2 class="h4 mb-0">{{ summary.total_peserta }}</h2>
+                    </div>
+                </article>
+            </div>
+            <div class="col-6 col-xl-3">
+                <article class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <p class="small text-muted mb-1">Rata-rata Nilai</p>
+                        <h2 class="h4 mb-0">{{ summary.rata_rata_nilai }}%</h2>
+                    </div>
+                </article>
+            </div>
+            <div class="col-6 col-xl-3">
+                <article class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <p class="small text-muted mb-1">Rata-rata Kelulusan</p>
+                        <h2 class="h4 mb-0">{{ summary.rata_rata_kelulusan }}%</h2>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <section class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+                <form method="get" class="row g-2 g-md-3 align-items-end">
+                    <div class="col-md-3">
+                        <label class="form-label small mb-1">Cari Ujian</label>
+                        <input type="text" class="form-control" name="q" value="{{ filters.keyword }}" placeholder="Judul / deskripsi / mapel...">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small mb-1">Tanggal Mulai</label>
+                        <input type="date" class="form-control" name="date_from" value="{{ filters.date_from|date:'Y-m-d' }}">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small mb-1">Tanggal Akhir</label>
+                        <input type="date" class="form-control" name="date_to" value="{{ filters.date_to|date:'Y-m-d' }}">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small mb-1">Mata Pelajaran</label>
+                        <select class="form-select" name="subject">
+                            <option value="">Semua Mapel</option>
+                            {% for subject in subjects %}
+                            <option value="{{ subject.id }}" {% if filters.subject == subject.id %}selected{% endif %}>{{ subject.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small mb-1">Kelas</label>
+                        <select class="form-select" name="class">
+                            <option value="">Semua Kelas</option>
+                            {% for class_item in classes %}
+                            <option value="{{ class_item.id }}" {% if filters.class_id == class_item.id %}selected{% endif %}>{{ class_item.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-auto d-flex gap-2">
+                        <button type="submit" class="btn btn-primary" title="Terapkan filter analitik">
+                            <i class="ri-filter-3-line me-1"></i>Terapkan
+                        </button>
+                        <a href="{% url 'teacher_results_analytics' %}" class="btn btn-outline-secondary" title="Reset semua filter">Reset</a>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <section class="row g-4 mb-4">
+            <div class="col-xl-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white border-0 pt-3 px-3 px-md-4">
+                        <h3 class="h6 mb-0">Tren Rata-rata Nilai per Ujian</h3>
+                    </div>
+                    <div class="card-body px-3 px-md-4">
+                        <canvas id="analyticsTrendChart" height="180"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white border-0 pt-3 px-3 px-md-4">
+                        <h3 class="h6 mb-0">Tren Tingkat Kelulusan</h3>
+                    </div>
+                    <div class="card-body px-3 px-md-4">
+                        <canvas id="analyticsPassChart" height="180"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white border-0 pt-3 px-3 px-md-4">
+                        <h3 class="h6 mb-0">Rata-rata Nilai per Kelas</h3>
+                    </div>
+                    <div class="card-body px-3 px-md-4">
+                        <canvas id="analyticsClassChart" height="180"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-0 pt-3 px-3 px-md-4">
+                <h3 class="h6 mb-0">Rekap Ujian</h3>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-3">Ujian</th>
+                                <th>Mapel</th>
+                                <th>Kelas</th>
+                                <th>Peserta</th>
+                                <th>Rata-rata</th>
+                                <th>Lulus</th>
+                                <th class="text-end pe-3">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in rows %}
+                            <tr>
+                                <td class="ps-3">
+                                    <p class="mb-1 fw-semibold">{{ row.exam.title }}</p>
+                                    <p class="small text-muted mb-0">{{ row.exam.start_time|date:"d M Y H:i" }}</p>
+                                </td>
+                                <td>{{ row.exam.subject.name }}</td>
+                                <td>{{ row.class_names }}</td>
+                                <td>{{ row.participants }}</td>
+                                <td>{{ row.average_score }}%</td>
+                                <td>{{ row.pass_rate }}%</td>
+                                <td class="text-end pe-3">
+                                    <a href="{% url 'exam_results_detail' row.exam.id %}" class="btn btn-sm btn-outline-primary" title="Lihat detail hasil ujian ini">
+                                        <i class="ri-file-chart-line"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center text-muted py-5">Belum ada data analitik untuk filter ini.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {% if is_paginated %}
+            <div class="card-footer bg-white">
+                <nav aria-label="Paginasi rekap analitik">
+                    <ul class="pagination pagination-sm mb-0">
+                        {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.previous_page_number }}">Sebelumnya</a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled"><span class="page-link">Sebelumnya</span></li>
+                        {% endif %}
+
+                        {% for num in paginator.page_range %}
+                            {% if num == page_obj.number %}
+                            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                            {% elif num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
+                            <li class="page-item"><a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ num }}">{{ num }}</a></li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.next_page_number }}">Berikutnya</a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled"><span class="page-link">Berikutnya</span></li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+            {% endif %}
+        </section>
+{% endblock %}
+
+{% block vendor_js %}
+{{ chart_data.trend|json_script:"analytics-trend-data" }}
+    {{ chart_data.pass_rate|json_script:"analytics-pass-rate-data" }}
+    {{ chart_data.class_avg|json_script:"analytics-class-average-data" }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="{% static 'results/js/charts.js' %}"></script>
+{% endblock %}
+

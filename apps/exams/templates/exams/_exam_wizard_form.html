@@ -1,0 +1,544 @@
+{% load static %}
+{% if messages %}
+    <div class="mb-3">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags|default:'info' }} py-2 mb-2">{{ message }}</div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+{% if form.non_field_errors %}
+<div class="alert alert-danger">
+    {% for error in form.non_field_errors %}
+    <div>{{ error }}</div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<form method="post" id="examWizardForm" novalidate>
+    {% csrf_token %}
+    {{ form.selected_questions_payload }}
+    {{ form.assignment_payload }}
+    {{ form.status_action }}
+
+    <ul class="nav nav-pills nav-fill gap-2 mb-4" aria-label="Wizard stepper">
+        <li class="nav-item"><button type="button" class="nav-link active wizard-step-indicator" data-step-indicator="1">1. Info Dasar</button></li>
+        <li class="nav-item"><button type="button" class="nav-link wizard-step-indicator" data-step-indicator="2">2. Waktu</button></li>
+        <li class="nav-item"><button type="button" class="nav-link wizard-step-indicator" data-step-indicator="3">3. Soal</button></li>
+        <li class="nav-item"><button type="button" class="nav-link wizard-step-indicator" data-step-indicator="4">4. Pengaturan</button></li>
+        <li class="nav-item"><button type="button" class="nav-link wizard-step-indicator" data-step-indicator="5">5. Anti-Cheat</button></li>
+        <li class="nav-item"><button type="button" class="nav-link wizard-step-indicator" data-step-indicator="6">6. Penugasan</button></li>
+        <li class="nav-item"><button type="button" class="nav-link wizard-step-indicator" data-step-indicator="7">7. Tinjau</button></li>
+    </ul>
+
+    <section class="wizard-step-card card border-0 shadow-sm mb-3" data-step="1">
+        <div class="card-header bg-white border-0 pt-3">
+            <h2 class="h6 mb-0">Langkah 1: Informasi Dasar</h2>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-8">
+                    <label class="form-label required">{{ form.title.label }}</label>
+                    {{ form.title }}
+                    {% if form.title.errors %}<div class="text-danger small mt-1">{{ form.title.errors|join:", " }}</div>{% endif %}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label required">{{ form.subject.label }}</label>
+                    {{ form.subject }}
+                    {% if form.subject.errors %}<div class="text-danger small mt-1">{{ form.subject.errors|join:", " }}</div>{% endif %}
+                </div>
+                <div class="col-12">
+                    <label class="form-label required">{{ form.description.label }}</label>
+                    {{ form.description }}
+                    {% if form.description.errors %}<div class="text-danger small mt-1">{{ form.description.errors|join:", " }}</div>{% endif %}
+                </div>
+                <div class="col-12">
+                    <label class="form-label required">{{ form.instructions.label }}</label>
+                    {{ form.instructions }}
+                    {% if form.instructions.errors %}<div class="text-danger small mt-1">{{ form.instructions.errors|join:", " }}</div>{% endif %}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="wizard-step-card card border-0 shadow-sm mb-3 d-none" data-step="2">
+        <div class="card-header bg-white border-0 pt-3">
+            <h2 class="h6 mb-0">Langkah 2: Pengaturan Waktu</h2>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label required">{{ form.start_time.label }}</label>
+                    {{ form.start_time }}
+                    {% if form.start_time.errors %}<div class="text-danger small mt-1">{{ form.start_time.errors|join:", " }}</div>{% endif %}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label required">{{ form.end_time.label }}</label>
+                    {{ form.end_time }}
+                    {% if form.end_time.errors %}<div class="text-danger small mt-1">{{ form.end_time.errors|join:", " }}</div>{% endif %}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label required">{{ form.duration_minutes.label }}</label>
+                    {{ form.duration_minutes }}
+                    {% if form.duration_minutes.errors %}<div class="text-danger small mt-1">{{ form.duration_minutes.errors|join:", " }}</div>{% endif %}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Waktu per Soal</label>
+                    <input type="number" class="form-control" min="0" placeholder="Contoh: 60 detik">
+                    <div class="form-text">Pengaturan ini hanya simulasi karena tidak disimpan pada level ujian.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="wizard-step-card card border-0 shadow-sm mb-3 d-none" data-step="3">
+        <div class="card-header bg-white border-0 pt-3 pb-2 d-flex flex-wrap gap-2 justify-content-between align-items-center">
+            <div>
+                <h2 class="h6 mb-1">Langkah 3: Pemilihan Soal</h2>
+                <p class="text-muted small mb-0">Cari soal dari bank soal, pilih, lalu atur parameter soal secara massal atau per-soal.</p>
+            </div>
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+                <select class="form-select form-select-sm w-auto" id="bulkCategorySelector" title="Pilih kategori untuk menambah soal massal" style="min-width: 240px;">
+                    <option value="">Tambah berdasarkan kategori...</option>
+                    {% for category in form.available_categories %}
+                    <option value="{{ category.id }}">{{ category.name }}</option>
+                    {% endfor %}
+                </select>
+                <button type="button" id="addCategoryQuestionsBtn" class="btn btn-sm btn-outline-primary" title="Tambahkan semua soal dari kategori terpilih">
+                    <i class="ri-add-line me-1"></i>Tambah Kategori
+                </button>
+            </div>
+        </div>
+        <div class="card-body pt-3">
+            {% if form.selected_questions_payload.errors %}
+            <div class="alert alert-danger py-2">{{ form.selected_questions_payload.errors|join:", " }}</div>
+            {% endif %}
+            <div class="row g-3">
+                <div class="col-xl-5">
+                    <div class="card h-100">
+                        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                            <h3 class="h6 mb-0">Bank Soal Tersedia</h3>
+                            <span class="badge text-bg-light"><span id="availableQuestionVisibleCount">0</span> soal</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-2 align-items-end mb-3">
+                                <div class="col-md-8">
+                                    <label class="form-label small mb-1">Pencarian</label>
+                                    <input type="search" class="form-control form-control-sm" id="questionFilterSearch" placeholder="Cari teks soal..." title="Cari soal di bank soal">
+                                </div>
+                                <div class="col-md-4 d-grid">
+                                    <label class="form-label small mb-1 d-none d-sm-block">&nbsp;</label>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#questionFilterModal" title="Buka pengaturan filter soal">
+                                        <i class="ri-filter-3-line me-1"></i>Filter Soal
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="list-group" id="availableQuestionList" style="max-height: 30rem; overflow:auto;">
+                                {% for question in form.available_questions %}
+                                <label
+                                    class="list-group-item list-group-item-action question-picker-item py-3"
+                                    data-category-id="{{ question.category_id|default:'' }}"
+                                    data-subject-name="{{ question.subject.name|lower|escapejs }}"
+                                    data-question-type="{{ question.question_type }}"
+                                    data-question-text="{{ question.question_text|striptags|lower|escapejs }}"
+                                >
+                                    <div class="d-flex align-items-start gap-2">
+                                        <input type="checkbox" class="form-check-input question-picker-checkbox mt-1" value="{{ question.id }}" title="Pilih soal">
+                                        <div class="w-100">
+                                            <p class="mb-1 fw-semibold">{{ question.question_text|striptags|truncatechars:92 }}</p>
+                                            <p class="small text-muted mb-0">
+                                                {{ question.subject.name }} &bull; {{ question.category.name|default:'Tanpa kategori' }} &bull; {{ question.points }} poin &bull;
+                                                {% if question.question_type == 'multiple_choice' %}Pilihan Ganda{% elif question.question_type == 'essay' %}Esai{% else %}Jawaban Singkat{% endif %}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </label>
+                                {% empty %}
+                                <div class="list-group-item text-muted">Belum ada soal aktif di bank soal Anda.</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-7">
+                    <div class="card h-100">
+                        <div class="card-header bg-white d-flex flex-wrap justify-content-between align-items-center gap-2">
+                            <h3 class="h6 mb-0">Soal Terpilih</h3>
+                            <div class="d-flex flex-wrap gap-2">
+                                <span class="badge text-bg-primary">Total Soal: <span id="selectedQuestionCountTop">0</span></span>
+                                <span class="badge text-bg-secondary">Total Poin: <span id="selectedQuestionTotalPointsTop">0.00</span></span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+                                <p class="small text-muted mb-0">Centang soal pada daftar ini untuk menerapkan aksi bulk.</p>
+                                <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#selectedBulkModal" title="Buka pengaturan aksi bulk">
+                                    <i class="ri-magic-line me-1"></i>Aksi Bulk
+                                </button>
+                            </div>
+                            <div id="selectedQuestionList" class="list-group border rounded bg-light p-2" style="min-height: 14rem;"></div>
+                            <div class="d-none">
+                                <span id="selectedQuestionCount">0</span>
+                                <span id="selectedQuestionTotalPoints">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="wizard-step-card card border-0 shadow-sm mb-3 d-none" data-step="4">
+        <div class="card-header bg-white border-0 pt-3">
+            <h2 class="h6 mb-0">Langkah 4: Pengaturan Ujian</h2>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-4 col-lg-3">
+                    <label class="form-label required">{{ form.passing_score.label }}</label>
+                    {{ form.passing_score }}
+                    {% if form.passing_score.errors %}<div class="text-danger small mt-1">{{ form.passing_score.errors|join:", " }}</div>{% endif %}
+                </div>
+                <div class="col-md-8 col-lg-9">
+                    <label class="form-label">Pengaturan Umum</label>
+                    <div class="row g-2">
+                        <div class="col-md-6">
+                            <div class="form-check form-switch">
+                                {{ form.randomize_questions }}
+                                <label class="form-check-label" for="{{ form.randomize_questions.id_for_label }}">{{ form.randomize_questions.label }}</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check form-switch">
+                                {{ form.randomize_options }}
+                                <label class="form-check-label" for="{{ form.randomize_options.id_for_label }}">{{ form.randomize_options.label }}</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check form-switch">
+                                {{ form.show_results_immediately }}
+                                <label class="form-check-label" for="{{ form.show_results_immediately.id_for_label }}">{{ form.show_results_immediately.label }}</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check form-switch">
+                                {{ form.allow_review }}
+                                <label class="form-check-label" for="{{ form.allow_review.id_for_label }}">{{ form.allow_review.label }}</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="form-check form-switch mb-3">
+                                {{ form.allow_retake }}
+                                <label class="form-check-label" for="{{ form.allow_retake.id_for_label }}">{{ form.allow_retake.label }}</label>
+                            </div>
+                        </div>
+                        <div class="card-body pt-0 d-none" id="retakeSettingsFields">
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label class="form-label required">{{ form.max_retake_attempts.label }}</label>
+                                    {{ form.max_retake_attempts }}
+                                    <div class="form-text">Termasuk ujian pertama - nilai 3 = 1 asli + 2 retake.</div>
+                                    {% if form.max_retake_attempts.errors %}<div class="text-danger small mt-1">{{ form.max_retake_attempts.errors|join:", " }}</div>{% endif %}
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label required">{{ form.retake_cooldown_minutes.label }}</label>
+                                    {{ form.retake_cooldown_minutes }}
+                                    <div class="form-text">0 = langsung bisa retake setelah submit.</div>
+                                    {% if form.retake_cooldown_minutes.errors %}<div class="text-danger small mt-1">{{ form.retake_cooldown_minutes.errors|join:", " }}</div>{% endif %}
+                                </div>
+                                <div class="col-md-4 d-flex align-items-end">
+                                    <div class="form-check form-switch mb-0">
+                                        {{ form.retake_show_review }}
+                                        <label class="form-check-label" for="{{ form.retake_show_review.id_for_label }}">{{ form.retake_show_review.label }}</label>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label d-block required">{{ form.retake_score_policy.label }}</label>
+                                    {{ form.retake_score_policy }}
+                                    {% if form.retake_score_policy.errors %}<div class="text-danger small mt-1">{{ form.retake_score_policy.errors|join:", " }}</div>{% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label">Aturan Navigasi Global</label>
+                    <div class="row g-2">
+                        <div class="col-md-6">
+                            <div class="form-check form-switch">
+                                {{ form.override_question_navigation }}
+                                <label class="form-check-label" for="{{ form.override_question_navigation.id_for_label }}">{{ form.override_question_navigation.label }}</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check form-switch">
+                                {{ form.global_allow_previous }}
+                                <label class="form-check-label" for="{{ form.global_allow_previous.id_for_label }}">{{ form.global_allow_previous.label }}</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check form-switch">
+                                {{ form.global_allow_next }}
+                                <label class="form-check-label" for="{{ form.global_allow_next.id_for_label }}">{{ form.global_allow_next.label }}</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check form-switch">
+                                {{ form.global_force_sequential }}
+                                <label class="form-check-label" for="{{ form.global_force_sequential.id_for_label }}">{{ form.global_force_sequential.label }}</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="wizard-step-card card border-0 shadow-sm mb-3 d-none" data-step="5">
+        <div class="card-header bg-white border-0 pt-3">
+            <h2 class="h6 mb-0">Langkah 5: Pengaturan Anti-Cheat</h2>
+        </div>
+        <div class="card-body">
+            <div class="row g-2 mb-3">
+                <div class="col-md-6">
+                    <div class="form-check form-switch">
+                        {{ form.require_fullscreen }}
+                        <label class="form-check-label" for="{{ form.require_fullscreen.id_for_label }}">{{ form.require_fullscreen.label }}</label>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-check form-switch">
+                        {{ form.detect_tab_switch }}
+                        <label class="form-check-label" for="{{ form.detect_tab_switch.id_for_label }}">{{ form.detect_tab_switch.label }}</label>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-check form-switch">
+                        {{ form.enable_screenshot_proctoring }}
+                        <label class="form-check-label" for="{{ form.enable_screenshot_proctoring.id_for_label }}">{{ form.enable_screenshot_proctoring.label }}</label>
+                    </div>
+                </div>
+            </div>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label required">{{ form.screenshot_interval_seconds.label }}</label>
+                    {{ form.screenshot_interval_seconds }}
+                    {% if form.screenshot_interval_seconds.errors %}<div class="text-danger small mt-1">{{ form.screenshot_interval_seconds.errors|join:", " }}</div>{% endif %}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label required">{{ form.max_violations_allowed.label }}</label>
+                    {{ form.max_violations_allowed }}
+                    {% if form.max_violations_allowed.errors %}<div class="text-danger small mt-1">{{ form.max_violations_allowed.errors|join:", " }}</div>{% endif %}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="wizard-step-card card border-0 shadow-sm mb-3 d-none" data-step="6">
+        <div class="card-header bg-white border-0 pt-3">
+            <h2 class="h6 mb-0">Langkah 6: Penugasan Peserta</h2>
+        </div>
+        <div class="card-body">
+            {% if form.assignment_payload.errors %}
+            <div class="alert alert-danger py-2">{{ form.assignment_payload.errors|join:", " }}</div>
+            {% endif %}
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <h3 class="h6">Pilih Kelas</h3>
+                    <div class="list-group" style="max-height: 22rem; overflow:auto;">
+                        {% for class_obj in form.available_classes %}
+                        <label class="list-group-item assignment-item d-flex gap-2 align-items-start">
+                            <input type="checkbox" class="form-check-input assignment-checkbox" data-type="class" value="{{ class_obj.id }}" title="Pilih kelas">
+                            <span>{{ class_obj.name }}</span>
+                        </label>
+                        {% empty %}
+                        <p class="text-muted mb-0">Belum ada kelas aktif.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h3 class="h6">Pilih Siswa Spesifik</h3>
+                    <div class="list-group" style="max-height: 22rem; overflow:auto;">
+                        {% for student in form.available_students %}
+                        <label class="list-group-item assignment-item d-flex gap-2 align-items-start">
+                            <input type="checkbox" class="form-check-input assignment-checkbox" data-type="student" value="{{ student.id }}" title="Pilih siswa">
+                            <span>{{ student.get_full_name|default:student.username }} ({{ student.username }})</span>
+                        </label>
+                        {% empty %}
+                        <p class="text-muted mb-0">Belum ada siswa aktif.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <div class="border rounded p-3 bg-light mt-3">
+                <h4 class="h6 mb-2">Penugasan Terpilih</h4>
+                <ul id="assignmentSummaryList" class="small mb-0"></ul>
+            </div>
+        </div>
+    </section>
+
+    <section class="wizard-step-card card border-0 shadow-sm mb-3 d-none" data-step="7">
+        <div class="card-header bg-white border-0 pt-3">
+            <h2 class="h6 mb-0">Langkah 7: Tinjau & Publikasi</h2>
+        </div>
+        <div class="card-body">
+            <div id="reviewSummary" class="list-group list-group-flush"></div>
+            <div class="alert alert-info mt-3 mb-0">
+                Periksa kembali konfigurasi ujian. Anda dapat menyimpan sebagai draf atau langsung mempublikasikan.
+            </div>
+        </div>
+    </section>
+
+    <div class="d-flex flex-wrap gap-2 justify-content-between mt-3">
+        <button type="button" class="btn btn-outline-secondary" id="wizardPrevBtn" title="Kembali ke langkah sebelumnya">Sebelumnya</button>
+        <div class="d-flex flex-wrap gap-2">
+            <button type="button" class="btn btn-primary" id="wizardNextBtn" title="Lanjut ke langkah berikutnya">Berikutnya</button>
+            <button type="submit" class="btn btn-outline-primary wizard-submit-btn d-none" data-status-action="draft" title="Simpan ujian sebagai draf">Simpan Draf</button>
+            <button type="submit" class="btn btn-success wizard-submit-btn d-none" data-status-action="publish" title="Simpan dan publikasikan ujian">Publikasikan</button>
+        </div>
+    </div>
+</form>
+
+<div class="modal fade" id="questionFilterModal" tabindex="-1" aria-labelledby="questionFilterModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="h6 mb-0" id="questionFilterModalLabel">Filter Soal</h3>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label small mb-1" for="questionFilterSubject">Mata Pelajaran</label>
+                        <select class="form-select form-select-sm" id="questionFilterSubject">
+                            <option value="">Semua mata pelajaran</option>
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label small mb-1" for="questionFilterType">Tipe Soal</label>
+                        <select class="form-select form-select-sm" id="questionFilterType">
+                            <option value="">Semua tipe soal</option>
+                            <option value="multiple_choice">Pilihan Ganda</option>
+                            <option value="essay">Esai</option>
+                            <option value="short_answer">Jawaban Singkat</option>
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label small mb-1" for="questionFilterCategory">Kategori</label>
+                        <select class="form-select form-select-sm" id="questionFilterCategory">
+                            <option value="">Semua kategori</option>
+                            {% for category in form.available_categories %}
+                            <option value="{{ category.id }}">{{ category.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary btn-sm" id="questionFilterResetBtn">Reset Filter</button>
+                <button type="button" class="btn btn-primary btn-sm" id="questionFilterApplyBtn">Terapkan</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="selectedBulkModal" tabindex="-1" aria-labelledby="selectedBulkModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="h6 mb-0" id="selectedBulkModalLabel">Aksi Bulk Soal Terpilih</h3>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-4">
+                        <div class="form-check mb-0">
+                            <input type="checkbox" class="form-check-input" id="selectedBulkCheckAll">
+                            <label class="form-check-label" for="selectedBulkCheckAll">Pilih semua soal</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small mb-1" for="bulkPointsOverride">Poin Timpa</label>
+                        <input type="number" min="0.01" step="0.01" class="form-control form-control-sm" id="bulkPointsOverride" placeholder="Kosongkan jika tidak diubah">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small mb-1" for="bulkAllowPrevious">Navigasi Sebelumnya</label>
+                        <select class="form-select form-select-sm" id="bulkAllowPrevious">
+                            <option value="inherit">Ikuti pengaturan saat ini</option>
+                            <option value="true">Ya</option>
+                            <option value="false">Tidak</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small mb-1" for="bulkAllowNext">Navigasi Berikutnya</label>
+                        <select class="form-select form-select-sm" id="bulkAllowNext">
+                            <option value="inherit">Ikuti pengaturan saat ini</option>
+                            <option value="true">Ya</option>
+                            <option value="false">Tidak</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small mb-1" for="bulkForceSequential">Paksa Berurutan</label>
+                        <select class="form-select form-select-sm" id="bulkForceSequential">
+                            <option value="inherit">Ikuti pengaturan saat ini</option>
+                            <option value="true">Ya</option>
+                            <option value="false">Tidak</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-outline-danger btn-sm" id="deleteBulkSelectedBtn" title="Hapus semua soal yang dicentang dari daftar terpilih">
+                    <i class="ri-delete-bin-line me-1"></i>Hapus Terpilih
+                </button>
+                <button type="button" class="btn btn-primary btn-sm" id="applyBulkSelectedBtn" title="Terapkan pengaturan ke soal terpilih">
+                    <i class="ri-magic-line me-1"></i>Terapkan Bulk
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{ form.initial.selected_questions_payload|default:"[]"|json_script:"initial-selected-questions" }}
+{{ form.initial.assignment_payload|default:"[]"|json_script:"initial-assignment-payload" }}
+
+<script id="available-questions-data" type="application/json">
+[
+{% for question in form.available_questions %}
+    {
+        "id": "{{ question.id }}",
+        "text": "{{ question.question_text|striptags|escapejs }}",
+        "subject_name": "{{ question.subject.name|escapejs }}",
+        "category_id": "{{ question.category_id|default:'' }}",
+        "category_name": "{{ question.category.name|default:'Tanpa kategori'|escapejs }}",
+        "question_type": "{{ question.question_type }}",
+        "points": "{{ question.points }}",
+        "allow_previous": {{ question.allow_previous|yesno:"true,false" }},
+        "allow_next": {{ question.allow_next|yesno:"true,false" }},
+        "force_sequential": {{ question.force_sequential|yesno:"true,false" }}
+    }{% if not forloop.last %},{% endif %}
+{% endfor %}
+]
+</script>
+
+<script id="available-assignment-data" type="application/json">
+{
+    "classes": [
+        {% for class_obj in form.available_classes %}
+        {"id":"{{ class_obj.id }}","name":"{{ class_obj.name|escapejs }}"}{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ],
+    "students": [
+        {% for student in form.available_students %}
+        {"id":"{{ student.id }}","name":"{{ student.get_full_name|default:student.username|escapejs }}","username":"{{ student.username|escapejs }}"}{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ]
+}
+</script>
+

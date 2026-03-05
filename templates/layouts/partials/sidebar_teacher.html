@@ -1,0 +1,31 @@
+{% load cbt_extras static %}
+<aside class="cbt-sidebar">
+    <div class="cbt-sidebar-header">
+        {% with sidebar_logo=branding.institution_logo_dark_url|default:branding.institution_logo_url|default:'/static/images/logo-light.png' %}
+        <img
+            src="{{ sidebar_logo }}"
+            alt="{{ branding.institution_name|default:'Logo Institusi' }}"
+            class="cbt-sidebar-brand-image"
+            onerror="this.onerror=null;this.src='{% static 'images/logo-light.png' %}';"
+        >
+        {% endwith %}
+    </div>
+    <nav class="cbt-sidebar-nav" aria-label="Sidebar navigation">
+        <a class="cbt-sidebar-link {% cbt_active 'teacher_dashboard' %}" href="/teacher/dashboard/">
+            <i class="ri-dashboard-line" aria-hidden="true"></i>
+            <span>Dashboard</span>
+        </a>
+        <a class="cbt-sidebar-link {% cbt_active 'question_list' 'question_create' 'question_edit' 'question_delete' 'question_duplicate' 'question_preview' 'question_import' 'question_import_template' 'question_export' %}" href="/teacher/question-bank/">
+            <i class="ri-questionnaire-line" aria-hidden="true"></i>
+            <span>Bank Soal</span>
+        </a>
+        <a class="cbt-sidebar-link {% cbt_active 'exam_list' 'exam_create' 'exam_detail' 'exam_edit' 'exam_delete' 'exam_publish' 'exam_preview' 'exam_duplicate' 'monitoring_dashboard' 'student_detail' %}" href="/teacher/exams/">
+            <i class="ri-file-list-3-line" aria-hidden="true"></i>
+            <span>Kelola Ujian</span>
+        </a>
+        <a class="cbt-sidebar-link {% cbt_active 'teacher_results' 'teacher_results_analytics' 'exam_results_detail' 'answer_review' 'export_results' 'retake_history' %}" href="/teacher/results/">
+            <i class="ri-medal-line" aria-hidden="true"></i>
+            <span>Hasil Ujian</span>
+        </a>
+    </nav>
+</aside>

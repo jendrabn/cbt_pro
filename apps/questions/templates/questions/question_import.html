@@ -1,0 +1,124 @@
+{% extends "layouts/teacher.html" %}
+{% load static %}
+
+{% block title %}Impor Soal - CBT{% endblock %}
+
+{% block topbar %}
+    {% include "layouts/partials/topbar_teacher.html" with parent_label="Bank Soal" parent_url="/teacher/question-bank/" current_label="Impor Bank Soal" %}
+{% endblock %}
+
+{% block main_attrs %}class="container-fluid px-3 px-md-4 py-4"{% endblock %}
+
+{% block page_header %}
+    <section class="cbt-page-header">
+        <div class="cbt-page-header-body">
+            {% include "layouts/partials/page_header.html" with eyebrow="Panel Guru" title="Impor Bank Soal" %}
+            <div class="d-flex align-items-center gap-2 cbt-page-header-actions">
+                <div class="d-flex gap-2">
+                                <a href="{% url 'question_list' %}" class="btn btn-sm btn-outline-primary" title="Kembali ke daftar bank soal">
+                                    <i class="ri-arrow-left-line me-1"></i>Kembali ke Bank Soal
+                                </a>
+                            </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block content %}
+        {% if messages %}
+            <div class="mb-3">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'info' }} py-2 mb-2">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <section class="row g-4">
+            <div class="col-xl-5">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white border-0 pt-3">
+                        <h2 class="h6 mb-0">Unggah File</h2>
+                    </div>
+                    <div class="card-body">
+                        <form method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label class="form-label required">{{ form.import_file.label }}</label>
+                                {{ form.import_file }}
+                                {% if form.import_file.errors %}
+                                <div class="text-danger small mt-1">{{ form.import_file.errors|join:", " }}</div>
+                                {% endif %}
+                                <div class="form-text">Format didukung: `.json` atau `.xlsx` (maksimal 10MB).</div>
+                            </div>
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary" title="Mulai proses impor soal">
+                                    <i class="ri-upload-line me-1"></i>Mulai Impor
+                                </button>
+                                <a href="{% url 'question_import_template' %}" class="btn btn-outline-secondary" title="Unduh templat impor Excel">
+                                    <i class="ri-download-line me-1"></i>Unduh Templat Excel
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                {% if import_result %}
+                <div class="card border-0 shadow-sm mt-4">
+                    <div class="card-header bg-white border-0 pt-3">
+                        <h2 class="h6 mb-0">Ringkasan Impor</h2>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-1">Total baris diproses: <strong>{{ import_result.total_rows }}</strong></p>
+                        <p class="mb-1">Berhasil: <strong class="text-success">{{ import_result.success_count }}</strong></p>
+                        <p class="mb-0">Gagal: <strong class="text-danger">{{ import_result.errors|length }}</strong></p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="col-xl-7">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white border-0 pt-3">
+                        <h2 class="h6 mb-0">Panduan Format Data</h2>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-2">Header minimal yang wajib ada:</p>
+                        <ul class="mb-3">
+                            <li><code>subject</code></li>
+                            <li><code>question_type</code></li>
+                            <li><code>question_text</code></li>
+                        </ul>
+
+                        <p class="mb-2">Header tambahan yang didukung:</p>
+                        <div class="small border rounded p-2 bg-light">
+                            <code>
+                                category, difficulty_level, points, explanation, allow_previous, allow_next,<br>
+                                force_sequential, time_limit_seconds, option_a, option_b, option_c, option_d, option_e,<br>
+                                correct_option, answer_text, keywords, is_case_sensitive, max_word_count, tags
+                            </code>
+                        </div>
+
+                        <hr>
+                        <h3 class="h6">Contoh JSON</h3>
+<pre class="bg-light p-3 rounded small mb-0"><code>{
+  "questions": [
+    {
+      "subject": "Matematika",
+      "category": "Aljabar",
+      "question_type": "multiple_choice",
+      "question_text": "Hasil 2 + 2 adalah...",
+      "difficulty_level": "easy",
+      "points": 5,
+      "option_a": "3",
+      "option_b": "4",
+      "correct_option": "B",
+      "tags": "dasar, penjumlahan"
+    }
+  ]
+}</code></pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+{% endblock %}
+

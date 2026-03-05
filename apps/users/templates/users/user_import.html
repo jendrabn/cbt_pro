@@ -1,0 +1,206 @@
+{% extends "layouts/admin.html" %}
+{% load static %}
+
+{% block title %}Impor Pengguna - CBT{% endblock %}
+
+{% block topbar %}
+    {% include "layouts/partials/topbar_admin.html" with parent_label="Manajemen Pengguna" parent_url="/admin/users/" current_label="Impor Pengguna" %}
+{% endblock %}
+
+{% block main_attrs %}class="container-fluid px-3 px-md-4 py-4"{% endblock %}
+
+{% block page_header %}
+    <section class="cbt-page-header">
+        <div class="cbt-page-header-body">
+            {% include "layouts/partials/page_header.html" with eyebrow="Admin Panel" title="Impor Pengguna" %}
+            <div class="d-flex align-items-center gap-2 cbt-page-header-actions">
+                <div class="d-flex gap-2">
+                                <a href="{% url 'user_list' %}" class="btn btn-sm btn-outline-primary">
+                                    <i class="ri-arrow-left-line me-1"></i>Kembali ke Manajemen Pengguna
+                                </a>
+                            </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block content %}
+        {% if messages %}
+            <div class="mb-3">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'info' }} py-2 mb-2">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <section class="row g-4">
+            <div class="col-xl-5">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white border-0 pt-3">
+                        <h2 class="h6 mb-0">Unggah File Impor</h2>
+                    </div>
+                    <div class="card-body">
+                        <form method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label class="form-label required">{{ form.import_file.label }}</label>
+                                {{ form.import_file }}
+                                {% if form.import_file.errors %}
+                                <div class="text-danger small mt-1">{{ form.import_file.errors|join:", " }}</div>
+                                {% endif %}
+                                <div class="form-text">Format didukung: `.json`, `.xlsx`, `.xls` (maksimal 5MB).</div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label required">{{ form.role.label }}</label>
+                                {{ form.role }}
+                                {% if form.role.errors %}
+                                <div class="text-danger small mt-1">{{ form.role.errors|join:", " }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="mb-3 form-check">
+                                {{ form.send_credentials_email }}
+                                <label class="form-check-label" for="{{ form.send_credentials_email.id_for_label }}">
+                                    {{ form.send_credentials_email.label }}
+                                </label>
+                            </div>
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="ri-upload-line me-1"></i>Mulai Impor
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                {% if import_result %}
+                <div class="card border-0 shadow-sm mt-4">
+                    <div class="card-header bg-white border-0 pt-3">
+                        <h2 class="h6 mb-0">Ringkasan Impor Terakhir</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <div class="border rounded p-2 h-100">
+                                    <p class="small text-muted mb-1">Total Baris</p>
+                                    <p class="h5 mb-0">{{ import_result.total_rows }}</p>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="border rounded p-2 h-100">
+                                    <p class="small text-muted mb-1">Berhasil</p>
+                                    <p class="h5 mb-0 text-success">{{ import_result.total_created }}</p>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="border rounded p-2 h-100">
+                                    <p class="small text-muted mb-1">Dilewati</p>
+                                    <p class="h5 mb-0 text-warning">{{ import_result.total_skipped }}</p>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="border rounded p-2 h-100">
+                                    <p class="small text-muted mb-1">Gagal</p>
+                                    <p class="h5 mb-0 text-danger">{{ import_result.total_failed }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        {% if import_result.error_details %}
+                        <p class="small fw-semibold mb-2">Error teratas:</p>
+                        <ul class="small mb-0">
+                            {% for row in import_result.error_details|slice:":5" %}
+                            <li>Baris {{ row.row|default:"-" }}: {{ row.error }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="col-xl-7">
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white border-0 pt-3">
+                        <h2 class="h6 mb-0">Panduan Format Data</h2>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-2">Template Excel:</p>
+                        <div class="d-flex flex-wrap gap-2 mb-3">
+                            <a href="{% url 'user_import_template' 'teacher' %}" class="btn btn-outline-primary btn-sm">
+                                <i class="ri-download-line me-1"></i>Template Teacher
+                            </a>
+                            <a href="{% url 'user_import_template' 'student' %}" class="btn btn-outline-success btn-sm">
+                                <i class="ri-download-line me-1"></i>Template Student
+                            </a>
+                        </div>
+
+                        <p class="mb-2">Field wajib:</p>
+                        <ul class="mb-3">
+                            <li><code>first_name</code>, <code>last_name</code>, <code>email</code>, <code>username</code></li>
+                            <li>Untuk `student`: tambah <code>student_id</code>, <code>class_grade</code></li>
+                        </ul>
+
+                        <h3 class="h6">Contoh JSON</h3>
+<pre class="bg-light p-3 rounded small mb-0"><code>{
+  "users": [
+    {
+      "first_name": "Budi",
+      "last_name": "Santoso",
+      "email": "budi@cbt.com",
+      "username": "budi.santoso",
+      "student_id": "NIS-1001",
+      "class_grade": "XI IPA 1",
+      "phone_number": "08123456789",
+      "is_active": true
+    }
+  ]
+}</code></pre>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white border-0 pt-3">
+                        <h2 class="h6 mb-0">Riwayat Impor</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Tanggal</th>
+                                        <th>File</th>
+                                        <th class="text-center">Berhasil</th>
+                                        <th class="text-center">Dilewati</th>
+                                        <th class="text-center">Gagal</th>
+                                        <th>Status</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for row in history %}
+                                    <tr>
+                                        <td>{{ row.created_at|date:"d M Y H:i" }}</td>
+                                        <td>{{ row.original_filename }}</td>
+                                        <td class="text-center"><span class="badge text-bg-success">{{ row.total_created }}</span></td>
+                                        <td class="text-center"><span class="badge text-bg-warning">{{ row.total_skipped }}</span></td>
+                                        <td class="text-center"><span class="badge text-bg-danger">{{ row.total_failed }}</span></td>
+                                        <td><span class="badge text-bg-secondary">{{ row.get_status_display }}</span></td>
+                                        <td>
+                                            <a href="{% url 'user_import_report' row.id %}" class="btn btn-sm btn-outline-primary">
+                                                <i class="ri-download-line"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="7" class="text-center text-muted py-4">Belum ada riwayat impor.</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+{% endblock %}
+

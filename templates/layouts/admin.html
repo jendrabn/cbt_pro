@@ -1,0 +1,24 @@
+{% extends "layouts/base_dashboard.html" %}
+
+{% block body_classes %} cbt-has-sidebar{% endblock %}
+
+{% block topbar %}
+    {% include "layouts/partials/topbar_admin.html" with current_label="Dashboard" %}
+{% endblock %}
+
+{% block sidebar %}
+    {% include "layouts/partials/sidebar_admin.html" %}
+{% endblock %}
+
+{% block sidebar_overlay %}
+    <div class="cbt-sidebar-overlay"></div>
+{% endblock %}
+
+{% block page_header %}
+    <section class="cbt-page-header">
+        <div class="cbt-page-header-body">
+            {% include "layouts/partials/page_header.html" with eyebrow="Admin Panel" title="Dashboard" %}
+            <div class="d-flex align-items-center gap-2 cbt-page-header-actions"></div>
+        </div>
+    </section>
+{% endblock %}

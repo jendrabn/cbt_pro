@@ -1,0 +1,166 @@
+{% extends "layouts/admin.html" %}
+{% load static analytics_extras %}
+
+{% block title %}Laporan Sistem - CBT{% endblock %}
+
+{% block topbar %}
+    {% include "layouts/partials/topbar_admin.html" with parent_label="Analitik" parent_url="/admin/analytics/" current_label="Laporan Analitik" %}
+{% endblock %}
+
+{% block main_attrs %}class="container-fluid px-3 px-md-4 py-4"{% endblock %}
+
+{% block page_header %}
+    <section class="cbt-page-header">
+        <div class="cbt-page-header-body">
+            {% include "layouts/partials/page_header.html" with eyebrow="Panel Admin" title="Laporan Analitik" %}
+            <div class="d-flex align-items-center gap-2 cbt-page-header-actions">
+                <div class="d-flex gap-2">
+                                <a href="{{ analytics_url }}" class="btn btn-sm btn-outline-primary" title="Kembali ke dashboard analytics">
+                                    <i class="ri-arrow-left-line me-1"></i>Kembali ke Analitik
+                                </a>
+                            </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block content %}
+        {% if messages %}
+            <div class="mb-3">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'info' }} py-2 mb-2">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <section class="card border-0 shadow-sm filter-card mb-4">
+            <div class="card-body">
+                <form method="get" class="row g-2 g-md-3 align-items-end">
+                    <div class="col-6 col-md-2">
+                        <label class="form-label small mb-1">Tanggal Mulai</label>
+                        <input type="date" class="form-control" name="date_from" value="{{ filters.date_from|date:'Y-m-d' }}">
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <label class="form-label small mb-1">Tanggal Akhir</label>
+                        <input type="date" class="form-control" name="date_to" value="{{ filters.date_to|date:'Y-m-d' }}">
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <label class="form-label small mb-1">Mata Pelajaran</label>
+                        <select class="form-select" name="subject">
+                            <option value="">Semua Mata Pelajaran</option>
+                            {% for subject in subjects %}
+                            <option value="{{ subject.id }}" {% if filters.subject == subject.id %}selected{% endif %}>
+                                {{ subject.name }}{% if not subject.is_active %} (Nonaktif){% endif %}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <label class="form-label small mb-1">Kelas</label>
+                        <select class="form-select" name="class">
+                            <option value="">Semua Kelas</option>
+                            {% for class_item in classes %}
+                            <option value="{{ class_item.id }}" {% if filters.class == class_item.id %}selected{% endif %}>{{ class_item.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <label class="form-label small mb-1">Jenis Ujian</label>
+                        <select class="form-select" name="exam_type">
+                            <option value="">Semua Jenis</option>
+                            {% for exam_type in exam_types %}
+                            <option value="{{ exam_type.id }}" {% if filters.exam_type == exam_type.id %}selected{% endif %}>{{ exam_type.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-12 d-flex flex-wrap gap-2">
+                        <button type="submit" class="btn btn-primary" title="Terapkan filter laporan">
+                            <i class="ri-filter-3-line me-1"></i>Terapkan
+                        </button>
+                        <a href="{% url 'system_reports' %}" class="btn btn-outline-secondary" title="Reset semua filter">
+                            Reset
+                        </a>
+                        <a href="{{ export_csv_url }}" class="btn btn-outline-success" title="Ekspor laporan ke CSV">
+                            <i class="ri-file-excel-2-line me-1"></i>Ekspor CSV
+                        </a>
+                        <a href="{{ export_xlsx_url }}" class="btn btn-outline-success" title="Ekspor laporan ke Excel">
+                            <i class="ri-file-excel-line me-1"></i>Ekspor Excel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <section class="card border-0 shadow-sm table-card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                {% for key, label in report_columns %}
+                                    <th {% if forloop.first %}class="ps-3"{% endif %}>{{ label }}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in rows %}
+                            <tr>
+                                {% for key, label in report_columns %}
+                                    <td {% if forloop.first %}class="ps-3"{% endif %}>
+                                        {% if key == 'start_time' or key == 'end_time' %}
+                                            {{ row|get_item:key|date:"d M Y H:i" }}
+                                        {% elif key == 'completion_rate' or key == 'avg_score' or key == 'pass_rate' %}
+                                            {{ row|get_item:key }}%
+                                        {% else %}
+                                            {{ row|get_item:key }}
+                                        {% endif %}
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="{{ report_columns|length }}" class="text-center py-4 text-muted">Tidak ada data laporan untuk filter saat ini.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {% if is_paginated %}
+            <div class="card-footer bg-white">
+                <nav aria-label="Paginasi laporan">
+                    <ul class="pagination pagination-sm mb-0">
+                        {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{% if query_string %}{{ query_string }}&{% endif %}page={{ page_obj.previous_page_number }}">Sebelumnya</a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled"><span class="page-link">Sebelumnya</span></li>
+                        {% endif %}
+
+                        {% for num in paginator.page_range %}
+                            {% if num == page_obj.number %}
+                            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                            {% elif num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
+                            <li class="page-item">
+                                <a class="page-link" href="?{% if query_string %}{{ query_string }}&{% endif %}page={{ num }}">{{ num }}</a>
+                            </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{% if query_string %}{{ query_string }}&{% endif %}page={{ page_obj.next_page_number }}">Berikutnya</a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled"><span class="page-link">Berikutnya</span></li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+            {% endif %}
+        </section>
+{% endblock %}
+

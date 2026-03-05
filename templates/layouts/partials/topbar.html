@@ -1,0 +1,60 @@
+{% load cbt_extras %}
+<header class="cbt-topbar">
+    <div class="cbt-topbar-inner">
+        <div class="cbt-topbar-start">
+            {% if show_sidebar %}
+                <button class="btn btn-sm cbt-sidebar-toggle" type="button" aria-label="Toggle sidebar">
+                    <i class="ri-menu-fold-line"></i>
+                </button>
+            {% endif %}
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ home_url }}">{{ home_label }}</a></li>
+                    {% if parent_label and parent_url %}
+                        <li class="breadcrumb-item"><a href="{{ parent_url }}">{{ parent_label }}</a></li>
+                    {% elif parent_label %}
+                        <li class="breadcrumb-item">{{ parent_label }}</li>
+                    {% endif %}
+                    <li class="breadcrumb-item active" aria-current="page">{{ current_label }}</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="dropdown">
+            <button class="cbt-user-menu-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                {% with profile=request.user.profile %}
+                    {% if profile.profile_picture %}
+                        <img src="{{ profile.profile_picture.url }}" alt="Avatar" class="cbt-user-avatar-img">
+                    {% else %}
+                        <img src="{{ request.user.get_full_name|default:request.user.username|avatar_url }}" alt="Avatar" class="cbt-user-avatar-img">
+                    {% endif %}
+                {% endwith %}
+                <span class="text-start">
+                    <span class="name">{{ request.user.get_full_name|default:request.user.username }}</span>
+                    <span class="role">{{ role_label }}</span>
+                </span>
+                <i class="ri-arrow-down-s-line text-muted"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                <li>
+                    <a class="dropdown-item" href="{% url 'profile' %}">
+                        <i class="ri-account-circle-line me-2"></i>Profil
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item" href="{% url 'change_password' %}">
+                        <i class="ri-lock-password-line me-2"></i>Ubah Password
+                    </a>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                    <form method="post" action="{% url 'logout' %}" class="px-2 py-1">
+                        {% csrf_token %}
+                        <button type="submit" class="dropdown-item text-danger">
+                            <i class="ri-logout-box-r-line me-2"></i>Logout
+                        </button>
+                    </form>
+                </li>
+            </ul>
+        </div>
+    </div>
+</header>

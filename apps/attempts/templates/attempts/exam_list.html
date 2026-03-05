@@ -1,0 +1,311 @@
+{% extends "layouts/student.html" %}
+{% load static %}
+
+{% block title %}Daftar Ujian Siswa - CBT{% endblock %}
+
+{% block topbar %}
+    {% include "layouts/partials/topbar_student.html" with current_label="Daftar Ujian" %}
+{% endblock %}
+
+{% block main_attrs %}class="container-fluid px-3 px-md-4 py-4"{% endblock %}
+
+{% block page_header %}
+    <section class="cbt-page-header">
+        <div class="cbt-page-header-body">
+            {% include "layouts/partials/page_header.html" with eyebrow="Panel Siswa" title="Daftar Ujian" %}
+            <div class="d-flex align-items-center gap-2 cbt-page-header-actions">
+                <div class="d-flex flex-wrap gap-2">
+                                <a href="{% url 'student_results' %}" class="btn btn-sm btn-outline-info" title="Buka halaman hasil & review ujian">
+                                    <i class="ri-bar-chart-line me-1"></i>Hasil Ujian
+                                </a>
+                            </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block content %}
+        {% if messages %}
+            <div class="mb-3">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'info' }} py-2 mb-2">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <section class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+                <form method="get" class="row g-2 g-md-3 align-items-end">
+                    <input type="hidden" name="tab" value="{{ active_tab }}">
+                    <div class="col-md-4">
+                        <label class="form-label small mb-1">Cari Ujian</label>
+                        <input type="text" class="form-control" name="q" value="{{ filters.keyword }}" placeholder="Judul / deskripsi / mapel...">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small mb-1">Mata Pelajaran</label>
+                        <select class="form-select" name="subject">
+                            <option value="">Semua Mapel</option>
+                            {% for subject in subjects %}
+                            <option value="{{ subject.id }}" {% if filters.subject_id == subject.id %}selected{% endif %}>{{ subject.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small mb-1">Tanggal Ujian</label>
+                        <input type="date" class="form-control" name="date" value="{{ filters.selected_date_raw }}">
+                    </div>
+                    <div class="col-12 col-md-auto d-flex gap-2">
+                        <button type="submit" class="btn btn-primary" title="Terapkan filter daftar ujian">
+                            <i class="ri-filter-3-line me-1"></i>Terapkan
+                        </button>
+                        <a href="{% url 'student_exam_list' %}?tab={{ active_tab }}" class="btn btn-outline-secondary" title="Reset filter tab ini">Reset</a>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <section class="card border-0 shadow-sm mb-4">
+            <div class="card-body py-2">
+                <ul class="nav nav-pills flex-wrap gap-2" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <a href="{{ tab_urls.upcoming }}" class="nav-link {% if active_tab == 'upcoming' %}active{% endif %}" title="Tampilkan ujian akan datang">
+                            {{ tab_labels.upcoming }} <span class="badge text-bg-light ms-1">{{ tab_counts.upcoming }}</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <a href="{{ tab_urls.ongoing }}" class="nav-link {% if active_tab == 'ongoing' %}active{% endif %}" title="Tampilkan ujian yang sedang berlangsung">
+                            {{ tab_labels.ongoing }} <span class="badge text-bg-light ms-1">{{ tab_counts.ongoing }}</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <a href="{{ tab_urls.completed }}" class="nav-link {% if active_tab == 'completed' %}active{% endif %}" title="Tampilkan ujian yang sudah selesai">
+                            {{ tab_labels.completed }} <span class="badge text-bg-light ms-1">{{ tab_counts.completed }}</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <a href="{{ tab_urls.missed }}" class="nav-link {% if active_tab == 'missed' %}active{% endif %}" title="Tampilkan ujian yang terlewat">
+                            {{ tab_labels.missed }} <span class="badge text-bg-light ms-1">{{ tab_counts.missed }}</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="row g-3">
+            {% for row in exam_rows %}
+            <div class="col-md-6 col-xl-4">
+                <article class="card border-0 shadow-sm h-100 student-exam-card">
+                    <div class="card-body d-flex flex-column">
+                        <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                            <div>
+                                <p class="small text-muted mb-1">{{ row.exam.subject.name }}</p>
+                                <h2 class="h6 mb-0">
+                                    {{ row.exam.title }}
+                                    {% if row.retake.enabled %}
+                                    <span class="badge text-bg-secondary ms-1"><i class="ri-repeat-line me-1"></i>{{ row.retake.max_attempts }}x</span>
+                                    {% endif %}
+                                </h2>
+                            </div>
+                            <span class="badge {{ row.status_badge }}">{{ row.status_label }}</span>
+                        </div>
+
+                        <p class="small text-muted mb-2">{{ row.exam.description|default:"Tidak ada deskripsi."|striptags|truncatechars:115 }}</p>
+
+                        <ul class="list-unstyled small mb-3 text-muted">
+                            <li><i class="ri-calendar-line me-1"></i>{{ row.exam.start_time|date:"d M Y H:i" }} - {{ row.exam.end_time|date:"d M Y H:i" }}</li>
+                            <li><i class="ri-time-line me-1"></i>Durasi: {{ row.exam.duration_minutes }} menit</li>
+                            <li><i class="ri-questionnaire-line me-1"></i>Total Soal: {{ row.question_count }}</li>
+                            {% if row.retake.enabled %}
+                            <li><i class="ri-repeat-line me-1"></i>Attempt: {{ row.retake.attempts_used }}/{{ row.retake.max_attempts }}</li>
+                            {% endif %}
+                            {% if row.status_key == 'upcoming' %}
+                            <li>
+                                <i class="ri-timer-line me-1"></i>
+                                <span class="countdown-chip" data-countdown data-target="{{ row.countdown_target }}">Menghitung waktu mulai...</span>
+                            </li>
+                            {% endif %}
+                        </ul>
+
+                        <div class="d-flex flex-wrap gap-1 mt-auto">
+                            <button
+                                type="button"
+                                class="btn btn-sm btn-outline-info exam-detail-btn"
+                                data-bs-toggle="modal"
+                                data-bs-target="#examDetailModal"
+                                data-title="{{ row.detail.title }}"
+                                data-subject="{{ row.detail.subject }}"
+                                data-description="{{ row.detail.description }}"
+                                data-instructions="{{ row.detail.instructions }}"
+                                data-schedule="{{ row.detail.schedule }}"
+                                data-duration="{{ row.detail.duration }}"
+                                data-question-count="{{ row.detail.question_count }}"
+                                data-navigation-rules="{{ row.detail.navigation_rules }}"
+                                data-anti-cheat="{{ row.detail.anti_cheat_rules }}"
+                                data-start-url="{{ row.detail.start_url }}"
+                                data-retake-enabled="{{ row.detail.retake_enabled|yesno:'true,false' }}"
+                                data-retake-max-attempts="{{ row.detail.retake_max_attempts }}"
+                                data-retake-attempts-used="{{ row.detail.retake_attempts_used }}"
+                                data-retake-remaining-attempts="{{ row.detail.retake_remaining_attempts }}"
+                                data-retake-policy="{{ row.detail.retake_policy_label }}"
+                                data-retake-cooldown="{{ row.detail.retake_cooldown_minutes }}"
+                                title="Lihat detail lengkap ujian"
+                            >
+                                <i class="ri-information-line"></i>
+                            </button>
+
+                            {% if row.action.type == "start" %}
+                            <a href="{{ row.action.url }}" class="btn btn-sm {{ row.action.class_name }} flex-grow-1" title="Mulai ujian sekarang">
+                                <i class="{{ row.action.icon }} me-1"></i>{{ row.action.label }}
+                            </a>
+                            {% elif row.action.type == "result" and row.result_summary.has_result %}
+                            <button
+                                type="button"
+                                class="btn btn-sm {{ row.action.class_name }} flex-grow-1 exam-result-btn"
+                                data-bs-toggle="modal"
+                                data-bs-target="#examResultModal"
+                                data-title="{{ row.exam.title }}"
+                                data-score="{{ row.result_summary.score }}"
+                                data-percentage="{{ row.result_summary.percentage }}"
+                                data-status="{{ row.result_summary.status }}"
+                                data-correct="{{ row.result_summary.correct }}"
+                                data-wrong="{{ row.result_summary.wrong }}"
+                                data-unanswered="{{ row.result_summary.unanswered }}"
+                                data-time-spent="{{ row.result_summary.time_spent_seconds }}"
+                                data-result-url="{{ row.result_summary.detail_url }}"
+                                title="Lihat ringkasan hasil ujian"
+                            >
+                                <i class="{{ row.action.icon }} me-1"></i>{{ row.action.label }}
+                            </button>
+                            {% else %}
+                            <button type="button" class="btn btn-sm {{ row.action.class_name }} flex-grow-1" disabled title="Aksi belum tersedia untuk ujian ini">
+                                <i class="{{ row.action.icon }} me-1"></i>{{ row.action.label }}
+                            </button>
+                            {% endif %}
+
+                            {% if row.status_key == "completed" and row.retake.enabled and row.retake.remaining_attempts > 0 %}
+                                {% if row.retake.eligible %}
+                                    {% if row.retake.show_review %}
+                                    <a href="{{ row.retake.review_url }}" class="btn btn-sm btn-outline-warning" title="Review sebelum retake">
+                                        <i class="ri-repeat-line me-1"></i>Ujian Ulang
+                                    </a>
+                                    {% else %}
+                                    <form method="post" action="{{ row.retake.start_url }}" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-outline-warning" title="Mulai ujian ulang">
+                                            <i class="ri-repeat-line me-1"></i>Ujian Ulang
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                {% else %}
+                                    {% if row.retake.cooldown_remaining_seconds > 0 %}
+                                        <button
+                                            type="button"
+                                            class="btn btn-sm btn-outline-secondary"
+                                            disabled
+                                            data-retake-countdown
+                                            data-next-available="{{ row.retake.next_available_at_iso }}"
+                                            title="Retake belum tersedia"
+                                        >
+                                            <i class="ri-repeat-line me-1"></i>Tersedia dalam cooldown
+                                        </button>
+                                    {% endif %}
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                    </div>
+                </article>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body py-5 text-center text-muted">
+                        Tidak ada ujian pada tab <strong>{{ active_tab_label }}</strong> dengan filter saat ini.
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </section>
+{% endblock %}
+
+{% block vendor_js %}
+<div class="modal fade" id="examDetailModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="h6 mb-0">Detail Ujian</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                </div>
+                <div class="modal-body">
+                    <h3 class="h5 mb-1" id="detailTitle">-</h3>
+                    <p class="small text-muted mb-3" id="detailSubject">-</p>
+                    <p id="detailDescription" class="mb-3">-</p>
+
+                    <div class="row g-2 mb-3 small">
+                        <div class="col-md-6"><span class="text-muted">Jadwal:</span> <strong id="detailSchedule">-</strong></div>
+                        <div class="col-md-3"><span class="text-muted">Durasi:</span> <strong id="detailDuration">-</strong></div>
+                        <div class="col-md-3"><span class="text-muted">Total Soal:</span> <strong id="detailQuestionCount">-</strong></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <h4 class="h6 mb-2">Instruksi Ujian</h4>
+                        <p class="small mb-0" id="detailInstructions">-</p>
+                    </div>
+                    <div class="mb-3">
+                        <h4 class="h6 mb-2">Aturan Navigasi</h4>
+                        <p class="small mb-0" id="detailNavigation">-</p>
+                    </div>
+                    <div>
+                        <h4 class="h6 mb-2">Aturan Anti-Cheat</h4>
+                        <p class="small mb-0" id="detailAntiCheat">-</p>
+                    </div>
+                    <div class="mt-3 d-none" id="detailRetakeWrap">
+                        <h4 class="h6 mb-2">Info Retake</h4>
+                        <ul class="small mb-0 ps-3">
+                            <li>Kesempatan total: <strong id="detailRetakeMax">-</strong></li>
+                            <li>Sudah digunakan: <strong id="detailRetakeUsed">-</strong></li>
+                            <li>Sisa: <strong id="detailRetakeRemaining">-</strong></li>
+                            <li>Kebijakan nilai: <strong id="detailRetakePolicy">-</strong></li>
+                            <li>Jeda antar sesi: <strong id="detailRetakeCooldown">-</strong></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <a id="detailStartBtn" href="#" class="btn btn-success" title="Konfirmasi untuk mulai ujian">
+                        <i class="ri-play-circle-line me-1"></i>Mulai Ujian
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="examResultModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="h6 mb-0">Ringkasan Hasil Ujian</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                </div>
+                <div class="modal-body">
+                    <h3 class="h6 mb-3" id="resultTitle">-</h3>
+                    <div class="row g-2 small">
+                        <div class="col-6"><span class="text-muted">Skor:</span> <strong id="resultScore">-</strong></div>
+                        <div class="col-6"><span class="text-muted">Persentase:</span> <strong id="resultPercentage">-</strong></div>
+                        <div class="col-6"><span class="text-muted">Status:</span> <strong id="resultStatus">-</strong></div>
+                        <div class="col-6"><span class="text-muted">Waktu Pengerjaan:</span> <strong id="resultTime">-</strong></div>
+                        <div class="col-4"><span class="text-muted">Benar:</span> <strong id="resultCorrect">-</strong></div>
+                        <div class="col-4"><span class="text-muted">Salah:</span> <strong id="resultWrong">-</strong></div>
+                        <div class="col-4"><span class="text-muted">Kosong:</span> <strong id="resultUnanswered">-</strong></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <a id="resultDetailLink" href="{% url 'student_results' %}" class="btn btn-primary" title="Buka halaman detail hasil ujian ini">
+                        <i class="ri-file-chart-line me-1"></i>Lihat Detail Hasil
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+<script src="{% static 'attempts/js/exam_list.js' %}"></script>
+    <script src="{% static 'attempts/js/retake_cooldown.js' %}"></script>
+{% endblock %}
+

@@ -1,0 +1,310 @@
+{% extends "layouts/teacher.html" %}
+{% load static %}
+
+{% block title %}Manajemen Ujian Guru - CBT{% endblock %}
+
+{% block topbar %}
+    {% include "layouts/partials/topbar_teacher.html" with current_label="Manajemen Ujian" %}
+{% endblock %}
+
+{% block main_attrs %}class="container-fluid px-3 px-md-4 py-4"{% endblock %}
+
+{% block page_header %}
+    <section class="cbt-page-header">
+        <div class="cbt-page-header-body">
+            {% include "layouts/partials/page_header.html" with eyebrow="Panel Guru" title="Manajemen Ujian" %}
+            <div class="d-flex align-items-center gap-2 cbt-page-header-actions">
+                <div class="d-flex flex-wrap gap-2">
+                                <a href="{% url 'exam_create' %}" class="btn btn-sm btn-primary" title="Buat ujian baru">
+                                    <i class="ri-file-add-line me-1"></i>Buat Ujian
+                                </a>
+                            </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block content %}
+        {% if messages %}
+            <div class="mb-3">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'info' }} py-2 mb-2">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <section class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+                <form method="get" class="row g-2 g-md-3 align-items-end">
+                    <div class="col-md-3">
+                        <label class="form-label small mb-1">Cari Ujian</label>
+                        <input type="text" class="form-control" name="q" value="{{ filters.q }}" placeholder="Judul / deskripsi / mapel...">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small mb-1">Status</label>
+                        <select class="form-select" name="status">
+                            <option value="">Semua Status</option>
+                            {% for key, label in status_choices %}
+                            <option value="{{ key }}" {% if filters.status == key %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small mb-1">Mata Pelajaran</label>
+                        <select class="form-select" name="subject">
+                            <option value="">Semua Mapel</option>
+                            {% for subject in subjects %}
+                            <option value="{{ subject.id }}" {% if filters.subject == subject.id|stringformat:"s" %}selected{% endif %}>{{ subject.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small mb-1">Tanggal Mulai</label>
+                        <input type="date" class="form-control" name="date_from" value="{{ filters.date_from }}">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small mb-1">Tanggal Akhir</label>
+                        <input type="date" class="form-control" name="date_to" value="{{ filters.date_to }}">
+                    </div>
+                    <div class="col-12 col-md-auto d-flex gap-2">
+                        <button type="submit" class="btn btn-primary" title="Terapkan filter">
+                            <i class="ri-filter-3-line me-1"></i>Terapkan
+                        </button>
+                        <a href="{% url 'exam_list' %}" class="btn btn-outline-secondary" title="Reset semua filter">Reset</a>
+                    </div>
+                </form>
+
+                <div class="d-flex flex-wrap align-items-center justify-content-between mt-3 pt-2 border-top">
+                    <p class="small text-muted mb-0">Total data: {{ page_obj.paginator.count }} ujian</p>
+                    <div class="btn-group btn-group-sm" role="group" aria-label="Ubah tampilan daftar ujian">
+                        <a
+                            href="?{% if querystring_without_view %}{{ querystring_without_view }}&{% endif %}view=table"
+                            class="btn {% if view_mode == 'table' %}btn-primary{% else %}btn-outline-primary{% endif %}"
+                            title="Tampilan tabel"
+                        >
+                            <i class="ri-table-line me-1"></i>Tabel
+                        </a>
+                        <a
+                            href="?{% if querystring_without_view %}{{ querystring_without_view }}&{% endif %}view=cards"
+                            class="btn {% if view_mode == 'cards' %}btn-primary{% else %}btn-outline-primary{% endif %}"
+                            title="Tampilan kartu"
+                        >
+                            <i class="ri-layout-grid-line me-1"></i>Kartu
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        {% if view_mode == 'cards' %}
+        <section class="row g-3">
+            {% for row in exam_rows %}
+            <div class="col-md-6 col-xl-4">
+                <article class="card border-0 shadow-sm h-100 exam-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start gap-2">
+                            <div>
+                                <h2 class="h6 mb-1">{{ row.exam.title }}</h2>
+                                {% if row.retake_badge %}
+                                <span class="badge text-bg-secondary">{{ row.retake_badge }}</span>
+                                {% endif %}
+                            </div>
+                            <span class="badge exam-status-badge status-{{ row.exam.status }}">{{ row.status_label }}</span>
+                        </div>
+                        <p class="small text-muted mb-2">{{ row.exam.subject.name }}</p>
+                        <ul class="list-unstyled small mb-3">
+                            <li><i class="ri-calendar-line me-1"></i>{{ row.exam.start_time|date:"d M Y H:i" }} - {{ row.exam.end_time|date:"d M Y H:i" }}</li>
+                            <li><i class="ri-time-line me-1"></i>Durasi: {{ row.exam.duration_minutes }} menit</li>
+                            <li><i class="ri-group-line me-1"></i>Peserta: {{ row.participant_count }}</li>
+                            <li><i class="ri-questionnaire-line me-1"></i>Soal: {{ row.question_count }}</li>
+                        </ul>
+                        <div class="d-flex flex-wrap gap-1">
+                            <a href="{% url 'exam_detail' row.exam.id %}" class="btn btn-sm btn-outline-primary" title="Lihat detail ujian"><i class="ri-file-list-3-line"></i></a>
+                            <button type="button" class="btn btn-sm btn-outline-info preview-btn" data-preview-url="{% url 'exam_preview' row.exam.id %}" data-bs-toggle="modal" data-bs-target="#examPreviewModal" title="Pratinjau ujian"><i class="ri-eye-line"></i></button>
+                            <a href="{% url 'monitoring_dashboard' row.exam.id %}" class="btn btn-sm btn-outline-dark" title="Buka monitoring live ujian"><i class="ri-radar-line"></i></a>
+                            <a href="{% url 'exam_results_detail' row.exam.id %}" class="btn btn-sm btn-outline-success" title="Buka hasil & analitik ujian"><i class="ri-bar-chart-line"></i></a>
+                            <a href="{% url 'exam_edit' row.exam.id %}" class="btn btn-sm btn-outline-secondary" title="Edit ujian"><i class="ri-edit-line"></i></a>
+                            <form method="post" action="{% url 'exam_publish' row.exam.id %}" class="d-inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                    <button type="submit" class="btn btn-sm {% if row.exam.status == 'draft' %}btn-outline-success{% else %}btn-outline-warning{% endif %}" title="{% if row.exam.status == 'draft' %}Publikasikan ujian{% else %}Kembalikan ke draf{% endif %}">
+                                    <i class="{% if row.exam.status == 'draft' %}ri-send-plane-line{% else %}ri-draft-line{% endif %}"></i>
+                                </button>
+                            </form>
+                            <button type="button" class="btn btn-sm btn-outline-dark duplicate-btn" data-action-url="{% url 'exam_duplicate' row.exam.id %}" data-title="{{ row.exam.title }}" data-bs-toggle="modal" data-bs-target="#duplicateModal" title="Duplikasi ujian"><i class="ri-file-copy-line"></i></button>
+                            <button type="button" class="btn btn-sm btn-outline-danger delete-btn" data-action-url="{% url 'exam_delete' row.exam.id %}" data-title="{{ row.exam.title }}" data-bs-toggle="modal" data-bs-target="#deleteModal" title="Hapus ujian"><i class="ri-delete-bin-line"></i></button>
+                        </div>
+                    </div>
+                </article>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body py-5 text-center text-muted">Belum ada data ujian untuk filter saat ini.</div>
+                </div>
+            </div>
+            {% endfor %}
+        </section>
+        {% else %}
+        <section class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-3">Judul</th>
+                                <th>Mata Pelajaran</th>
+                                <th>Jadwal</th>
+                                <th>Durasi</th>
+                                <th>Peserta</th>
+                                <th>Status</th>
+                                <th class="text-end pe-3">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in exam_rows %}
+                            <tr>
+                                <td class="ps-3">
+                                    <p class="mb-1 fw-semibold">
+                                        {{ row.exam.title }}
+                                        {% if row.retake_badge %}
+                                        <span class="badge text-bg-secondary ms-1">{{ row.retake_badge }}</span>
+                                        {% endif %}
+                                    </p>
+                                    <p class="small text-muted mb-0">Soal: {{ row.question_count }}</p>
+                                </td>
+                                <td>{{ row.exam.subject.name }}</td>
+                                <td>
+                                    <div class="small">{{ row.exam.start_time|date:"d M Y H:i" }}</div>
+                                    <div class="small text-muted">{{ row.exam.end_time|date:"d M Y H:i" }}</div>
+                                </td>
+                                <td>{{ row.exam.duration_minutes }} menit</td>
+                                <td>{{ row.participant_count }}</td>
+                                <td><span class="badge exam-status-badge status-{{ row.exam.status }}">{{ row.status_label }}</span></td>
+                                <td class="text-end pe-3">
+                                    <div class="d-flex flex-wrap justify-content-end gap-1">
+                                        <a href="{% url 'exam_detail' row.exam.id %}" class="btn btn-sm btn-outline-primary" title="Lihat detail ujian"><i class="ri-file-list-3-line"></i></a>
+                                        <button type="button" class="btn btn-sm btn-outline-info preview-btn" data-preview-url="{% url 'exam_preview' row.exam.id %}" data-bs-toggle="modal" data-bs-target="#examPreviewModal" title="Pratinjau ujian"><i class="ri-eye-line"></i></button>
+                                        <a href="{% url 'monitoring_dashboard' row.exam.id %}" class="btn btn-sm btn-outline-dark" title="Buka monitoring live ujian"><i class="ri-radar-line"></i></a>
+                                        <a href="{% url 'exam_results_detail' row.exam.id %}" class="btn btn-sm btn-outline-success" title="Buka hasil & analitik ujian"><i class="ri-bar-chart-line"></i></a>
+                                        <a href="{% url 'exam_edit' row.exam.id %}" class="btn btn-sm btn-outline-secondary" title="Edit ujian"><i class="ri-edit-line"></i></a>
+                                        <form method="post" action="{% url 'exam_publish' row.exam.id %}" class="d-inline">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                            <button type="submit" class="btn btn-sm {% if row.exam.status == 'draft' %}btn-outline-success{% else %}btn-outline-warning{% endif %}" title="{% if row.exam.status == 'draft' %}Publikasikan ujian{% else %}Kembalikan ke draf{% endif %}">
+                                                <i class="{% if row.exam.status == 'draft' %}ri-send-plane-line{% else %}ri-draft-line{% endif %}"></i>
+                                            </button>
+                                        </form>
+                                        <button type="button" class="btn btn-sm btn-outline-dark duplicate-btn" data-action-url="{% url 'exam_duplicate' row.exam.id %}" data-title="{{ row.exam.title }}" data-bs-toggle="modal" data-bs-target="#duplicateModal" title="Duplikasi ujian"><i class="ri-file-copy-line"></i></button>
+                                        <button type="button" class="btn btn-sm btn-outline-danger delete-btn" data-action-url="{% url 'exam_delete' row.exam.id %}" data-title="{{ row.exam.title }}" data-bs-toggle="modal" data-bs-target="#deleteModal" title="Hapus ujian"><i class="ri-delete-bin-line"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center text-muted py-5">Belum ada data ujian untuk filter saat ini.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {% if is_paginated %}
+            <div class="card-footer bg-white">
+                <nav aria-label="Paginasi daftar ujian">
+                    <ul class="pagination pagination-sm mb-0">
+                        {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.previous_page_number }}">Sebelumnya</a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled"><span class="page-link">Sebelumnya</span></li>
+                        {% endif %}
+
+                        {% for num in paginator.page_range %}
+                            {% if num == page_obj.number %}
+                            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                            {% elif num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
+                            <li class="page-item"><a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ num }}">{{ num }}</a></li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.next_page_number }}">Berikutnya</a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled"><span class="page-link">Berikutnya</span></li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+            {% endif %}
+        </section>
+        {% endif %}
+{% endblock %}
+
+{% block vendor_js %}
+<div class="modal fade" id="examPreviewModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="h6 mb-0">Pratinjau Ujian</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <iframe id="examPreviewFrame" class="exam-preview-frame" src="about:blank" title="Pratinjau ujian"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="duplicateModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="h6 mb-0">Duplikasi Ujian</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                </div>
+                <form id="duplicateExamForm" method="post" action="">
+                    <div class="modal-body">
+                        {% csrf_token %}
+                        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                        <p class="mb-0">Duplikasi ujian berikut?</p>
+                        <p id="duplicateExamTitle" class="small text-muted mt-2 mb-0"></p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-dark">Duplikasi</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="h6 mb-0">Konfirmasi Hapus Ujian</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                </div>
+                <form id="deleteExamForm" method="post" action="">
+                    <div class="modal-body">
+                        {% csrf_token %}
+                        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                        <p class="mb-0">Ujian berikut akan dihapus (soft delete):</p>
+                        <p id="deleteExamTitle" class="small text-muted mt-2 mb-0"></p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-danger">Hapus</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+<script src="{% static 'exams/js/exam_settings.js' %}"></script>
+{% endblock %}
+

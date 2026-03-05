@@ -1,0 +1,399 @@
+{% extends "layouts/teacher.html" %}
+{% load static %}
+
+{% block title %}Detail Hasil Ujian - CBT{% endblock %}
+
+{% block topbar %}
+    {% include "layouts/partials/topbar_teacher.html" with parent_label="Hasil Ujian" parent_url="/teacher/results/" current_label=exam.title %}
+{% endblock %}
+
+{% block main_attrs %}class="container-fluid px-3 px-md-4 py-4"{% endblock %}
+
+{% block page_header %}
+    <section class="cbt-page-header">
+        <div class="cbt-page-header-body">
+            {% include "layouts/partials/page_header.html" with eyebrow="Hasil & Analitik" title=exam.title %}
+            <div class="d-flex align-items-center gap-2 cbt-page-header-actions">
+                <div class="d-flex flex-wrap gap-2">
+                                <a href="{% url 'teacher_results' %}" class="btn btn-sm btn-outline-primary" title="Kembali ke daftar hasil ujian">
+                                    <i class="ri-arrow-left-line me-1"></i>Daftar Hasil
+                                </a>
+                                <a href="{{ analytics_url }}" class="btn btn-sm btn-outline-info" title="Buka dashboard analitik">
+                                    <i class="ri-line-chart-line me-1"></i>Analitik
+                                </a>
+                                <a href="{{ export_xlsx_url }}" class="btn btn-sm btn-outline-success" title="Ekspor semua hasil ke Excel">
+                                    <i class="ri-file-excel-2-line me-1"></i>Ekspor Excel
+                                </a>
+                                <a href="{{ export_pdf_url }}" class="btn btn-sm btn-outline-danger" title="Ekspor semua hasil ke PDF">
+                                    <i class="ri-file-pdf-2-line me-1"></i>Ekspor PDF
+                                </a>
+                            </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block content %}
+        {% if messages %}
+            <div class="mb-3">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'info' }} py-2 mb-2">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <section class="row g-3 mb-4">
+            <div class="col-6 col-xl-2">
+                <article class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <p class="small text-muted mb-1">Peserta</p>
+                        <h2 class="h4 mb-0">{{ summary.total_participants }}</h2>
+                    </div>
+                </article>
+            </div>
+            <div class="col-6 col-xl-2">
+                <article class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <p class="small text-muted mb-1">Tingkat Lulus</p>
+                        <h2 class="h4 mb-0">{{ summary.pass_rate }}%</h2>
+                    </div>
+                </article>
+            </div>
+            <div class="col-6 col-xl-2">
+                <article class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <p class="small text-muted mb-1">Nilai Tertinggi</p>
+                        <h2 class="h4 mb-0">{{ statistics_cards.highest }}%</h2>
+                    </div>
+                </article>
+            </div>
+            <div class="col-6 col-xl-2">
+                <article class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <p class="small text-muted mb-1">Nilai Terendah</p>
+                        <h2 class="h4 mb-0">{{ statistics_cards.lowest }}%</h2>
+                    </div>
+                </article>
+            </div>
+            <div class="col-6 col-xl-2">
+                <article class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <p class="small text-muted mb-1">Rata-rata</p>
+                        <h2 class="h4 mb-0">{{ statistics_cards.average }}%</h2>
+                    </div>
+                </article>
+            </div>
+            <div class="col-6 col-xl-2">
+                <article class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <p class="small text-muted mb-1">Median / Std Dev</p>
+                        <h2 class="h6 mb-0">{{ statistics_cards.median }}% / {{ statistics_cards.std_dev }}</h2>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <section class="row g-4 mb-4">
+            <div class="col-xl-8">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white border-0 pt-3 px-3 px-md-4">
+                        <h3 class="h6 mb-0">Distribusi Nilai</h3>
+                    </div>
+                    <div class="card-body px-3 px-md-4">
+                        <canvas id="scoreDistributionChart" height="110"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white border-0 pt-3 px-3 px-md-4">
+                        <h3 class="h6 mb-0">Rasio Lulus / Belum Lulus</h3>
+                    </div>
+                    <div class="card-body px-3 px-md-4">
+                        <canvas id="passFailChart" height="150"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="row g-4 mb-4">
+            <div class="col-xl-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white border-0 pt-3 px-3 px-md-4">
+                        <h3 class="h6 mb-0">Perbandingan Antar Ujian</h3>
+                    </div>
+                    <div class="card-body px-3 px-md-4">
+                        <canvas id="examComparisonChart" height="140"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white border-0 pt-3 px-3 px-md-4">
+                        <h3 class="h6 mb-0">Perbandingan Kelas (Ujian Ini)</h3>
+                    </div>
+                    <div class="card-body px-3 px-md-4">
+                        <canvas id="classComparisonChart" height="140"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white border-0 pt-3 px-3 px-md-4">
+                <div class="d-flex flex-wrap gap-2 align-items-center justify-content-between">
+                    <h3 class="h6 mb-0">Hasil Siswa</h3>
+                    <div class="d-flex flex-wrap gap-2">
+                        <form method="get" class="d-flex flex-wrap gap-2 align-items-center">
+                            <label class="small text-muted" for="sortField">Urutkan</label>
+                            <select id="sortField" class="form-select form-select-sm" name="sort">
+                                <option value="rank" {% if sort_by == 'rank' %}selected{% endif %}>Peringkat</option>
+                                <option value="name" {% if sort_by == 'name' %}selected{% endif %}>Nama</option>
+                                <option value="score" {% if sort_by == 'score' %}selected{% endif %}>Skor</option>
+                                <option value="percentage" {% if sort_by == 'percentage' %}selected{% endif %}>Persentase</option>
+                                <option value="status" {% if sort_by == 'status' %}selected{% endif %}>Status</option>
+                                <option value="time" {% if sort_by == 'time' %}selected{% endif %}>Waktu</option>
+                                <option value="violations" {% if sort_by == 'violations' %}selected{% endif %}>Pelanggaran</option>
+                                <option value="attempts" {% if sort_by == 'attempts' %}selected{% endif %}>Attempts</option>
+                            </select>
+                            <select class="form-select form-select-sm" name="dir">
+                                <option value="asc" {% if sort_dir == 'asc' %}selected{% endif %}>Naik</option>
+                                <option value="desc" {% if sort_dir == 'desc' %}selected{% endif %}>Turun</option>
+                            </select>
+                            <button type="submit" class="btn btn-sm btn-outline-primary" title="Terapkan urutan data siswa">
+                                Terapkan
+                            </button>
+                        </form>
+
+                        <form id="exportSelectedForm" method="get" action="{% url 'export_results' exam.id %}" class="d-flex flex-wrap gap-2">
+                            <input type="hidden" name="selected_ids" id="selectedResultIds" value="">
+                            <button type="submit" class="btn btn-sm btn-outline-success" name="format" value="xlsx" title="Ekspor siswa terpilih ke Excel">
+                                Ekspor Terpilih Excel
+                            </button>
+                            <button type="submit" class="btn btn-sm btn-outline-danger" name="format" value="pdf" title="Ekspor siswa terpilih ke PDF">
+                                Ekspor Terpilih PDF
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-3" style="width:42px;">
+                                    <input type="checkbox" class="form-check-input" id="selectAllResults" title="Pilih semua siswa pada halaman ini">
+                                </th>
+                                <th>Peringkat</th>
+                                <th>Nama Siswa</th>
+                                <th>Kelas</th>
+                                <th>Skor</th>
+                                <th>Persentase</th>
+                                <th>Status</th>
+                                <th>Waktu</th>
+                                <th>Attempts</th>
+                                <th>Pelanggaran</th>
+                                <th class="text-end pe-3">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in student_rows %}
+                            <tr>
+                                <td class="ps-3">
+                                    <input type="checkbox" class="form-check-input result-select-item" value="{{ row.id }}" title="Pilih siswa ini">
+                                </td>
+                                <td>#{{ row.rank }}</td>
+                                <td>
+                                    <p class="mb-0 fw-semibold">{{ row.student_name }}</p>
+                                    <span class="small text-muted">@{{ row.student_username }}</span>
+                                </td>
+                                <td>{{ row.class_label }}</td>
+                                <td title="Nilai final ({{ row.final_policy_label }} dari {{ row.attempts_used }} attempt)">{{ row.total_score }}</td>
+                                <td>{{ row.percentage }}%</td>
+                                <td>
+                                    <span class="badge {% if row.passed %}text-bg-success{% else %}text-bg-danger{% endif %}">
+                                        {{ row.status_label }}
+                                    </span>
+                                </td>
+                                <td>{{ row.time_taken_human }}</td>
+                                <td>
+                                    {% if row.allow_retake %}
+                                    <a href="{% url 'retake_history' exam.id row.result.student_id %}" class="btn btn-sm btn-outline-secondary" title="Buka riwayat attempt siswa ini">
+                                        {{ row.attempts_label }}
+                                    </a>
+                                    {% else %}
+                                    {{ row.attempts_label }}
+                                    {% endif %}
+                                </td>
+                                <td>{{ row.total_violations }}</td>
+                                <td class="text-end pe-3">
+                                    <div class="d-flex flex-wrap justify-content-end gap-1">
+                                        <button
+                                            type="button"
+                                            class="btn btn-sm btn-outline-info student-detail-btn"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#studentDetailModal"
+                                            data-student-name="{{ row.student_name }}"
+                                            data-score="{{ row.total_score }}"
+                                            data-percentage="{{ row.percentage }}"
+                                            data-status="{{ row.status_label }}"
+                                            data-time="{{ row.time_taken_human }}"
+                                            data-violations="{{ row.total_violations }}"
+                                            data-class="{{ row.class_label }}"
+                                            data-review-url="{% url 'answer_review' row.id %}?next={{ request.get_full_path|urlencode }}"
+                                            title="Lihat ringkasan detail hasil siswa"
+                                        >
+                                            <i class="ri-eye-line"></i>
+                                        </button>
+                                        <a href="{% url 'answer_review' row.id %}?next={{ request.get_full_path|urlencode }}" class="btn btn-sm btn-outline-primary" title="Review jawaban lengkap siswa">
+                                            <i class="ri-file-list-3-line"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="11" class="text-center text-muted py-5">Belum ada hasil siswa untuk ujian ini.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {% if is_paginated %}
+            <div class="card-footer bg-white">
+                <nav aria-label="Paginasi hasil siswa">
+                    <ul class="pagination pagination-sm mb-0">
+                        {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.previous_page_number }}">Sebelumnya</a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled"><span class="page-link">Sebelumnya</span></li>
+                        {% endif %}
+
+                        {% for num in paginator.page_range %}
+                            {% if num == page_obj.number %}
+                            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                            {% elif num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
+                            <li class="page-item"><a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ num }}">{{ num }}</a></li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.next_page_number }}">Berikutnya</a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled"><span class="page-link">Berikutnya</span></li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+            {% endif %}
+        </section>
+
+        <section class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-0 pt-3 px-3 px-md-4">
+                <h3 class="h6 mb-0">Analisis Butir Soal</h3>
+            </div>
+            <div class="card-body">
+                <div class="accordion" id="itemAnalysisAccordion">
+                    {% for item in item_analysis %}
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="heading-{{ item.display_order }}">
+                            <button class="accordion-button {% if not forloop.first %}collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ item.display_order }}" aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}" aria-controls="collapse-{{ item.display_order }}">
+                                Soal {{ item.display_order }} - {{ item.question.question_text|striptags|truncatechars:80 }}
+                            </button>
+                        </h2>
+                        <div id="collapse-{{ item.display_order }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" aria-labelledby="heading-{{ item.display_order }}" data-bs-parent="#itemAnalysisAccordion">
+                            <div class="accordion-body">
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-2"><span class="small text-muted d-block">Peserta</span><strong>{{ item.participant_count }}</strong></div>
+                                    <div class="col-md-2"><span class="small text-muted d-block">Menjawab</span><strong>{{ item.answered_count }}</strong></div>
+                                    <div class="col-md-2"><span class="small text-muted d-block">Benar</span><strong>{{ item.correct_count }}</strong></div>
+                                    <div class="col-md-2"><span class="small text-muted d-block">Salah</span><strong>{{ item.wrong_count }}</strong></div>
+                                    <div class="col-md-2"><span class="small text-muted d-block">Indeks Kesulitan</span><strong>{{ item.difficulty_index }}%</strong></div>
+                                    <div class="col-md-2"><span class="small text-muted d-block">Indeks Pembeda</span><strong>{{ item.discrimination_index }}</strong></div>
+                                </div>
+
+                                {% if item.distractors %}
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Opsi</th>
+                                                <th>Isi Opsi</th>
+                                                <th>Dipilih</th>
+                                                <th>Persentase</th>
+                                                <th>Keterangan</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for option in item.distractors %}
+                                            <tr>
+                                                <td>{{ option.option_letter }}</td>
+                                                <td>{{ option.option_text|striptags|truncatechars:90 }}</td>
+                                                <td>{{ option.selected_count }}</td>
+                                                <td>{{ option.selected_percentage }}%</td>
+                                                <td>
+                                                    {% if option.is_correct %}
+                                                    <span class="badge text-bg-success">Kunci</span>
+                                                    {% else %}
+                                                    <span class="badge text-bg-secondary">Distraktor</span>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                {% else %}
+                                <p class="text-muted small mb-0">Analisis distraktor hanya tersedia untuk soal pilihan ganda.</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="text-muted">Belum ada data item analysis untuk ujian ini.</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+{% endblock %}
+
+{% block vendor_js %}
+<div class="modal fade" id="studentDetailModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="h6 mb-0">Detail Siswa</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-2"><span class="text-muted">Nama:</span> <strong id="detailStudentName">-</strong></p>
+                    <p class="mb-2"><span class="text-muted">Kelas:</span> <strong id="detailStudentClass">-</strong></p>
+                    <p class="mb-2"><span class="text-muted">Skor:</span> <strong id="detailStudentScore">-</strong></p>
+                    <p class="mb-2"><span class="text-muted">Persentase:</span> <strong id="detailStudentPercentage">-</strong></p>
+                    <p class="mb-2"><span class="text-muted">Status:</span> <strong id="detailStudentStatus">-</strong></p>
+                    <p class="mb-2"><span class="text-muted">Waktu:</span> <strong id="detailStudentTime">-</strong></p>
+                    <p class="mb-0"><span class="text-muted">Pelanggaran:</span> <strong id="detailStudentViolations">-</strong></p>
+                </div>
+                <div class="modal-footer">
+                    <a id="detailReviewLink" href="#" class="btn btn-primary" title="Buka halaman review jawaban lengkap">Review Jawaban Lengkap</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{ score_distribution|json_script:"result-score-distribution-data" }}
+    {{ pass_fail_distribution|json_script:"result-pass-fail-data" }}
+    {{ exam_comparison_chart|json_script:"result-exam-comparison-data" }}
+    {{ class_comparison_chart|json_script:"result-class-comparison-data" }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="{% static 'results/js/charts.js' %}"></script>
+    <script src="{% static 'results/js/analytics.js' %}"></script>
+{% endblock %}
+

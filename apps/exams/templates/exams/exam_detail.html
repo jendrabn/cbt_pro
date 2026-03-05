@@ -1,0 +1,215 @@
+{% extends "layouts/teacher.html" %}
+{% load static %}
+
+{% block title %}Detail Ujian - CBT{% endblock %}
+
+{% block topbar %}
+    {% include "layouts/partials/topbar_teacher.html" with parent_label="Kelola Ujian" parent_url="/teacher/exams/" current_label=exam.title %}
+{% endblock %}
+
+{% block main_attrs %}class="container-fluid px-3 px-md-4 py-4"{% endblock %}
+
+{% block page_header %}
+    <section class="cbt-page-header">
+        <div class="cbt-page-header-body">
+            {% include "layouts/partials/page_header.html" with eyebrow="Detail Ujian" title=exam.title %}
+            <div class="d-flex align-items-center gap-2 cbt-page-header-actions">
+                <div class="d-flex flex-wrap gap-2">
+                                <a href="{% url 'exam_list' %}" class="btn btn-sm btn-outline-primary" title="Kembali ke daftar ujian">
+                                    <i class="ri-arrow-left-line me-1"></i>Kembali
+                                </a>
+                                <a href="{% url 'exam_edit' exam.id %}" class="btn btn-sm btn-outline-secondary" title="Edit konfigurasi ujian">
+                                    <i class="ri-edit-line me-1"></i>Edit
+                                </a>
+                                <a href="{% url 'exam_preview' exam.id %}" class="btn btn-sm btn-outline-info" title="Lihat pratinjau tampilan siswa">
+                                    <i class="ri-eye-line me-1"></i>Pratinjau
+                                </a>
+                                <a href="{% url 'monitoring_dashboard' exam.id %}" class="btn btn-sm btn-outline-dark" title="Buka halaman monitoring live ujian ini">
+                                    <i class="ri-radar-line me-1"></i>Monitoring Live
+                                </a>
+                                <form method="post" action="{% url 'exam_publish' exam.id %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                    <button type="submit" class="btn btn-sm {% if exam.status == 'draft' %}btn-success{% else %}btn-warning{% endif %}" title="{% if exam.status == 'draft' %}Publikasikan ujian{% else %}Kembalikan ujian ke draf{% endif %}">
+                                        {% if exam.status == 'draft' %}<i class="ri-send-plane-line me-1"></i>Publikasikan{% else %}<i class="ri-draft-line me-1"></i>Jadikan Draf{% endif %}
+                                    </button>
+                                </form>
+                            </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block content %}
+        {% if messages %}
+            <div class="mb-3">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'info' }} py-2 mb-2">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <section class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <p class="small text-muted mb-1">Status</p>
+                        <h2 class="h6 mb-0"><span class="badge exam-status-badge status-{{ exam.status }}">{{ exam_status_label }}</span></h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <p class="small text-muted mb-1">Status Waktu</p>
+                        <h2 class="h6 mb-0">{{ timing_status }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <p class="small text-muted mb-1">Jumlah Soal</p>
+                        <h2 class="h6 mb-0">{{ exam_questions|length }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <p class="small text-muted mb-1">Total Poin</p>
+                        <h2 class="h6 mb-0">{{ exam.total_points }}</h2>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white border-0 pt-3">
+                <h3 class="h6 mb-0">Informasi Ujian</h3>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4"><strong>Mata Pelajaran:</strong> {{ exam.subject.name }}</div>
+                    <div class="col-md-4"><strong>Mulai:</strong> {{ exam.start_time|date:"d M Y H:i" }}</div>
+                    <div class="col-md-4"><strong>Selesai:</strong> {{ exam.end_time|date:"d M Y H:i" }}</div>
+                    <div class="col-md-4"><strong>Durasi:</strong> {{ exam.duration_minutes }} menit</div>
+                    <div class="col-md-4"><strong>Nilai Kelulusan:</strong> {{ exam.passing_score }}%</div>
+                    <div class="col-md-4"><strong>Timpa Navigasi Global:</strong> {% if exam.override_question_navigation %}Ya{% else %}Tidak{% endif %}</div>
+                </div>
+                {% if exam.description %}
+                <hr>
+                <p class="mb-1"><strong>Deskripsi</strong></p>
+                <p class="mb-0">{{ exam.description|linebreaksbr }}</p>
+                {% endif %}
+                {% if exam.instructions %}
+                <hr>
+                <p class="mb-1"><strong>Instruksi</strong></p>
+                <p class="mb-0">{{ exam.instructions|linebreaksbr }}</p>
+                {% endif %}
+            </div>
+        </section>
+
+        <section class="row g-4 mb-4">
+            <div class="col-xl-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white border-0 pt-3"><h3 class="h6 mb-0">Pengaturan Ujian</h3></div>
+                    <div class="card-body">
+                        <ul class="mb-0 small">
+                            <li>Acak Soal: {% if exam.randomize_questions %}Ya{% else %}Tidak{% endif %}</li>
+                            <li>Acak Opsi: {% if exam.randomize_options %}Ya{% else %}Tidak{% endif %}</li>
+                            <li>Tampilkan Hasil Langsung: {% if exam.show_results_immediately %}Ya{% else %}Tidak{% endif %}</li>
+                            <li>Izinkan Peninjauan: {% if exam.allow_review %}Ya{% else %}Tidak{% endif %}</li>
+                            <li>Global Izinkan Sebelumnya: {% if exam.global_allow_previous %}Ya{% else %}Tidak{% endif %}</li>
+                            <li>Global Izinkan Berikutnya: {% if exam.global_allow_next %}Ya{% else %}Tidak{% endif %}</li>
+                            <li>Global Paksa Berurutan: {% if exam.global_force_sequential %}Ya{% else %}Tidak{% endif %}</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white border-0 pt-3"><h3 class="h6 mb-0">Pengaturan Anti-Cheat</h3></div>
+                    <div class="card-body">
+                        <ul class="mb-0 small">
+                            <li>Wajib Fullscreen: {% if exam.require_fullscreen %}Ya{% else %}Tidak{% endif %}</li>
+                            <li>Deteksi Pindah Tab: {% if exam.detect_tab_switch %}Ya{% else %}Tidak{% endif %}</li>
+                            <li>Screenshot Proctoring: {% if exam.enable_screenshot_proctoring %}Ya{% else %}Tidak{% endif %}</li>
+                            <li>Interval Screenshot: {{ exam.screenshot_interval_seconds }} detik</li>
+                            <li>Maksimal Pelanggaran: {{ exam.max_violations_allowed }}</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="row g-4 mb-4">
+            <div class="col-xl-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white border-0 pt-3"><h3 class="h6 mb-0">Penugasan Kelas</h3></div>
+                    <div class="card-body">
+                        <ul class="mb-0">
+                            {% for class_obj in assignment_classes %}
+                            <li>{{ class_obj.name }}</li>
+                            {% empty %}
+                            <li class="text-muted">Tidak ada penugasan kelas.</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white border-0 pt-3"><h3 class="h6 mb-0">Penugasan Siswa</h3></div>
+                    <div class="card-body">
+                        <ul class="mb-0">
+                            {% for student in assignment_students %}
+                            <li>{{ student.get_full_name|default:student.username }} ({{ student.username }})</li>
+                            {% empty %}
+                            <li class="text-muted">Tidak ada penugasan siswa spesifik.</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-0 pt-3">
+                <h3 class="h6 mb-0">Daftar Soal & Aturan Navigasi Efektif</h3>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-3">ID</th>
+                                <th>Soal</th>
+                                <th>Poin</th>
+                                <th>Timpa</th>
+                                <th>Izinkan Sebelumnya</th>
+                                <th>Izinkan Berikutnya</th>
+                                <th class="pe-3">Paksa Berurutan</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in navigation_rows %}
+                            <tr>
+                                <td class="ps-3"><small class="text-muted" title="{{ row.exam_question.id }}">{{ row.exam_question.id|truncatechars:8 }}</small></td>
+                                <td>{{ row.exam_question.question.question_text|striptags|truncatechars:80 }}</td>
+                                <td>{{ row.exam_question.points_override|default:row.exam_question.question.points }}</td>
+                                <td>{% if row.exam_question.override_navigation %}Ya{% else %}Tidak{% endif %}</td>
+                                <td>{{ row.effective.allow_previous|yesno:"Ya,Tidak" }}</td>
+                                <td>{{ row.effective.allow_next|yesno:"Ya,Tidak" }}</td>
+                                <td class="pe-3">{{ row.effective.force_sequential|yesno:"Ya,Tidak" }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="7" class="text-center text-muted py-4">Belum ada soal pada ujian ini.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+{% endblock %}
+

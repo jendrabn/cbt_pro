@@ -1,0 +1,179 @@
+{% extends "layouts/admin.html" %}
+{% load static %}
+
+{% block title %}{{ page_title }} - CBT{% endblock %}
+
+{% block topbar %}
+    {% include "layouts/partials/topbar_admin.html" with parent_label="Manajemen Pengguna" parent_url="/admin/users/" current_label=page_title %}
+{% endblock %}
+
+{% block main_attrs %}class="container py-4" x-data="{
+    role: '{{ form.role.value|default:'student' }}',
+    showPassword: false,
+    generatePassword() {
+        const chars = 'abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+        const length = 12;
+        let result = '';
+        for (let i = 0; i < length; i += 1) {
+            result += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        const input = document.getElementById('{{ form.password.id_for_label }}');
+        if (input) {
+            input.value = result;
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+            input.focus();
+        }
+    }
+}"{% endblock %}
+
+{% block page_header %}
+    <section class="cbt-page-header">
+        <div class="cbt-page-header-body">
+            {% include "layouts/partials/page_header.html" with eyebrow="Manajemen Pengguna" title=page_title %}
+            <div class="d-flex align-items-center gap-2 cbt-page-header-actions">
+                <a href="{% url 'user_list' %}" class="btn btn-sm btn-outline-primary" title="Kembali ke daftar pengguna">
+                                <i class="ri-arrow-left-line me-1"></i>Kembali
+                            </a>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block content %}
+        {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags|default:'info' }} py-2 mb-3" role="alert">
+                {{ message }}
+            </div>
+            {% endfor %}
+        {% endif %}
+
+        <section class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                {% if form.non_field_errors %}
+                <div class="alert alert-danger py-2">
+                    {% for error in form.non_field_errors %}{{ error }}{% if not forloop.last %}<br>{% endif %}{% endfor %}
+                </div>
+                {% endif %}
+
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label required">{{ form.first_name.label }}</label>
+                            {{ form.first_name }}
+                            {% for error in form.first_name.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label required">{{ form.last_name.label }}</label>
+                            {{ form.last_name }}
+                            {% for error in form.last_name.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label required">{{ form.email.label }}</label>
+                            {{ form.email }}
+                            {% for error in form.email.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label required">{{ form.username.label }}</label>
+                            {{ form.username }}
+                            {% for error in form.username.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label required">{{ form.role.label }}</label>
+                            {{ form.role }}
+                            {% for error in form.role.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                        </div>
+                        <div class="col-md-6 d-flex align-items-end">
+                            <div class="form-check mb-2">
+                                {{ form.is_active }}
+                                <label class="form-check-label" for="{{ form.is_active.id_for_label }}">{{ form.is_active.label }}</label>
+                                {% for error in form.is_active.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{{ form.phone_number.label }}</label>
+                            {{ form.phone_number }}
+                            {% for error in form.phone_number.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+                    <h2 class="h6 mb-3">Informasi Role</h2>
+
+                    <div class="row g-3" x-show="role === 'teacher'" x-cloak>
+                        <div class="col-md-6">
+                            <label class="form-label required">{{ form.teacher_id.label }}</label>
+                            {{ form.teacher_id }}
+                            {% for error in form.teacher_id.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{{ form.subject_specialization.label }}</label>
+                            {{ form.subject_specialization }}
+                            {% for error in form.subject_specialization.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="row g-3" x-show="role === 'student'" x-cloak>
+                        <div class="col-md-6">
+                            <label class="form-label required">{{ form.student_id.label }}</label>
+                            {{ form.student_id }}
+                            {% for error in form.student_id.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{{ form.class_grade.label }}</label>
+                            {{ form.class_grade }}
+                            {% for error in form.class_grade.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+                    <h2 class="h6 mb-3">Pengaturan Password</h2>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label required">{{ form.password.label }}</label>
+                            <div class="input-group">
+                                <input
+                                    :type="showPassword ? 'text' : 'password'"
+                                    name="{{ form.password.name }}"
+                                    id="{{ form.password.id_for_label }}"
+                                    class="form-control"
+                                    value="{{ form.password.value|default:'' }}"
+                                    placeholder="{% if is_create %}Masukkan password{% else %}Kosongkan jika tidak ingin mengganti password{% endif %}">
+                                <button type="button" class="btn btn-outline-secondary" @click="showPassword = !showPassword" title="Tampilkan atau sembunyikan password">
+                                    <i :class="showPassword ? 'ri-eye-off-line' : 'ri-eye-line'"></i>
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" @click="generatePassword()" title="Generate password otomatis">
+                                    <i class="ri-refresh-line"></i>
+                                </button>
+                            </div>
+                            {% if not is_create %}
+                            <small class="text-muted d-block mt-1">Kosongkan jika password tidak ingin diubah.</small>
+                            {% endif %}
+                            {% for error in form.password.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                        </div>
+                    </div>
+
+                    {% if is_create %}
+                    <div class="form-check mt-3">
+                        {{ form.send_password_email }}
+                        <label class="form-check-label" for="{{ form.send_password_email.id_for_label }}">{{ form.send_password_email.label }}</label>
+                    </div>
+                    {% endif %}
+
+                    <div class="d-flex flex-wrap gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary" title="Simpan data pengguna">
+                            <i class="ri-save-line me-1"></i>Simpan
+                        </button>
+                        <a href="{% url 'user_list' %}" class="btn btn-outline-secondary" title="Batalkan dan kembali ke daftar pengguna">Batal</a>
+                    </div>
+                </form>
+            </div>
+        </section>
+{% endblock %}
+
+{% block vendor_js %}
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.5/dist/cdn.min.js"></script>
+{% endblock %}
+

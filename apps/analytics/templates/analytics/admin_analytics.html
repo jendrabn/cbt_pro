@@ -1,0 +1,298 @@
+{% extends "layouts/admin.html" %}
+{% load static %}
+
+{% block title %}Analitik & Laporan - CBT{% endblock %}
+
+{% block topbar %}
+    {% include "layouts/partials/topbar_admin.html" with current_label="Analitik & Laporan" %}
+{% endblock %}
+
+{% block main_attrs %}class="container-fluid px-3 px-md-4 py-4"{% endblock %}
+
+{% block page_header %}
+    <section class="cbt-page-header">
+        <div class="cbt-page-header-body">
+            {% include "layouts/partials/page_header.html" with eyebrow="Panel Admin" title="Analitik & Laporan" %}
+            <div class="d-flex align-items-center gap-2 cbt-page-header-actions">
+                <div class="d-flex gap-2">
+                                <a href="{{ reports_url }}" class="btn btn-sm btn-outline-secondary" title="Buka halaman laporan lengkap">
+                                    <i class="ri-file-chart-line me-1"></i>Laporan Rinci
+                                </a>
+                            </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block content %}
+        {% if messages %}
+            <div class="mb-3">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'info' }} py-2 mb-2">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <section class="card border-0 shadow-sm filter-card mb-4">
+            <div class="card-body">
+                <form method="get" class="row g-2 g-md-3 align-items-end">
+                    <div class="col-6 col-lg-2">
+                        <label class="form-label small mb-1">Tanggal Mulai</label>
+                        <input type="date" class="form-control" name="date_from" value="{{ filters.date_from|date:'Y-m-d' }}">
+                    </div>
+                    <div class="col-6 col-lg-2">
+                        <label class="form-label small mb-1">Tanggal Akhir</label>
+                        <input type="date" class="form-control" name="date_to" value="{{ filters.date_to|date:'Y-m-d' }}">
+                    </div>
+                    <div class="col-6 col-lg-3">
+                        <label class="form-label small mb-1">Mata Pelajaran</label>
+                        <select class="form-select" name="subject">
+                            <option value="">Semua Mata Pelajaran</option>
+                            {% for subject in subjects %}
+                            <option value="{{ subject.id }}" {% if filters.subject == subject.id %}selected{% endif %}>
+                                {{ subject.name }}{% if not subject.is_active %} (Nonaktif){% endif %}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-6 col-lg-2">
+                        <label class="form-label small mb-1">Kelas</label>
+                        <select class="form-select" name="class">
+                            <option value="">Semua Kelas</option>
+                            {% for class_item in classes %}
+                            <option value="{{ class_item.id }}" {% if filters.class == class_item.id %}selected{% endif %}>{{ class_item.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-6 col-lg-2">
+                        <label class="form-label small mb-1">Jenis Ujian</label>
+                        <select class="form-select" name="exam_type">
+                            <option value="">Semua Jenis</option>
+                            {% for exam_type in exam_types %}
+                            <option value="{{ exam_type.id }}" {% if filters.exam_type == exam_type.id %}selected{% endif %}>{{ exam_type.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-auto d-flex gap-2">
+                        <button type="submit" class="btn btn-primary" title="Terapkan filter analitik">
+                            <i class="ri-filter-3-line me-1"></i>Terapkan
+                        </button>
+                        <a href="{% url 'admin_analytics' %}" class="btn btn-outline-secondary" title="Reset semua filter">Reset</a>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <section class="row g-3 mb-4">
+            <div class="col-6 col-xl-3">
+                <article class="card border-0 shadow-sm metric-card h-100">
+                    <div class="card-body">
+                        <p class="small text-muted mb-1">Total Ujian Berlangsung</p>
+                        <h2 class="metric-value mb-2">{{ summary.total_exams }}</h2>
+                        <span class="badge change-chip {% if comparison.total_exams_change >= 0 %}text-bg-success{% else %}text-bg-danger{% endif %}">
+                            {% if comparison.total_exams_change >= 0 %}+{% endif %}{{ comparison.total_exams_change }}%
+                        </span>
+                    </div>
+                </article>
+            </div>
+            <div class="col-6 col-xl-3">
+                <article class="card border-0 shadow-sm metric-card h-100">
+                    <div class="card-body">
+                        <p class="small text-muted mb-1">Total Peserta</p>
+                        <h2 class="metric-value mb-2">{{ summary.total_participants }}</h2>
+                        <span class="badge change-chip {% if comparison.total_participants_change >= 0 %}text-bg-success{% else %}text-bg-danger{% endif %}">
+                            {% if comparison.total_participants_change >= 0 %}+{% endif %}{{ comparison.total_participants_change }}%
+                        </span>
+                    </div>
+                </article>
+            </div>
+            <div class="col-6 col-xl-3">
+                <article class="card border-0 shadow-sm metric-card h-100">
+                    <div class="card-body">
+                        <p class="small text-muted mb-1">Rata-rata Nilai</p>
+                        <h2 class="metric-value mb-2">{{ summary.average_score }}%</h2>
+                        <span class="badge change-chip {% if comparison.average_score_change >= 0 %}text-bg-success{% else %}text-bg-danger{% endif %}">
+                            {% if comparison.average_score_change >= 0 %}+{% endif %}{{ comparison.average_score_change }}%
+                        </span>
+                    </div>
+                </article>
+            </div>
+            <div class="col-6 col-xl-3">
+                <article class="card border-0 shadow-sm metric-card h-100">
+                    <div class="card-body">
+                        <p class="small text-muted mb-1">Tingkat Penyelesaian</p>
+                        <h2 class="metric-value mb-2">{{ summary.completion_rate }}%</h2>
+                        <span class="badge change-chip {% if comparison.completion_rate_change >= 0 %}text-bg-success{% else %}text-bg-danger{% endif %}">
+                            {% if comparison.completion_rate_change >= 0 %}+{% endif %}{{ comparison.completion_rate_change }}%
+                        </span>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <section class="row g-4 mb-4">
+            <div class="col-xl-6">
+                <div class="card border-0 shadow-sm chart-card h-100">
+                    <div class="card-header bg-white border-0 pt-3">
+                        <h3 class="h6 mb-0">Tren Performa Ujian</h3>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="performanceTrendChart" height="140"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-6">
+                <div class="card border-0 shadow-sm chart-card h-100">
+                    <div class="card-header bg-white border-0 pt-3">
+                        <h3 class="h6 mb-0">Analisis per Mata Pelajaran</h3>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="subjectPieChart" height="140"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-6">
+                <div class="card border-0 shadow-sm chart-card h-100">
+                    <div class="card-header bg-white border-0 pt-3">
+                        <h3 class="h6 mb-0">Aktivitas Pengguna</h3>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="userActivityChart" height="140"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-6">
+                <div class="card border-0 shadow-sm chart-card h-100">
+                    <div class="card-header bg-white border-0 pt-3">
+                        <h3 class="h6 mb-0">Distribusi Nilai</h3>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="scoreHistogramChart" height="140"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="card border-0 shadow-sm report-card">
+            <div class="card-header bg-white border-0 pt-3 d-flex flex-wrap gap-2 justify-content-between align-items-center">
+                <h3 class="h6 mb-0">Ringkasan Laporan</h3>
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="{{ export_csv_url }}" class="btn btn-sm btn-outline-success" title="Ekspor laporan ke CSV">
+                        <i class="ri-file-excel-2-line me-1"></i>Ekspor CSV
+                    </a>
+                    <a href="{{ export_xlsx_url }}" class="btn btn-sm btn-outline-success" title="Ekspor laporan ke Excel">
+                        <i class="ri-file-excel-line me-1"></i>Ekspor Excel
+                    </a>
+                    <a href="{{ reports_url }}" class="btn btn-sm btn-outline-primary" title="Lihat laporan lengkap">
+                        <i class="ri-table-line me-1"></i>Lihat Semua
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-3">Ujian</th>
+                                <th>Mata Pelajaran</th>
+                                <th>Jenis</th>
+                                <th>Peserta</th>
+                                <th>Rata-rata Nilai</th>
+                                <th class="pe-3">Tingkat Penyelesaian</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in report_rows %}
+                            <tr>
+                                <td class="ps-3">{{ row.exam_title }}</td>
+                                <td>{{ row.subject }}</td>
+                                <td>{{ row.exam_type }}</td>
+                                <td>{{ row.participants }}</td>
+                                <td>{{ row.avg_score }}%</td>
+                                <td class="pe-3">{{ row.completion_rate }}%</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-4">Belum ada data laporan untuk filter saat ini.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+{% endblock %}
+
+{% block vendor_js %}
+{{ chart_data.performance_trend|json_script:"analytics-performance-data" }}
+    {{ chart_data.subject_analysis|json_script:"analytics-subject-data" }}
+    {{ chart_data.user_activity|json_script:"analytics-activity-data" }}
+    {{ chart_data.score_distribution|json_script:"analytics-distribution-data" }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>
+        function parseData(id) {
+            const raw = document.getElementById(id);
+            return raw ? JSON.parse(raw.textContent) : {labels: [], values: []};
+        }
+
+        const trendData = parseData('analytics-performance-data');
+        const subjectData = parseData('analytics-subject-data');
+        const activityData = parseData('analytics-activity-data');
+        const distributionData = parseData('analytics-distribution-data');
+
+        new Chart(document.getElementById('performanceTrendChart'), {
+            type: 'line',
+            data: {
+                labels: trendData.labels,
+                datasets: [{
+                    label: 'Nilai Rata-rata',
+                    data: trendData.values,
+                    borderColor: '#0d6efd',
+                    backgroundColor: 'rgba(13,110,253,0.12)',
+                    fill: true,
+                    tension: 0.35
+                }]
+            },
+            options: { responsive: true, scales: { y: { beginAtZero: true, max: 100 } } }
+        });
+
+        new Chart(document.getElementById('subjectPieChart'), {
+            type: 'pie',
+            data: {
+                labels: subjectData.labels,
+                datasets: [{
+                    data: subjectData.values,
+                    backgroundColor: ['#0d6efd', '#20c997', '#ffc107', '#dc3545', '#6f42c1', '#fd7e14']
+                }]
+            },
+            options: { responsive: true }
+        });
+
+        new Chart(document.getElementById('userActivityChart'), {
+            type: 'bar',
+            data: {
+                labels: activityData.labels,
+                datasets: [{
+                    label: 'Jumlah Aktivitas',
+                    data: activityData.values,
+                    backgroundColor: ['#0d6efd', '#20c997', '#ffc107']
+                }]
+            },
+            options: { responsive: true, scales: { y: { beginAtZero: true, precision: 0 } } }
+        });
+
+        new Chart(document.getElementById('scoreHistogramChart'), {
+            type: 'bar',
+            data: {
+                labels: distributionData.labels,
+                datasets: [{
+                    label: 'Frekuensi',
+                    data: distributionData.values,
+                    backgroundColor: '#198754'
+                }]
+            },
+            options: { responsive: true, scales: { y: { beginAtZero: true, precision: 0 } } }
+        });
+    </script>
+{% endblock %}
+

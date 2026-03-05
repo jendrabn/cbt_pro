@@ -1,0 +1,186 @@
+{% extends "layouts/teacher.html" %}
+{% load static %}
+
+{% block title %}Monitoring Siswa - {{ exam.title }}{% endblock %}
+
+{% block topbar %}
+    {% include "layouts/partials/topbar_teacher.html" with parent_label="Kelola Ujian" parent_url="/teacher/exams/" current_label=exam.title %}
+{% endblock %}
+
+{% block main_attrs %}class="container-fluid px-3 px-md-4 py-4"{% endblock %}
+
+{% block page_header %}
+    <section class="cbt-page-header">
+        <div class="cbt-page-header-body">
+            {% include "layouts/partials/page_header.html" with eyebrow="Panel Guru - Monitoring Live Ujian" title=exam.title %}
+            <div class="d-flex align-items-center gap-2 cbt-page-header-actions">
+                <div class="d-flex flex-wrap gap-2">
+                                <a href="{% url 'exam_detail' exam.id %}" class="btn btn-sm btn-outline-primary" title="Kembali ke detail ujian">
+                                    <i class="ri-arrow-left-line me-1"></i>Kembali ke Detail
+                                </a>
+                                <a href="{% url 'exam_list' %}" class="btn btn-sm btn-outline-secondary" title="Kembali ke daftar ujian">
+                                    <i class="ri-file-list-3-line me-1"></i>Daftar Ujian
+                                </a>
+                            </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block content %}
+        {% if messages %}
+            <div class="mb-3">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'info' }} py-2 mb-2">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div id="monitoringAlert" class="mb-3 d-none"></div>
+
+        <section class="row g-3 mb-4">
+            <div class="col-6 col-xl-3">
+                <article class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <p class="small text-muted mb-1">Total Peserta</p>
+                        <h2 id="totalParticipantsValue" class="h4 mb-0">0</h2>
+                    </div>
+                </article>
+            </div>
+            <div class="col-6 col-xl-3">
+                <article class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <p class="small text-muted mb-1">Sedang Aktif</p>
+                        <h2 id="currentlyActiveValue" class="h4 mb-0 text-success">0</h2>
+                    </div>
+                </article>
+            </div>
+            <div class="col-6 col-xl-3">
+                <article class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <p class="small text-muted mb-1">Sudah Selesai</p>
+                        <h2 id="completedValue" class="h4 mb-0 text-primary">0</h2>
+                    </div>
+                </article>
+            </div>
+            <div class="col-6 col-xl-3">
+                <article class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <p class="small text-muted mb-1">Rata-rata Progress</p>
+                        <h2 id="averageProgressValue" class="h4 mb-0">0%</h2>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <section class="card border-0 shadow-sm mb-4">
+            <div class="card-body d-flex flex-wrap align-items-center justify-content-between gap-3">
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                    <span class="small text-muted">Indikator Status:</span>
+                    <span class="badge rounded-pill text-bg-success">Hijau: Normal</span>
+                    <span class="badge rounded-pill text-bg-warning">Kuning: Warning/Idle</span>
+                    <span class="badge rounded-pill text-bg-danger">Merah: Pelanggaran Tinggi</span>
+                    <span class="badge rounded-pill text-bg-secondary">Abu-abu: Belum Mulai</span>
+                </div>
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                    <label for="refreshIntervalSelect" class="small text-muted mb-0">Auto Refresh</label>
+                    <select id="refreshIntervalSelect" class="form-select form-select-sm" title="Pilih interval auto refresh">
+                        <option value="10">10 detik</option>
+                        <option value="20">20 detik</option>
+                        <option value="30" selected>30 detik</option>
+                        <option value="60">60 detik</option>
+                        <option value="0">Nonaktif</option>
+                    </select>
+                    <button id="manualRefreshBtn" type="button" class="btn btn-sm btn-outline-primary" title="Refresh data sekarang">
+                        <i class="ri-refresh-line me-1"></i>Refresh
+                    </button>
+                    <span id="monitorLastUpdateAt" class="small text-muted">Update terakhir: -</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="row g-4">
+            <div class="col-xl-8">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white border-0 pt-3 d-flex flex-wrap align-items-center justify-content-between gap-2">
+                        <h2 class="h6 mb-0">Grid Monitoring Siswa</h2>
+                        <span class="small text-muted">Klik "Detail" untuk intervensi manual dan histori lengkap</span>
+                    </div>
+                    <div class="card-body">
+                        <div id="studentsMonitoringGrid" class="row g-3">
+                            <div class="col-12">
+                                <p class="text-muted mb-0">Memuat data siswa...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-4">
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white border-0 pt-3 d-flex align-items-center justify-content-between">
+                        <h2 class="h6 mb-0">Feed Pelanggaran Live</h2>
+                        <select id="violationTypeFilter" class="form-select form-select-sm w-auto" title="Filter jenis pelanggaran">
+                            <option value="">Semua Tipe</option>
+                            {% for value, label in violation_types %}
+                            <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="card-body">
+                        <ul id="violationsFeed" class="list-group list-group-flush violations-feed-list">
+                            <li class="list-group-item px-0 text-muted small">Belum ada data pelanggaran.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white border-0 pt-3">
+                        <h2 class="h6 mb-0">Widget Pengumuman</h2>
+                    </div>
+                    <div class="card-body">
+                        <form id="announcementForm">
+                            {% csrf_token %}
+                            <div class="mb-2">
+                                <label for="announcementTargetType" class="form-label small mb-1">Target Pengiriman</label>
+                                <select id="announcementTargetType" class="form-select form-select-sm" title="Pilih target pengumuman">
+                                    <option value="all">Semua Peserta</option>
+                                    <option value="student">Siswa Tertentu</option>
+                                </select>
+                            </div>
+                            <div class="mb-2">
+                                <label for="announcementStudentId" class="form-label small mb-1">Pilih Siswa</label>
+                                <select id="announcementStudentId" class="form-select form-select-sm" disabled title="Pilih siswa tujuan pengumuman">
+                                    <option value="">Pilih siswa...</option>
+                                </select>
+                            </div>
+                            <div class="mb-2">
+                                <label for="announcementTitle" class="form-label small mb-1">Judul</label>
+                                <input id="announcementTitle" type="text" class="form-control form-control-sm" maxlength="255" placeholder="Contoh: Informasi tambahan ujian">
+                            </div>
+                            <div class="mb-2">
+                                <label for="announcementMessage" class="form-label small mb-1">Pesan</label>
+                                <textarea id="announcementMessage" class="form-control form-control-sm" rows="4" maxlength="1000" placeholder="Tulis pengumuman untuk peserta..." required></textarea>
+                            </div>
+                            <div class="d-grid">
+                                <button id="sendAnnouncementBtn" type="submit" class="btn btn-sm btn-primary" title="Kirim pengumuman">
+                                    <i class="ri-broadcast-line me-1"></i>Kirim Pengumuman
+                                </button>
+                            </div>
+                            <p id="announcementResult" class="small text-muted mt-2 mb-0"></p>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+{% endblock %}
+
+{% block vendor_js %}
+{% include "monitoring/student_detail_modal.html" %}
+
+    {{ monitoring_config|json_script:"monitoring-config-data" }}
+    {{ initial_snapshot|json_script:"monitoring-snapshot-data" }}
+<script src="https://cdn.jsdelivr.net/npm/axios@1.6.2/dist/axios.min.js"></script>
+    <script src="{% static 'monitoring/js/monitoring.js' %}?v=20260218-1"></script>
+{% endblock %}
+

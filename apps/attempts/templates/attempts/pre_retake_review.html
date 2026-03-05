@@ -1,0 +1,90 @@
+{% extends "layouts/student.html" %}
+{% load static %}
+
+{% block title %}Review Sebelum Retake - CBT{% endblock %}
+
+{% block topbar %}
+    {% include "layouts/partials/topbar_student.html" with parent_label="Daftar Ujian" parent_url="/student/exams/" current_label="Review Sebelum Retake" %}
+{% endblock %}
+
+{% block main_attrs %}class="container py-4"{% endblock %}
+
+{% block page_header %}
+    <section class="cbt-page-header">
+        <div class="cbt-page-header-body">
+            {% include "layouts/partials/page_header.html" with eyebrow="Panel Siswa" title="Review Sebelum Retake" %}
+            <div class="d-flex align-items-center gap-2 cbt-page-header-actions">
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block content %}
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h1 class="h5 mb-0">Review Sebelum Ujian Ulang</h1>
+                <a href="{{ back_url }}" class="btn btn-sm btn-outline-secondary">
+                    <i class="ri-arrow-left-line me-1"></i>Daftar Ujian
+                </a>
+            </div>
+            <div class="card-body">
+                <h2 class="h6 mb-1">{{ exam.title }}</h2>
+                <p class="small text-muted mb-3">Attempt {{ attempt.attempt_number }} selesai. Berikut jawaban yang perlu ditinjau.</p>
+
+                {% if wrong_answers %}
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Soal</th>
+                                <th>Jawaban Anda</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for answer in wrong_answers %}
+                            <tr>
+                                <td><small class="text-muted" title="{{ answer.id }}">{{ answer.id|truncatechars:8 }}</small></td>
+                                <td>{{ answer.question.question_text|striptags|truncatechars:110 }}</td>
+                                <td>
+                                    {% if answer.selected_option %}
+                                    {{ answer.selected_option.option_letter }}. {{ answer.selected_option.option_text|truncatechars:60 }}
+                                    {% elif answer.answer_text %}
+                                    {{ answer.answer_text|truncatechars:80 }}
+                                    {% else %}
+                                    -
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info py-2">
+                    Tidak ada jawaban salah yang terdeteksi untuk attempt sebelumnya.
+                </div>
+                {% endif %}
+
+                <div class="d-flex flex-wrap gap-2 align-items-center justify-content-between">
+                    <p class="small text-muted mb-0">
+                        Percobaan: {{ retake_check.attempts_used }}/{{ retake_check.max_attempts }}.
+                    </p>
+                    <form method="post" action="{{ start_retake_url }}">
+                        {% csrf_token %}
+                        <button
+                            type="submit"
+                            class="btn btn-primary"
+                            {% if not retake_check.eligible %}disabled{% endif %}
+                        >
+                            <i class="ri-refresh-line me-1"></i>Mulai Ujian Ulang
+                        </button>
+                    </form>
+                </div>
+                {% if not retake_check.eligible %}
+                <p class="small text-danger mt-2 mb-0">{{ retake_check.reason }}</p>
+                {% endif %}
+            </div>
+        </div>
+{% endblock %}
+

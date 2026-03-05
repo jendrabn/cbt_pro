@@ -1,0 +1,239 @@
+$primary: #1B3A6B;
+$secondary: #4A6080;
+$success: #1E6B4A;
+$danger: #B82020;
+$warning: #9A7200;
+$info: #1E6B98;
+
+$link-color: $primary;
+$link-hover-color: #2E5598;
+
+$dashboard-border-color: #dbe4f0;
+$dashboard-input-border-color: #ccd9ea;
+$dashboard-table-head-color: #22324a;
+$dashboard-table-body-color: #20304a;
+$dashboard-table-row-hover-color: #f4f8ff;
+$dashboard-breadcrumb-color: #64748b;
+$dashboard-breadcrumb-active-color: #0f172a;
+$dashboard-focus-border-color: rgba($primary, .35);
+$dashboard-focus-shadow-color: rgba($primary, .13);
+$login-focus-border-color: #8ab4ff;
+$login-focus-shadow-color: rgba($primary, .15);
+
+$badge-soft-primary-bg: #eef4ff;
+$badge-soft-primary-border: #cfddff;
+$badge-soft-primary-text: #1f4fa8;
+$badge-soft-secondary-bg: #f2f4f7;
+$badge-soft-secondary-border: #dfe3e8;
+$badge-soft-secondary-text: #475467;
+$badge-soft-success-bg: #edf9f2;
+$badge-soft-success-border: #c8ecd5;
+$badge-soft-success-text: #176a3a;
+$badge-soft-info-bg: #edf6ff;
+$badge-soft-info-border: #cfe2ff;
+$badge-soft-info-text: #1b4f9b;
+$badge-soft-warning-bg: #fff7e8;
+$badge-soft-warning-border: #ffe2ad;
+$badge-soft-warning-text: #8a5a00;
+$badge-soft-danger-bg: #fff1f3;
+$badge-soft-danger-border: #ffd0d5;
+$badge-soft-danger-text: #a02537;
+$badge-soft-light-bg: #f8fafc;
+$badge-soft-light-border: #e4e7ec;
+$badge-soft-light-text: #475467;
+
+// Color-only overrides for form controls.
+$input-bg: #f9fbff;
+$input-color: #12243b;
+$input-border-color: #c7d5e7;
+$input-placeholder-color: #8ea0b7;
+$input-focus-bg: #ffffff;
+$input-focus-border-color: #486f9d;
+$input-btn-focus-color: rgba($primary, .16);
+
+$form-label-font-size: .84rem;
+$form-label-font-weight: 650;
+$form-label-color: #24364f;
+$form-text-color: #5e7089;
+
+$form-select-bg: #f9fbff;
+$form-select-indicator-color: #4a6080;
+$form-select-border-color: $input-border-color;
+$form-select-focus-border-color: $input-focus-border-color;
+
+$input-group-addon-color: #51647e;
+$input-group-addon-bg: #f3f7fc;
+$input-group-addon-border-color: $input-border-color;
+
+$form-check-input-border: var(--bs-border-width) solid #9db1c9;
+$form-check-input-focus-border: $input-focus-border-color;
+$form-check-input-focus-box-shadow: 0 0 0 .2rem rgba($primary, .16);
+$form-check-input-checked-bg-color: $primary;
+$form-check-input-checked-border-color: $primary;
+$form-check-input-indeterminate-bg-color: $primary;
+$form-check-input-indeterminate-border-color: $primary;
+$form-check-label-color: #2b3f5a;
+
+@import "bootstrap/scss/bootstrap";
+
+label,
+.form-label,
+.col-form-label {
+  font-size: .84rem;
+  text-transform: uppercase;
+  letter-spacing: .055em;
+}
+
+fieldset > legend {
+  font-size: .84rem;
+  text-transform: uppercase;
+  letter-spacing: .055em;
+}
+
+.form-floating > label {
+  text-transform: uppercase;
+  letter-spacing: .045em;
+}
+
+.form-check-label {
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+// Unify header/footer surfaces with body in cards and modals.
+.card-header,
+.card-footer {
+  background-color: var(--bs-card-bg) !important;
+  border: 0 !important;
+}
+
+.modal-header,
+.modal-footer {
+  background-color: var(--bs-modal-bg);
+  border: 0;
+}
+
+// Dashboard shell overrides for Bootstrap components.
+.cbt-topbar .breadcrumb {
+  margin: 0;
+  font-size: .84rem;
+}
+
+.cbt-topbar .breadcrumb-item,
+.cbt-topbar .breadcrumb-item a {
+  color: $dashboard-breadcrumb-color;
+  text-decoration: none;
+}
+
+.cbt-topbar .breadcrumb-item.active {
+  color: $dashboard-breadcrumb-active-color;
+  font-weight: 600;
+}
+
+body.dashboard-body .modal-backdrop,
+body.dashboard-body .modal-backdrop.show {
+  z-index: 1080 !important;
+}
+
+body.dashboard-body .modal {
+  z-index: 1090 !important;
+}
+
+.card {
+  border-color: $dashboard-border-color;
+}
+
+.table thead th {
+  color: $dashboard-table-head-color;
+  font-size: .82rem;
+  text-transform: uppercase;
+  letter-spacing: .02em;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.table tbody td {
+  color: $dashboard-table-body-color;
+}
+
+.table-hover > tbody > tr:hover > * {
+  --bs-table-bg-state: #{$dashboard-table-row-hover-color};
+}
+
+.table-responsive {
+  border-radius: 12px;
+}
+
+.form-control,
+.form-select {
+  border-color: $dashboard-input-border-color;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: $dashboard-focus-border-color;
+  box-shadow: 0 0 0 .2rem $dashboard-focus-shadow-color;
+}
+
+.settings-nav .nav-link {
+  border-radius: 10px;
+}
+
+// Bootstrap badge soft override for existing text-bg-* usages.
+.badge.text-bg-primary {
+  background: $badge-soft-primary-bg !important;
+  color: $badge-soft-primary-text !important;
+  border: 1px solid $badge-soft-primary-border;
+}
+
+.badge.text-bg-secondary {
+  background: $badge-soft-secondary-bg !important;
+  color: $badge-soft-secondary-text !important;
+  border: 1px solid $badge-soft-secondary-border;
+}
+
+.badge.text-bg-success {
+  background: $badge-soft-success-bg !important;
+  color: $badge-soft-success-text !important;
+  border: 1px solid $badge-soft-success-border;
+}
+
+.badge.text-bg-info {
+  background: $badge-soft-info-bg !important;
+  color: $badge-soft-info-text !important;
+  border: 1px solid $badge-soft-info-border;
+}
+
+.badge.text-bg-warning {
+  background: $badge-soft-warning-bg !important;
+  color: $badge-soft-warning-text !important;
+  border: 1px solid $badge-soft-warning-border;
+}
+
+.badge.text-bg-danger {
+  background: $badge-soft-danger-bg !important;
+  color: $badge-soft-danger-text !important;
+  border: 1px solid $badge-soft-danger-border;
+}
+
+.badge.text-bg-light {
+  background: $badge-soft-light-bg !important;
+  color: $badge-soft-light-text !important;
+  border: 1px solid $badge-soft-light-border;
+}
+
+.login-page .form-control,
+.login-page .input-group-text {
+  border-color: var(--login-border);
+}
+
+.login-page .form-control:focus {
+  border-color: $login-focus-border-color;
+  box-shadow: 0 0 0 .2rem $login-focus-shadow-color;
+}
+
+@media (max-width: 991.98px) {
+  .cbt-topbar .breadcrumb-item:first-child {
+    display: none;
+  }
+}

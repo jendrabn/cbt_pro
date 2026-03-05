@@ -1,0 +1,19 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ branding.institution_name|default:"Sistem CBT" }}{% endblock %}</title>
+    <link rel="icon" href="{{ branding.institution_favicon_url|default:'/static/images/favicon.ico' }}">
+    <style>
+        :root {
+            --cbt-primary: {{ branding.primary_color|default:'#0d6efd' }};
+        }
+    </style>
+    {% block head %}{% endblock %}
+</head>
+<body>
+    {% block body %}{% endblock %}
+</body>
+</html>
