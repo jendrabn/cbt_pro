@@ -56,24 +56,24 @@
             <div class="container">
                 <div class="row align-items-center gy-5">
                     <div class="col-lg-7" data-reveal>
-                        <span class="hero-badge">Platform Ujian Berbasis Komputer</span>
-<h1 class="hero-title mt-3 mb-3">
-                            {{ branding.login_page_headline|default:"Kelola Ujian Online dengan Mudah" }}
-                            <span class="d-block text-gradient">Platform CBT Lengkap untuk Sekolah Modern</span>
+                        <span class="hero-badge">Lebih tenang saat ujian berlangsung</span>
+                        <h1 class="hero-title mt-3 mb-3">
+                            Platform Ujian Berbasis
+                            <span class="d-block text-gradient">Komputer yang Modern</span>
                         </h1>
-<p class="hero-lead mb-4">
-                            Buat soal, laksanakan ujian, pantau peserta, dan lihat hasil dalam satu platform terintegrasi.
-                            Dilengkapi proctoring untuk menjaga integritas ujian dan analitik untuk evaluasi mendalam.
+                        <p class="hero-lead mb-4">
+                            CBT Pro membantu sekolah dan institusi menyelenggarakan ujian digital yang cepat, aman,
+                            dan rapi. Guru fokus pada kualitas soal, siswa fokus pada jawaban, sistem mengurus sisanya.
                         </p>
                         <div class="d-flex flex-wrap gap-2 gap-md-3">
                             <a href="{{ dashboard_url }}" class="btn btn-primary btn-lg rounded-pill px-4">
-                                <i class="{{ dashboard_icon }} me-1"></i>{{ dashboard_label }}
+                                <i class="ri-login-box-line me-1"></i>Mulai Sekarang
                             </a>
                             <a href="#features" class="btn btn-outline-dark btn-lg rounded-pill px-4">
                                 Lihat Fitur
                             </a>
                         </div>
-<div class="d-flex flex-wrap gap-3 mt-4">
+                        <div class="d-flex flex-wrap gap-3 mt-4">
                             <div class="chip">
                                 <i class="ri-checkbox-circle-line text-success"></i>
                                 <span>Server stabil dan andal</span>
@@ -134,9 +134,9 @@
             <div class="container">
                 <div class="row justify-content-center mb-4 mb-md-5" data-reveal>
                     <div class="col-lg-8 text-center">
-                        <h2 class="section-title">Fitur Utama Platform</h2>
-<p class="section-subtitle mb-0">
-                            Komponen lengkap untuk operasional CBT dari persiapan hingga evaluasi akhir.
+                        <h2 class="section-title">Fitur yang Dibutuhkan Tim Akademik</h2>
+                        <p class="section-subtitle mb-0">
+                            Dirancang untuk sekolah yang ingin proses ujian lebih profesional, dengan antarmuka bersih dan alur kerja yang ringkas.
                         </p>
                     </div>
                 </div>
@@ -177,66 +177,73 @@
             </div>
         </section>
 
-        <section id="about" class="section-space pb-5">
+        <section id="about" class="section-space about-lite">
             <div class="container">
-                <div class="row align-items-center gy-4">
-                    <div class="col-lg-6" data-reveal>
-                        <h2 class="section-title mb-3">Didesain untuk Alur Kerja Sekolah Modern</h2>
-<p class="text-muted mb-3">
-                            Platform ini mencakup alur lengkap sistem CBT: persiapan, pelaksanaan, pemantauan,
-                            dan evaluasi. Dibangun dengan Django templates dan Bootstrap untuk performa yang ringan dan cepat.
+                <div class="row justify-content-center mb-4 mb-md-5" data-reveal>
+                    <div class="col-lg-9 text-center">
+                        <h2 class="section-title">Tentang CBT Pro</h2>
+                        <p class="section-subtitle mb-0">
+                            Kami percaya kualitas evaluasi pembelajaran meningkat saat teknologi bekerja di belakang layar, bukan menambah beban tim pengajar.
                         </p>
-<ul class="list-unstyled about-list mb-4">
-                            <li><i class="ri-check-line"></i> Arsitektur multi-peran: admin, guru, dan siswa</li>
-                            <li><i class="ri-check-line"></i> Pemantauan ujian lebih terkontrol</li>
-                            <li><i class="ri-check-line"></i> Analitik hasil untuk pengambilan keputusan cepat</li>
-                        </ul>
-                        <a href="{{ dashboard_url }}" class="btn btn-dark rounded-pill px-4">
-                            <i class="{{ dashboard_icon }} me-1"></i>{{ dashboard_label }}
-                        </a>
                     </div>
-                    <div class="col-lg-6" data-reveal>
-                        <div class="about-panel shadow-sm">
-<div class="about-step">
-                                <span>01</span>
-                                <div>
-                                    <h3>Siapkan Ujian</h3>
-                                    <p>Atur jadwal, durasi, dan aturan ujian dengan mudah.</p>
-                                </div>
+                </div>
+                <div class="row g-4 g-lg-5 about-lite-grid">
+                    <div class="col-md-6 col-lg-4" data-reveal>
+                        <article class="about-lite-item">
+                            <i class="ri-layout-grid-line about-lite-icon"></i>
+                            <div>
+                                <h3 class="h4">Antarmuka Bersih</h3>
+                                <p>Tampilan dibuat fokus pada tugas utama, jadi pengguna baru pun bisa langsung produktif.</p>
                             </div>
-                            <div class="about-step">
-                                <span>02</span>
-                                <div>
-                                    <h3>Laksanakan Sesi</h3>
-                                    <p>Peserta mengerjakan soal dengan auto-save dan timer otomatis.</p>
-                                </div>
-                            </div>
-                            <div class="about-step">
-                                <span>03</span>
-                                <div>
-                                    <h3>Lihat Hasil</h3>
-                                    <p>Nilai dan analitik tampil otomatis setelah sesi selesai.</p>
-                                </div>
-                            </div>
-                        </div>
+                        </article>
                     </div>
+                    <div class="col-md-6 col-lg-4" data-reveal>
+                        <article class="about-lite-item">
+                            <i class="ri-time-line about-lite-icon"></i>
+                            <div>
+                                <h3 class="h4">Operasional Ringkas</h3>
+                                <p>Mulai dari setup ujian sampai rekap hasil dipersingkat agar tim punya lebih banyak waktu untuk evaluasi.</p>
+                            </div>
+                        </article>
+                    </div>
+                    <div class="col-md-6 col-lg-4" data-reveal>
+                        <article class="about-lite-item">
+                            <i class="ri-lock-2-line about-lite-icon"></i>
+                            <div>
+                                <h3 class="h4">Keamanan Terjaga</h3>
+                                <p>Setiap sesi dirancang dengan kontrol akses dan jejak aktivitas agar proses ujian lebih terpercaya.</p>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="cta-shell">
+            <div class="container" data-reveal>
+                <div class="cta-panel">
+                    <div>
+                        <h2>Siap Memulai?</h2>
+                        <p>Masuk ke CBT Pro dan kelola ujian digital dari satu dashboard terpadu.</p>
+                    </div>
+                    <a href="{{ dashboard_url }}" class="btn btn-light btn-lg rounded-3 px-4 cta-btn">
+                        <i class="ri-login-box-line me-1"></i>Masuk Sekarang
+                    </a>
                 </div>
             </div>
         </section>
     </main>
 
-    <footer class="py-4 border-top">
-        <div class="container d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3">
-            <p class="mb-0 text-muted small">
-                Copyright {{ current_year }} {{ branding.institution_type|default:"" }} {{ branding.institution_name|default:"CBT Platform" }}. All rights reserved.
+    <footer class="landing-footer">
+        <div class="container d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-4">
+            <p class="footer-copy">
+                &copy; {{ current_year }} CBT Pro. Hak cipta dilindungi.
             </p>
-<div class="d-flex align-items-center gap-3">
-                <a href="#home" class="footer-link">Beranda</a>
-                <a href="#features" class="footer-link">Fitur</a>
-                <a href="#about" class="footer-link">Tentang</a>
-                <a href="#" class="footer-social" aria-label="Instagram"><i class="ri-instagram-line"></i></a>
-                <a href="#" class="footer-social" aria-label="LinkedIn"><i class="ri-linkedin-box-line"></i></a>
-                <a href="#" class="footer-social" aria-label="YouTube"><i class="ri-youtube-line"></i></a>
+            <div class="footer-socials">
+                <a href="#" class="btn btn-ghost footer-icon-btn" aria-label="Instagram"><i class="ri-instagram-line"></i></a>
+                <a href="#" class="btn btn-ghost footer-icon-btn" aria-label="Facebook"><i class="ri-facebook-line"></i></a>
+                <a href="#" class="btn btn-ghost footer-icon-btn" aria-label="YouTube"><i class="ri-youtube-line"></i></a>
+                <a href="#" class="btn btn-ghost footer-icon-btn" aria-label="WhatsApp"><i class="ri-whatsapp-line"></i></a>
             </div>
         </div>
     </footer>

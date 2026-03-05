@@ -53,34 +53,34 @@ class LandingView(TemplateView):
 
         context["features"] = [
             {
+                "icon": "ri-layout-grid-line",
+                "title": "Bank Soal Terstruktur",
+                "description": "Kelola ribuan soal per mapel, tingkat kesulitan, dan tag kompetensi dalam satu panel yang mudah ditelusuri.",
+            },
+            {
+                "icon": "ri-shuffle-line",
+                "title": "Randomisasi Cerdas",
+                "description": "Acak soal dan opsi jawaban otomatis untuk tiap peserta, menjaga keadilan ujian tanpa konfigurasi rumit.",
+            },
+            {
                 "icon": "ri-shield-check-line",
-                "title": "Ujian Aman",
-                "description": "Kontrol anti-cheat, timer terstruktur, dan monitoring real-time.",
+                "title": "Pengawasan Terintegrasi",
+                "description": "Dukungan monitoring aktivitas dan sinyal pelanggaran agar pengawas bisa bertindak cepat saat ujian berlangsung.",
             },
             {
-                "icon": "ri-file-list-3-line",
-                "title": "Bank Soal Terpusat",
-                "description": "Kelola soal pilihan ganda, esai, dan short answer dalam satu alur.",
+                "icon": "ri-medal-line",
+                "title": "Penilaian Otomatis",
+                "description": "Skor objektif dihitung instan, sehingga guru dapat langsung menganalisis hasil tanpa menunggu proses manual.",
             },
             {
-                "icon": "ri-bar-chart-line",
-                "title": "Analitik Nilai",
-                "description": "Lihat tren performa kelas dan insight hasil ujian dengan cepat.",
-            },
-            {
-                "icon": "ri-time-line",
-                "title": "Auto Save Jawaban",
-                "description": "Jawaban peserta tersimpan otomatis selama sesi berlangsung.",
+                "icon": "ri-line-chart-line",
+                "title": "Analitik Berbasis Data",
+                "description": "Lihat performa siswa, tingkat keberhasilan per soal, dan tren kelas untuk perbaikan pembelajaran berikutnya.",
             },
             {
                 "icon": "ri-team-line",
-                "title": "Multi Role",
-                "description": "Dashboard berbeda untuk admin, guru, dan siswa sesuai kebutuhan.",
-            },
-            {
-                "icon": "ri-notification-3-line",
-                "title": "Notifikasi Terintegrasi",
-                "description": "Pembaruan penting langsung diterima pengguna di dalam aplikasi.",
+                "title": "Multi-Role Workflow",
+                "description": "Admin, guru, dan siswa mendapat dashboard sesuai kebutuhan masing-masing agar alur kerja tetap fokus dan efisien.",
             },
         ]
         context["stats"] = [
