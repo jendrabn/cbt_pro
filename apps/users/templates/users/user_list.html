@@ -38,46 +38,21 @@
             </div>
         {% endif %}
 
-        <section class="row g-3 mb-4">
-            <div class="col-6 col-xl-2">
-                <article class="card summary-card border-0 shadow-sm h-100">
-                    <div class="card-body">
-                        <p class="text-muted small mb-1">Total Pengguna</p>
-                        <h2 class="h4 mb-0">{{ summary.total }}</h2>
-                    </div>
-                </article>
+        <section class="row row-cols-2 row-cols-md-3 row-cols-xl-5 g-3 mb-4 cbt-stats-grid">
+            <div class="col">
+                {% include "partials/stats_card.html" with title="Total Pengguna" value=summary.total icon="ri-group-line" tone="primary" %}
             </div>
-            <div class="col-6 col-xl-2">
-                <article class="card summary-card border-0 shadow-sm h-100">
-                    <div class="card-body">
-                        <p class="text-muted small mb-1">Aktif</p>
-                        <h2 class="h4 mb-0">{{ summary.active }}</h2>
-                    </div>
-                </article>
+            <div class="col">
+                {% include "partials/stats_card.html" with title="Aktif" value=summary.active icon="ri-checkbox-circle-line" tone="success" %}
             </div>
-            <div class="col-6 col-xl-2">
-                <article class="card summary-card border-0 shadow-sm h-100">
-                    <div class="card-body">
-                        <p class="text-muted small mb-1">Nonaktif</p>
-                        <h2 class="h4 mb-0">{{ summary.inactive }}</h2>
-                    </div>
-                </article>
+            <div class="col">
+                {% include "partials/stats_card.html" with title="Nonaktif" value=summary.inactive icon="ri-user-unfollow-line" tone="secondary" %}
             </div>
-            <div class="col-6 col-xl-2">
-                <article class="card summary-card border-0 shadow-sm h-100">
-                    <div class="card-body">
-                        <p class="text-muted small mb-1">Guru</p>
-                        <h2 class="h4 mb-0">{{ summary.teacher }}</h2>
-                    </div>
-                </article>
+            <div class="col">
+                {% include "partials/stats_card.html" with title="Guru" value=summary.teacher icon="ri-user-star-line" tone="info" %}
             </div>
-            <div class="col-6 col-xl-2">
-                <article class="card summary-card border-0 shadow-sm h-100">
-                    <div class="card-body">
-                        <p class="text-muted small mb-1">Siswa</p>
-                        <h2 class="h4 mb-0">{{ summary.student }}</h2>
-                    </div>
-                </article>
+            <div class="col">
+                {% include "partials/stats_card.html" with title="Siswa" value=summary.student icon="ri-graduation-cap-line" tone="warning" %}
             </div>
         </section>
 
@@ -293,4 +268,3 @@
         }
     </script>
 {% endblock %}
-

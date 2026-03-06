@@ -81,50 +81,34 @@
             </div>
         </section>
 
-        <section class="row g-3 mb-4">
-            <div class="col-6 col-xl-3">
-                <article class="card border-0 shadow-sm metric-card h-100">
-                    <div class="card-body">
-                        <p class="small text-muted mb-1">Total Ujian Berlangsung</p>
-                        <h2 class="metric-value mb-2">{{ summary.total_exams }}</h2>
-                        <span class="badge change-chip {% if comparison.total_exams_change >= 0 %}text-bg-success{% else %}text-bg-danger{% endif %}">
-                            {% if comparison.total_exams_change >= 0 %}+{% endif %}{{ comparison.total_exams_change }}%
-                        </span>
-                    </div>
-                </article>
+        <section class="row row-cols-2 row-cols-xl-4 g-3 mb-4 cbt-stats-grid">
+            <div class="col">
+                {% if comparison.total_exams_change >= 0 %}
+                    {% include "partials/stats_card.html" with title="Total Ujian Berlangsung" value=summary.total_exams icon="ri-file-list-3-line" tone="primary" delta_value=comparison.total_exams_change delta_prefix="+" delta_suffix="%" delta_tone="success" %}
+                {% else %}
+                    {% include "partials/stats_card.html" with title="Total Ujian Berlangsung" value=summary.total_exams icon="ri-file-list-3-line" tone="primary" delta_value=comparison.total_exams_change delta_suffix="%" delta_tone="danger" %}
+                {% endif %}
             </div>
-            <div class="col-6 col-xl-3">
-                <article class="card border-0 shadow-sm metric-card h-100">
-                    <div class="card-body">
-                        <p class="small text-muted mb-1">Total Peserta</p>
-                        <h2 class="metric-value mb-2">{{ summary.total_participants }}</h2>
-                        <span class="badge change-chip {% if comparison.total_participants_change >= 0 %}text-bg-success{% else %}text-bg-danger{% endif %}">
-                            {% if comparison.total_participants_change >= 0 %}+{% endif %}{{ comparison.total_participants_change }}%
-                        </span>
-                    </div>
-                </article>
+            <div class="col">
+                {% if comparison.total_participants_change >= 0 %}
+                    {% include "partials/stats_card.html" with title="Total Peserta" value=summary.total_participants icon="ri-group-line" tone="info" delta_value=comparison.total_participants_change delta_prefix="+" delta_suffix="%" delta_tone="success" %}
+                {% else %}
+                    {% include "partials/stats_card.html" with title="Total Peserta" value=summary.total_participants icon="ri-group-line" tone="info" delta_value=comparison.total_participants_change delta_suffix="%" delta_tone="danger" %}
+                {% endif %}
             </div>
-            <div class="col-6 col-xl-3">
-                <article class="card border-0 shadow-sm metric-card h-100">
-                    <div class="card-body">
-                        <p class="small text-muted mb-1">Rata-rata Nilai</p>
-                        <h2 class="metric-value mb-2">{{ summary.average_score }}%</h2>
-                        <span class="badge change-chip {% if comparison.average_score_change >= 0 %}text-bg-success{% else %}text-bg-danger{% endif %}">
-                            {% if comparison.average_score_change >= 0 %}+{% endif %}{{ comparison.average_score_change }}%
-                        </span>
-                    </div>
-                </article>
+            <div class="col">
+                {% if comparison.average_score_change >= 0 %}
+                    {% include "partials/stats_card.html" with title="Rata-rata Nilai" value=summary.average_score value_suffix="%" icon="ri-line-chart-line" tone="success" delta_value=comparison.average_score_change delta_prefix="+" delta_suffix="%" delta_tone="success" %}
+                {% else %}
+                    {% include "partials/stats_card.html" with title="Rata-rata Nilai" value=summary.average_score value_suffix="%" icon="ri-line-chart-line" tone="success" delta_value=comparison.average_score_change delta_suffix="%" delta_tone="danger" %}
+                {% endif %}
             </div>
-            <div class="col-6 col-xl-3">
-                <article class="card border-0 shadow-sm metric-card h-100">
-                    <div class="card-body">
-                        <p class="small text-muted mb-1">Tingkat Penyelesaian</p>
-                        <h2 class="metric-value mb-2">{{ summary.completion_rate }}%</h2>
-                        <span class="badge change-chip {% if comparison.completion_rate_change >= 0 %}text-bg-success{% else %}text-bg-danger{% endif %}">
-                            {% if comparison.completion_rate_change >= 0 %}+{% endif %}{{ comparison.completion_rate_change }}%
-                        </span>
-                    </div>
-                </article>
+            <div class="col">
+                {% if comparison.completion_rate_change >= 0 %}
+                    {% include "partials/stats_card.html" with title="Tingkat Penyelesaian" value=summary.completion_rate value_suffix="%" icon="ri-timer-flash-line" tone="warning" delta_value=comparison.completion_rate_change delta_prefix="+" delta_suffix="%" delta_tone="success" %}
+                {% else %}
+                    {% include "partials/stats_card.html" with title="Tingkat Penyelesaian" value=summary.completion_rate value_suffix="%" icon="ri-timer-flash-line" tone="warning" delta_value=comparison.completion_rate_change delta_suffix="%" delta_tone="danger" %}
+                {% endif %}
             </div>
         </section>
 
@@ -293,4 +277,3 @@
         });
     </script>
 {% endblock %}
-

@@ -33,30 +33,15 @@
             </div>
         {% endif %}
 
-        <section class="row g-3 mb-4">
-            <div class="col-6 col-xl-2">
-                <article class="card summary-card border-0 shadow-sm h-100">
-                    <div class="card-body">
-                        <p class="text-muted small mb-1">Total Mata Pelajaran</p>
-                        <h2 class="h4 mb-0">{{ summary.total }}</h2>
-                    </div>
-                </article>
+        <section class="row row-cols-2 row-cols-xl-3 g-3 mb-4 cbt-stats-grid">
+            <div class="col">
+                {% include "partials/stats_card.html" with title="Total Mata Pelajaran" value=summary.total icon="ri-book-open-line" tone="primary" %}
             </div>
-            <div class="col-6 col-xl-2">
-                <article class="card summary-card border-0 shadow-sm h-100">
-                    <div class="card-body">
-                        <p class="text-muted small mb-1">Aktif</p>
-                        <h2 class="h4 mb-0">{{ summary.active }}</h2>
-                    </div>
-                </article>
+            <div class="col">
+                {% include "partials/stats_card.html" with title="Aktif" value=summary.active icon="ri-checkbox-circle-line" tone="success" %}
             </div>
-            <div class="col-6 col-xl-2">
-                <article class="card summary-card border-0 shadow-sm h-100">
-                    <div class="card-body">
-                        <p class="text-muted small mb-1">Nonaktif</p>
-                        <h2 class="h4 mb-0">{{ summary.inactive }}</h2>
-                    </div>
-                </article>
+            <div class="col">
+                {% include "partials/stats_card.html" with title="Nonaktif" value=summary.inactive icon="ri-close-circle-line" tone="secondary" %}
             </div>
         </section>
 
@@ -386,4 +371,3 @@
         })();
     </script>
 {% endblock %}
-

@@ -59,30 +59,18 @@
                         {% endif %}
                     </div>
                     <div class="col-lg-7">
-                        <div class="row g-2">
-                            <div class="col-6 col-md-3">
-                                <div class="p-3 border rounded-3 bg-light-subtle h-100">
-                                    <div class="small text-muted">Persentase</div>
-                                    <div class="fw-semibold">{{ percentage_value }}%</div>
-                                </div>
+                        <div class="row row-cols-2 row-cols-md-4 g-2 cbt-stats-grid">
+                            <div class="col">
+                                {% include "partials/stats_card.html" with title="Persentase" value=percentage_value value_suffix="%" icon="ri-line-chart-line" tone="info" card_class="cbt-stat-card--compact" %}
                             </div>
-                            <div class="col-6 col-md-3">
-                                <div class="p-3 border rounded-3 bg-light-subtle h-100">
-                                    <div class="small text-muted">Peringkat</div>
-                                    <div class="fw-semibold">{{ rank_label }}</div>
-                                </div>
+                            <div class="col">
+                                {% include "partials/stats_card.html" with title="Peringkat" value=rank_label icon="ri-award-line" tone="primary" card_class="cbt-stat-card--compact" %}
                             </div>
-                            <div class="col-6 col-md-3">
-                                <div class="p-3 border rounded-3 bg-light-subtle h-100">
-                                    <div class="small text-muted">Waktu Pengerjaan</div>
-                                    <div class="fw-semibold">{{ time_taken_human }}</div>
-                                </div>
+                            <div class="col">
+                                {% include "partials/stats_card.html" with title="Waktu Pengerjaan" value=time_taken_human icon="ri-time-line" tone="warning" card_class="cbt-stat-card--compact" %}
                             </div>
-                            <div class="col-6 col-md-3">
-                                <div class="p-3 border rounded-3 bg-light-subtle h-100">
-                                    <div class="small text-muted">Efisiensi Waktu</div>
-                                    <div class="fw-semibold">{{ time_efficiency }}%</div>
-                                </div>
+                            <div class="col">
+                                {% include "partials/stats_card.html" with title="Efisiensi Waktu" value=time_efficiency value_suffix="%" icon="ri-timer-flash-line" tone="success" card_class="cbt-stat-card--compact" %}
                             </div>
                         </div>
                     </div>
@@ -97,30 +85,18 @@
                         <h3 class="h6 mb-0">Ringkasan Jawaban</h3>
                     </div>
                     <div class="card-body px-3 px-md-4">
-                        <div class="row g-3 mb-3">
-                            <div class="col-6 col-md-3">
-                                <div class="result-stat-card">
-                                    <p class="small text-muted mb-1">Benar</p>
-                                    <h4 class="h5 mb-0 text-success">{{ result.correct_answers }}</h4>
-                                </div>
+                        <div class="row row-cols-2 row-cols-md-4 g-3 mb-3 cbt-stats-grid">
+                            <div class="col">
+                                {% include "partials/stats_card.html" with title="Benar" value=result.correct_answers icon="ri-checkbox-circle-line" tone="success" %}
                             </div>
-                            <div class="col-6 col-md-3">
-                                <div class="result-stat-card">
-                                    <p class="small text-muted mb-1">Salah</p>
-                                    <h4 class="h5 mb-0 text-danger">{{ result.wrong_answers }}</h4>
-                                </div>
+                            <div class="col">
+                                {% include "partials/stats_card.html" with title="Salah" value=result.wrong_answers icon="ri-close-circle-line" tone="danger" %}
                             </div>
-                            <div class="col-6 col-md-3">
-                                <div class="result-stat-card">
-                                    <p class="small text-muted mb-1">Tidak Dijawab</p>
-                                    <h4 class="h5 mb-0 text-secondary">{{ result.unanswered }}</h4>
-                                </div>
+                            <div class="col">
+                                {% include "partials/stats_card.html" with title="Tidak Dijawab" value=result.unanswered icon="ri-question-line" tone="secondary" %}
                             </div>
-                            <div class="col-6 col-md-3">
-                                <div class="result-stat-card">
-                                    <p class="small text-muted mb-1">Total Soal</p>
-                                    <h4 class="h5 mb-0">{{ result.total_questions }}</h4>
-                                </div>
+                            <div class="col">
+                                {% include "partials/stats_card.html" with title="Total Soal" value=result.total_questions icon="ri-file-list-3-line" tone="primary" %}
                             </div>
                         </div>
 
@@ -254,4 +230,3 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script src="{% static 'results/js/student_results.js' %}"></script>
 {% endblock %}
-

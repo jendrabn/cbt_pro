@@ -38,38 +38,18 @@
 
         <div id="monitoringAlert" class="mb-3 d-none"></div>
 
-        <section class="row g-3 mb-4">
-            <div class="col-6 col-xl-3">
-                <article class="card border-0 shadow-sm h-100">
-                    <div class="card-body">
-                        <p class="small text-muted mb-1">Total Peserta</p>
-                        <h2 id="totalParticipantsValue" class="h4 mb-0">0</h2>
-                    </div>
-                </article>
+        <section class="row row-cols-2 row-cols-xl-4 g-3 mb-4 cbt-stats-grid">
+            <div class="col">
+                {% include "partials/stats_card.html" with title="Total Peserta" value="0" value_id="totalParticipantsValue" icon="ri-group-line" tone="primary" %}
             </div>
-            <div class="col-6 col-xl-3">
-                <article class="card border-0 shadow-sm h-100">
-                    <div class="card-body">
-                        <p class="small text-muted mb-1">Sedang Aktif</p>
-                        <h2 id="currentlyActiveValue" class="h4 mb-0 text-success">0</h2>
-                    </div>
-                </article>
+            <div class="col">
+                {% include "partials/stats_card.html" with title="Sedang Aktif" value="0" value_id="currentlyActiveValue" icon="ri-loader-4-line" tone="success" %}
             </div>
-            <div class="col-6 col-xl-3">
-                <article class="card border-0 shadow-sm h-100">
-                    <div class="card-body">
-                        <p class="small text-muted mb-1">Sudah Selesai</p>
-                        <h2 id="completedValue" class="h4 mb-0 text-primary">0</h2>
-                    </div>
-                </article>
+            <div class="col">
+                {% include "partials/stats_card.html" with title="Sudah Selesai" value="0" value_id="completedValue" icon="ri-check-double-line" tone="info" %}
             </div>
-            <div class="col-6 col-xl-3">
-                <article class="card border-0 shadow-sm h-100">
-                    <div class="card-body">
-                        <p class="small text-muted mb-1">Rata-rata Progress</p>
-                        <h2 id="averageProgressValue" class="h4 mb-0">0%</h2>
-                    </div>
-                </article>
+            <div class="col">
+                {% include "partials/stats_card.html" with title="Rata-rata Progress" value="0%" value_id="averageProgressValue" icon="ri-progress-5-line" tone="warning" %}
             </div>
         </section>
 
@@ -183,4 +163,3 @@
 <script src="https://cdn.jsdelivr.net/npm/axios@1.6.2/dist/axios.min.js"></script>
     <script src="{% static 'monitoring/js/monitoring.js' %}?v=20260218-1"></script>
 {% endblock %}
-

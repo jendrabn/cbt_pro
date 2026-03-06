@@ -25,38 +25,18 @@
 {% endblock %}
 
 {% block content %}
-        <section class="row g-3 mb-4">
-            <div class="col-6 col-xl-3">
-                <article class="card border-0 shadow-sm h-100">
-                    <div class="card-body">
-                        <p class="small text-muted mb-1">Total Ujian</p>
-                        <h2 class="h4 mb-0">{{ summary.total_exam }}</h2>
-                    </div>
-                </article>
+        <section class="row row-cols-2 row-cols-xl-4 g-3 mb-4 cbt-stats-grid">
+            <div class="col">
+                {% include "partials/stats_card.html" with title="Total Ujian" value=summary.total_exam icon="ri-file-list-3-line" tone="primary" %}
             </div>
-            <div class="col-6 col-xl-3">
-                <article class="card border-0 shadow-sm h-100">
-                    <div class="card-body">
-                        <p class="small text-muted mb-1">Total Peserta</p>
-                        <h2 class="h4 mb-0">{{ summary.total_peserta }}</h2>
-                    </div>
-                </article>
+            <div class="col">
+                {% include "partials/stats_card.html" with title="Total Peserta" value=summary.total_peserta icon="ri-group-line" tone="info" %}
             </div>
-            <div class="col-6 col-xl-3">
-                <article class="card border-0 shadow-sm h-100">
-                    <div class="card-body">
-                        <p class="small text-muted mb-1">Rata-rata Nilai</p>
-                        <h2 class="h4 mb-0">{{ summary.rata_rata_nilai }}%</h2>
-                    </div>
-                </article>
+            <div class="col">
+                {% include "partials/stats_card.html" with title="Rata-rata Nilai" value=summary.rata_rata_nilai value_suffix="%" icon="ri-line-chart-line" tone="success" %}
             </div>
-            <div class="col-6 col-xl-3">
-                <article class="card border-0 shadow-sm h-100">
-                    <div class="card-body">
-                        <p class="small text-muted mb-1">Rata-rata Kelulusan</p>
-                        <h2 class="h4 mb-0">{{ summary.rata_rata_kelulusan }}%</h2>
-                    </div>
-                </article>
+            <div class="col">
+                {% include "partials/stats_card.html" with title="Rata-rata Kelulusan" value=summary.rata_rata_kelulusan value_suffix="%" icon="ri-award-line" tone="warning" %}
             </div>
         </section>
 
@@ -228,4 +208,3 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script src="{% static 'results/js/charts.js' %}"></script>
 {% endblock %}
-

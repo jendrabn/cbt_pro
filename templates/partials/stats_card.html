@@ -1,0 +1,34 @@
+{% comment %}
+Reusable Stats Card
+- tone: primary | success | info | warning | danger | secondary | neutral
+- delta_tone: success | danger | warning | info | neutral
+- optional: card_class (e.g. cbt-stat-card--compact), value_prefix/value_suffix, note_prefix/note_suffix
+- optional delta: delta_text OR delta_prefix/delta_value/delta_suffix
+{% endcomment %}
+<article class="card cbt-stat-card cbt-stat-card--{{ tone|default:'primary' }} border-0 shadow-sm h-100{% if card_class %} {{ card_class }}{% endif %}">
+    <div class="card-body">
+        <div class="cbt-stat-card__main">
+            <p class="cbt-stat-card__label mb-1">{{ title }}</p>
+            <h2 class="cbt-stat-card__value mb-0{% if value_class %} {{ value_class }}{% endif %}"{% if value_id %} id="{{ value_id }}"{% endif %}>
+                {% if value_prefix %}{{ value_prefix }}{% endif %}{{ value }}{% if value_suffix %}{{ value_suffix }}{% endif %}
+            </h2>
+            {% if note or note_prefix or note_suffix %}
+            <p class="cbt-stat-card__note mb-0">
+                {% if note_prefix %}{{ note_prefix }}{% endif %}{{ note }}{% if note_suffix %}{{ note_suffix }}{% endif %}
+            </p>
+            {% endif %}
+            {% if delta_text or delta_value or delta_value == 0 %}
+            <span class="cbt-stat-card__delta cbt-stat-card__delta--{{ delta_tone|default:'neutral' }}">
+                {% if delta_text %}
+                    {{ delta_text }}
+                {% else %}
+                    {% if delta_prefix %}{{ delta_prefix }}{% endif %}{{ delta_value }}{% if delta_suffix %}{{ delta_suffix }}{% endif %}
+                {% endif %}
+            </span>
+            {% endif %}
+        </div>
+        {% if icon %}
+        <span class="cbt-stat-card__icon" aria-hidden="true"><i class="{{ icon }}"></i></span>
+        {% endif %}
+    </div>
+</article>

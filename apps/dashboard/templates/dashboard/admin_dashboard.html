@@ -20,47 +20,21 @@
 {% endblock %}
 
 {% block content %}
-        <section class="row g-3 mb-4">
-            <div class="col-6 col-xl">
-                <article class="card metric-card h-100 border-0 shadow-sm">
-                    <div class="card-body">
-                        <p class="metric-label mb-1">Total Pengguna Aktif</p>
-                        <h2 class="metric-value mb-0">{{ total_users }}</h2>
-                        <p class="small text-muted mb-0">Guru: {{ teacher_count }} | Siswa: {{ student_count }}</p>
-                    </div>
-                </article>
+        <section class="row row-cols-2 row-cols-md-3 row-cols-xl-5 g-3 mb-4 cbt-stats-grid">
+            <div class="col">
+                {% include "partials/stats_card.html" with title="Total Pengguna Aktif" value=total_users icon="ri-group-line" tone="primary" %}
             </div>
-            <div class="col-6 col-xl">
-                <article class="card metric-card h-100 border-0 shadow-sm">
-                    <div class="card-body">
-                        <p class="metric-label mb-1">Total Soal</p>
-                        <h2 class="metric-value mb-0">{{ total_questions }}</h2>
-                    </div>
-                </article>
+            <div class="col">
+                {% include "partials/stats_card.html" with title="Total Soal" value=total_questions icon="ri-questionnaire-line" tone="info" %}
             </div>
-            <div class="col-6 col-xl">
-                <article class="card metric-card h-100 border-0 shadow-sm">
-                    <div class="card-body">
-                        <p class="metric-label mb-1">Total Mata Pelajaran Aktif</p>
-                        <h2 class="metric-value mb-0">{{ total_active_subjects }}</h2>
-                    </div>
-                </article>
+            <div class="col">
+                {% include "partials/stats_card.html" with title="Mapel Aktif" value=total_active_subjects icon="ri-book-open-line" tone="success" %}
             </div>
-            <div class="col-6 col-xl">
-                <article class="card metric-card h-100 border-0 shadow-sm">
-                    <div class="card-body">
-                        <p class="metric-label mb-1">Total Ujian Aktif</p>
-                        <h2 class="metric-value mb-0">{{ active_exams }}</h2>
-                    </div>
-                </article>
+            <div class="col">
+                {% include "partials/stats_card.html" with title="Ujian Aktif" value=active_exams icon="ri-timer-line" tone="warning" %}
             </div>
-            <div class="col-6 col-xl">
-                <article class="card metric-card h-100 border-0 shadow-sm">
-                    <div class="card-body">
-                        <p class="metric-label mb-1">Total Ujian Selesai</p>
-                        <h2 class="metric-value mb-0">{{ completed_exams }}</h2>
-                    </div>
-                </article>
+            <div class="col">
+                {% include "partials/stats_card.html" with title="Ujian Selesai" value=completed_exams icon="ri-check-double-line" tone="secondary" %}
             </div>
         </section>
 

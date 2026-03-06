@@ -20,38 +20,18 @@
 {% endblock %}
 
 {% block content %}
-        <section class="row g-3 mb-4">
-            <div class="col-6 col-xl-3">
-                <article class="card metric-card h-100 border-0 shadow-sm">
-                    <div class="card-body">
-                        <p class="metric-label mb-1">Soal Dibuat</p>
-                        <h2 class="metric-value mb-0">{{ total_questions_created }}</h2>
-                    </div>
-                </article>
+        <section class="row row-cols-2 row-cols-xl-4 g-3 mb-4 cbt-stats-grid">
+            <div class="col">
+                {% include "partials/stats_card.html" with title="Soal Dibuat" value=total_questions_created icon="ri-questionnaire-line" tone="primary" %}
             </div>
-            <div class="col-6 col-xl-3">
-                <article class="card metric-card h-100 border-0 shadow-sm">
-                    <div class="card-body">
-                        <p class="metric-label mb-1">Ujian Aktif</p>
-                        <h2 class="metric-value mb-0">{{ active_exams }}</h2>
-                    </div>
-                </article>
+            <div class="col">
+                {% include "partials/stats_card.html" with title="Ujian Aktif" value=active_exams icon="ri-timer-line" tone="warning" %}
             </div>
-            <div class="col-6 col-xl-3">
-                <article class="card metric-card h-100 border-0 shadow-sm">
-                    <div class="card-body">
-                        <p class="metric-label mb-1">Total Siswa</p>
-                        <h2 class="metric-value mb-0">{{ total_students }}</h2>
-                    </div>
-                </article>
+            <div class="col">
+                {% include "partials/stats_card.html" with title="Total Siswa" value=total_students icon="ri-graduation-cap-line" tone="info" %}
             </div>
-            <div class="col-6 col-xl-3">
-                <article class="card metric-card h-100 border-0 shadow-sm">
-                    <div class="card-body">
-                        <p class="metric-label mb-1">Rata-rata / Lulus</p>
-                        <h2 class="metric-value mb-0">{{ average_score }}% / {{ pass_rate }}%</h2>
-                    </div>
-                </article>
+            <div class="col">
+                {% include "partials/stats_card.html" with title="Rata-rata Nilai" value=average_score value_suffix="%" note_prefix="Lulus " note=pass_rate note_suffix="%" icon="ri-line-chart-line" tone="success" %}
             </div>
         </section>
 

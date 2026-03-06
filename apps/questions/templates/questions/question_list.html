@@ -60,46 +60,21 @@
             </div>
         {% endif %}
 
-        <section class="row g-3 mb-4">
-            <div class="col-6 col-xl-2">
-                <article class="card border-0 shadow-sm h-100">
-                    <div class="card-body">
-                        <p class="text-muted small mb-1">Total Soal</p>
-                        <h2 class="h4 mb-0">{{ summary.total }}</h2>
-                    </div>
-                </article>
+        <section class="row row-cols-2 row-cols-md-3 row-cols-xl-5 g-3 mb-4 cbt-stats-grid">
+            <div class="col">
+                {% include "partials/stats_card.html" with title="Total Soal" value=summary.total icon="ri-database-2-line" tone="primary" %}
             </div>
-            <div class="col-6 col-xl-2">
-                <article class="card border-0 shadow-sm h-100">
-                    <div class="card-body">
-                        <p class="text-muted small mb-1">Soal Ditampilkan</p>
-                        <h2 class="h4 mb-0">{{ summary.filtered }}</h2>
-                    </div>
-                </article>
+            <div class="col">
+                {% include "partials/stats_card.html" with title="Soal Ditampilkan" value=summary.filtered icon="ri-filter-3-line" tone="info" %}
             </div>
-            <div class="col-6 col-xl-2">
-                <article class="card border-0 shadow-sm h-100">
-                    <div class="card-body">
-                        <p class="text-muted small mb-1">Pilihan Ganda</p>
-                        <h2 class="h4 mb-0">{{ summary.multiple_choice }}</h2>
-                    </div>
-                </article>
+            <div class="col">
+                {% include "partials/stats_card.html" with title="Pilihan Ganda" value=summary.multiple_choice icon="ri-list-check-3" tone="success" %}
             </div>
-            <div class="col-6 col-xl-2">
-                <article class="card border-0 shadow-sm h-100">
-                    <div class="card-body">
-                        <p class="text-muted small mb-1">Esai</p>
-                        <h2 class="h4 mb-0">{{ summary.essay }}</h2>
-                    </div>
-                </article>
+            <div class="col">
+                {% include "partials/stats_card.html" with title="Esai" value=summary.essay icon="ri-file-text-line" tone="warning" %}
             </div>
-            <div class="col-6 col-xl-2">
-                <article class="card border-0 shadow-sm h-100">
-                    <div class="card-body">
-                        <p class="text-muted small mb-1">Jawaban Singkat</p>
-                        <h2 class="h4 mb-0">{{ summary.short_answer }}</h2>
-                    </div>
-                </article>
+            <div class="col">
+                {% include "partials/stats_card.html" with title="Jawaban Singkat" value=summary.short_answer icon="ri-chat-quote-line" tone="secondary" %}
             </div>
         </section>
 
@@ -346,4 +321,3 @@
     </script>
 <script src="{% static 'questions/js/question_preview.js' %}"></script>
 {% endblock %}
-

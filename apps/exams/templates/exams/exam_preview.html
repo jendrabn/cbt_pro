@@ -18,30 +18,26 @@
                 </p>
             </div>
             <div class="card-body">
-                <div class="row g-3">
-                    <div class="col-md-3">
-                        <div class="preview-stat-box">
-                            <p class="small text-muted mb-1">Total Soal</p>
-                            <strong>{{ exam_questions|length }}</strong>
-                        </div>
+                <div class="row row-cols-2 row-cols-md-4 g-3 cbt-stats-grid">
+                    <div class="col">
+                        {% include "partials/stats_card.html" with title="Total Soal" value=exam_questions|length icon="ri-list-check-3" tone="primary" card_class="cbt-stat-card--compact" %}
                     </div>
-                    <div class="col-md-3">
-                        <div class="preview-stat-box">
-                            <p class="small text-muted mb-1">Total Poin</p>
-                            <strong>{{ exam.total_points }}</strong>
-                        </div>
+                    <div class="col">
+                        {% include "partials/stats_card.html" with title="Total Poin" value=exam.total_points icon="ri-star-line" tone="warning" card_class="cbt-stat-card--compact" %}
                     </div>
-                    <div class="col-md-3">
-                        <div class="preview-stat-box">
-                            <p class="small text-muted mb-1">Acak Soal</p>
-                            <strong>{% if exam.randomize_questions %}Ya{% else %}Tidak{% endif %}</strong>
-                        </div>
+                    <div class="col">
+                        {% if exam.randomize_questions %}
+                            {% include "partials/stats_card.html" with title="Acak Soal" value="Ya" icon="ri-shuffle-line" tone="success" card_class="cbt-stat-card--compact" %}
+                        {% else %}
+                            {% include "partials/stats_card.html" with title="Acak Soal" value="Tidak" icon="ri-shuffle-line" tone="secondary" card_class="cbt-stat-card--compact" %}
+                        {% endif %}
                     </div>
-                    <div class="col-md-3">
-                        <div class="preview-stat-box">
-                            <p class="small text-muted mb-1">Aturan Navigasi Global</p>
-                            <strong>{% if exam.override_question_navigation %}Aktif{% else %}Tidak Aktif{% endif %}</strong>
-                        </div>
+                    <div class="col">
+                        {% if exam.override_question_navigation %}
+                            {% include "partials/stats_card.html" with title="Navigasi Global" value="Aktif" icon="ri-route-line" tone="info" card_class="cbt-stat-card--compact" %}
+                        {% else %}
+                            {% include "partials/stats_card.html" with title="Navigasi Global" value="Tidak Aktif" icon="ri-route-line" tone="secondary" card_class="cbt-stat-card--compact" %}
+                        {% endif %}
                     </div>
                 </div>
             </div>

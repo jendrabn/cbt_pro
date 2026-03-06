@@ -41,24 +41,15 @@
 
                 <p class="mb-3">{{ exam.description|default:"Tidak ada deskripsi ujian." }}</p>
 
-                <div class="row g-3 mb-3">
-                    <div class="col-md-4">
-                        <div class="border rounded-3 p-3 h-100">
-                            <p class="small text-muted mb-1">Jadwal</p>
-                            <p class="mb-0">{{ exam.start_time|date:"d M Y H:i" }} - {{ exam.end_time|date:"d M Y H:i" }}</p>
-                        </div>
+                <div class="row row-cols-1 row-cols-md-3 g-3 mb-3 cbt-stats-grid">
+                    <div class="col">
+                        {% include "partials/stats_card.html" with title="Jadwal Mulai" value=exam.start_time|date:"d M Y H:i" note_prefix="Selesai " note=exam.end_time|date:"d M Y H:i" icon="ri-calendar-event-line" tone="info" card_class="cbt-stat-card--compact" %}
                     </div>
-                    <div class="col-md-4">
-                        <div class="border rounded-3 p-3 h-100">
-                            <p class="small text-muted mb-1">Durasi</p>
-                            <p class="mb-0">{{ exam.duration_minutes }} menit</p>
-                        </div>
+                    <div class="col">
+                        {% include "partials/stats_card.html" with title="Durasi" value=exam.duration_minutes value_suffix=" menit" icon="ri-time-line" tone="primary" card_class="cbt-stat-card--compact" %}
                     </div>
-                    <div class="col-md-4">
-                        <div class="border rounded-3 p-3 h-100">
-                            <p class="small text-muted mb-1">Total Soal</p>
-                            <p class="mb-0">{{ exam.exam_questions.count }}</p>
-                        </div>
+                    <div class="col">
+                        {% include "partials/stats_card.html" with title="Total Soal" value=exam.exam_questions.count icon="ri-list-check-3" tone="success" card_class="cbt-stat-card--compact" %}
                     </div>
                 </div>
 

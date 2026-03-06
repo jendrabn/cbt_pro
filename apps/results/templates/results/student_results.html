@@ -33,73 +33,33 @@
             </div>
         {% endif %}
 
-        <section class="row g-3 mb-4">
-            <div class="col-6 col-xl-3">
-                <article class="card border-0 shadow-sm h-100">
-                    <div class="card-body">
-                        <p class="small text-muted mb-1">Total Hasil</p>
-                        <h2 class="h4 mb-0">{{ summary.total_hasil }}</h2>
-                    </div>
-                </article>
+        <section class="row row-cols-2 row-cols-xl-4 g-3 mb-4 cbt-stats-grid">
+            <div class="col">
+                {% include "partials/stats_card.html" with title="Total Hasil" value=summary.total_hasil icon="ri-file-chart-line" tone="primary" %}
             </div>
-            <div class="col-6 col-xl-3">
-                <article class="card border-0 shadow-sm h-100">
-                    <div class="card-body">
-                        <p class="small text-muted mb-1">Rata-rata Nilai</p>
-                        <h2 class="h4 mb-0">{{ summary.rata_rata_nilai }}%</h2>
-                    </div>
-                </article>
+            <div class="col">
+                {% include "partials/stats_card.html" with title="Rata-rata Nilai" value=summary.rata_rata_nilai value_suffix="%" icon="ri-line-chart-line" tone="info" %}
             </div>
-            <div class="col-6 col-xl-3">
-                <article class="card border-0 shadow-sm h-100">
-                    <div class="card-body">
-                        <p class="small text-muted mb-1">Persentase Lulus</p>
-                        <h2 class="h4 mb-0">{{ summary.persentase_lulus }}%</h2>
-                    </div>
-                </article>
+            <div class="col">
+                {% include "partials/stats_card.html" with title="Persentase Lulus" value=summary.persentase_lulus value_suffix="%" icon="ri-medal-line" tone="success" %}
             </div>
-            <div class="col-6 col-xl-3">
-                <article class="card border-0 shadow-sm h-100">
-                    <div class="card-body">
-                        <p class="small text-muted mb-1">Sertifikat Tersedia</p>
-                        <h2 class="h4 mb-0">{{ summary.jumlah_sertifikat }}</h2>
-                    </div>
-                </article>
+            <div class="col">
+                {% include "partials/stats_card.html" with title="Sertifikat Tersedia" value=summary.jumlah_sertifikat icon="ri-award-line" tone="warning" %}
             </div>
         </section>
 
-        <section class="row g-3 mb-4">
-            <div class="col-6 col-xl-3">
-                <article class="card border-0 shadow-sm h-100">
-                    <div class="card-body">
-                        <p class="small text-muted mb-1">Total Benar</p>
-                        <h2 class="h5 mb-0">{{ summary.total_benar }}</h2>
-                    </div>
-                </article>
+        <section class="row row-cols-2 row-cols-xl-4 g-3 mb-4 cbt-stats-grid">
+            <div class="col">
+                {% include "partials/stats_card.html" with title="Total Benar" value=summary.total_benar icon="ri-checkbox-circle-line" tone="success" %}
             </div>
-            <div class="col-6 col-xl-3">
-                <article class="card border-0 shadow-sm h-100">
-                    <div class="card-body">
-                        <p class="small text-muted mb-1">Total Salah</p>
-                        <h2 class="h5 mb-0">{{ summary.total_salah }}</h2>
-                    </div>
-                </article>
+            <div class="col">
+                {% include "partials/stats_card.html" with title="Total Salah" value=summary.total_salah icon="ri-close-circle-line" tone="danger" %}
             </div>
-            <div class="col-6 col-xl-3">
-                <article class="card border-0 shadow-sm h-100">
-                    <div class="card-body">
-                        <p class="small text-muted mb-1">Total Tidak Dijawab</p>
-                        <h2 class="h5 mb-0">{{ summary.total_kosong }}</h2>
-                    </div>
-                </article>
+            <div class="col">
+                {% include "partials/stats_card.html" with title="Total Tidak Dijawab" value=summary.total_kosong icon="ri-question-line" tone="secondary" %}
             </div>
-            <div class="col-6 col-xl-3">
-                <article class="card border-0 shadow-sm h-100">
-                    <div class="card-body">
-                        <p class="small text-muted mb-1">Rata-rata Efisiensi Waktu</p>
-                        <h2 class="h5 mb-0">{{ summary.rata_rata_efisiensi }}%</h2>
-                    </div>
-                </article>
+            <div class="col">
+                {% include "partials/stats_card.html" with title="Rata-rata Efisiensi Waktu" value=summary.rata_rata_efisiensi value_suffix="%" icon="ri-time-line" tone="info" %}
             </div>
         </section>
 
@@ -281,4 +241,3 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script src="{% static 'results/js/student_results.js' %}"></script>
 {% endblock %}
-

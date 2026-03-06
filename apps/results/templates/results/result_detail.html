@@ -42,54 +42,24 @@
             </div>
         {% endif %}
 
-        <section class="row g-3 mb-4">
-            <div class="col-6 col-xl-2">
-                <article class="card border-0 shadow-sm h-100">
-                    <div class="card-body">
-                        <p class="small text-muted mb-1">Peserta</p>
-                        <h2 class="h4 mb-0">{{ summary.total_participants }}</h2>
-                    </div>
-                </article>
+        <section class="row row-cols-2 row-cols-md-3 row-cols-xl-6 g-3 mb-4 cbt-stats-grid">
+            <div class="col">
+                {% include "partials/stats_card.html" with title="Peserta" value=summary.total_participants icon="ri-group-line" tone="primary" %}
             </div>
-            <div class="col-6 col-xl-2">
-                <article class="card border-0 shadow-sm h-100">
-                    <div class="card-body">
-                        <p class="small text-muted mb-1">Tingkat Lulus</p>
-                        <h2 class="h4 mb-0">{{ summary.pass_rate }}%</h2>
-                    </div>
-                </article>
+            <div class="col">
+                {% include "partials/stats_card.html" with title="Tingkat Lulus" value=summary.pass_rate value_suffix="%" icon="ri-medal-line" tone="success" %}
             </div>
-            <div class="col-6 col-xl-2">
-                <article class="card border-0 shadow-sm h-100">
-                    <div class="card-body">
-                        <p class="small text-muted mb-1">Nilai Tertinggi</p>
-                        <h2 class="h4 mb-0">{{ statistics_cards.highest }}%</h2>
-                    </div>
-                </article>
+            <div class="col">
+                {% include "partials/stats_card.html" with title="Nilai Tertinggi" value=statistics_cards.highest value_suffix="%" icon="ri-arrow-up-circle-line" tone="info" %}
             </div>
-            <div class="col-6 col-xl-2">
-                <article class="card border-0 shadow-sm h-100">
-                    <div class="card-body">
-                        <p class="small text-muted mb-1">Nilai Terendah</p>
-                        <h2 class="h4 mb-0">{{ statistics_cards.lowest }}%</h2>
-                    </div>
-                </article>
+            <div class="col">
+                {% include "partials/stats_card.html" with title="Nilai Terendah" value=statistics_cards.lowest value_suffix="%" icon="ri-arrow-down-circle-line" tone="danger" %}
             </div>
-            <div class="col-6 col-xl-2">
-                <article class="card border-0 shadow-sm h-100">
-                    <div class="card-body">
-                        <p class="small text-muted mb-1">Rata-rata</p>
-                        <h2 class="h4 mb-0">{{ statistics_cards.average }}%</h2>
-                    </div>
-                </article>
+            <div class="col">
+                {% include "partials/stats_card.html" with title="Rata-rata" value=statistics_cards.average value_suffix="%" icon="ri-line-chart-line" tone="warning" %}
             </div>
-            <div class="col-6 col-xl-2">
-                <article class="card border-0 shadow-sm h-100">
-                    <div class="card-body">
-                        <p class="small text-muted mb-1">Median / Std Dev</p>
-                        <h2 class="h6 mb-0">{{ statistics_cards.median }}% / {{ statistics_cards.std_dev }}</h2>
-                    </div>
-                </article>
+            <div class="col">
+                {% include "partials/stats_card.html" with title="Median" value=statistics_cards.median value_suffix="%" note_prefix="Std Dev " note=statistics_cards.std_dev icon="ri-functions" tone="secondary" %}
             </div>
         </section>
 
@@ -396,4 +366,3 @@
     <script src="{% static 'results/js/charts.js' %}"></script>
     <script src="{% static 'results/js/analytics.js' %}"></script>
 {% endblock %}
-

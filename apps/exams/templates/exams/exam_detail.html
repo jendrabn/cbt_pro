@@ -49,38 +49,18 @@
             </div>
         {% endif %}
 
-        <section class="row g-3 mb-4">
-            <div class="col-md-3">
-                <div class="card border-0 shadow-sm h-100">
-                    <div class="card-body">
-                        <p class="small text-muted mb-1">Status</p>
-                        <h2 class="h6 mb-0"><span class="badge exam-status-badge status-{{ exam.status }}">{{ exam_status_label }}</span></h2>
-                    </div>
-                </div>
+        <section class="row row-cols-2 row-cols-md-4 g-3 mb-4 cbt-stats-grid">
+            <div class="col">
+                {% include "partials/stats_card.html" with title="Status" value=exam_status_label icon="ri-information-line" tone="primary" card_class="cbt-stat-card--compact" %}
             </div>
-            <div class="col-md-3">
-                <div class="card border-0 shadow-sm h-100">
-                    <div class="card-body">
-                        <p class="small text-muted mb-1">Status Waktu</p>
-                        <h2 class="h6 mb-0">{{ timing_status }}</h2>
-                    </div>
-                </div>
+            <div class="col">
+                {% include "partials/stats_card.html" with title="Status Waktu" value=timing_status icon="ri-time-line" tone="warning" card_class="cbt-stat-card--compact" %}
             </div>
-            <div class="col-md-3">
-                <div class="card border-0 shadow-sm h-100">
-                    <div class="card-body">
-                        <p class="small text-muted mb-1">Jumlah Soal</p>
-                        <h2 class="h6 mb-0">{{ exam_questions|length }}</h2>
-                    </div>
-                </div>
+            <div class="col">
+                {% include "partials/stats_card.html" with title="Jumlah Soal" value=exam_questions|length icon="ri-list-check-3" tone="info" card_class="cbt-stat-card--compact" %}
             </div>
-            <div class="col-md-3">
-                <div class="card border-0 shadow-sm h-100">
-                    <div class="card-body">
-                        <p class="small text-muted mb-1">Total Poin</p>
-                        <h2 class="h6 mb-0">{{ exam.total_points }}</h2>
-                    </div>
-                </div>
+            <div class="col">
+                {% include "partials/stats_card.html" with title="Total Poin" value=exam.total_points icon="ri-star-line" tone="success" card_class="cbt-stat-card--compact" %}
             </div>
         </section>
 
@@ -212,4 +192,3 @@
             </div>
         </section>
 {% endblock %}
-
