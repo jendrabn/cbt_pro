@@ -12,21 +12,21 @@
 {% block page_header %}
     <section class="cbt-page-header">
         <div class="cbt-page-header-body">
-            {% include "partials/page_header.html" with eyebrow="Panel Guru" title="Manajemen Bank Soal" %}
+            {% include "partials/page_header.html" with eyebrow="Panel Guru" title="Manajemen Bank Soal" subtitle="Kelola koleksi soal dan proses impor/ekspor bank soal." %}
             <div class="d-flex align-items-center gap-2 cbt-page-header-actions">
                 <div class="d-flex flex-wrap gap-2">
-                                <a href="{% url 'question_create' %}" class="btn btn-sm btn-primary" title="Tambah soal baru">
+                                <a href="{% url 'question_create' %}" class="btn btn-primary" title="Tambah soal baru">
                                     <i class="ri-add-line me-1"></i>Tambah Soal
                                 </a>
                                 <a
                                     href="{% url 'question_import' %}"
-                                    class="btn btn-sm btn-outline-secondary"
+                                    class="btn btn-outline-secondary"
                                     title="Buka halaman impor soal"
                                 >
                                     <i class="ri-upload-line me-1"></i>Impor
                                 </a>
                                 <div class="dropdown">
-                                    <button class="btn btn-sm btn-outline-success dropdown-toggle" data-bs-toggle="dropdown" title="Ekspor soal">
+                                    <button class="btn btn-outline-success dropdown-toggle" data-bs-toggle="dropdown" title="Ekspor soal">
                                         <i class="ri-download-line me-1"></i>Ekspor
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-end">
@@ -105,13 +105,18 @@
 
         <section class="card border-0 shadow-sm mb-4">
             <div class="card-body">
-                <form method="get" class="row g-2 g-md-3 align-items-end">
-                    <div class="col-12 col-md-6 col-xl-4">
-                        <label class="form-label small mb-1">Pencarian</label>
-                        <input type="search" class="form-control" name="q" value="{{ filters.q }}" placeholder="Cari teks soal...">
+                <form method="get" class="cbt-inline-filter">
+                    <div class="cbt-inline-filter-search">
+                        <i class="ri-search-line"></i>
+                        <input
+                            type="search"
+                            class="form-control"
+                            name="q"
+                            value="{{ filters.q }}"
+                            placeholder="Cari teks soal..."
+                        >
                     </div>
-                    <div class="col-6 col-md-3 col-xl-2">
-                        <label class="form-label small mb-1">Tipe Soal</label>
+                    <div class="cbt-inline-filter-select">
                         <select class="form-select" name="question_type">
                             <option value="">Semua Tipe</option>
                             {% for key, label in question_type_choices %}
@@ -119,8 +124,7 @@
                             {% endfor %}
                         </select>
                     </div>
-                    <div class="col-6 col-md-3 col-xl-2">
-                        <label class="form-label small mb-1">Mata Pelajaran</label>
+                    <div class="cbt-inline-filter-select">
                         <select class="form-select" name="subject">
                             <option value="">Semua Mata Pelajaran</option>
                             {% for subject in subjects %}
@@ -128,8 +132,7 @@
                             {% endfor %}
                         </select>
                     </div>
-                    <div class="col-6 col-md-3 col-xl-2">
-                        <label class="form-label small mb-1">Kesulitan</label>
+                    <div class="cbt-inline-filter-select">
                         <select class="form-select" name="difficulty">
                             <option value="">Semua Tingkat</option>
                             {% for key, label in difficulty_choices %}
@@ -137,8 +140,7 @@
                             {% endfor %}
                         </select>
                     </div>
-                    <div class="col-6 col-md-3 col-xl-2">
-                        <label class="form-label small mb-1">Kategori</label>
+                    <div class="cbt-inline-filter-select">
                         <select class="form-select" name="category">
                             <option value="">Semua Kategori</option>
                             {% for category in categories %}
@@ -146,14 +148,12 @@
                             {% endfor %}
                         </select>
                     </div>
-                    <div class="col-12 col-md-auto d-flex gap-2">
-                        <button type="submit" class="btn btn-primary" title="Terapkan filter bank soal">
-                            <i class="ri-filter-3-line me-1"></i>Terapkan
-                        </button>
-                        <a href="{% url 'question_list' %}" class="btn btn-outline-secondary" title="Reset semua filter">
-                            Reset
-                        </a>
-                    </div>
+                    <button type="submit" class="btn btn-primary" title="Terapkan filter">
+                        <i class="ri-filter-3-line me-1"></i>Terapkan
+                    </button>
+                    <a href="{% url 'question_list' %}" class="btn btn-outline-secondary cbt-inline-filter-reset" title="Reset semua filter">
+                        <i class="ri-refresh-line me-1"></i>Reset
+                    </a>
                 </form>
             </div>
         </section>

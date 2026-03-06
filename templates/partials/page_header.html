@@ -1,4 +1,6 @@
-<div>
-    <p class="eyebrow">{{ eyebrow }}</p>
+<div class="cbt-page-header-meta">
     <h1 class="title">{{ title }}</h1>
+    {% if subtitle %}
+    <p class="subtitle">{{ subtitle }}</p>
+    {% endif %}
 </div>

@@ -12,10 +12,10 @@
 {% block page_header %}
     <section class="cbt-page-header">
         <div class="cbt-page-header-body">
-            {% include "partials/page_header.html" with eyebrow="Panel Guru" title="Hasil & Analitik" %}
+            {% include "partials/page_header.html" with eyebrow="Panel Guru" title="Hasil & Analitik" subtitle="Tinjau performa peserta dan lanjutkan ke analisis mendalam." %}
             <div class="d-flex align-items-center gap-2 cbt-page-header-actions">
                 <div class="d-flex flex-wrap gap-2">
-                                <a href="{{ analytics_url }}" class="btn btn-sm btn-outline-info" title="Buka dashboard analitik hasil ujian">
+                                <a href="{{ analytics_url }}" class="btn btn-outline-info" title="Buka dashboard analitik hasil ujian">
                                     <i class="ri-line-chart-line me-1"></i>Analitik
                                 </a>
                             </div>
@@ -70,21 +70,27 @@
 
         <section class="card border-0 shadow-sm mb-4">
             <div class="card-body">
-                <form method="get" class="row g-2 g-md-3 align-items-end">
-                    <div class="col-md-3">
-                        <label class="form-label small mb-1">Cari Ujian</label>
-                        <input type="text" class="form-control" name="q" value="{{ filters.keyword }}" placeholder="Judul / deskripsi / mapel...">
+                <form method="get" class="cbt-inline-filter">
+                    <div class="cbt-inline-filter-search">
+                        <i class="ri-search-line"></i>
+                        <input
+                            type="search"
+                            class="form-control"
+                            name="q"
+                            value="{{ filters.keyword }}"
+                            placeholder="Cari judul, deskripsi, atau mapel..."
+                        >
                     </div>
-                    <div class="col-md-2">
-                        <label class="form-label small mb-1">Tanggal Mulai</label>
-                        <input type="date" class="form-control" name="date_from" value="{{ filters.date_from|date:'Y-m-d' }}">
+                    <div class="cbt-inline-filter-range">
+                        <div class="cbt-inline-filter-date">
+                            <input type="date" class="form-control" name="date_from" value="{{ filters.date_from|date:'Y-m-d' }}">
+                        </div>
+                        <span class="cbt-inline-filter-range-sep">-</span>
+                        <div class="cbt-inline-filter-date">
+                            <input type="date" class="form-control" name="date_to" value="{{ filters.date_to|date:'Y-m-d' }}">
+                        </div>
                     </div>
-                    <div class="col-md-2">
-                        <label class="form-label small mb-1">Tanggal Akhir</label>
-                        <input type="date" class="form-control" name="date_to" value="{{ filters.date_to|date:'Y-m-d' }}">
-                    </div>
-                    <div class="col-md-2">
-                        <label class="form-label small mb-1">Mata Pelajaran</label>
+                    <div class="cbt-inline-filter-select">
                         <select class="form-select" name="subject">
                             <option value="">Semua Mapel</option>
                             {% for subject in subjects %}
@@ -92,8 +98,7 @@
                             {% endfor %}
                         </select>
                     </div>
-                    <div class="col-md-2">
-                        <label class="form-label small mb-1">Kelas</label>
+                    <div class="cbt-inline-filter-select">
                         <select class="form-select" name="class">
                             <option value="">Semua Kelas</option>
                             {% for class_item in classes %}
@@ -101,12 +106,12 @@
                             {% endfor %}
                         </select>
                     </div>
-                    <div class="col-12 col-md-auto d-flex gap-2">
-                        <button type="submit" class="btn btn-primary" title="Terapkan filter hasil ujian">
-                            <i class="ri-filter-3-line me-1"></i>Terapkan
-                        </button>
-                        <a href="{% url 'teacher_results' %}" class="btn btn-outline-secondary" title="Reset semua filter">Reset</a>
-                    </div>
+                    <button type="submit" class="btn btn-primary" title="Terapkan filter">
+                        <i class="ri-filter-3-line me-1"></i>Terapkan
+                    </button>
+                    <a href="{% url 'teacher_results' %}" class="btn btn-outline-secondary cbt-inline-filter-reset" title="Reset semua filter">
+                        <i class="ri-refresh-line me-1"></i>Reset
+                    </a>
                 </form>
             </div>
         </section>

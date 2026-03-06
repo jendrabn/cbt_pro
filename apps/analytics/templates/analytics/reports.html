@@ -12,10 +12,10 @@
 {% block page_header %}
     <section class="cbt-page-header">
         <div class="cbt-page-header-body">
-            {% include "partials/page_header.html" with eyebrow="Panel Admin" title="Laporan Analitik" %}
+            {% include "partials/page_header.html" with eyebrow="Panel Admin" title="Laporan Analitik" subtitle="Bangun laporan detail dan ekspor data sesuai kebutuhan evaluasi." %}
             <div class="d-flex align-items-center gap-2 cbt-page-header-actions">
                 <div class="d-flex gap-2">
-                                <a href="{{ analytics_url }}" class="btn btn-sm btn-outline-primary" title="Kembali ke dashboard analytics">
+                                <a href="{{ analytics_url }}" class="btn btn-outline-primary" title="Kembali ke dashboard analytics">
                                     <i class="ri-arrow-left-line me-1"></i>Kembali ke Analitik
                                 </a>
                             </div>
@@ -35,17 +35,17 @@
 
         <section class="card border-0 shadow-sm filter-card mb-4">
             <div class="card-body">
-                <form method="get" class="row g-2 g-md-3 align-items-end">
-                    <div class="col-6 col-md-2">
-                        <label class="form-label small mb-1">Tanggal Mulai</label>
-                        <input type="date" class="form-control" name="date_from" value="{{ filters.date_from|date:'Y-m-d' }}">
+                <form method="get" class="cbt-inline-filter">
+                    <div class="cbt-inline-filter-range">
+                        <div class="cbt-inline-filter-date">
+                            <input type="date" class="form-control" name="date_from" value="{{ filters.date_from|date:'Y-m-d' }}">
+                        </div>
+                        <span class="cbt-inline-filter-range-sep">-</span>
+                        <div class="cbt-inline-filter-date">
+                            <input type="date" class="form-control" name="date_to" value="{{ filters.date_to|date:'Y-m-d' }}">
+                        </div>
                     </div>
-                    <div class="col-6 col-md-2">
-                        <label class="form-label small mb-1">Tanggal Akhir</label>
-                        <input type="date" class="form-control" name="date_to" value="{{ filters.date_to|date:'Y-m-d' }}">
-                    </div>
-                    <div class="col-6 col-md-3">
-                        <label class="form-label small mb-1">Mata Pelajaran</label>
+                    <div class="cbt-inline-filter-select">
                         <select class="form-select" name="subject">
                             <option value="">Semua Mata Pelajaran</option>
                             {% for subject in subjects %}
@@ -55,8 +55,7 @@
                             {% endfor %}
                         </select>
                     </div>
-                    <div class="col-6 col-md-2">
-                        <label class="form-label small mb-1">Kelas</label>
+                    <div class="cbt-inline-filter-select">
                         <select class="form-select" name="class">
                             <option value="">Semua Kelas</option>
                             {% for class_item in classes %}
@@ -64,8 +63,7 @@
                             {% endfor %}
                         </select>
                     </div>
-                    <div class="col-6 col-md-3">
-                        <label class="form-label small mb-1">Jenis Ujian</label>
+                    <div class="cbt-inline-filter-select">
                         <select class="form-select" name="exam_type">
                             <option value="">Semua Jenis</option>
                             {% for exam_type in exam_types %}
@@ -73,21 +71,18 @@
                             {% endfor %}
                         </select>
                     </div>
-
-                    <div class="col-12 d-flex flex-wrap gap-2">
-                        <button type="submit" class="btn btn-primary" title="Terapkan filter laporan">
-                            <i class="ri-filter-3-line me-1"></i>Terapkan
-                        </button>
-                        <a href="{% url 'system_reports' %}" class="btn btn-outline-secondary" title="Reset semua filter">
-                            Reset
-                        </a>
-                        <a href="{{ export_csv_url }}" class="btn btn-outline-success" title="Ekspor laporan ke CSV">
-                            <i class="ri-file-excel-2-line me-1"></i>Ekspor CSV
-                        </a>
-                        <a href="{{ export_xlsx_url }}" class="btn btn-outline-success" title="Ekspor laporan ke Excel">
-                            <i class="ri-file-excel-line me-1"></i>Ekspor Excel
-                        </a>
-                    </div>
+                    <button type="submit" class="btn btn-primary" title="Terapkan filter">
+                        <i class="ri-filter-3-line me-1"></i>Terapkan
+                    </button>
+                    <a href="{% url 'system_reports' %}" class="btn btn-outline-secondary cbt-inline-filter-reset" title="Reset semua filter">
+                        <i class="ri-refresh-line me-1"></i>Reset
+                    </a>
+                    <a href="{{ export_csv_url }}" class="btn btn-outline-success" title="Ekspor laporan ke CSV">
+                        <i class="ri-file-excel-2-line me-1"></i>Ekspor CSV
+                    </a>
+                    <a href="{{ export_xlsx_url }}" class="btn btn-outline-success" title="Ekspor laporan ke Excel">
+                        <i class="ri-file-excel-line me-1"></i>Ekspor Excel
+                    </a>
                 </form>
             </div>
         </section>

@@ -15,7 +15,7 @@
             {% include "partials/page_header.html" with eyebrow="Panel Siswa" title="Daftar Ujian" %}
             <div class="d-flex align-items-center gap-2 cbt-page-header-actions">
                 <div class="d-flex flex-wrap gap-2">
-                                <a href="{% url 'student_results' %}" class="btn btn-sm btn-outline-info" title="Buka halaman hasil & review ujian">
+                                <a href="{% url 'student_results' %}" class="btn btn-outline-info" title="Buka halaman hasil & review ujian">
                                     <i class="ri-bar-chart-line me-1"></i>Hasil Ujian
                                 </a>
                             </div>
@@ -35,14 +35,19 @@
 
         <section class="card border-0 shadow-sm mb-4">
             <div class="card-body">
-                <form method="get" class="row g-2 g-md-3 align-items-end">
+                <form method="get" class="cbt-inline-filter">
                     <input type="hidden" name="tab" value="{{ active_tab }}">
-                    <div class="col-md-4">
-                        <label class="form-label small mb-1">Cari Ujian</label>
-                        <input type="text" class="form-control" name="q" value="{{ filters.keyword }}" placeholder="Judul / deskripsi / mapel...">
+                    <div class="cbt-inline-filter-search">
+                        <i class="ri-search-line"></i>
+                        <input
+                            type="search"
+                            class="form-control"
+                            name="q"
+                            value="{{ filters.keyword }}"
+                            placeholder="Cari judul, deskripsi, atau mapel..."
+                        >
                     </div>
-                    <div class="col-md-3">
-                        <label class="form-label small mb-1">Mata Pelajaran</label>
+                    <div class="cbt-inline-filter-select">
                         <select class="form-select" name="subject">
                             <option value="">Semua Mapel</option>
                             {% for subject in subjects %}
@@ -50,16 +55,15 @@
                             {% endfor %}
                         </select>
                     </div>
-                    <div class="col-md-3">
-                        <label class="form-label small mb-1">Tanggal Ujian</label>
+                    <div class="cbt-inline-filter-date">
                         <input type="date" class="form-control" name="date" value="{{ filters.selected_date_raw }}">
                     </div>
-                    <div class="col-12 col-md-auto d-flex gap-2">
-                        <button type="submit" class="btn btn-primary" title="Terapkan filter daftar ujian">
-                            <i class="ri-filter-3-line me-1"></i>Terapkan
-                        </button>
-                        <a href="{% url 'student_exam_list' %}?tab={{ active_tab }}" class="btn btn-outline-secondary" title="Reset filter tab ini">Reset</a>
-                    </div>
+                    <button type="submit" class="btn btn-primary" title="Terapkan filter">
+                        <i class="ri-filter-3-line me-1"></i>Terapkan
+                    </button>
+                    <a href="{% url 'student_exam_list' %}?tab={{ active_tab }}" class="btn btn-outline-secondary cbt-inline-filter-reset" title="Reset filter tab ini">
+                        <i class="ri-refresh-line me-1"></i>Reset
+                    </a>
                 </form>
             </div>
         </section>

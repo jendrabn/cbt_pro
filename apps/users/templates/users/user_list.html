@@ -12,13 +12,13 @@
 {% block page_header %}
     <section class="cbt-page-header">
         <div class="cbt-page-header-body">
-            {% include "partials/page_header.html" with eyebrow="Admin Panel" title="Manajemen Pengguna" %}
+            {% include "partials/page_header.html" with eyebrow="Admin Panel" title="Manajemen Pengguna" subtitle="Kelola semua akun pengguna sistem." %}
             <div class="d-flex align-items-center gap-2 cbt-page-header-actions">
                 <div class="d-flex align-items-center gap-2">
-                                <a href="{% url 'user_create' %}" class="btn btn-sm btn-primary" title="Tambah pengguna baru">
+                                <a href="{% url 'user_create' %}" class="btn btn-primary" title="Tambah pengguna baru">
                                     <i class="ri-user-add-line me-1"></i>Tambah Pengguna
                                 </a>
-                                <a href="{% url 'user_import' %}" class="btn btn-sm btn-success" title="Impor pengguna">
+                                <a href="{% url 'user_import' %}" class="btn btn-outline-secondary" title="Impor pengguna">
                                     <i class="ri-upload-2-line me-1"></i>Impor Pengguna
                                 </a>
                             </div>
@@ -83,13 +83,18 @@
 
         <section class="card filter-card border-0 shadow-sm mb-4">
             <div class="card-body">
-                <form method="get" class="row g-2 g-md-3 align-items-end">
-                    <div class="col-12 col-md-4 col-xl-3">
-                        <label class="form-label small mb-1">Pencarian</label>
-                        <input type="search" name="q" value="{{ filters.q }}" class="form-control" placeholder="Nama, username, email">
+                <form method="get" class="cbt-inline-filter">
+                    <div class="cbt-inline-filter-search">
+                        <i class="ri-search-line"></i>
+                        <input
+                            type="search"
+                            name="q"
+                            value="{{ filters.q }}"
+                            class="form-control"
+                            placeholder="Cari nama, username, email..."
+                        >
                     </div>
-                    <div class="col-6 col-md-2">
-                        <label class="form-label small mb-1">Role</label>
+                    <div class="cbt-inline-filter-select">
                         <select name="role" class="form-select">
                             <option value="">Semua Role</option>
                             {% for role_value, role_label in role_choices %}
@@ -97,28 +102,28 @@
                             {% endfor %}
                         </select>
                     </div>
-                    <div class="col-6 col-md-2">
-                        <label class="form-label small mb-1">Status</label>
+                    <div class="cbt-inline-filter-select">
                         <select name="status" class="form-select">
                             <option value="">Semua Status</option>
                             <option value="active" {% if filters.status == 'active' %}selected{% endif %}>Aktif</option>
                             <option value="inactive" {% if filters.status == 'inactive' %}selected{% endif %}>Nonaktif</option>
                         </select>
                     </div>
-                    <div class="col-6 col-md-2">
-                        <label class="form-label small mb-1">Gabung Dari</label>
-                        <input type="date" name="date_from" value="{{ filters.date_from }}" class="form-control">
+                    <div class="cbt-inline-filter-range">
+                        <div class="cbt-inline-filter-date">
+                            <input type="date" name="date_from" value="{{ filters.date_from }}" class="form-control">
+                        </div>
+                        <span class="cbt-inline-filter-range-sep">-</span>
+                        <div class="cbt-inline-filter-date">
+                            <input type="date" name="date_to" value="{{ filters.date_to }}" class="form-control">
+                        </div>
                     </div>
-                    <div class="col-6 col-md-2">
-                        <label class="form-label small mb-1">Sampai</label>
-                        <input type="date" name="date_to" value="{{ filters.date_to }}" class="form-control">
-                    </div>
-                    <div class="col-12 col-md-auto d-flex gap-2">
-                        <button type="submit" class="btn btn-primary" title="Terapkan filter pencarian">
-                            <i class="ri-filter-3-line me-1"></i>Terapkan
-                        </button>
-                        <a href="{% url 'user_list' %}" class="btn btn-outline-secondary" title="Reset semua filter">Reset</a>
-                    </div>
+                    <button type="submit" class="btn btn-primary" title="Terapkan filter">
+                        <i class="ri-filter-3-line me-1"></i>Terapkan
+                    </button>
+                    <a href="{% url 'user_list' %}" class="btn btn-outline-secondary cbt-inline-filter-reset" title="Reset semua filter">
+                        <i class="ri-refresh-line me-1"></i>Reset
+                    </a>
                 </form>
             </div>
         </section>

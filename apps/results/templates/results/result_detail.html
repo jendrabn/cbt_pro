@@ -15,16 +15,16 @@
             {% include "partials/page_header.html" with eyebrow="Hasil & Analitik" title=exam.title %}
             <div class="d-flex align-items-center gap-2 cbt-page-header-actions">
                 <div class="d-flex flex-wrap gap-2">
-                                <a href="{% url 'teacher_results' %}" class="btn btn-sm btn-outline-primary" title="Kembali ke daftar hasil ujian">
+                                <a href="{% url 'teacher_results' %}" class="btn btn-outline-primary" title="Kembali ke daftar hasil ujian">
                                     <i class="ri-arrow-left-line me-1"></i>Daftar Hasil
                                 </a>
-                                <a href="{{ analytics_url }}" class="btn btn-sm btn-outline-info" title="Buka dashboard analitik">
+                                <a href="{{ analytics_url }}" class="btn btn-outline-info" title="Buka dashboard analitik">
                                     <i class="ri-line-chart-line me-1"></i>Analitik
                                 </a>
-                                <a href="{{ export_xlsx_url }}" class="btn btn-sm btn-outline-success" title="Ekspor semua hasil ke Excel">
+                                <a href="{{ export_xlsx_url }}" class="btn btn-outline-success" title="Ekspor semua hasil ke Excel">
                                     <i class="ri-file-excel-2-line me-1"></i>Ekspor Excel
                                 </a>
-                                <a href="{{ export_pdf_url }}" class="btn btn-sm btn-outline-danger" title="Ekspor semua hasil ke PDF">
+                                <a href="{{ export_pdf_url }}" class="btn btn-outline-danger" title="Ekspor semua hasil ke PDF">
                                     <i class="ri-file-pdf-2-line me-1"></i>Ekspor PDF
                                 </a>
                             </div>
