@@ -48,7 +48,7 @@
                                 {% if form.import_file.errors %}
                                 <div class="text-danger small mt-1">{{ form.import_file.errors|join:", " }}</div>
                                 {% endif %}
-                                <div class="form-text">Format didukung: `.json` atau `.xlsx` (maksimal 10MB).</div>
+                                <div class="form-text">Format didukung: `.xlsx` (maksimal 10MB).</div>
                             </div>
                             <div class="d-grid gap-2">
                                 <button type="submit" class="btn btn-primary" title="Mulai proses impor soal">
@@ -99,26 +99,26 @@
                         </div>
 
                         <hr>
-                        <h3 class="h6">Contoh JSON</h3>
-<pre class="bg-light p-3 rounded small mb-0"><code>{
-  "questions": [
-    {
-      "subject": "Matematika",
-      "category": "Aljabar",
-      "question_type": "multiple_choice",
-      "question_text": "Hasil 2 + 2 adalah...",
-      "difficulty_level": "easy",
-      "points": 5,
-      "option_a": "3",
-      "option_b": "4",
-      "correct_option": "B",
-      "tags": "dasar, penjumlahan"
-    }
-  ]
-}</code></pre>
+                        <h3 class="h6">Aturan Nilai (Enum/Case-Sensitive)</h3>
+                        <ul class="small mb-3">
+                            <li><code>allow_next</code>, <code>allow_previous</code>, <code>force_sequential</code>: isi <code>TRUE</code> atau <code>FALSE</code>.</li>
+                            <li><code>is_case_sensitive</code>: isi <code>TRUE</code> atau <code>FALSE</code> (untuk soal <code>short_answer</code>).</li>
+                            <li><code>difficulty_level</code>: <code>easy</code>, <code>medium</code>, <code>hard</code>.</li>
+                            <li><code>question_type</code>: <code>multiple_choice</code>, <code>essay</code>, <code>short_answer</code>.</li>
+                            <li><code>correct_option</code>: isi huruf kapital <code>A</code> sampai <code>E</code> (khusus pilihan ganda).</li>
+                            <li><code>subject</code>: harus sesuai nama/kode subject aktif di sistem.</li>
+                        </ul>
+
+                        <p class="small fw-semibold mb-1">Daftar subject aktif:</p>
+                        {% if available_subjects %}
+                        <div class="small border rounded p-2 bg-light">
+                            <code>{{ available_subjects_csv }}</code>
+                        </div>
+                        {% else %}
+                        <p class="small text-muted mb-0">Belum ada subject aktif.</p>
+                        {% endif %}
                     </div>
                 </div>
             </div>
         </section>
 {% endblock %}
-

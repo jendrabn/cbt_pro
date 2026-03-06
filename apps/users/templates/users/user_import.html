@@ -48,7 +48,7 @@
                                 {% if form.import_file.errors %}
                                 <div class="text-danger small mt-1">{{ form.import_file.errors|join:", " }}</div>
                                 {% endif %}
-                                <div class="form-text">Format didukung: `.json`, `.xlsx`, `.xls` (maksimal 5MB).</div>
+                                <div class="form-text">Format didukung: `.xlsx`, `.xls` (maksimal 5MB).</div>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label required">{{ form.role.label }}</label>
@@ -124,24 +124,25 @@
                         <p class="mb-2">Field wajib:</p>
                         <ul class="mb-3">
                             <li><code>first_name</code>, <code>last_name</code>, <code>email</code>, <code>username</code></li>
-                            <li>Untuk `student`: tambah <code>student_id</code>, <code>class_grade</code></li>
+                            <li>Untuk <code>teacher</code>: kolom tambahan <code>teacher_id</code>, <code>subject_specialization</code> (opsional).</li>
+                            <li>Untuk <code>student</code>: wajib tambah <code>student_id</code>, <code>class_grade</code>.</li>
                         </ul>
 
-                        <h3 class="h6">Contoh JSON</h3>
-<pre class="bg-light p-3 rounded small mb-0"><code>{
-  "users": [
-    {
-      "first_name": "Budi",
-      "last_name": "Santoso",
-      "email": "budi@cbt.com",
-      "username": "budi.santoso",
-      "student_id": "NIS-1001",
-      "class_grade": "XI IPA 1",
-      "phone_number": "08123456789",
-      "is_active": true
-    }
-  ]
-}</code></pre>
+                        <h3 class="h6">Aturan Nilai (Enum/Boolean)</h3>
+                        <ul class="small mb-3">
+                            <li><code>is_active</code>: isi <code>TRUE</code> atau <code>FALSE</code>.</li>
+                            <li><code>email</code> dan <code>username</code> harus unik (tidak boleh duplikat).</li>
+                            <li><code>subject_specialization</code> (teacher): gunakan nama mapel aktif agar konsisten.</li>
+                        </ul>
+
+                        <p class="small fw-semibold mb-1">Daftar subject aktif:</p>
+                        {% if available_subjects %}
+                        <div class="small border rounded p-2 bg-light">
+                            <code>{{ available_subjects_csv }}</code>
+                        </div>
+                        {% else %}
+                        <p class="small text-muted mb-0">Belum ada subject aktif.</p>
+                        {% endif %}
                     </div>
                 </div>
 

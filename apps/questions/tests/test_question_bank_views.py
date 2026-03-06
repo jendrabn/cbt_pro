@@ -1,6 +1,9 @@
+from io import BytesIO
+
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from django.urls import reverse
+from openpyxl import Workbook
 
 from apps.accounts.models import User
 from apps.questions.models import Question, QuestionCategory
@@ -105,27 +108,53 @@ class QuestionBankViewTests(TestCase):
         self.assertContains(response, "Pratinjau Soal")
         self.assertEqual(response.get("X-Frame-Options"), "SAMEORIGIN")
 
-    def test_teacher_can_export_question_json(self):
+    def test_teacher_can_export_question_excel(self):
         self._create_sample_question()
         self.client.force_login(self.teacher)
-        response = self.client.get(reverse("question_export"), data={"format": "json"})
+        response = self.client.get(reverse("question_export"), data={"format": "xlsx"})
         self.assertEqual(response.status_code, 200)
-        self.assertIn("application/json", response["Content-Type"])
+        self.assertIn(
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            response["Content-Type"],
+        )
         self.assertIn("attachment;", response["Content-Disposition"])
 
-    def test_teacher_can_import_question_json(self):
+    def test_teacher_can_import_question_excel(self):
         self.client.force_login(self.teacher)
-        payload = (
-            '{"questions": ['
-            '{"subject": "Matematika", "category": "Aljabar", "question_type": "multiple_choice", '
-            '"question_text": "5 + 5 = ...", "difficulty_level": "easy", "points": 5, '
-            '"option_a": "9", "option_b": "10", "correct_option": "B"}'
-            ']}'
+        workbook = Workbook()
+        worksheet = workbook.active
+        worksheet.append(
+            [
+                "subject",
+                "category",
+                "question_type",
+                "question_text",
+                "difficulty_level",
+                "points",
+                "option_a",
+                "option_b",
+                "correct_option",
+            ]
         )
+        worksheet.append(
+            [
+                "Matematika",
+                "Aljabar",
+                "multiple_choice",
+                "5 + 5 = ...",
+                "easy",
+                5,
+                "9",
+                "10",
+                "B",
+            ]
+        )
+        payload = BytesIO()
+        workbook.save(payload)
         upload = SimpleUploadedFile(
-            "import_soal.json",
-            payload.encode("utf-8"),
-            content_type="application/json",
+            "import_soal.xlsx",
+            payload.getvalue(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         )
         response = self.client.post(reverse("question_import"), data={"import_file": upload})
         self.assertEqual(response.status_code, 200)

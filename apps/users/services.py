@@ -14,7 +14,7 @@ from django.utils.crypto import get_random_string
 
 from apps.accounts.models import UserActivityLog, UserImportLog, UserProfile
 
-from .importers import ExcelUserImporter, ImportPreviewResult, JsonUserImporter
+from .importers import ExcelUserImporter, ImportPreviewResult
 
 User = get_user_model()
 
@@ -262,11 +262,7 @@ class ImportResult:
 
 
 def parse_import_file(uploaded_file, role: str) -> ImportPreviewResult:
-    filename = (getattr(uploaded_file, "name", "") or "").lower()
-    if filename.endswith(".json"):
-        importer = JsonUserImporter(role)
-    else:
-        importer = ExcelUserImporter(role)
+    importer = ExcelUserImporter(role)
     return importer.parse_file(uploaded_file)
 
 

@@ -1,6 +1,4 @@
 from __future__ import annotations
-
-import json
 from dataclasses import dataclass, field
 from decimal import Decimal, InvalidOperation
 
@@ -185,31 +183,6 @@ def _create_question_from_payload(payload, teacher):
     sync_question_answer(question, cleaned_data)
     sync_question_tags(question, cleaned_data)
     return question
-
-
-def import_questions_from_json(uploaded_file, teacher):
-    result = ImportResult()
-    try:
-        payload = json.loads(uploaded_file.read().decode("utf-8-sig"))
-    except Exception as exc:
-        result.errors.append(f"Gagal membaca file JSON: {exc}")
-        return result
-
-    rows = payload.get("questions", []) if isinstance(payload, dict) else payload
-    if not isinstance(rows, list):
-        result.errors.append("Format JSON tidak valid. Harus berupa list data atau key 'questions'.")
-        return result
-
-    for index, row in enumerate(rows, start=1):
-        result.total_rows += 1
-        try:
-            if not isinstance(row, dict):
-                raise ValueError("Setiap item JSON harus berupa objek.")
-            _create_question_from_payload(row, teacher)
-            result.success_count += 1
-        except Exception as exc:
-            result.errors.append(f"Baris {index}: {exc}")
-    return result
 
 
 def import_questions_from_excel(uploaded_file, teacher):

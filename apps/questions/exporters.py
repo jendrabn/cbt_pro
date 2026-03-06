@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-import json
 from datetime import datetime
 from io import BytesIO
 
 from django.http import HttpResponse
 from django.utils import timezone
 from openpyxl import Workbook
+
+from apps.subjects.models import Subject
 
 from .importers import export_template_headers
 
@@ -55,16 +56,6 @@ def _question_to_export_row(question):
         "created_at": timezone.localtime(question.created_at).isoformat() if isinstance(question.created_at, datetime) else "",
         "updated_at": timezone.localtime(question.updated_at).isoformat() if isinstance(question.updated_at, datetime) else "",
     }
-
-
-def export_questions_to_json(queryset):
-    rows = [_question_to_export_row(question) for question in queryset]
-    response = HttpResponse(
-        json.dumps({"questions": rows}, ensure_ascii=False, indent=2),
-        content_type="application/json",
-    )
-    response["Content-Disposition"] = f'attachment; filename="bank_soal_{_safe_timestamp()}.json"'
-    return response
 
 
 def export_questions_to_excel(queryset):
@@ -121,6 +112,27 @@ def export_import_template_excel():
             "aljabar, dasar",
         ]
     )
+
+    guide = workbook.create_sheet("Panduan")
+    guide.append(["Kolom", "Wajib", "Aturan Nilai"])
+    subject_names = list(Subject.objects.filter(is_active=True).order_by("name").values_list("name", flat=True))
+    subject_text = ", ".join(subject_names) if subject_names else "-"
+    guide_rows = [
+        ("subject", "YA", f"Nama/kode subject aktif. Daftar subject: {subject_text}"),
+        ("question_type", "YA", "multiple_choice, essay, short_answer"),
+        ("question_text", "YA", "Teks soal"),
+        ("difficulty_level", "TIDAK", "easy, medium, hard"),
+        ("allow_previous", "TIDAK", "TRUE atau FALSE"),
+        ("allow_next", "TIDAK", "TRUE atau FALSE"),
+        ("force_sequential", "TIDAK", "TRUE atau FALSE"),
+        ("is_case_sensitive", "TIDAK", "TRUE atau FALSE (khusus short_answer)"),
+        ("correct_option", "KONDISIONAL", "A/B/C/D/E untuk multiple_choice"),
+        ("answer_text", "KONDISIONAL", "Wajib untuk essay/short_answer"),
+    ]
+    for row in guide_rows:
+        guide.append(list(row))
+    for col_idx in range(1, 4):
+        guide.column_dimensions[guide.cell(row=1, column=col_idx).column_letter].width = 48 if col_idx == 3 else 24
 
     buffer = BytesIO()
     workbook.save(buffer)

@@ -7,9 +7,38 @@ from openpyxl import Workbook
 from openpyxl.styles import Alignment, Font, PatternFill
 
 from apps.accounts.models import UserImportLog
+from apps.subjects.models import Subject
 
 
 class ImportTemplateExporter:
+    @staticmethod
+    def _append_guidance_sheet(workbook: Workbook, role: str):
+        guide = workbook.create_sheet("Panduan")
+        guide.append(["Kolom", "Wajib", "Aturan Nilai"])
+        guide.append(["first_name", "YA", "Nama depan pengguna"])
+        guide.append(["last_name", "YA", "Nama belakang pengguna"])
+        guide.append(["email", "YA", "Gunakan format email yang valid dan unik"])
+        guide.append(["username", "YA", "Huruf/angka/underscore, minimal 3 karakter, harus unik"])
+        guide.append(["is_active", "TIDAK", "Isi TRUE atau FALSE"])
+        guide.append(["phone_number", "TIDAK", "Nomor telepon (opsional)"])
+
+        if role == "teacher":
+            guide.append(["teacher_id", "TIDAK", "NIP guru (opsional)"])
+            subject_names = list(Subject.objects.filter(is_active=True).order_by("name").values_list("name", flat=True))
+            subject_text = ", ".join(subject_names) if subject_names else "-"
+            guide.append(["subject_specialization", "TIDAK", f"Gunakan nama subject aktif: {subject_text}"])
+        else:
+            guide.append(["student_id", "YA", "NIS siswa"])
+            guide.append(["class_grade", "YA", "Contoh: X IPA 1 / XI IPS 2"])
+
+        for col_idx in range(1, 4):
+            guide.column_dimensions[guide.cell(row=1, column=col_idx).column_letter].width = 44 if col_idx == 3 else 22
+        for col_idx in range(1, 4):
+            cell = guide.cell(row=1, column=col_idx)
+            cell.fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
+            cell.font = Font(bold=True, color="FFFFFF")
+            cell.alignment = Alignment(horizontal="center")
+
     @staticmethod
     def create_teacher_template() -> bytes:
         workbook = Workbook()
@@ -61,6 +90,8 @@ class ImportTemplateExporter:
         ]
         for col_idx, value in enumerate(example_data, start=1):
             worksheet.cell(row=2, column=col_idx, value=value)
+
+        ImportTemplateExporter._append_guidance_sheet(workbook, role="teacher")
 
         buffer = BytesIO()
         workbook.save(buffer)
@@ -117,6 +148,8 @@ class ImportTemplateExporter:
         ]
         for col_idx, value in enumerate(example_data, start=1):
             worksheet.cell(row=2, column=col_idx, value=value)
+
+        ImportTemplateExporter._append_guidance_sheet(workbook, role="student")
 
         buffer = BytesIO()
         workbook.save(buffer)

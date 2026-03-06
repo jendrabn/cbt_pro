@@ -21,6 +21,7 @@ from apps.accounts.models import UserImportLog, UserProfile
 from apps.attempts.models import ExamAttempt
 from apps.core.mixins import RoleRequiredMixin
 from apps.exams.models import Exam
+from apps.subjects.models import Subject
 
 from .exporters import ImportTemplateExporter
 from .forms import UserCreateForm, UserEditForm, UserImportForm
@@ -485,10 +486,13 @@ class UserImportView(AdminUserBaseView, View):
     template_name = "users/user_import.html"
 
     def _build_context(self, request, **extra):
+        subjects = list(Subject.objects.filter(is_active=True).order_by("name").values_list("name", flat=True))
         context = {
             "form": extra.get("form") or UserImportForm(),
             "import_result": extra.get("import_result"),
             "history": get_import_history(actor=request.user, limit=30),
+            "available_subjects": subjects,
+            "available_subjects_csv": ", ".join(subjects),
         }
         context.update(extra)
         return context

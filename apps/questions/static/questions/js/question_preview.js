@@ -86,7 +86,7 @@
 
         exportSelectedButtons.forEach(function (button) {
             button.addEventListener("click", function () {
-                var format = button.getAttribute("data-format") || "json";
+                var format = button.getAttribute("data-format") || "xlsx";
                 exportSelected(format);
             });
         });

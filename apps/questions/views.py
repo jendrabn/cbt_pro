@@ -16,10 +16,9 @@ from apps.core.mixins import RoleRequiredMixin
 from .exporters import (
     export_import_template_excel,
     export_questions_to_excel,
-    export_questions_to_json,
 )
 from .forms import QuestionForm, QuestionImportForm
-from .importers import import_questions_from_excel, import_questions_from_json
+from .importers import import_questions_from_excel
 from .models import Question, QuestionCategory
 from .services import (
     DIFFICULTY_LABELS,
@@ -61,7 +60,6 @@ class QuestionListView(TeacherQuestionBaseView, ListView):
         context = super().get_context_data(**kwargs)
         query_string = _querystring_without_page(self.request)
         export_base = reverse("question_export")
-        export_json_url = f"{export_base}?{query_string}&format=json" if query_string else f"{export_base}?format=json"
         export_xlsx_url = f"{export_base}?{query_string}&format=xlsx" if query_string else f"{export_base}?format=xlsx"
 
         context.update(
@@ -72,7 +70,6 @@ class QuestionListView(TeacherQuestionBaseView, ListView):
                 "question_type_choices": QUESTION_TYPE_LABELS.items(),
                 "difficulty_choices": DIFFICULTY_LABELS.items(),
                 "querystring": query_string,
-                "export_json_url": export_json_url,
                 "export_xlsx_url": export_xlsx_url,
                 "import_form": QuestionImportForm(),
                 "summary": {
@@ -194,22 +191,28 @@ class QuestionPreviewView(TeacherQuestionBaseView, DetailView):
 class QuestionImportView(TeacherQuestionBaseView, View):
     template_name = "questions/question_import.html"
 
+    def _build_context(self, **extra):
+        subjects = list(Subject.objects.filter(is_active=True).order_by("name").values_list("name", flat=True))
+        context = {
+            "form": extra.get("form") or QuestionImportForm(),
+            "import_result": extra.get("import_result"),
+            "available_subjects": subjects,
+            "available_subjects_csv": ", ".join(subjects),
+        }
+        context.update(extra)
+        return context
+
     def get(self, request):
-        context = {"form": QuestionImportForm()}
-        return render(request, self.template_name, context)
+        return render(request, self.template_name, self._build_context())
 
     def post(self, request):
         form = QuestionImportForm(request.POST, request.FILES)
         if not form.is_valid():
             messages.error(request, "File import tidak valid.")
-            return render(request, self.template_name, {"form": form})
+            return render(request, self.template_name, self._build_context(form=form))
 
         upload = form.cleaned_data["import_file"]
-        lower_name = upload.name.lower()
-        if lower_name.endswith(".json"):
-            result = import_questions_from_json(upload, request.user)
-        else:
-            result = import_questions_from_excel(upload, request.user)
+        result = import_questions_from_excel(upload, request.user)
 
         if result.success_count:
             messages.success(
@@ -230,10 +233,7 @@ class QuestionImportView(TeacherQuestionBaseView, View):
         return render(
             request,
             self.template_name,
-            {
-                "form": QuestionImportForm(),
-                "import_result": result,
-            },
+            self._build_context(form=QuestionImportForm(), import_result=result),
         )
 
 
@@ -244,8 +244,17 @@ class QuestionImportTemplateView(TeacherQuestionBaseView, View):
 
 class QuestionExportView(TeacherQuestionBaseView, View):
     def get(self, request):
-        export_format = (request.GET.get("format") or "json").strip().lower()
+        export_format = (request.GET.get("format") or "xlsx").strip().lower()
         ids = request.GET.getlist("ids")
+
+        if export_format != "xlsx":
+            messages.error(request, "Format ekspor JSON sudah tidak didukung. Gunakan format Excel (.xlsx).")
+            query_string = urlencode(
+                {k: v for k, v in request.GET.items() if k not in {"format", "ids", "page"}},
+                doseq=True,
+            )
+            target = reverse("question_list")
+            return redirect(f"{target}?{query_string}" if query_string else target)
 
         queryset = get_teacher_question_queryset(request.user)
         if ids:
@@ -262,6 +271,4 @@ class QuestionExportView(TeacherQuestionBaseView, View):
             target = reverse("question_list")
             return redirect(f"{target}?{query_string}" if query_string else target)
 
-        if export_format == "xlsx":
-            return export_questions_to_excel(queryset)
-        return export_questions_to_json(queryset)
+        return export_questions_to_excel(queryset)

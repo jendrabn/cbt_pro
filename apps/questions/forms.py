@@ -242,20 +242,21 @@ class QuestionForm(forms.ModelForm):
 
 
 class QuestionImportForm(forms.Form):
-    import_file = forms.FileField(label="File Impor (Excel/JSON)")
+    import_file = forms.FileField(label="File Impor (Excel)")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         _bootstrap_widget(self.fields["import_file"])
+        self.fields["import_file"].widget.attrs.update({"accept": ".xlsx"})
 
     def clean_import_file(self):
         file_obj = self.cleaned_data.get("import_file")
         if not file_obj:
             return file_obj
         lower_name = file_obj.name.lower()
-        allowed_ext = (".json", ".xlsx")
+        allowed_ext = (".xlsx",)
         if not lower_name.endswith(allowed_ext):
-            raise ValidationError("File harus berformat .json atau .xlsx.")
+            raise ValidationError("File harus berformat .xlsx.")
         max_size = 10 * 1024 * 1024
         if file_obj.size > max_size:
             raise ValidationError("Ukuran file import maksimal 10MB.")
