@@ -11,9 +11,8 @@
             --cbt-primary: {{ branding.primary_color|default:'#0d6efd' }};
         }
     </style>
-    <link href="{% static 'dashboard/css/theme.css' %}" rel="stylesheet">
+    <link href="{% static 'css/main.css' %}" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.0.0/fonts/remixicon.css" rel="stylesheet">
-    <link href="{% static 'dashboard/css/custom.css' %}" rel="stylesheet">
     {% block extra_css %}{% endblock %}
 </head>
 <body class="dashboard-body{% block shell_class %} cbt-shell-enabled{% endblock %}{% block body_classes %}{% endblock %}">

@@ -1,10 +1,10 @@
-{% extends "layouts/admin.html" %}
+{% extends "layouts/base_admin.html" %}
 {% load static %}
 
 {% block title %}{{ page_title }} - CBT{% endblock %}
 
 {% block topbar %}
-    {% include "layouts/partials/topbar_admin.html" with parent_label="Manajemen Pengguna" parent_url="/admin/users/" current_label=page_title %}
+    {% include "partials/topbar_admin.html" with parent_label="Manajemen Pengguna" parent_url="/admin/users/" current_label=page_title %}
 {% endblock %}
 
 {% block main_attrs %}class="container py-4" x-data="{
@@ -29,7 +29,7 @@
 {% block page_header %}
     <section class="cbt-page-header">
         <div class="cbt-page-header-body">
-            {% include "layouts/partials/page_header.html" with eyebrow="Manajemen Pengguna" title=page_title %}
+            {% include "partials/page_header.html" with eyebrow="Manajemen Pengguna" title=page_title %}
             <div class="d-flex align-items-center gap-2 cbt-page-header-actions">
                 <a href="{% url 'user_list' %}" class="btn btn-sm btn-outline-primary" title="Kembali ke daftar pengguna">
                                 <i class="ri-arrow-left-line me-1"></i>Kembali

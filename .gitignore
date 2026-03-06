@@ -75,6 +75,7 @@ media/*
 !media/.gitkeep
 staticfiles/
 test_media/
+static/css/
 
 # But keep these media subdirectories for structure
 !media/questions/

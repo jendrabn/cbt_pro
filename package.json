@@ -8,8 +8,8 @@
     "test": "tests"
   },
   "scripts": {
-    "build:css": "sass --no-source-map --style=compressed --load-path=node_modules static/dashboard/scss/theme.scss:static/dashboard/css/theme.css static/dashboard/scss/custom.scss:static/dashboard/css/custom.css",
-    "watch:css": "sass --watch --load-path=node_modules static/dashboard/scss/theme.scss:static/dashboard/css/theme.css static/dashboard/scss/custom.scss:static/dashboard/css/custom.css",
+    "build:css": "sass --no-source-map --style=compressed --load-path=node_modules static/scss/main.scss:static/css/main.css",
+    "watch:css": "sass --watch --load-path=node_modules static/scss/main.scss:static/css/main.css",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

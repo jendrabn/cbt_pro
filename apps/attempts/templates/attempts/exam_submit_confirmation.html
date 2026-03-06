@@ -1,10 +1,10 @@
-{% extends "layouts/student.html" %}
+{% extends "layouts/base_student.html" %}
 {% load static %}
 
 {% block title %}Konfirmasi Submit Ujian - CBT{% endblock %}
 
 {% block topbar %}
-    {% include "layouts/partials/topbar_student.html" with parent_label="Daftar Ujian" parent_url="/student/exams/" current_label="Konfirmasi Submit Ujian" %}
+    {% include "partials/topbar_student.html" with parent_label="Daftar Ujian" parent_url="/student/exams/" current_label="Konfirmasi Submit Ujian" %}
 {% endblock %}
 
 {% block main_attrs %}class="container py-4"{% endblock %}
@@ -12,7 +12,7 @@
 {% block page_header %}
     <section class="cbt-page-header">
         <div class="cbt-page-header-body">
-            {% include "layouts/partials/page_header.html" with eyebrow="Panel Siswa" title="Konfirmasi Submit Ujian" %}
+            {% include "partials/page_header.html" with eyebrow="Panel Siswa" title="Konfirmasi Submit Ujian" %}
             <div class="d-flex align-items-center gap-2 cbt-page-header-actions">
             </div>
         </div>

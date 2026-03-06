@@ -1,10 +1,10 @@
-{% extends "layouts/teacher.html" %}
+{% extends "layouts/base_teacher.html" %}
 {% load static %}
 
 {% block title %}Bank Soal Guru - CBT{% endblock %}
 
 {% block topbar %}
-    {% include "layouts/partials/topbar_teacher.html" with current_label="Manajemen Bank Soal" %}
+    {% include "partials/topbar_teacher.html" with current_label="Manajemen Bank Soal" %}
 {% endblock %}
 
 {% block main_attrs %}class="container-fluid px-3 px-md-4 py-4"{% endblock %}
@@ -12,7 +12,7 @@
 {% block page_header %}
     <section class="cbt-page-header">
         <div class="cbt-page-header-body">
-            {% include "layouts/partials/page_header.html" with eyebrow="Panel Guru" title="Manajemen Bank Soal" %}
+            {% include "partials/page_header.html" with eyebrow="Panel Guru" title="Manajemen Bank Soal" %}
             <div class="d-flex align-items-center gap-2 cbt-page-header-actions">
                 <div class="d-flex flex-wrap gap-2">
                                 <a href="{% url 'question_create' %}" class="btn btn-sm btn-primary" title="Tambah soal baru">

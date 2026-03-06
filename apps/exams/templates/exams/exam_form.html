@@ -1,10 +1,10 @@
-{% extends "layouts/teacher.html" %}
+{% extends "layouts/base_teacher.html" %}
 {% load static %}
 
 {% block title %}{{ page_title }} - CBT{% endblock %}
 
 {% block topbar %}
-    {% include "layouts/partials/topbar_teacher.html" with parent_label="Kelola Ujian" parent_url="/teacher/exams/" current_label=page_title %}
+    {% include "partials/topbar_teacher.html" with parent_label="Kelola Ujian" parent_url="/teacher/exams/" current_label=page_title %}
 {% endblock %}
 
 {% block main_attrs %}class="container-fluid px-3 px-md-4 py-4"{% endblock %}
@@ -12,7 +12,7 @@
 {% block page_header %}
     <section class="cbt-page-header">
         <div class="cbt-page-header-body">
-            {% include "layouts/partials/page_header.html" with eyebrow="Panel Guru" title=page_title %}
+            {% include "partials/page_header.html" with eyebrow="Panel Guru" title=page_title %}
             <div class="d-flex align-items-center gap-2 cbt-page-header-actions">
                 <div class="d-flex gap-2">
                                 <a href="{% url 'exam_detail' exam.id %}" class="btn btn-sm btn-outline-primary" title="Kembali ke detail ujian">

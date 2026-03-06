@@ -161,9 +161,8 @@ npm install
 npm run build:css
 ```
 
-SCSS source files:
-- `static/dashboard/scss/theme.scss` (khusus override Bootstrap 5)
-- `static/dashboard/scss/custom.scss` (style aplikasi)
+SCSS source file:
+- `static/scss/main.scss` (entry point that pulls in `theme.scss` and `custom.scss`)
 
 Untuk mode watch:
 ```bash

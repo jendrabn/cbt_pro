@@ -3,11 +3,11 @@
 {% block body_classes %} cbt-has-sidebar{% endblock %}
 
 {% block topbar %}
-    {% include "layouts/partials/topbar_teacher.html" with current_label="Dashboard" %}
+    {% include "partials/topbar_student.html" with current_label="Dashboard" %}
 {% endblock %}
 
 {% block sidebar %}
-    {% include "layouts/partials/sidebar_teacher.html" %}
+    {% include "partials/sidebar_student.html" %}
 {% endblock %}
 
 {% block sidebar_overlay %}
@@ -17,7 +17,7 @@
 {% block page_header %}
     <section class="cbt-page-header">
         <div class="cbt-page-header-body">
-            {% include "layouts/partials/page_header.html" with eyebrow="Panel Guru" title="Dashboard" %}
+            {% include "partials/page_header.html" with eyebrow="Panel Siswa" title="Dashboard" %}
             <div class="d-flex align-items-center gap-2 cbt-page-header-actions"></div>
         </div>
     </section>

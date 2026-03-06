@@ -1,10 +1,10 @@
-{% extends "layouts/student.html" %}
+{% extends "layouts/base_student.html" %}
 {% load static %}
 
 {% block title %}Hasil & Review Ujian - Siswa{% endblock %}
 
 {% block topbar %}
-    {% include "layouts/partials/topbar_student.html" with current_label="Hasil & Review Ujian" %}
+    {% include "partials/topbar_student.html" with current_label="Hasil & Review Ujian" %}
 {% endblock %}
 
 {% block main_attrs %}class="container-fluid px-3 px-md-4 py-4"{% endblock %}
@@ -12,7 +12,7 @@
 {% block page_header %}
     <section class="cbt-page-header">
         <div class="cbt-page-header-body">
-            {% include "layouts/partials/page_header.html" with eyebrow="Panel Siswa" title="Hasil & Review Ujian" %}
+            {% include "partials/page_header.html" with eyebrow="Panel Siswa" title="Hasil & Review Ujian" %}
             <div class="d-flex align-items-center gap-2 cbt-page-header-actions">
                 <div class="d-flex flex-wrap gap-2">
                                 <a href="{% url 'student_exam_list' %}" class="btn btn-sm btn-outline-secondary" title="Buka daftar ujian siswa">

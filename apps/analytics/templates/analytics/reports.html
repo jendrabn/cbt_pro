@@ -1,10 +1,10 @@
-{% extends "layouts/admin.html" %}
+{% extends "layouts/base_admin.html" %}
 {% load static analytics_extras %}
 
 {% block title %}Laporan Sistem - CBT{% endblock %}
 
 {% block topbar %}
-    {% include "layouts/partials/topbar_admin.html" with parent_label="Analitik" parent_url="/admin/analytics/" current_label="Laporan Analitik" %}
+    {% include "partials/topbar_admin.html" with parent_label="Analitik" parent_url="/admin/analytics/" current_label="Laporan Analitik" %}
 {% endblock %}
 
 {% block main_attrs %}class="container-fluid px-3 px-md-4 py-4"{% endblock %}
@@ -12,7 +12,7 @@
 {% block page_header %}
     <section class="cbt-page-header">
         <div class="cbt-page-header-body">
-            {% include "layouts/partials/page_header.html" with eyebrow="Panel Admin" title="Laporan Analitik" %}
+            {% include "partials/page_header.html" with eyebrow="Panel Admin" title="Laporan Analitik" %}
             <div class="d-flex align-items-center gap-2 cbt-page-header-actions">
                 <div class="d-flex gap-2">
                                 <a href="{{ analytics_url }}" class="btn btn-sm btn-outline-primary" title="Kembali ke dashboard analytics">

@@ -1,3 +1,3 @@
-sempurnakan DDL pada docs\DB_AND_PROJECT_STRUCTURE.md agar sesuai docs\NEW_PLAN.md dengan ketentuan
-1. gunakan tabel auth_user default django termasuk role atau mungkin group dalam django sesuai docs\NEW_PLAN.md
-2. jika pada docs\NEW_PLAN.md ada tabel dan kolom yang belum ada di docs\DB_AND_PROJECT_STRUCTURE.md maka tambahkan, selain itu jangan rubah apa apa
+lakukan refactoring sebagai berikut:
+1. tempatkan seluruh partials komponen templates\layouts\partials ke templates\partials lalu ubah semua path yang menggunakan komponen tersebut agar tidak error 
+2. 

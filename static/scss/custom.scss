@@ -522,7 +522,7 @@ h6 {
     display: block;
     width: auto;
     height: auto;
-    max-height: 44px;
+    max-height: 40px;
     max-width: min(100%, 220px);
     object-fit: contain;
 }
@@ -547,20 +547,20 @@ h6 {
 
 @media (min-width: 992px) {
     .landing-nav-collapse {
-        position: relative;
-        min-height: 40px;
+        flex: 1 1 auto;
+        align-items: center;
     }
 
     .landing-nav-collapse .navbar-nav {
-        position: absolute;
-        left: 50%;
-        transform: translateX(-50%);
+        flex: 1 1 auto;
+        justify-content: center;
         margin-bottom: 0 !important;
         gap: 0.4rem;
     }
 
     .landing-nav-collapse > .btn {
-        margin-left: auto;
+        flex: 0 0 auto;
+        margin-left: 1rem;
     }
 }
 
