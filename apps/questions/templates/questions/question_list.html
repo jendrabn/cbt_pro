@@ -18,15 +18,13 @@
                                 <a href="{% url 'question_create' %}" class="btn btn-sm btn-primary" title="Tambah soal baru">
                                     <i class="ri-add-line me-1"></i>Tambah Soal
                                 </a>
-                                <button
-                                    type="button"
+                                <a
+                                    href="{% url 'question_import' %}"
                                     class="btn btn-sm btn-outline-secondary"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#importModal"
-                                    title="Impor soal dari Excel atau JSON"
+                                    title="Buka halaman impor soal"
                                 >
                                     <i class="ri-upload-line me-1"></i>Impor
-                                </button>
+                                </a>
                                 <div class="dropdown">
                                     <button class="btn btn-sm btn-outline-success dropdown-toggle" data-bs-toggle="dropdown" title="Ekspor soal">
                                         <i class="ri-download-line me-1"></i>Ekspor
@@ -337,40 +335,6 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
                         <button type="submit" class="btn btn-danger">Hapus</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="importModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2 class="h6 mb-0">Impor Soal</h2>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
-                </div>
-                <form method="post" action="{% url 'question_import' %}" enctype="multipart/form-data">
-                    <div class="modal-body">
-                        {% csrf_token %}
-                        <input type="hidden" name="from_modal" value="1">
-                        <div class="mb-3">
-                            <label class="form-label">File Impor</label>
-                            <input type="file" class="form-control" name="import_file" accept=".json,.xlsx" required>
-                            <small class="text-muted">Format didukung: `.json` atau `.xlsx` (maksimal 10MB).</small>
-                        </div>
-                        <div>
-                            <a href="{% url 'question_import_template' %}" class="btn btn-sm btn-outline-primary" title="Unduh templat Excel untuk impor">
-                                <i class="ri-download-line me-1"></i>Unduh Templat Excel
-                            </a>
-                            <a href="{% url 'question_import' %}" class="btn btn-sm btn-outline-secondary" title="Buka halaman impor lengkap">
-                                Buka Halaman Impor
-                            </a>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-primary">Mulai Impor</button>
                     </div>
                 </form>
             </div>
