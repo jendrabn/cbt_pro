@@ -1,14 +1,14 @@
 :root {
-    --dash-primary: var(--cbt-primary, #0d6efd);
+    --dash-primary: var(--bs-primary);
     --dash-bg: #f3f6fb;
-    --dash-surface: #ffffff;
-    --dash-ink: #0f172a;
-    --dash-muted: #64748b;
-    --dash-border: #dbe4f0;
-    --dash-sidebar-bg: #0f1b2d;
-    --dash-sidebar-bg-soft: #13233a;
-    --dash-sidebar-text: #95a7c1;
-    --dash-sidebar-text-active: #ffffff;
+    --dash-surface: var(--bs-body-bg);
+    --dash-ink: var(--bs-emphasis-color);
+    --dash-muted: var(--bs-secondary-color);
+    --dash-border: var(--bs-border-color);
+    --dash-sidebar-bg: var(--bs-body-bg);
+    --dash-sidebar-bg-soft: var(--bs-tertiary-bg);
+    --dash-sidebar-text: var(--bs-secondary-color);
+    --dash-sidebar-text-active: var(--bs-white);
     --dash-topbar-height: 68px;
     --dash-sidebar-width: 272px;
     --dash-sidebar-width-collapsed: 84px;
@@ -53,9 +53,9 @@ body.dashboard-body.cbt-mobile-sidebar-open {
     left: 0;
     height: var(--dash-topbar-height);
     z-index: 1040;
-    background: rgba(243, 246, 251, 0.92);
+    background: linear-gradient(180deg, var(--dash-sidebar-bg), var(--dash-sidebar-bg-soft));
     border-bottom: 1px solid var(--dash-border);
-    backdrop-filter: blur(8px);
+    backdrop-filter: none;
 }
 
 body.dashboard-body.cbt-has-sidebar .cbt-topbar {
@@ -84,18 +84,18 @@ body.dashboard-body.cbt-has-sidebar.cbt-sidebar-collapsed .cbt-topbar {
 
 .cbt-sidebar-toggle {
     border: 1px solid var(--dash-border);
-    background: #fff;
+    background: var(--dash-surface);
     color: var(--dash-ink);
 }
 
 .cbt-sidebar-toggle:hover {
-    border-color: #bfd2ea;
-    background: #f9fbff;
+    border-color: rgba(var(--bs-primary-rgb), 0.28);
+    background: rgba(var(--bs-primary-rgb), 0.06);
 }
 
 .cbt-user-menu-btn {
     border: 1px solid var(--dash-border);
-    background: #fff;
+    background: var(--dash-surface);
     display: inline-flex;
     align-items: center;
     gap: 0.6rem;
@@ -123,7 +123,7 @@ body.dashboard-body.cbt-has-sidebar.cbt-sidebar-collapsed .cbt-topbar {
     width: 36px;
     height: 36px;
     border-radius: 999px;
-    background: linear-gradient(135deg, var(--dash-primary), #45a6ff);
+    background: linear-gradient(135deg, rgba(var(--bs-primary-rgb), 1), rgba(var(--bs-primary-rgb), 0.7));
     color: #fff;
     display: inline-flex;
     align-items: center;
@@ -138,7 +138,7 @@ body.dashboard-body.cbt-has-sidebar.cbt-sidebar-collapsed .cbt-topbar {
     height: 36px;
     border-radius: 999px;
     object-fit: cover;
-    background: linear-gradient(135deg, var(--dash-primary), #45a6ff);
+    background: linear-gradient(135deg, rgba(var(--bs-primary-rgb), 1), rgba(var(--bs-primary-rgb), 0.7));
 }
 
 .cbt-sidebar {
@@ -150,8 +150,8 @@ body.dashboard-body.cbt-has-sidebar.cbt-sidebar-collapsed .cbt-topbar {
     z-index: 1045;
     background: linear-gradient(180deg, var(--dash-sidebar-bg), var(--dash-sidebar-bg-soft));
     color: var(--dash-sidebar-text);
-    border-right: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: var(--dash-shadow-soft);
+    border-right: 1px solid var(--dash-border);
+    box-shadow: 0 10px 24px rgba(var(--bs-primary-rgb), 0.1);
     display: flex;
     flex-direction: column;
     transition: width 0.25s ease, transform 0.25s ease;
@@ -159,12 +159,100 @@ body.dashboard-body.cbt-has-sidebar.cbt-sidebar-collapsed .cbt-topbar {
 
 .cbt-sidebar-header {
     min-height: var(--dash-topbar-height);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 0;
     display: flex;
     align-items: center;
-    justify-content: center;
-    padding: 0.55rem 1rem;
+    justify-content: stretch;
+    padding: 0.55rem 0.75rem;
+    overflow: visible;
+}
+
+.cbt-sidebar-user-dropdown {
+    width: 100%;
+}
+
+.cbt-sidebar-user-toggle {
+    width: 100%;
+    border: 1px solid var(--dash-border);
+    background: var(--dash-surface);
+    border-radius: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.58rem;
+    padding: 0.38rem 0.5rem;
+    color: var(--dash-ink);
+    transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+}
+
+.cbt-sidebar-user-toggle:hover,
+.cbt-sidebar-user-toggle:focus {
+    border-color: rgba(var(--bs-primary-rgb), 0.35);
+    background: rgba(var(--bs-primary-rgb), 0.06);
+    color: var(--dash-primary);
+}
+
+.cbt-sidebar-user-toggle:focus-visible {
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.16);
+}
+
+.cbt-sidebar-user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    object-fit: cover;
+    background: linear-gradient(135deg, rgba(var(--bs-primary-rgb), 1), rgba(var(--bs-primary-rgb), 0.72));
+    flex-shrink: 0;
+}
+
+.cbt-sidebar-user-meta {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    line-height: 1.15;
+}
+
+.cbt-sidebar-user-name {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--dash-ink);
+    white-space: nowrap;
+    max-width: 148px;
     overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cbt-sidebar-user-role {
+    font-size: 0.73rem;
+    color: var(--dash-muted);
+}
+
+.cbt-sidebar-user-caret {
+    margin-left: auto;
+    color: var(--dash-muted);
+    font-size: 1rem;
+}
+
+.cbt-sidebar-user-menu {
+    width: min(calc(var(--dash-sidebar-width) - 1.5rem), calc(100vw - 1.5rem));
+    border: 1px solid var(--dash-border);
+    border-radius: 12px;
+    padding: 0.35rem;
+}
+
+.cbt-sidebar-user-menu .dropdown-item {
+    border-radius: 8px;
+    font-size: 0.85rem;
+    padding: 0.45rem 0.58rem;
+    color: var(--bs-body-color);
+}
+
+.cbt-sidebar-user-menu .dropdown-item:hover,
+.cbt-sidebar-user-menu .dropdown-item:focus {
+    background: rgba(var(--bs-primary-rgb), 0.1);
+    color: var(--dash-primary);
 }
 
 .cbt-sidebar-brand-image {
@@ -176,7 +264,7 @@ body.dashboard-body.cbt-has-sidebar.cbt-sidebar-collapsed .cbt-topbar {
     object-fit: contain;
 }
 
-.cbt-sidebar-header img {
+.cbt-sidebar-header .cbt-sidebar-brand-image {
     width: auto;
     height: auto;
     max-width: 100%;
@@ -188,7 +276,7 @@ body.dashboard-body.cbt-has-sidebar.cbt-sidebar-collapsed .cbt-topbar {
     display: block;
     width: 100%;
     max-width: 208px;
-    color: #fff;
+    color: var(--dash-ink);
     font-size: 1rem;
     font-weight: 700;
     text-align: center;
@@ -209,6 +297,7 @@ body.dashboard-body.cbt-has-sidebar.cbt-sidebar-collapsed .cbt-topbar {
     color: var(--dash-sidebar-text);
     text-decoration: none;
     border-radius: 10px;
+    border: 1px solid transparent;
     padding: 0.58rem 0.68rem;
     display: flex;
     align-items: center;
@@ -223,14 +312,16 @@ body.dashboard-body.cbt-has-sidebar.cbt-sidebar-collapsed .cbt-topbar {
 }
 
 .cbt-sidebar-link:hover {
-    color: #fff;
-    background: rgba(255, 255, 255, 0.08);
+    color: var(--dash-primary);
+    background: rgba(var(--bs-primary-rgb), 0.1);
+    border-color: rgba(var(--bs-primary-rgb), 0.2);
 }
 
 .cbt-sidebar-link.active {
     color: var(--dash-sidebar-text-active);
-    background: linear-gradient(135deg, rgba(13, 110, 253, 0.9), rgba(69, 166, 255, 0.85));
-    box-shadow: 0 8px 16px rgba(13, 110, 253, 0.22);
+    background: var(--dash-primary);
+    border-color: rgba(var(--bs-primary-rgb), 0.28);
+    box-shadow: 0 8px 16px rgba(var(--bs-primary-rgb), 0.24);
 }
 
 .cbt-sidebar-overlay {
@@ -258,16 +349,32 @@ body.dashboard-body.cbt-sidebar-collapsed .cbt-sidebar-link span {
 
 body.dashboard-body.cbt-sidebar-collapsed .cbt-sidebar-header {
     justify-content: center;
-    padding: 0;
-    min-height: 0;
-    border-bottom: 0;
+    padding: 0.5rem 0;
+    min-height: var(--dash-topbar-height);
 }
 
-body.dashboard-body.cbt-sidebar-collapsed .cbt-sidebar-brand-image {
+body.dashboard-body.cbt-sidebar-collapsed .cbt-sidebar-user-dropdown {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+body.dashboard-body.cbt-sidebar-collapsed .cbt-sidebar-user-toggle {
+    width: 48px;
+    min-width: 48px;
+    height: 48px;
+    padding: 0;
+    border-radius: 999px;
+    justify-content: center;
+    margin: 0 auto;
+}
+
+body.dashboard-body.cbt-sidebar-collapsed .cbt-sidebar-user-meta,
+body.dashboard-body.cbt-sidebar-collapsed .cbt-sidebar-user-caret {
     display: none;
 }
 
-body.dashboard-body.cbt-sidebar-collapsed .cbt-sidebar-header img {
+body.dashboard-body.cbt-sidebar-collapsed .cbt-sidebar-brand-image {
     display: none;
 }
 

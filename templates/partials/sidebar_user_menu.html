@@ -1,0 +1,40 @@
+{% load cbt_extras %}
+{% with display_name=request.user.get_full_name|default:request.user.username %}
+<div class="dropdown cbt-sidebar-user-dropdown">
+    <button
+        class="cbt-sidebar-user-toggle"
+        type="button"
+        data-bs-toggle="dropdown"
+        aria-expanded="false"
+        aria-label="Menu pengguna"
+    >
+        <img src="{% user_avatar_url request.user %}" alt="Avatar {{ display_name }}" class="cbt-sidebar-user-avatar">
+        <span class="cbt-sidebar-user-meta">
+            <span class="cbt-sidebar-user-name">{{ display_name|max_words:2 }}</span>
+            <span class="cbt-sidebar-user-role">{{ role_label }}</span>
+        </span>
+        <i class="ri-arrow-down-s-line cbt-sidebar-user-caret" aria-hidden="true"></i>
+    </button>
+    <ul class="dropdown-menu cbt-sidebar-user-menu shadow-sm">
+        <li>
+            <a class="dropdown-item" href="{% url 'profile' %}">
+                <i class="ri-account-circle-line me-2"></i>Profil
+            </a>
+        </li>
+        <li>
+            <a class="dropdown-item" href="{% url 'change_password' %}">
+                <i class="ri-lock-password-line me-2"></i>Ubah Password
+            </a>
+        </li>
+        <li><hr class="dropdown-divider"></li>
+        <li>
+            <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="dropdown-item text-danger">
+                    <i class="ri-logout-box-r-line me-2"></i>Logout
+                </button>
+            </form>
+        </li>
+    </ul>
+</div>
+{% endwith %}

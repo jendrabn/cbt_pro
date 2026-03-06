@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from django import template
+from django.core.exceptions import ObjectDoesNotExist
 from urllib.parse import quote_plus
 
 register = template.Library()
@@ -23,10 +24,49 @@ def avatar_url(name: str) -> str:
     return f"https://ui-avatars.com/api/?name={encoded_name}&background=random&color=fff&bold=true"
 
 
+@register.filter(name="max_words")
+def max_words(value: str, limit: int = 2) -> str:
+    try:
+        max_limit = max(int(limit), 1)
+    except (TypeError, ValueError):
+        max_limit = 2
+
+    parts = [part for part in str(value or "").strip().split() if part]
+    if not parts:
+        return "User"
+    return " ".join(parts[:max_limit])
+
+
+@register.simple_tag(name="user_avatar_url")
+def user_avatar_url(user) -> str:
+    if user is None:
+        return avatar_url("")
+
+    display_name = user.get_full_name() or getattr(user, "username", "")
+
+    try:
+        profile = user.profile
+    except ObjectDoesNotExist:
+        profile = None
+
+    if profile is not None:
+        profile_picture = getattr(profile, "profile_picture", None)
+        if profile_picture:
+            try:
+                return profile_picture.url
+            except (OSError, ValueError):
+                pass
+
+        profile_picture_url = str(getattr(profile, "profile_picture_url", "") or "").strip()
+        if profile_picture_url:
+            return profile_picture_url
+
+    return avatar_url(display_name)
+
+
 @register.simple_tag(takes_context=True)
 def cbt_active(context, *url_names: str) -> str:
     request = context.get("request")
     resolver_match = getattr(request, "resolver_match", None)
     current_name = getattr(resolver_match, "url_name", "")
     return "active" if current_name in set(url_names) else ""
-

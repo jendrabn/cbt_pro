@@ -1,14 +1,7 @@
-{% load cbt_extras static %}
+{% load cbt_extras %}
 <aside class="cbt-sidebar">
     <div class="cbt-sidebar-header">
-        {% with sidebar_logo=branding.institution_logo_dark_url|default:branding.institution_logo_url|default:'/static/images/logo-light.png' %}
-        <img
-            src="{{ sidebar_logo }}"
-            alt="{{ branding.institution_name|default:'Logo Institusi' }}"
-            class="cbt-sidebar-brand-image"
-            onerror="this.onerror=null;this.src='{% static 'images/logo-light.png' %}';"
-        >
-        {% endwith %}
+        {% include "partials/sidebar_user_menu.html" with role_label="Admin" %}
     </div>
     <nav class="cbt-sidebar-nav" aria-label="Sidebar navigation">
         <a class="cbt-sidebar-link {% cbt_active 'admin_dashboard' %}" href="/admin/dashboard/">

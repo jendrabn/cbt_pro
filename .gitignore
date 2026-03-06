@@ -145,5 +145,5 @@ $RECYCLE.BIN/
 # Profiling
 prof/
 
-# Documentation build
-docs/_build/
+# Documentation
+docs/
