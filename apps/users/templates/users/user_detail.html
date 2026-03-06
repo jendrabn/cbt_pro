@@ -165,7 +165,7 @@
                         <thead class="table-light">
                             <tr>
                                 <th class="ps-3">Waktu</th>
-                                <th>Aksi</th>
+                                <th class="text-end pe-3">Aksi</th>
                                 <th class="pe-3">Deskripsi</th>
                             </tr>
                         </thead>
@@ -173,7 +173,11 @@
                             {% for log in activity_logs %}
                             <tr>
                                 <td class="ps-3">{{ log.created_at|date:"d M Y H:i" }}</td>
-                                <td><span class="badge text-bg-primary">{{ log.action }}</span></td>
+                                <td class="text-end pe-3">
+                                    <div class="d-flex justify-content-end gap-1">
+                                        <span class="badge text-bg-primary">{{ log.action }}</span>
+                                    </div>
+                                </td>
                                 <td class="pe-3 text-muted">{{ log.description|default:"-" }}</td>
                             </tr>
                             {% empty %}
@@ -187,4 +191,3 @@
             </div>
         </section>
 {% endblock %}
-

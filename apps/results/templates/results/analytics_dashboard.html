@@ -152,9 +152,11 @@
                                 <td>{{ row.average_score }}%</td>
                                 <td>{{ row.pass_rate }}%</td>
                                 <td class="text-end pe-3">
-                                    <a href="{% url 'exam_results_detail' row.exam.id %}" class="btn btn-sm btn-outline-primary" title="Lihat detail hasil ujian ini">
-                                        <i class="ri-file-chart-line"></i>
-                                    </a>
+                                    <div class="d-flex justify-content-end gap-1">
+                                        <a href="{% url 'exam_results_detail' row.exam.id %}" class="btn btn-sm btn-outline-primary" title="Lihat detail hasil ujian ini">
+                                            <i class="ri-file-chart-line"></i>
+                                        </a>
+                                    </div>
                                 </td>
                             </tr>
                             {% empty %}

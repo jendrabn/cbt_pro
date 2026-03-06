@@ -160,7 +160,7 @@
                                         <th class="text-center">Dilewati</th>
                                         <th class="text-center">Gagal</th>
                                         <th>Status</th>
-                                        <th>Aksi</th>
+                                        <th class="text-end pe-3">Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -172,10 +172,12 @@
                                         <td class="text-center"><span class="badge text-bg-warning">{{ row.total_skipped }}</span></td>
                                         <td class="text-center"><span class="badge text-bg-danger">{{ row.total_failed }}</span></td>
                                         <td><span class="badge text-bg-secondary">{{ row.get_status_display }}</span></td>
-                                        <td>
-                                            <a href="{% url 'user_import_report' row.id %}" class="btn btn-sm btn-outline-primary">
-                                                <i class="ri-download-line"></i>
-                                            </a>
+                                        <td class="text-end pe-3">
+                                            <div class="d-flex justify-content-end gap-1">
+                                                <a href="{% url 'user_import_report' row.id %}" class="btn btn-sm btn-outline-primary">
+                                                    <i class="ri-download-line"></i>
+                                                </a>
+                                            </div>
                                         </td>
                                     </tr>
                                     {% empty %}

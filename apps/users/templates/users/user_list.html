@@ -157,7 +157,7 @@
                                         <a class="text-decoration-none text-dark" href="?{% if sort_querystring %}{{ sort_querystring }}&{% endif %}sort=-date_joined">Gabung</a>
                                     </th>
                                     <th>Login Terakhir</th>
-                                    <th class="action-cell">Aksi</th>
+                                    <th class="text-end pe-3">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -178,8 +178,8 @@
                                     </td>
                                     <td>{{ user.date_joined|date:"d M Y" }}</td>
                                     <td>{{ user.last_login|date:"d M Y H:i"|default:"-" }}</td>
-                                    <td class="action-cell">
-                                        <div class="d-flex flex-wrap gap-1">
+                                    <td class="text-end pe-3">
+                                        <div class="d-flex justify-content-end gap-1">
                                             <a href="{% url 'user_detail' user.id %}" class="btn btn-sm btn-outline-primary" title="Lihat detail pengguna">
                                                 <i class="ri-eye-line"></i>
                                             </a>

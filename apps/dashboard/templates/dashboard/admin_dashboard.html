@@ -78,7 +78,7 @@
                                     <tr>
                                         <th class="ps-3">Waktu</th>
                                         <th>User</th>
-                                        <th>Aksi</th>
+                                        <th class="text-end pe-3">Aksi</th>
                                         <th class="pe-3">Deskripsi</th>
                                     </tr>
                                 </thead>
@@ -87,7 +87,11 @@
                                     <tr>
                                         <td class="ps-3">{{ activity.created_at|date:"d M Y H:i" }}</td>
                                         <td>{{ activity.user.username }}</td>
-                                        <td><span class="badge text-bg-primary">{{ activity.action }}</span></td>
+                                        <td class="text-end pe-3">
+                                            <div class="d-flex justify-content-end gap-1">
+                                                <span class="badge text-bg-primary">{{ activity.action }}</span>
+                                            </div>
+                                        </td>
                                         <td class="pe-3 text-muted">{{ activity.description|default:"-"|truncatechars:70 }}</td>
                                     </tr>
                                     {% empty %}
@@ -108,16 +112,16 @@
                     </div>
                     <div class="card-body px-3 px-md-4">
                         <div class="d-grid gap-2">
-                            <a href="{% url 'user_list' %}" class="btn btn-outline-primary btn-sm text-start">
+                            <a href="{% url 'user_list' %}" class="btn btn-outline-primary text-start">
                                 <i class="ri-user-add-line me-2"></i>Tambah/Pengelolaan User
                             </a>
-                            <a href="{% url 'subject_list' %}" class="btn btn-outline-primary btn-sm text-start">
+                            <a href="{% url 'subject_list' %}" class="btn btn-outline-primary text-start">
                                 <i class="ri-book-open-line me-2"></i>Kelola Mata Pelajaran
                             </a>
-                            <a href="{% url 'admin_analytics' %}" class="btn btn-outline-primary btn-sm text-start">
+                            <a href="{% url 'admin_analytics' %}" class="btn btn-outline-primary text-start">
                                 <i class="ri-file-chart-line me-2"></i>Lihat Laporan
                             </a>
-                            <a href="{% url 'system_settings' %}" class="btn btn-outline-primary btn-sm text-start">
+                            <a href="{% url 'system_settings' %}" class="btn btn-outline-primary text-start">
                                 <i class="ri-settings-3-line me-2"></i>Pengaturan Sistem
                             </a>
                         </div>
