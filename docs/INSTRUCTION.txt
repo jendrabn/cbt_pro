@@ -1,3 +1,0 @@
-lakukan refactoring sebagai berikut:
-1. tempatkan seluruh partials komponen templates\layouts\partials ke templates\partials lalu ubah semua path yang menggunakan komponen tersebut agar tidak error 
-2. 
