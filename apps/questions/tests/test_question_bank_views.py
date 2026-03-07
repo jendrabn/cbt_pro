@@ -122,6 +122,28 @@ class QuestionBankViewTests(TestCase):
         )
         self.assertIn("attachment;", response["Content-Disposition"])
 
+    def test_teacher_can_export_question_csv(self):
+        self._create_sample_question()
+        self.client.force_login(self.teacher)
+        response = self.client.get(reverse("question_export"), data={"format": "csv"})
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("text/csv", response["Content-Type"])
+        self.assertIn(".csv", response["Content-Disposition"])
+
+    def test_teacher_can_bulk_delete_questions(self):
+        question = self._create_sample_question()
+        self.client.force_login(self.teacher)
+        response = self.client.post(
+            reverse("question_list"),
+            data={
+                "action": "delete",
+                "selected_ids": [str(question.id)],
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        question.refresh_from_db()
+        self.assertTrue(question.is_deleted)
+
     def test_teacher_can_import_question_excel(self):
         self.client.force_login(self.teacher)
         workbook = Workbook()

@@ -15,267 +15,280 @@
             {% include "partials/page_header.html" with eyebrow="Panel Guru" title="Manajemen Bank Soal" subtitle="Kelola koleksi soal dan proses impor/ekspor bank soal." %}
             <div class="d-flex align-items-center gap-2 cbt-page-header-actions">
                 <div class="d-flex flex-wrap gap-2">
-                                <a href="{% url 'question_create' %}" class="btn btn-primary" title="Tambah soal baru">
-                                    <i class="ri-add-line me-1"></i>Tambah Soal
-                                </a>
-                                <a
-                                    href="{% url 'question_import' %}"
-                                    class="btn btn-outline-secondary"
-                                    title="Buka halaman impor soal"
-                                >
-                                    <i class="ri-upload-line me-1"></i>Impor Soal
-                                </a>
-                            </div>
+                    <a href="{% url 'question_create' %}" class="btn btn-primary" title="Tambah soal baru">
+                        <i class="ri-add-line me-1"></i>Tambah Soal
+                    </a>
+                    <a
+                        href="{% url 'question_import' %}"
+                        class="btn btn-outline-secondary"
+                        title="Buka halaman impor soal"
+                    >
+                        <i class="ri-upload-line me-1"></i>Impor Soal
+                    </a>
+                </div>
             </div>
         </div>
     </section>
 {% endblock %}
 
 {% block content %}
-        {% if messages %}
-            <div class="mb-3">
-                {% for message in messages %}
-                <div class="alert alert-{{ message.tags|default:'info' }} py-2 mb-2">{{ message }}</div>
-                {% endfor %}
-            </div>
-        {% endif %}
+    {% if messages %}
+        <div class="mb-3">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags|default:'info' }} py-2 mb-2">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
 
-        <section class="row row-cols-2 row-cols-md-3 row-cols-xl-5 g-3 mb-4 cbt-stats-grid">
-            <div class="col">
-                {% include "partials/stats_card.html" with title="Total Soal" value=summary.total icon="ri-database-2-line" tone="primary" %}
-            </div>
-            <div class="col">
-                {% include "partials/stats_card.html" with title="Soal Ditampilkan" value=summary.filtered icon="ri-filter-3-line" tone="info" %}
-            </div>
-            <div class="col">
-                {% include "partials/stats_card.html" with title="Pilihan Ganda" value=summary.multiple_choice icon="ri-list-check-3" tone="success" %}
-            </div>
-            <div class="col">
-                {% include "partials/stats_card.html" with title="Esai" value=summary.essay icon="ri-file-text-line" tone="warning" %}
-            </div>
-            <div class="col">
-                {% include "partials/stats_card.html" with title="Jawaban Singkat" value=summary.short_answer icon="ri-chat-quote-line" tone="secondary" %}
-            </div>
-        </section>
+    <section class="row row-cols-2 row-cols-md-3 row-cols-xl-5 g-3 mb-4 cbt-stats-grid">
+        <div class="col">
+            {% include "partials/stats_card.html" with title="Total Soal" value=summary.total icon="ri-database-2-line" tone="primary" %}
+        </div>
+        <div class="col">
+            {% include "partials/stats_card.html" with title="Soal Ditampilkan" value=summary.filtered icon="ri-filter-3-line" tone="info" %}
+        </div>
+        <div class="col">
+            {% include "partials/stats_card.html" with title="Pilihan Ganda" value=summary.multiple_choice icon="ri-list-check-3" tone="success" %}
+        </div>
+        <div class="col">
+            {% include "partials/stats_card.html" with title="Esai" value=summary.essay icon="ri-file-text-line" tone="warning" %}
+        </div>
+        <div class="col">
+            {% include "partials/stats_card.html" with title="Jawaban Singkat" value=summary.short_answer icon="ri-chat-quote-line" tone="secondary" %}
+        </div>
+    </section>
 
-        <section class="card border-0 shadow-sm mb-4">
-            <div class="card-body">
-                <form method="get" class="cbt-inline-filter">
-                    <div class="cbt-inline-filter-search">
-                        <i class="ri-search-line"></i>
-                        <input
-                            type="search"
-                            class="form-control"
-                            name="q"
-                            value="{{ filters.q }}"
-                            placeholder="Cari teks soal..."
-                        >
-                    </div>
-                    <div class="cbt-inline-filter-select">
-                        <select class="form-select" name="question_type">
-                            <option value="">Semua Tipe</option>
-                            {% for key, label in question_type_choices %}
-                            <option value="{{ key }}" {% if filters.question_type == key %}selected{% endif %}>{{ label }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="cbt-inline-filter-select">
-                        <select class="form-select" name="subject">
-                            <option value="">Semua Mata Pelajaran</option>
-                            {% for subject in subjects %}
-                            <option value="{{ subject.id }}" {% if filters.subject == subject.id|stringformat:"s" %}selected{% endif %}>{{ subject.name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="cbt-inline-filter-select">
-                        <select class="form-select" name="difficulty">
-                            <option value="">Semua Tingkat</option>
-                            {% for key, label in difficulty_choices %}
-                            <option value="{{ key }}" {% if filters.difficulty == key %}selected{% endif %}>{{ label }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="cbt-inline-filter-select">
-                        <select class="form-select" name="category">
-                            <option value="">Semua Kategori</option>
-                            {% for category in categories %}
-                            <option value="{{ category.id }}" {% if filters.category == category.id|stringformat:"s" %}selected{% endif %}>{{ category.name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <button type="submit" class="btn btn-primary" title="Terapkan filter">
-                        <i class="ri-filter-3-line me-1"></i>Terapkan
-                    </button>
-                    <a href="{% url 'question_list' %}" class="btn btn-outline-secondary cbt-inline-filter-reset" title="Reset semua filter">
-                        <i class="ri-refresh-line me-1"></i>Reset
-                    </a>
-                </form>
-            </div>
-        </section>
-
-        <section class="card border-0 shadow-sm">
-                    <div class="card-body">
-                        <div class="d-flex flex-wrap gap-2 justify-content-end mb-3">
-                            <div class="dropdown">
-                                <button class="btn btn-sm btn-outline-success dropdown-toggle" data-bs-toggle="dropdown" title="Ekspor soal">
-                                    <i class="ri-download-line me-1"></i>Ekspor
-                                </button>
-                                <ul class="dropdown-menu dropdown-menu-end">
-                                    <li><a class="dropdown-item" href="{{ export_xlsx_url }}">Ekspor Semua (Excel)</a></li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li>
-                                        <button class="dropdown-item export-selected-btn" data-format="xlsx" type="button">
-                                            Ekspor Terpilih (Excel)
-                                        </button>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th class="ps-3" style="width: 42px;">
-                                            <input id="selectAllQuestions" type="checkbox" class="form-check-input" title="Pilih semua soal">
-                                        </th>
-                                        <th style="width: 100px;">ID</th>
-                                        <th style="width: 170px;">Tipe</th>
-                                        <th>Pratinjau Soal</th>
-                                        <th style="width: 170px;">Kategori</th>
-                                        <th style="width: 140px;">Kesulitan</th>
-                                        <th class="text-end pe-3" style="width: 250px;">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for question in questions %}
-                                    <tr>
-                                        <td class="ps-3">
-                                            <input
-                                                type="checkbox"
-                                                class="form-check-input question-select-item"
-                                                value="{{ question.id }}"
-                                                title="Pilih soal ini"
-                                            >
-                                        </td>
-                                        <td><small class="text-muted" title="{{ question.id }}">{{ question.id|truncatechars:8 }}</small></td>
-                                        <td>
-                                            {% if question.question_type == 'multiple_choice' %}
-                                            <span class="badge text-bg-primary">Pilihan Ganda</span>
-                                            {% elif question.question_type == 'essay' %}
-                                            <span class="badge text-bg-info">Esai</span>
-                                            {% else %}
-                                            <span class="badge text-bg-secondary">Jawaban Singkat</span>
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            <p class="mb-1 fw-semibold">{{ question.question_text|striptags|truncatechars:80 }}</p>
-                                            <p class="small text-muted mb-0">
-                                                {{ question.subject.name }}{% if question.points %} • Bobot {{ question.points }}{% endif %}
-                                            </p>
-                                        </td>
-                                        <td>{{ question.category.name|default:"-" }}</td>
-                                        <td>
-                                            {% if question.difficulty_level == 'easy' %}
-                                            <span class="badge badge-difficulty-easy">Mudah</span>
-                                            {% elif question.difficulty_level == 'medium' %}
-                                            <span class="badge badge-difficulty-medium">Sedang</span>
-                                            {% elif question.difficulty_level == 'hard' %}
-                                            <span class="badge badge-difficulty-hard">Sulit</span>
-                                            {% else %}
-                                            <span class="text-muted">-</span>
-                                            {% endif %}
-                                        </td>
-                                        <td class="text-end pe-3">
-                                            <div class="d-flex flex-wrap justify-content-end gap-1">
-                                                <button
-                                                    type="button"
-                                                    class="btn btn-sm btn-outline-info preview-btn"
-                                                    data-preview-url="{% url 'question_preview' question.id %}"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#previewModal"
-                                                    title="Pratinjau soal"
-                                                >
-                                                    <i class="ri-eye-line"></i>
-                                                </button>
-                                                <a
-                                                    href="{% url 'question_edit' question.id %}?next={{ request.get_full_path|urlencode }}"
-                                                    class="btn btn-sm btn-outline-primary"
-                                                    title="Edit soal"
-                                                >
-                                                    <i class="ri-edit-line"></i>
-                                                </a>
-                                                <form method="post" action="{% url 'question_duplicate' question.id %}" class="d-inline">
-                                                    {% csrf_token %}
-                                                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
-                                                    <button type="submit" class="btn btn-sm btn-outline-secondary" title="Duplikasi soal">
-                                                        <i class="ri-file-copy-line"></i>
-                                                    </button>
-                                                </form>
-                                                <button
-                                                    type="button"
-                                                    class="btn btn-sm btn-outline-danger delete-btn"
-                                                    data-action-url="{% url 'question_delete' question.id %}"
-                                                    data-question-text="{{ question.question_text|striptags|truncatechars:60 }}"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#deleteModal"
-                                                    title="Hapus soal"
-                                                >
-                                                    <i class="ri-delete-bin-line"></i>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    {% empty %}
-                                    <tr>
-                                        <td colspan="7" class="text-center text-muted py-5">
-                                            Belum ada soal untuk filter yang dipilih.
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    {% if is_paginated %}
-                    <div class="card-footer bg-white">
-                        <nav aria-label="Paginasi bank soal">
-                            <ul class="pagination pagination-sm mb-0">
-                                {% if page_obj.has_previous %}
-                                <li class="page-item">
-                                    <a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.previous_page_number }}">Sebelumnya</a>
-                                </li>
-                                {% else %}
-                                <li class="page-item disabled"><span class="page-link">Sebelumnya</span></li>
-                                {% endif %}
-
-                                {% for num in paginator.page_range %}
-                                    {% if num == page_obj.number %}
-                                    <li class="page-item active"><span class="page-link">{{ num }}</span></li>
-                                    {% elif num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
-                                    <li class="page-item">
-                                        <a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ num }}">{{ num }}</a>
-                                    </li>
-                                    {% endif %}
-                                {% endfor %}
-
-                                {% if page_obj.has_next %}
-                                <li class="page-item">
-                                    <a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.next_page_number }}">Berikutnya</a>
-                                </li>
-                                {% else %}
-                                <li class="page-item disabled"><span class="page-link">Berikutnya</span></li>
-                                {% endif %}
-                            </ul>
-                        </nav>
-                    </div>
-                    {% endif %}
+    <section class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" class="cbt-inline-filter">
+                <div class="cbt-inline-filter-search">
+                    <i class="ri-search-line"></i>
+                    <input
+                        type="search"
+                        class="form-control"
+                        name="q"
+                        value="{{ filters.q }}"
+                        placeholder="Cari teks soal..."
+                    >
                 </div>
-        </section>
+                <div class="cbt-inline-filter-select">
+                    <select class="form-select" name="question_type">
+                        <option value="">Semua Tipe</option>
+                        {% for key, label in question_type_choices %}
+                        <option value="{{ key }}" {% if filters.question_type == key %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="cbt-inline-filter-select">
+                    <select class="form-select" name="subject">
+                        <option value="">Semua Mata Pelajaran</option>
+                        {% for subject in subjects %}
+                        <option value="{{ subject.id }}" {% if filters.subject == subject.id|stringformat:"s" %}selected{% endif %}>{{ subject.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="cbt-inline-filter-select">
+                    <select class="form-select" name="difficulty">
+                        <option value="">Semua Tingkat</option>
+                        {% for key, label in difficulty_choices %}
+                        <option value="{{ key }}" {% if filters.difficulty == key %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="cbt-inline-filter-select">
+                    <select class="form-select" name="category">
+                        <option value="">Semua Kategori</option>
+                        {% for category in categories %}
+                        <option value="{{ category.id }}" {% if filters.category == category.id|stringformat:"s" %}selected{% endif %}>{{ category.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary" title="Terapkan filter">
+                    <i class="ri-filter-3-line me-1"></i>Terapkan
+                </button>
+                <a href="{% url 'question_list' %}" class="btn btn-outline-secondary cbt-inline-filter-reset" title="Reset semua filter">
+                    <i class="ri-refresh-line me-1"></i>Reset
+                </a>
+            </form>
+        </div>
+    </section>
+
+    <section class="card border-0 shadow-sm">
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-3">
+                    <div class="d-flex flex-wrap gap-2">
+                        <select class="form-select form-select-sm" name="action" style="width: 210px;">
+                            <option value="">Pilih Aksi Bulk</option>
+                            <option value="delete">Hapus</option>
+                            <option value="export_csv">Ekspor CSV</option>
+                            <option value="export_excel">Ekspor Excel</option>
+                        </select>
+                        <button type="submit" class="btn btn-sm btn-outline-primary" title="Terapkan aksi bulk ke soal terpilih">
+                            <i class="ri-check-line me-1"></i>Terapkan
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" id="toggle-select-all" title="Pilih semua soal">
+                            <i class="ri-check-double-line me-1"></i><span class="toggle-select-all-label">Pilih Semua</span>
+                        </button>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2">
+                        <a href="{% url 'question_export' %}?format=csv{% if querystring %}&{{ querystring }}{% endif %}" class="btn btn-sm btn-outline-success" title="Ekspor semua data soal ke CSV">
+                            <i class="ri-download-line me-1"></i>CSV
+                        </a>
+                        <a href="{% url 'question_export' %}?format=xlsx{% if querystring %}&{{ querystring }}{% endif %}" class="btn btn-sm btn-outline-success" title="Ekspor semua data soal ke Excel">
+                            <i class="ri-download-line me-1"></i>Excel
+                        </a>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th></th>
+                                <th style="width: 100px;">ID</th>
+                                <th style="width: 170px;">Tipe</th>
+                                <th>Pratinjau Soal</th>
+                                <th style="width: 170px;">Kategori</th>
+                                <th style="width: 140px;">Kesulitan</th>
+                                <th class="text-end pe-3" style="width: 250px;">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for question in questions %}
+                            <tr>
+                                <td class="ps-3">
+                                    <input
+                                        type="checkbox"
+                                        class="form-check-input row-check question-select-item"
+                                        name="selected_ids"
+                                        value="{{ question.id }}"
+                                        title="Pilih soal ini"
+                                    >
+                                </td>
+                                <td><small class="text-muted" title="{{ question.id }}">{{ question.id|truncatechars:8 }}</small></td>
+                                <td>
+                                    {% if question.question_type == 'multiple_choice' %}
+                                    <span class="badge text-bg-primary">Pilihan Ganda</span>
+                                    {% elif question.question_type == 'essay' %}
+                                    <span class="badge text-bg-info">Esai</span>
+                                    {% else %}
+                                    <span class="badge text-bg-secondary">Jawaban Singkat</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <p class="mb-1 fw-semibold">{{ question.question_text|striptags|truncatechars:80 }}</p>
+                                    <p class="small text-muted mb-0">
+                                        {{ question.subject.name }}{% if question.points %} &middot; Bobot {{ question.points }}{% endif %}
+                                    </p>
+                                </td>
+                                <td>{{ question.category.name|default:"-" }}</td>
+                                <td>
+                                    {% if question.difficulty_level == 'easy' %}
+                                    <span class="badge badge-difficulty-easy">Mudah</span>
+                                    {% elif question.difficulty_level == 'medium' %}
+                                    <span class="badge badge-difficulty-medium">Sedang</span>
+                                    {% elif question.difficulty_level == 'hard' %}
+                                    <span class="badge badge-difficulty-hard">Sulit</span>
+                                    {% else %}
+                                    <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end pe-3">
+                                    <div class="d-flex flex-wrap justify-content-end gap-1">
+                                        <button
+                                            type="button"
+                                            class="btn btn-sm btn-outline-info preview-btn"
+                                            data-preview-url="{% url 'question_preview' question.id %}"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#previewModal"
+                                            title="Pratinjau soal"
+                                        >
+                                            <i class="ri-eye-line"></i>
+                                        </button>
+                                        <a
+                                            href="{% url 'question_edit' question.id %}?next={{ request.get_full_path|urlencode }}"
+                                            class="btn btn-sm btn-outline-primary"
+                                            title="Edit soal"
+                                        >
+                                            <i class="ri-edit-line"></i>
+                                        </a>
+                                        <button
+                                            type="submit"
+                                            formaction="{% url 'question_duplicate' question.id %}"
+                                            formmethod="post"
+                                            class="btn btn-sm btn-outline-secondary"
+                                            title="Duplikasi soal"
+                                        >
+                                            <i class="ri-file-copy-line"></i>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            class="btn btn-sm btn-outline-danger delete-btn"
+                                            data-action-url="{% url 'question_delete' question.id %}"
+                                            data-question-text="{{ question.question_text|striptags|truncatechars:60 }}"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#deleteModal"
+                                            title="Hapus soal"
+                                        >
+                                            <i class="ri-delete-bin-line"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center text-muted py-5">
+                                    Belum ada soal untuk filter yang dipilih.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </form>
+        </div>
+
+        {% if is_paginated %}
+        <div class="card-footer bg-white">
+            <nav aria-label="Paginasi bank soal">
+                <ul class="pagination pagination-sm mb-0">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.previous_page_number }}">Sebelumnya</a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled"><span class="page-link">Sebelumnya</span></li>
+                    {% endif %}
+
+                    {% for num in paginator.page_range %}
+                        {% if num == page_obj.number %}
+                        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                        {% elif num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ num }}">{{ num }}</a>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.next_page_number }}">Berikutnya</a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled"><span class="page-link">Berikutnya</span></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+    </section>
 {% endblock %}
 
 {% block vendor_js %}
-<div class="modal fade" id="previewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="previewModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-xl modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
@@ -313,7 +326,39 @@
     </div>
 
     <script>
-        window.questionExportBaseUrl = "{% url 'question_export' %}";
+        const toggleSelectAll = document.getElementById('toggle-select-all');
+        const rowChecks = document.querySelectorAll('.row-check');
+        const toggleSelectAllLabel = document.querySelector('.toggle-select-all-label');
+
+        const updateToggleButton = () => {
+            if (!toggleSelectAll) return;
+
+            const totalRows = rowChecks.length;
+            const checkedRows = Array.from(rowChecks).filter((item) => item.checked).length;
+            const allSelected = totalRows > 0 && checkedRows === totalRows;
+
+            toggleSelectAll.dataset.allSelected = allSelected ? 'true' : 'false';
+            toggleSelectAll.title = allSelected ? 'Batalkan semua pilihan soal' : 'Pilih semua soal';
+            if (toggleSelectAllLabel) {
+                toggleSelectAllLabel.textContent = allSelected ? 'Batalkan Semua' : 'Pilih Semua';
+            }
+        };
+
+        if (toggleSelectAll) {
+            toggleSelectAll.addEventListener('click', function () {
+                const shouldSelectAll = this.dataset.allSelected !== 'true';
+                rowChecks.forEach((item) => {
+                    item.checked = shouldSelectAll;
+                });
+                updateToggleButton();
+            });
+        }
+
+        rowChecks.forEach((item) => {
+            item.addEventListener('change', updateToggleButton);
+        });
+
+        updateToggleButton();
     </script>
-<script src="{% static 'questions/js/question_preview.js' %}"></script>
+    <script src="{% static 'questions/js/question_preview.js' %}"></script>
 {% endblock %}

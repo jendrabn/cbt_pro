@@ -17,6 +17,7 @@ from apps.core.mixins import RoleRequiredMixin
 
 from .exporters import (
     export_import_template_excel,
+    export_questions_to_csv,
     export_questions_to_excel,
 )
 from .forms import QuestionForm, QuestionImportForm
@@ -60,11 +61,40 @@ class QuestionListView(TeacherQuestionBaseView, ListView):
         self.current_filters = filters
         return queryset
 
+    def _current_querystring_without_page(self):
+        return _querystring_without_page(self.request)
+
+    def _redirect_to_current_list(self):
+        base_url = reverse("question_list")
+        qs = self._current_querystring_without_page()
+        return redirect(f"{base_url}?{qs}" if qs else base_url)
+
+    def post(self, request, *args, **kwargs):
+        action = (request.POST.get("action") or "").strip()
+        selected_ids = request.POST.getlist("selected_ids")
+        selected_qs = self.get_base_queryset().filter(id__in=selected_ids) if selected_ids else self.get_queryset()
+
+        if action in {"export_csv", "export_excel"}:
+            if not selected_qs.exists():
+                messages.warning(request, "Tidak ada data soal untuk diekspor.")
+                return self._redirect_to_current_list()
+            return export_questions_to_csv(selected_qs) if action == "export_csv" else export_questions_to_excel(selected_qs)
+
+        if action == "delete":
+            if not selected_ids:
+                messages.warning(request, "Pilih minimal satu soal untuk aksi bulk.")
+                return self._redirect_to_current_list()
+
+            deleted_count = selected_qs.update(is_deleted=True)
+            messages.success(request, f"{deleted_count} soal berhasil dihapus.")
+            return self._redirect_to_current_list()
+
+        messages.warning(request, "Aksi tidak dikenali.")
+        return self._redirect_to_current_list()
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        query_string = _querystring_without_page(self.request)
-        export_base = reverse("question_export")
-        export_xlsx_url = f"{export_base}?{query_string}&format=xlsx" if query_string else f"{export_base}?format=xlsx"
+        query_string = self._current_querystring_without_page()
 
         context.update(
             {
@@ -74,7 +104,6 @@ class QuestionListView(TeacherQuestionBaseView, ListView):
                 "question_type_choices": QUESTION_TYPE_LABELS.items(),
                 "difficulty_choices": DIFFICULTY_LABELS.items(),
                 "querystring": query_string,
-                "export_xlsx_url": export_xlsx_url,
                 "import_form": QuestionImportForm(),
                 "summary": {
                     "total": self.get_base_queryset().count(),
@@ -276,15 +305,8 @@ class QuestionExportView(TeacherQuestionBaseView, View):
     def get(self, request):
         export_format = (request.GET.get("format") or "xlsx").strip().lower()
         ids = request.GET.getlist("ids")
-
-        if export_format != "xlsx":
-            messages.error(request, "Format ekspor JSON sudah tidak didukung. Gunakan format Excel (.xlsx).")
-            query_string = urlencode(
-                {k: v for k, v in request.GET.items() if k not in {"format", "ids", "page"}},
-                doseq=True,
-            )
-            target = reverse("question_list")
-            return redirect(f"{target}?{query_string}" if query_string else target)
+        if export_format not in {"csv", "xlsx"}:
+            export_format = "xlsx"
 
         queryset = get_teacher_question_queryset(request.user)
         if ids:
@@ -301,4 +323,6 @@ class QuestionExportView(TeacherQuestionBaseView, View):
             target = reverse("question_list")
             return redirect(f"{target}?{query_string}" if query_string else target)
 
+        if export_format == "csv":
+            return export_questions_to_csv(queryset)
         return export_questions_to_excel(queryset)

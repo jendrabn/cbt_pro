@@ -81,6 +81,24 @@ def export_questions_to_excel(queryset):
     return response
 
 
+def export_questions_to_csv(queryset):
+    headers = export_template_headers() + ["created_at", "updated_at"]
+    response = HttpResponse(content_type="text/csv")
+    response["Content-Disposition"] = f'attachment; filename="bank_soal_{_safe_timestamp()}.csv"'
+    response.write("\ufeff")
+
+    def _csv_escape(value):
+        return '"' + str(value).replace('"', '""') + '"'
+
+    response.write(",".join(headers) + "\n")
+    for question in queryset:
+        row = _question_to_export_row(question)
+        values = [row.get(header, "") for header in headers]
+        escaped = [_csv_escape(value) for value in values]
+        response.write(",".join(escaped) + "\n")
+    return response
+
+
 def export_import_template_excel():
     workbook = Workbook()
     worksheet = workbook.active
