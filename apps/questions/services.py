@@ -6,13 +6,14 @@ from pathlib import Path
 
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
-from django.db import transaction
+from django.db import OperationalError, ProgrammingError, transaction
 from django.db.models import Q
 
 from .forms import OPTION_LETTERS
 from .models import (
     Question,
     QuestionAnswer,
+    QuestionImportLog,
     QuestionOption,
     QuestionTag,
     QuestionTagRelation,
@@ -243,3 +244,19 @@ def duplicate_question(source_question, teacher):
         QuestionTagRelation.objects.create(question=copy_question, tag=relation.tag)
 
     return copy_question
+
+
+def get_question_import_history(teacher=None, limit: int = 25):
+    try:
+        queryset = QuestionImportLog.objects.select_related("imported_by").order_by("-created_at")
+        if teacher:
+            queryset = queryset.filter(imported_by=teacher)
+        return list(queryset[:limit])
+    except (ProgrammingError, OperationalError):
+        return []
+
+
+def generate_question_import_report(import_log) -> bytes:
+    from .exporters import export_import_report_excel
+
+    return export_import_report_excel(import_log)

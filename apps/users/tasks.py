@@ -1,21 +1,18 @@
 from __future__ import annotations
 
 import logging
-from typing import List
+from typing import Any, List
 
 from django.conf import settings
-from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
+
+from apps.core.tasking import enqueue_task_or_run
 
 logger = logging.getLogger(__name__)
 
-User = get_user_model()
-
 try:
     from celery import shared_task
-    CELERY_AVAILABLE = True
 except ImportError:
-    CELERY_AVAILABLE = False
     def shared_task(func):
         def delay(*args, **kwargs):
             return func(*args, **kwargs)
@@ -24,64 +21,59 @@ except ImportError:
 
 
 @shared_task
-def send_import_credentials_email(user_ids: List[str], admin_username: str = "admin"):
+def send_import_credentials_email(credentials: List[dict[str, Any]], admin_username: str = "admin"):
     """
     Send credential emails to newly imported users.
-    
-    Args:
-        user_ids: List of user UUIDs (as strings)
-        admin_username: Username of the admin who performed the import
     """
-    if not user_ids:
+    if not credentials:
         logger.info("No users to send credentials email to")
         return
-    
-    users = User.objects.filter(id__in=user_ids)
+
     sent_count = 0
     failed_count = 0
-    
-    for user in users:
+
+    for item in credentials:
+        email = item.get("email", "")
+        username = item.get("username", "")
+        temp_password = item.get("temp_password", "")
+        full_name = item.get("full_name", username).strip() or username
         try:
-            temp_password = getattr(user, '_import_temp_password', None)
             if not temp_password:
-                logger.warning(f"No temp password found for user {user.username}, skipping email")
+                logger.warning("No temp password found for user %s, skipping email", username)
                 continue
-            
+
             subject = "Informasi Akun CBT - Kredensial Login"
             message = (
-                f"Halo {user.get_full_name()},\n\n"
+                f"Halo {full_name},\n\n"
                 f"Akun CBT Anda telah dibuat oleh {admin_username}.\n\n"
                 f"Detail Login:\n"
-                f"Username: {user.username}\n"
-                f"Email: {user.email}\n"
+                f"Username: {username}\n"
+                f"Email: {email}\n"
                 f"Password: {temp_password}\n\n"
                 f"Silakan login ke sistem CBT dan segera ubah password Anda untuk keamanan.\n\n"
                 f"Terima kasih."
             )
-            
+
             send_mail(
                 subject=subject,
                 message=message,
                 from_email=getattr(settings, "DEFAULT_FROM_EMAIL", None),
-                recipient_list=[user.email],
+                recipient_list=[email],
                 fail_silently=False,
             )
             sent_count += 1
-            logger.info(f"Credentials email sent to {user.email}")
+            logger.info("Credentials email sent to %s", email)
         except Exception as exc:
             failed_count += 1
-            logger.error(f"Failed to send credentials email to {user.email}: {exc}")
-    
-    logger.info(f"Credentials email task completed: {sent_count} sent, {failed_count} failed")
+            logger.error("Failed to send credentials email to %s: %s", email, exc)
+
+    logger.info("Credentials email task completed: %s sent, %s failed", sent_count, failed_count)
     return {"sent": sent_count, "failed": failed_count}
 
 
-def queue_credentials_email(user_ids: List[str], admin_username: str = "admin"):
+def queue_credentials_email(credentials: List[dict[str, Any]], admin_username: str = "admin"):
     """
-    Queue the credentials email task.
-    Uses Celery if available, otherwise runs synchronously.
+    Queue the credentials email task and fall back to synchronous execution
+    when the broker is unavailable.
     """
-    if CELERY_AVAILABLE:
-        send_import_credentials_email.delay(user_ids, admin_username)
-    else:
-        send_import_credentials_email(user_ids, admin_username)
+    return enqueue_task_or_run(send_import_credentials_email, credentials, admin_username)

@@ -33,18 +33,27 @@ class ImportTemplateExporter:
 
         for col_idx in range(1, 4):
             guide.column_dimensions[guide.cell(row=1, column=col_idx).column_letter].width = 44 if col_idx == 3 else 22
-        for col_idx in range(1, 4):
-            cell = guide.cell(row=1, column=col_idx)
-            cell.fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
-            cell.font = Font(bold=True, color="FFFFFF")
-            cell.alignment = Alignment(horizontal="center")
+
+    @staticmethod
+    def _build_template(headers: list[str], example_data: list[str], role: str) -> bytes:
+        workbook = Workbook()
+        worksheet = workbook.active
+        worksheet.title = "Template Import"
+
+        worksheet.append(headers)
+        worksheet.append(example_data)
+
+        for col_idx in range(1, len(headers) + 1):
+            worksheet.column_dimensions[worksheet.cell(row=1, column=col_idx).column_letter].width = 20
+
+        ImportTemplateExporter._append_guidance_sheet(workbook, role=role)
+
+        buffer = BytesIO()
+        workbook.save(buffer)
+        return buffer.getvalue()
 
     @staticmethod
     def create_teacher_template() -> bytes:
-        workbook = Workbook()
-        worksheet = workbook.active
-        worksheet.title = "Template Teacher"
-
         headers = [
             "first_name",
             "last_name",
@@ -55,29 +64,6 @@ class ImportTemplateExporter:
             "phone_number",
             "is_active",
         ]
-        header_labels = [
-            "Nama Depan *",
-            "Nama Belakang *",
-            "Email *",
-            "Username *",
-            "NIP",
-            "Spesialisasi Mapel",
-            "No. Telepon",
-            "Aktif (TRUE/FALSE)",
-        ]
-
-        header_fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
-        header_font = Font(bold=True, color="FFFFFF")
-
-        for col_idx, (header, label) in enumerate(zip(headers, header_labels), start=1):
-            cell = worksheet.cell(row=1, column=col_idx, value=label)
-            cell.fill = header_fill
-            cell.font = header_font
-            cell.alignment = Alignment(horizontal="center")
-
-        for col_idx in range(1, len(headers) + 1):
-            worksheet.column_dimensions[worksheet.cell(row=1, column=col_idx).column_letter].width = 20
-
         example_data = [
             "Budi",
             "Santoso",
@@ -88,21 +74,10 @@ class ImportTemplateExporter:
             "081234567890",
             "TRUE",
         ]
-        for col_idx, value in enumerate(example_data, start=1):
-            worksheet.cell(row=2, column=col_idx, value=value)
-
-        ImportTemplateExporter._append_guidance_sheet(workbook, role="teacher")
-
-        buffer = BytesIO()
-        workbook.save(buffer)
-        return buffer.getvalue()
+        return ImportTemplateExporter._build_template(headers, example_data, role="teacher")
 
     @staticmethod
     def create_student_template() -> bytes:
-        workbook = Workbook()
-        worksheet = workbook.active
-        worksheet.title = "Template Student"
-
         headers = [
             "first_name",
             "last_name",
@@ -113,29 +88,6 @@ class ImportTemplateExporter:
             "phone_number",
             "is_active",
         ]
-        header_labels = [
-            "Nama Depan *",
-            "Nama Belakang *",
-            "Email *",
-            "Username *",
-            "NIS *",
-            "Kelas *",
-            "No. Telepon",
-            "Aktif (TRUE/FALSE)",
-        ]
-
-        header_fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
-        header_font = Font(bold=True, color="FFFFFF")
-
-        for col_idx, (header, label) in enumerate(zip(headers, header_labels), start=1):
-            cell = worksheet.cell(row=1, column=col_idx, value=label)
-            cell.fill = header_fill
-            cell.font = header_font
-            cell.alignment = Alignment(horizontal="center")
-
-        for col_idx in range(1, len(headers) + 1):
-            worksheet.column_dimensions[worksheet.cell(row=1, column=col_idx).column_letter].width = 20
-
         example_data = [
             "Ahmad",
             "Wijaya",
@@ -146,14 +98,7 @@ class ImportTemplateExporter:
             "081234567891",
             "TRUE",
         ]
-        for col_idx, value in enumerate(example_data, start=1):
-            worksheet.cell(row=2, column=col_idx, value=value)
-
-        ImportTemplateExporter._append_guidance_sheet(workbook, role="student")
-
-        buffer = BytesIO()
-        workbook.save(buffer)
-        return buffer.getvalue()
+        return ImportTemplateExporter._build_template(headers, example_data, role="student")
 
 
 class ImportReportExporter:

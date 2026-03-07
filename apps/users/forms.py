@@ -162,7 +162,7 @@ class UserImportForm(forms.Form):
         super().__init__(*args, **kwargs)
         for field in self.fields.values():
             _bootstrap_widget(field)
-        self.fields["import_file"].widget.attrs.update({"accept": ".xlsx,.xls"})
+        self.fields["import_file"].widget.attrs.update({"accept": ".xlsx"})
         self.fields["send_credentials_email"].widget.attrs["class"] = "form-check-input"
 
     def clean_import_file(self):
@@ -171,8 +171,8 @@ class UserImportForm(forms.Form):
             raise ValidationError("File wajib diunggah.")
 
         filename = uploaded_file.name.lower()
-        if not (filename.endswith(".xlsx") or filename.endswith(".xls")):
-            raise ValidationError("File harus berformat .xlsx atau .xls.")
+        if not filename.endswith(".xlsx"):
+            raise ValidationError("File harus berformat .xlsx.")
 
         max_size_kb = 5 * 1024
         if uploaded_file.size > max_size_kb * 1024:

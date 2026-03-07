@@ -5,12 +5,12 @@ from typing import Any
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.contrib.auth.hashers import make_password
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.db import transaction
 from django.utils import timezone
-from django.utils.crypto import get_random_string
 
 from apps.accounts.models import UserActivityLog, UserImportLog, UserProfile
 
@@ -33,8 +33,14 @@ def _request_meta(request):
 
 
 def log_user_activity(user, action, description="", request=None):
+    activity = _build_user_activity_log(user, action, description=description, request=request)
+    activity.save()
+    return activity
+
+
+def _build_user_activity_log(user, action, description="", request=None):
     ip_address, user_agent = _request_meta(request)
-    return UserActivityLog.objects.create(
+    return UserActivityLog(
         user=user,
         action=action,
         description=description or "",
@@ -248,6 +254,7 @@ class ImportResult:
     total_created: int = 0
     total_skipped: int = 0
     total_failed: int = 0
+    default_password: str = ""
     created_user_ids: list = None
     error_details: list = None
     skip_details: list = None
@@ -278,16 +285,234 @@ def delete_import_preview(preview_key: str):
     cache.delete(f"{IMPORT_PREVIEW_CACHE_PREFIX}{preview_key}")
 
 
-@transaction.atomic
+def _current_import_password() -> str:
+    return timezone.localtime().strftime("%Y%m%d")
+
+
+def _chunked(rows: list[dict[str, Any]], chunk_size: int):
+    chunk_size = max(1, chunk_size)
+    for start in range(0, len(rows), chunk_size):
+        yield rows[start:start + chunk_size]
+
+
+def _profile_payload_from_row(role: str, row_data: dict[str, Any]) -> dict[str, Any]:
+    payload = {
+        "phone_number": row_data.get("phone_number") or None,
+        "teacher_id": None,
+        "subject_specialization": None,
+        "student_id": None,
+        "class_grade": None,
+    }
+    if role == "teacher":
+        payload["teacher_id"] = row_data.get("teacher_id") or None
+        payload["subject_specialization"] = row_data.get("subject_specialization") or None
+    elif role == "student":
+        payload["student_id"] = row_data.get("student_id") or None
+        payload["class_grade"] = row_data.get("class_grade") or None
+    return payload
+
+
+def _append_import_error(result: ImportResult, row_data: dict[str, Any], error: str):
+    result.total_failed += 1
+    result.error_details.append(
+        {
+            "row": row_data.get("row_number", 0),
+            "username": row_data.get("username", ""),
+            "email": row_data.get("email", ""),
+            "error": error,
+        }
+    )
+
+
+def _append_import_skip(result: ImportResult, row_data: dict[str, Any], reason: str):
+    result.total_skipped += 1
+    result.skip_details.append(
+        {
+            "row": row_data.get("row_number", 0),
+            "username": row_data.get("username", ""),
+            "email": row_data.get("email", ""),
+            "reason": reason,
+        }
+    )
+
+
+def _create_user_row(row_data: dict[str, Any], role: str, actor, plain_password: str, encoded_password: str, request=None):
+    user = User(
+        username=row_data["username"],
+        email=row_data["email"],
+        first_name=row_data["first_name"],
+        last_name=row_data["last_name"],
+        role=role,
+        is_active=row_data.get("is_active", True),
+        is_staff=(role == "admin"),
+        password=encoded_password,
+    )
+    user.save()
+    UserProfile.objects.create(user=user, **_profile_payload_from_row(role, row_data))
+    log_user_activity(
+        user,
+        "akun_dibuat",
+        f"Akun dibuat via import oleh {actor.username}.",
+        request=request,
+    )
+    return user, plain_password
+
+
+def _process_single_user_row(
+    row_data: dict[str, Any],
+    role: str,
+    actor,
+    result: ImportResult,
+    plain_password: str,
+    encoded_password: str,
+    request=None,
+):
+    username = row_data.get("username", "")
+    email = row_data.get("email", "")
+    with transaction.atomic():
+        if User.objects.filter(email=email).exists():
+            _append_import_skip(result, row_data, "Email sudah terdaftar saat proses import.")
+            return None
+        if User.objects.filter(username=username).exists():
+            _append_import_skip(result, row_data, "Username sudah terdaftar saat proses import.")
+            return None
+        user, password = _create_user_row(
+            row_data,
+            role,
+            actor=actor,
+            plain_password=plain_password,
+            encoded_password=encoded_password,
+            request=request,
+        )
+
+    result.total_created += 1
+    result.created_user_ids.append(str(user.id))
+    return {
+        "user_id": str(user.id),
+        "username": user.username,
+        "email": user.email,
+        "full_name": user.get_full_name().strip() or user.username,
+        "temp_password": password,
+    }
+
+
+def _process_user_chunk(
+    rows: list[dict[str, Any]],
+    role: str,
+    actor,
+    result: ImportResult,
+    plain_password: str,
+    encoded_password: str,
+    request=None,
+):
+    pending_rows = []
+    user_objects = []
+
+    usernames = [row.get("username", "") for row in rows if row.get("username")]
+    emails = [row.get("email", "") for row in rows if row.get("email")]
+    existing_usernames = set(User.objects.filter(username__in=usernames).values_list("username", flat=True))
+    existing_emails = set(User.objects.filter(email__in=emails).values_list("email", flat=True))
+
+    for row_data in rows:
+        username = row_data.get("username", "")
+        email = row_data.get("email", "")
+        if email in existing_emails:
+            _append_import_skip(result, row_data, "Email sudah terdaftar saat proses import.")
+            continue
+        if username in existing_usernames:
+            _append_import_skip(result, row_data, "Username sudah terdaftar saat proses import.")
+            continue
+
+        pending_rows.append(row_data)
+        user_objects.append(
+            User(
+                username=username,
+                email=email,
+                first_name=row_data["first_name"],
+                last_name=row_data["last_name"],
+                role=role,
+                is_active=row_data.get("is_active", True),
+                is_staff=(role == "admin"),
+                password=encoded_password,
+            )
+        )
+
+    if not pending_rows:
+        return []
+
+    try:
+        with transaction.atomic():
+            User.objects.bulk_create(user_objects, batch_size=getattr(settings, "USER_IMPORT_CHUNK_SIZE", 250))
+            created_users = list(User.objects.filter(username__in=[row["username"] for row in pending_rows]))
+            users_by_username = {user.username: user for user in created_users}
+
+            missing = [row["username"] for row in pending_rows if row["username"] not in users_by_username]
+            if missing:
+                raise ValueError(f"Gagal mengambil user hasil bulk insert: {', '.join(missing)}")
+
+            profiles = []
+            activity_logs = []
+            credential_rows = []
+            for row_data in pending_rows:
+                user = users_by_username[row_data["username"]]
+                profiles.append(UserProfile(user=user, **_profile_payload_from_row(role, row_data)))
+                activity_logs.append(
+                    _build_user_activity_log(
+                        user,
+                        "akun_dibuat",
+                        f"Akun dibuat via import oleh {actor.username}.",
+                        request=request,
+                    )
+                )
+                result.total_created += 1
+                result.created_user_ids.append(str(user.id))
+                credential_rows.append(
+                    {
+                        "user_id": str(user.id),
+                        "username": user.username,
+                        "email": user.email,
+                        "full_name": user.get_full_name().strip() or user.username,
+                        "temp_password": plain_password,
+                    }
+                )
+
+            UserProfile.objects.bulk_create(profiles, batch_size=getattr(settings, "USER_IMPORT_CHUNK_SIZE", 250))
+            UserActivityLog.objects.bulk_create(
+                activity_logs,
+                batch_size=getattr(settings, "USER_IMPORT_CHUNK_SIZE", 250),
+            )
+            return credential_rows
+    except Exception:
+        credential_rows = []
+        for row_data in pending_rows:
+            try:
+                credential = _process_single_user_row(
+                    row_data,
+                    role,
+                    actor=actor,
+                    result=result,
+                    plain_password=plain_password,
+                    encoded_password=encoded_password,
+                    request=request,
+                )
+                if credential:
+                    credential_rows.append(credential)
+            except Exception as exc:
+                _append_import_error(result, row_data, str(exc))
+        return credential_rows
+
+
 def execute_import(preview_key: str, actor, request=None) -> ImportResult:
     preview_data = get_import_preview(preview_key)
     if not preview_data:
         raise ValidationError("Data preview tidak ditemukan atau sudah kedaluwarsa. Silakan upload ulang file.")
 
     result = ImportResult()
+    result.default_password = _current_import_password()
     valid_rows = preview_data.get("valid_rows", [])
     role = preview_data.get("role", "student")
     send_credentials_email = preview_data.get("send_credentials_email", False)
+    encoded_password = make_password(result.default_password)
 
     import_log = UserImportLog.objects.create(
         imported_by=actor,
@@ -299,108 +524,70 @@ def execute_import(preview_key: str, actor, request=None) -> ImportResult:
         started_at=timezone.now(),
     )
 
-    created_users = []
-    passwords_map = {}
-
-    for row_data in valid_rows:
-        try:
-            password = get_random_string(
-                12,
-                allowed_chars="abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789",
+    credential_rows = []
+    try:
+        for chunk in _chunked(valid_rows, getattr(settings, "USER_IMPORT_CHUNK_SIZE", 250)):
+            credential_rows.extend(
+                _process_user_chunk(
+                    chunk,
+                    role=role,
+                    actor=actor,
+                    result=result,
+                    plain_password=result.default_password,
+                    encoded_password=encoded_password,
+                    request=request,
+                )
             )
 
-            user = User(
-                username=row_data["username"],
-                email=row_data["email"],
-                first_name=row_data["first_name"],
-                last_name=row_data["last_name"],
-                role=role,
-                is_active=row_data.get("is_active", True),
-                is_staff=(role == "admin"),
-            )
-            user.set_password(password)
-            user.save()
+        for skip_row in preview_data.get("skip_rows", []):
+            _append_import_skip(result, skip_row, skip_row.get("error", "Baris dilewati."))
 
-            profile_defaults = {
-                "phone_number": row_data.get("phone_number") or None,
-            }
-            if role == "teacher":
-                profile_defaults["teacher_id"] = row_data.get("teacher_id") or None
-                profile_defaults["subject_specialization"] = row_data.get("subject_specialization") or None
-            elif role == "student":
-                profile_defaults["student_id"] = row_data.get("student_id") or None
-                profile_defaults["class_grade"] = row_data.get("class_grade") or None
+        for error_row in preview_data.get("error_rows", []):
+            if error_row.get("row_number", 0) > 0:
+                _append_import_error(result, error_row, error_row.get("error", "Baris gagal diproses."))
 
-            UserProfile.objects.update_or_create(user=user, defaults=profile_defaults)
-
+        if actor:
             log_user_activity(
-                user,
-                "akun_dibuat",
-                f"Akun dibuat via import oleh {actor.username}.",
+                actor,
+                "bulk_import",
+                f"Import {result.total_created} user ({role}). File: {preview_data.get('filename', 'unknown')}",
                 request=request,
             )
 
-            created_users.append(user)
-            passwords_map[str(user.id)] = password
-            result.total_created += 1
+        import_log.total_created = result.total_created
+        import_log.total_skipped = result.total_skipped
+        import_log.total_failed = result.total_failed
+        import_log.error_details = result.error_details
+        import_log.skip_details = result.skip_details
+        import_log.status = "completed"
+        import_log.finished_at = timezone.now()
+        import_log.save()
 
-        except Exception as exc:
-            result.total_failed += 1
-            result.error_details.append({
-                "row": row_data.get("row_number", 0),
-                "username": row_data.get("username", ""),
-                "email": row_data.get("email", ""),
+        if send_credentials_email and credential_rows:
+            from .tasks import queue_credentials_email
+
+            queue_credentials_email(credential_rows, actor.username)
+
+        return result
+    except Exception as exc:
+        import_log.total_created = result.total_created
+        import_log.total_skipped = result.total_skipped
+        import_log.total_failed = result.total_failed + 1
+        import_log.error_details = result.error_details + [
+            {
+                "row": 0,
+                "username": "",
+                "email": "",
                 "error": str(exc),
-            })
-
-    for skip_row in preview_data.get("skip_rows", []):
-        result.total_skipped += 1
-        result.skip_details.append({
-            "row": skip_row.get("row_number", 0),
-            "username": skip_row.get("username", ""),
-            "email": skip_row.get("email", ""),
-            "reason": skip_row.get("error", ""),
-        })
-
-    for error_row in preview_data.get("error_rows", []):
-        if error_row.get("row_number", 0) > 0:
-            result.total_failed += 1
-            result.error_details.append({
-                "row": error_row.get("row_number", 0),
-                "username": error_row.get("username", ""),
-                "email": error_row.get("email", ""),
-                "error": error_row.get("error", ""),
-            })
-
-    if actor:
-        log_user_activity(
-            actor,
-            "bulk_import",
-            f"Import {result.total_created} user ({role}). File: {preview_data.get('filename', 'unknown')}",
-            request=request,
-        )
-
-    import_log.total_created = result.total_created
-    import_log.total_skipped = result.total_skipped
-    import_log.total_failed = result.total_failed
-    import_log.error_details = result.error_details
-    import_log.skip_details = result.skip_details
-    import_log.status = "completed"
-    import_log.finished_at = timezone.now()
-    import_log.save()
-
-    result.created_user_ids = [str(u.id) for u in created_users]
-
-    if send_credentials_email and created_users:
-        from .tasks import queue_credentials_email
-
-        for user in created_users:
-            user._import_temp_password = passwords_map.get(str(user.id))
-        queue_credentials_email(result.created_user_ids, actor.username)
-
-    delete_import_preview(preview_key)
-
-    return result
+            }
+        ]
+        import_log.skip_details = result.skip_details
+        import_log.status = "failed"
+        import_log.finished_at = timezone.now()
+        import_log.save()
+        raise
+    finally:
+        delete_import_preview(preview_key)
 
 
 def generate_import_report(import_log: UserImportLog) -> bytes:

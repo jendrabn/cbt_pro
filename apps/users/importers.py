@@ -1,7 +1,10 @@
 from __future__ import annotations
+
 from dataclasses import dataclass, field
 from typing import Any
+import re
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from openpyxl import load_workbook
 
@@ -14,6 +17,22 @@ TEACHER_ALL_HEADERS = TEACHER_REQUIRED_HEADERS | TEACHER_OPTIONAL_HEADERS
 STUDENT_REQUIRED_HEADERS = {"first_name", "last_name", "email", "username", "student_id", "class_grade"}
 STUDENT_OPTIONAL_HEADERS = {"phone_number", "is_active"}
 STUDENT_ALL_HEADERS = STUDENT_REQUIRED_HEADERS | STUDENT_OPTIONAL_HEADERS
+
+HEADER_ALIASES = {
+    "nama_depan": "first_name",
+    "nama_depan_": "first_name",
+    "nama_belakang": "last_name",
+    "nama_belakang_": "last_name",
+    "nip": "teacher_id",
+    "nis": "student_id",
+    "kelas": "class_grade",
+    "kelas_tingkat": "class_grade",
+    "spesialisasi_mata_pelajaran": "subject_specialization",
+    "spesialisasi_mapel": "subject_specialization",
+    "no_telepon": "phone_number",
+    "nomor_telepon": "phone_number",
+    "aktif_true_false": "is_active",
+}
 
 
 @dataclass
@@ -49,7 +68,8 @@ class ImportPreviewResult:
 def _normalize_header(value):
     if value is None:
         return ""
-    return str(value).strip().lower().replace(" ", "_")
+    normalized = re.sub(r"[^a-z0-9]+", "_", str(value).strip().lower()).strip("_")
+    return HEADER_ALIASES.get(normalized, normalized)
 
 
 def _validate_email(email):
@@ -71,9 +91,8 @@ def _validate_username(username):
         return "Username minimal 3 karakter."
     if len(username) > 150:
         return "Username maksimal 150 karakter."
-    import re
-    if not re.match(r"^[a-zA-Z0-9_]+$", username):
-        return "Username hanya boleh mengandung huruf, angka, dan underscore."
+    if not re.match(r"^[\w.@+-]+$", username):
+        return "Username hanya boleh mengandung huruf, angka, dan karakter @/./+/-/_."
     return None
 
 
@@ -101,7 +120,7 @@ def _collect_existing_accounts(candidates: list[dict[str, str]]) -> tuple[set[st
 
 
 class ExcelUserImporter:
-    MAX_ROWS = 500
+    MAX_ROWS = getattr(settings, "USER_IMPORT_MAX_ROWS", 5000)
     MAX_FILE_SIZE_KB = 5 * 1024
 
     def __init__(self, role: str):
@@ -139,7 +158,7 @@ class ExcelUserImporter:
 
         workbook = None
         try:
-            workbook = load_workbook(uploaded_file, data_only=True)
+            workbook = load_workbook(uploaded_file, data_only=True, read_only=True)
         except Exception as exc:
             result.error_rows.append(
                 ImportRowResult(

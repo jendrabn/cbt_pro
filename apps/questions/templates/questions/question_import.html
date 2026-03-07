@@ -15,10 +15,10 @@
             {% include "partials/page_header.html" with eyebrow="Panel Guru" title="Impor Bank Soal" %}
             <div class="d-flex align-items-center gap-2 cbt-page-header-actions">
                 <div class="d-flex gap-2">
-                                <a href="{% url 'question_list' %}" class="btn btn-outline-primary" title="Kembali ke daftar bank soal">
-                                    <i class="ri-arrow-left-line me-1"></i>Kembali ke Bank Soal
-                                </a>
-                            </div>
+                    <a href="{% url 'question_list' %}" class="btn btn-outline-primary" title="Kembali ke daftar bank soal">
+                        <i class="ri-arrow-left-line me-1"></i>Kembali ke Bank Soal
+                    </a>
+                </div>
             </div>
         </div>
     </section>
@@ -37,7 +37,7 @@
             <div class="col-xl-5">
                 <div class="card border-0 shadow-sm">
                     <div class="card-header bg-white border-0 pt-3">
-                        <h2 class="h6 mb-0">Unggah File</h2>
+                        <h2 class="h6 mb-0">Unggah File Impor</h2>
                     </div>
                     <div class="card-body">
                         <form method="post" enctype="multipart/form-data">
@@ -54,9 +54,6 @@
                                 <button type="submit" class="btn btn-primary" title="Mulai proses impor soal">
                                     <i class="ri-upload-line me-1"></i>Mulai Impor
                                 </button>
-                                <a href="{% url 'question_import_template' %}" class="btn btn-outline-secondary" title="Unduh templat impor Excel">
-                                    <i class="ri-download-line me-1"></i>Unduh Templat Excel
-                                </a>
                             </div>
                         </form>
                     </div>
@@ -65,48 +62,73 @@
                 {% if import_result %}
                 <div class="card border-0 shadow-sm mt-4">
                     <div class="card-header bg-white border-0 pt-3">
-                        <h2 class="h6 mb-0">Ringkasan Impor</h2>
+                        <h2 class="h6 mb-0">Ringkasan Impor Terakhir</h2>
                     </div>
                     <div class="card-body">
-                        <p class="mb-1">Total baris diproses: <strong>{{ import_result.total_rows }}</strong></p>
-                        <p class="mb-1">Berhasil: <strong class="text-success">{{ import_result.success_count }}</strong></p>
-                        <p class="mb-0">Gagal: <strong class="text-danger">{{ import_result.errors|length }}</strong></p>
+                        <div class="row row-cols-2 g-2 mb-3 cbt-stats-grid">
+                            <div class="col">
+                                {% include "partials/stats_card.html" with title="Total Baris" value=import_result.total_rows icon="ri-file-list-3-line" tone="primary" card_class="cbt-stat-card--compact" %}
+                            </div>
+                            <div class="col">
+                                {% include "partials/stats_card.html" with title="Berhasil" value=import_result.total_created icon="ri-checkbox-circle-line" tone="success" card_class="cbt-stat-card--compact" %}
+                            </div>
+                            <div class="col">
+                                {% include "partials/stats_card.html" with title="Dilewati" value=import_result.total_skipped icon="ri-skip-forward-line" tone="warning" card_class="cbt-stat-card--compact" %}
+                            </div>
+                            <div class="col">
+                                {% include "partials/stats_card.html" with title="Gagal" value=import_result.total_failed icon="ri-close-circle-line" tone="danger" card_class="cbt-stat-card--compact" %}
+                            </div>
+                        </div>
+                        {% if import_result.error_details %}
+                        <p class="small fw-semibold mb-2">Error teratas:</p>
+                        <ul class="small mb-0">
+                            {% for row in import_result.error_details|slice:":5" %}
+                            <li>Baris {{ row.row|default:"-" }}: {{ row.error }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
                     </div>
                 </div>
                 {% endif %}
             </div>
 
             <div class="col-xl-7">
-                <div class="card border-0 shadow-sm">
+                <div class="card border-0 shadow-sm mb-4">
                     <div class="card-header bg-white border-0 pt-3">
                         <h2 class="h6 mb-0">Panduan Format Data</h2>
                     </div>
                     <div class="card-body">
-                        <p class="mb-2">Header minimal yang wajib ada:</p>
+                        <p class="mb-2">Template Excel menggunakan header teknis pada baris pertama, misalnya <code>subject</code>, <code>question_type</code>, dan <code>question_text</code>.</p>
+                        <div class="d-flex flex-wrap gap-2 mb-3">
+                            <a href="{% url 'question_import_template' %}" class="btn btn-outline-primary btn-sm" title="Unduh templat impor Excel">
+                                <i class="ri-download-line me-1"></i>Template Bank Soal
+                            </a>
+                        </div>
+
+                        <p class="mb-2">Field wajib:</p>
                         <ul class="mb-3">
-                            <li><code>subject</code></li>
-                            <li><code>question_type</code></li>
-                            <li><code>question_text</code></li>
+                            <li><code>subject</code>, <code>question_type</code>, <code>question_text</code></li>
+                            <li>Untuk <code>multiple_choice</code>: isi minimal dua opsi dan <code>correct_option</code>.</li>
+                            <li>Untuk <code>essay</code> dan <code>short_answer</code>: isi <code>answer_text</code>.</li>
                         </ul>
 
-                        <p class="mb-2">Header tambahan yang didukung:</p>
-                        <div class="small border rounded p-2 bg-light">
+                        <p class="mb-2">Field tambahan yang didukung:</p>
+                        <div class="small border rounded p-2 bg-light mb-3">
                             <code>
-                                category, difficulty_level, points, explanation, allow_previous, allow_next,<br>
-                                force_sequential, time_limit_seconds, option_a, option_b, option_c, option_d, option_e,<br>
-                                correct_option, answer_text, keywords, is_case_sensitive, max_word_count, tags
+                                category, difficulty_level, points, explanation, question_image_url, allow_previous,<br>
+                                allow_next, force_sequential, time_limit_seconds, option_a, option_b, option_c,<br>
+                                option_d, option_e, correct_option, answer_text, keywords, is_case_sensitive,<br>
+                                max_word_count, tags, is_active
                             </code>
                         </div>
 
-                        <hr>
-                        <h3 class="h6">Aturan Nilai (Enum/Case-Sensitive)</h3>
+                        <h3 class="h6">Aturan Nilai (Enum/Boolean)</h3>
                         <ul class="small mb-3">
-                            <li><code>allow_next</code>, <code>allow_previous</code>, <code>force_sequential</code>: isi <code>TRUE</code> atau <code>FALSE</code>.</li>
-                            <li><code>is_case_sensitive</code>: isi <code>TRUE</code> atau <code>FALSE</code> (untuk soal <code>short_answer</code>).</li>
                             <li><code>difficulty_level</code>: <code>easy</code>, <code>medium</code>, <code>hard</code>.</li>
                             <li><code>question_type</code>: <code>multiple_choice</code>, <code>essay</code>, <code>short_answer</code>.</li>
-                            <li><code>correct_option</code>: isi huruf kapital <code>A</code> sampai <code>E</code> (khusus pilihan ganda).</li>
-                            <li><code>subject</code>: harus sesuai nama/kode subject aktif di sistem.</li>
+                            <li><code>allow_next</code>, <code>allow_previous</code>, <code>force_sequential</code>, <code>is_case_sensitive</code>, <code>is_active</code>: isi <code>TRUE</code> atau <code>FALSE</code>.</li>
+                            <li><code>correct_option</code>: isi huruf kapital <code>A</code> sampai <code>E</code> untuk soal pilihan ganda.</li>
+                            <li><code>subject</code>: gunakan nama atau kode subject aktif yang ada di sistem.</li>
                         </ul>
 
                         <p class="small fw-semibold mb-1">Daftar subject aktif:</p>
@@ -117,6 +139,52 @@
                         {% else %}
                         <p class="small text-muted mb-0">Belum ada subject aktif.</p>
                         {% endif %}
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white border-0 pt-3">
+                        <h2 class="h6 mb-0">Riwayat Impor</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Tanggal</th>
+                                        <th>File</th>
+                                        <th class="text-center">Berhasil</th>
+                                        <th class="text-center">Dilewati</th>
+                                        <th class="text-center">Gagal</th>
+                                        <th>Status</th>
+                                        <th class="text-end pe-3">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for row in history %}
+                                    <tr>
+                                        <td>{{ row.created_at|date:"d M Y H:i" }}</td>
+                                        <td>{{ row.original_filename }}</td>
+                                        <td class="text-center"><span class="badge text-bg-success">{{ row.total_created }}</span></td>
+                                        <td class="text-center"><span class="badge text-bg-warning">{{ row.total_skipped }}</span></td>
+                                        <td class="text-center"><span class="badge text-bg-danger">{{ row.total_failed }}</span></td>
+                                        <td><span class="badge text-bg-secondary">{{ row.get_status_display }}</span></td>
+                                        <td class="text-end pe-3">
+                                            <div class="d-flex justify-content-end gap-1">
+                                                <a href="{% url 'question_import_report' row.id %}" class="btn btn-sm btn-outline-primary" title="Unduh laporan import soal">
+                                                    <i class="ri-download-line"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="7" class="text-center text-muted py-4">Belum ada riwayat impor.</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -5,6 +5,7 @@ from .views import (
     QuestionDeleteView,
     QuestionDuplicateView,
     QuestionExportView,
+    QuestionImportReportView,
     QuestionImportTemplateView,
     QuestionImportView,
     QuestionListView,
@@ -24,6 +25,11 @@ urlpatterns = [
         "teacher/question-bank/import/template/",
         QuestionImportTemplateView.as_view(),
         name="question_import_template",
+    ),
+    path(
+        "teacher/question-bank/import/<uuid:log_id>/report/",
+        QuestionImportReportView.as_view(),
+        name="question_import_report",
     ),
     path("teacher/question-bank/export/", QuestionExportView.as_view(), name="question_export"),
 ]

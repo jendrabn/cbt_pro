@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django_celery_results",
     
     # Local apps
     "apps.core",
@@ -189,6 +190,16 @@ DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'CBT System <noreply@cbt.co
 
 
 # =============================================================================
+# IMPORT PROCESSING
+# =============================================================================
+
+USER_IMPORT_MAX_ROWS = int(os.getenv("USER_IMPORT_MAX_ROWS", "5000"))
+USER_IMPORT_CHUNK_SIZE = int(os.getenv("USER_IMPORT_CHUNK_SIZE", "250"))
+QUESTION_IMPORT_MAX_ROWS = int(os.getenv("QUESTION_IMPORT_MAX_ROWS", "10000"))
+QUESTION_IMPORT_CHUNK_SIZE = int(os.getenv("QUESTION_IMPORT_CHUNK_SIZE", "200"))
+
+
+# =============================================================================
 # CELERY & REDIS CONFIGURATION
 # =============================================================================
 
@@ -198,6 +209,7 @@ CELERY_TIMEZONE = os.getenv('CELERY_TIMEZONE', 'Asia/Jakarta')
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TASK_SYNC_FALLBACK = os.getenv("CELERY_TASK_SYNC_FALLBACK", "True").lower() in ("true", "1", "yes")
 
 
 # =============================================================================

@@ -48,7 +48,7 @@
                                 {% if form.import_file.errors %}
                                 <div class="text-danger small mt-1">{{ form.import_file.errors|join:", " }}</div>
                                 {% endif %}
-                                <div class="form-text">Format didukung: `.xlsx`, `.xls` (maksimal 5MB).</div>
+                                <div class="form-text">Format didukung: `.xlsx` (maksimal 5MB).</div>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label required">{{ form.role.label }}</label>
@@ -92,6 +92,11 @@
                                 {% include "partials/stats_card.html" with title="Gagal" value=import_result.total_failed icon="ri-close-circle-line" tone="danger" card_class="cbt-stat-card--compact" %}
                             </div>
                         </div>
+                        {% if import_result.default_password %}
+                        <div class="alert alert-info py-2">
+                            Password default batch impor ini: <strong>{{ import_result.default_password }}</strong>
+                        </div>
+                        {% endif %}
                         {% if import_result.error_details %}
                         <p class="small fw-semibold mb-2">Error teratas:</p>
                         <ul class="small mb-0">
@@ -111,7 +116,7 @@
                         <h2 class="h6 mb-0">Panduan Format Data</h2>
                     </div>
                     <div class="card-body">
-                        <p class="mb-2">Template Excel:</p>
+                        <p class="mb-2">Template Excel menggunakan header teknis pada baris pertama, misalnya <code>first_name</code>, <code>last_name</code>, <code>email</code>, dan <code>username</code>.</p>
                         <div class="d-flex flex-wrap gap-2 mb-3">
                             <a href="{% url 'user_import_template' 'teacher' %}" class="btn btn-outline-primary btn-sm">
                                 <i class="ri-download-line me-1"></i>Template Teacher

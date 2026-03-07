@@ -4,8 +4,10 @@ from urllib.parse import urlencode
 
 from django.conf import settings
 from django.contrib import messages
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
+from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.clickjacking import xframe_options_sameorigin
@@ -19,12 +21,14 @@ from .exporters import (
 )
 from .forms import QuestionForm, QuestionImportForm
 from .importers import import_questions_from_excel
-from .models import Question, QuestionCategory
+from .models import Question, QuestionCategory, QuestionImportLog
 from .services import (
     DIFFICULTY_LABELS,
     QUESTION_TYPE_LABELS,
     duplicate_question,
     filter_teacher_questions,
+    generate_question_import_report,
+    get_question_import_history,
     get_teacher_question_queryset,
     save_question_from_form,
 )
@@ -198,6 +202,7 @@ class QuestionImportView(TeacherQuestionBaseView, View):
             "import_result": extra.get("import_result"),
             "available_subjects": subjects,
             "available_subjects_csv": ", ".join(subjects),
+            "history": get_question_import_history(self.request.user, limit=10),
         }
         context.update(extra)
         return context
@@ -213,18 +218,24 @@ class QuestionImportView(TeacherQuestionBaseView, View):
 
         upload = form.cleaned_data["import_file"]
         result = import_questions_from_excel(upload, request.user)
+        import_result = {
+            "total_rows": result.total_rows,
+            "total_created": result.success_count,
+            "total_skipped": result.skipped_count,
+            "total_failed": len(result.error_details),
+            "error_details": result.error_details,
+            "skip_details": result.skip_details,
+        }
 
         if result.success_count:
             messages.success(
                 request,
                 f"Impor selesai: {result.success_count} dari {result.total_rows} baris berhasil diproses.",
             )
-        if result.errors:
-            messages.warning(request, f"Terdapat {len(result.errors)} baris gagal diproses.")
-            for error in result.errors[:10]:
-                messages.error(request, error)
-            if len(result.errors) > 10:
-                messages.info(request, f"... dan {len(result.errors) - 10} error lainnya.")
+        if result.skipped_count:
+            messages.warning(request, f"{result.skipped_count} baris dilewati saat import soal.")
+        if result.error_details:
+            messages.error(request, f"{len(result.error_details)} baris gagal diproses.")
 
         from_modal = request.POST.get("from_modal") == "1"
         if from_modal:
@@ -233,13 +244,32 @@ class QuestionImportView(TeacherQuestionBaseView, View):
         return render(
             request,
             self.template_name,
-            self._build_context(form=QuestionImportForm(), import_result=result),
+            self._build_context(form=QuestionImportForm(), import_result=import_result),
         )
 
 
 class QuestionImportTemplateView(TeacherQuestionBaseView, View):
     def get(self, request):
         return export_import_template_excel()
+
+
+class QuestionImportReportView(TeacherQuestionBaseView, View):
+    def get(self, request, log_id):
+        import_log = get_object_or_404(QuestionImportLog, id=log_id, imported_by=request.user)
+
+        try:
+            report_bytes = generate_question_import_report(import_log)
+        except Exception as exc:
+            messages.error(request, f"Gagal membuat laporan import soal: {exc}")
+            return redirect("question_import")
+
+        response = HttpResponse(
+            report_bytes,
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+        timestamp = timezone.localtime().strftime("%Y%m%d_%H%M%S")
+        response["Content-Disposition"] = f'attachment; filename="question_import_report_{timestamp}.xlsx"'
+        return response
 
 
 class QuestionExportView(TeacherQuestionBaseView, View):

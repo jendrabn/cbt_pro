@@ -604,6 +604,7 @@ class UserImportView(AdminUserBaseView, View):
             "total_created": result.total_created,
             "total_skipped": result.total_skipped,
             "total_failed": result.total_failed,
+            "default_password": result.default_password,
             "error_details": result.error_details,
             "skip_details": result.skip_details,
         }
@@ -612,6 +613,10 @@ class UserImportView(AdminUserBaseView, View):
             messages.success(
                 request,
                 f"Import selesai: {result.total_created} user berhasil dibuat dari {preview_result.total_rows} baris.",
+            )
+            messages.info(
+                request,
+                f"Password default untuk user hasil import batch ini adalah {result.default_password}.",
             )
         if result.total_skipped:
             messages.warning(request, f"{result.total_skipped} baris dilewati karena duplikat/invalid.")

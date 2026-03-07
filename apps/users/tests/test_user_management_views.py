@@ -1,7 +1,12 @@
+from io import BytesIO
+
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
+from openpyxl import Workbook, load_workbook
 
-from apps.accounts.models import User, UserProfile
+from apps.accounts.models import User, UserImportLog, UserProfile
 
 
 class UserManagementViewTests(TestCase):
@@ -141,3 +146,82 @@ class UserManagementViewTests(TestCase):
         user_b.refresh_from_db()
         self.assertFalse(user_a.is_active)
         self.assertFalse(user_b.is_active)
+
+    def test_user_import_template_uses_machine_headers(self):
+        self.client.force_login(self.admin)
+        response = self.client.get(reverse("user_import_template", kwargs={"role": "student"}))
+        self.assertEqual(response.status_code, 200)
+
+        workbook = load_workbook(BytesIO(response.content))
+        worksheet = workbook.active
+        headers = [worksheet.cell(row=1, column=col_idx).value for col_idx in range(1, 9)]
+        self.assertEqual(
+            headers,
+            [
+                "first_name",
+                "last_name",
+                "email",
+                "username",
+                "student_id",
+                "class_grade",
+                "phone_number",
+                "is_active",
+            ],
+        )
+
+    def test_admin_can_import_users_from_excel_and_log_result(self):
+        self.client.force_login(self.admin)
+
+        workbook = Workbook()
+        worksheet = workbook.active
+        worksheet.append(
+            [
+                "first_name",
+                "last_name",
+                "email",
+                "username",
+                "student_id",
+                "class_grade",
+                "phone_number",
+                "is_active",
+            ]
+        )
+        worksheet.append(
+            [
+                "Rina",
+                "Saputri",
+                "rina.saputri@cbt.com",
+                "rina.saputri",
+                "NIS-9001",
+                "XI IPA 1",
+                "081111111111",
+                "TRUE",
+            ]
+        )
+        payload = BytesIO()
+        workbook.save(payload)
+        upload = SimpleUploadedFile(
+            "import_users.xlsx",
+            payload.getvalue(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+
+        response = self.client.post(
+            reverse("user_import"),
+            data={
+                "import_file": upload,
+                "role": "student",
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(User.objects.filter(username="rina.saputri").exists())
+        self.assertContains(response, "Password default untuk user hasil import batch ini adalah")
+        self.assertContains(response, "Password default batch impor ini:")
+
+        imported_user = User.objects.get(username="rina.saputri")
+        self.assertTrue(imported_user.check_password(timezone.localtime().strftime("%Y%m%d")))
+
+        import_log = UserImportLog.objects.latest("created_at")
+        self.assertEqual(import_log.total_created, 1)
+        self.assertEqual(import_log.total_failed, 0)
+        self.assertEqual(import_log.status, "completed")

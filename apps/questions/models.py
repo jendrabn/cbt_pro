@@ -143,3 +143,38 @@ class QuestionTagRelation(models.Model):
     
     def __str__(self):
         return f"{self.question.id} - {self.tag.name}"
+
+
+class QuestionImportLog(models.Model):
+    STATUS_CHOICES = [
+        ("pending", "Pending"),
+        ("processing", "Processing"),
+        ("completed", "Completed"),
+        ("failed", "Failed"),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    imported_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name="question_import_logs")
+    original_filename = models.CharField(max_length=255)
+    file_size_kb = models.IntegerField()
+    total_rows = models.IntegerField(default=0)
+    total_created = models.IntegerField(default=0)
+    total_skipped = models.IntegerField(default=0)
+    total_failed = models.IntegerField(default=0)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
+    error_details = models.JSONField(null=True, blank=True, default=list)
+    skip_details = models.JSONField(null=True, blank=True, default=list)
+    started_at = models.DateTimeField(null=True, blank=True)
+    finished_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "question_import_logs"
+        indexes = [
+            models.Index(fields=["imported_by"], name="idx_qil_imported_by"),
+            models.Index(fields=["status"], name="idx_qil_status"),
+            models.Index(fields=["-created_at"], name="idx_qil_created_at"),
+        ]
+
+    def __str__(self):
+        return f"Question import {self.original_filename} by {self.imported_by.username} - {self.status}"

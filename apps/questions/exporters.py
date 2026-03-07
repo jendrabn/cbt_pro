@@ -6,6 +6,7 @@ from io import BytesIO
 from django.http import HttpResponse
 from django.utils import timezone
 from openpyxl import Workbook
+from openpyxl.styles import Alignment, Font, PatternFill
 
 from apps.subjects.models import Subject
 
@@ -63,7 +64,7 @@ def export_questions_to_excel(queryset):
     worksheet = workbook.active
     worksheet.title = "Bank Soal"
 
-    headers = export_template_headers() + ["is_active", "question_image_url", "created_at", "updated_at"]
+    headers = export_template_headers() + ["created_at", "updated_at"]
     worksheet.append(headers)
 
     for question in queryset:
@@ -95,6 +96,7 @@ def export_import_template_excel():
             "easy",
             5,
             "Operasi penjumlahan dasar.",
+            "",
             True,
             True,
             False,
@@ -110,6 +112,7 @@ def export_import_template_excel():
             False,
             "",
             "aljabar, dasar",
+            True,
         ]
     )
 
@@ -122,12 +125,14 @@ def export_import_template_excel():
         ("question_type", "YA", "multiple_choice, essay, short_answer"),
         ("question_text", "YA", "Teks soal"),
         ("difficulty_level", "TIDAK", "easy, medium, hard"),
+        ("question_image_url", "TIDAK", "URL gambar soal jika ada"),
         ("allow_previous", "TIDAK", "TRUE atau FALSE"),
         ("allow_next", "TIDAK", "TRUE atau FALSE"),
         ("force_sequential", "TIDAK", "TRUE atau FALSE"),
         ("is_case_sensitive", "TIDAK", "TRUE atau FALSE (khusus short_answer)"),
         ("correct_option", "KONDISIONAL", "A/B/C/D/E untuk multiple_choice"),
         ("answer_text", "KONDISIONAL", "Wajib untuk essay/short_answer"),
+        ("is_active", "TIDAK", "TRUE atau FALSE"),
     ]
     for row in guide_rows:
         guide.append(list(row))
@@ -142,3 +147,78 @@ def export_import_template_excel():
     )
     response["Content-Disposition"] = 'attachment; filename="template_import_bank_soal.xlsx"'
     return response
+
+
+def export_import_report_excel(import_log) -> bytes:
+    workbook = Workbook()
+    worksheet = workbook.active
+    worksheet.title = "Laporan Import"
+
+    header_fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
+    header_font = Font(bold=True, color="FFFFFF")
+    success_fill = PatternFill(start_color="C6EFCE", end_color="C6EFCE", fill_type="solid")
+    skip_fill = PatternFill(start_color="FFEB9C", end_color="FFEB9C", fill_type="solid")
+    error_fill = PatternFill(start_color="FFC7CE", end_color="FFC7CE", fill_type="solid")
+
+    headers = ["No", "Baris Excel", "Status", "Keterangan"]
+    for col_idx, header in enumerate(headers, start=1):
+        cell = worksheet.cell(row=1, column=col_idx, value=header)
+        cell.fill = header_fill
+        cell.font = header_font
+        cell.alignment = Alignment(horizontal="center")
+
+    widths = [10, 14, 14, 60]
+    for col_idx, width in enumerate(widths, start=1):
+        worksheet.column_dimensions[worksheet.cell(row=1, column=col_idx).column_letter].width = width
+
+    rows_data = []
+    for error in import_log.error_details or []:
+        rows_data.append(
+            {
+                "row": error.get("row", "-"),
+                "status": "error",
+                "message": error.get("error", ""),
+            }
+        )
+    for skip in import_log.skip_details or []:
+        rows_data.append(
+            {
+                "row": skip.get("row", "-"),
+                "status": "skip",
+                "message": skip.get("reason", ""),
+            }
+        )
+
+    if not rows_data:
+        rows_data.append(
+            {
+                "row": "-",
+                "status": "success",
+                "message": "Tidak ada baris yang gagal atau dilewati pada import ini.",
+            }
+        )
+
+    status_labels = {
+        "success": "Berhasil",
+        "skip": "Dilewati",
+        "error": "Gagal",
+    }
+    status_fills = {
+        "success": success_fill,
+        "skip": skip_fill,
+        "error": error_fill,
+    }
+
+    for row_idx, row_data in enumerate(rows_data, start=2):
+        fill = status_fills.get(row_data["status"], success_fill)
+        worksheet.cell(row=row_idx, column=1, value=row_idx - 1)
+        worksheet.cell(row=row_idx, column=2, value=row_data.get("row", "-"))
+        worksheet.cell(row=row_idx, column=3, value=status_labels.get(row_data["status"], row_data["status"]))
+        worksheet.cell(row=row_idx, column=4, value=row_data.get("message", ""))
+
+        for col_idx in range(1, len(headers) + 1):
+            worksheet.cell(row=row_idx, column=col_idx).fill = fill
+
+    buffer = BytesIO()
+    workbook.save(buffer)
+    return buffer.getvalue()

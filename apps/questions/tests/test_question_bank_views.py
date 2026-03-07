@@ -1,12 +1,15 @@
 from io import BytesIO
+from unittest.mock import patch
 
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.db import ProgrammingError
 from django.test import TestCase
 from django.urls import reverse
 from openpyxl import Workbook
 
 from apps.accounts.models import User
-from apps.questions.models import Question, QuestionCategory
+from apps.questions.models import Question, QuestionCategory, QuestionImportLog
+from apps.questions.services import get_question_import_history
 from apps.subjects.models import Subject
 
 
@@ -159,3 +162,26 @@ class QuestionBankViewTests(TestCase):
         response = self.client.post(reverse("question_import"), data={"import_file": upload})
         self.assertEqual(response.status_code, 200)
         self.assertTrue(Question.objects.filter(question_text__icontains="5 + 5").exists())
+        self.assertContains(response, "Ringkasan Impor Terakhir")
+        self.assertContains(response, "Template Bank Soal")
+        self.assertContains(response, "Riwayat Impor")
+        import_log = QuestionImportLog.objects.latest("created_at")
+        self.assertEqual(import_log.total_created, 1)
+        self.assertEqual(import_log.total_failed, 0)
+        self.assertEqual(import_log.status, "completed")
+
+        report_response = self.client.get(reverse("question_import_report", kwargs={"log_id": import_log.id}))
+        self.assertEqual(report_response.status_code, 200)
+        self.assertIn(
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            report_response["Content-Type"],
+        )
+
+    def test_question_import_history_returns_empty_when_log_table_unavailable(self):
+        with patch(
+            "apps.questions.services.QuestionImportLog.objects.select_related",
+            side_effect=ProgrammingError("table missing"),
+        ):
+            history = get_question_import_history(self.teacher, limit=10)
+
+        self.assertEqual(history, [])
