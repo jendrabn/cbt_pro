@@ -67,6 +67,9 @@
         var availableLoadMoreBtn = document.getElementById("availableQuestionLoadMoreBtn");
         var assignmentSummaryEl = document.getElementById("assignmentSummaryList");
         var reviewSummaryEl = document.getElementById("reviewSummary");
+        var studentAssignmentListEl = document.getElementById("studentAssignmentList");
+        var studentAssignmentToggleBtn = document.getElementById("studentAssignmentToggleSelectBtn");
+        var studentAssignmentToggleLabel = studentAssignmentToggleBtn ? studentAssignmentToggleBtn.querySelector(".student-toggle-select-label") : null;
 
         var addCategoryBtn = document.getElementById("addCategoryQuestionsBtn");
         var categorySelector = document.getElementById("bulkCategorySelector");
@@ -199,6 +202,10 @@
                 .replace(/'/g, "&#39;");
         }
 
+        function buildSafeDomId(prefix, value) {
+            return prefix + String(value || "").replace(/[^A-Za-z0-9_-]/g, "-");
+        }
+
         function questionTypeLabel(value) {
             if (value === "multiple_choice") {
                 return "Pilihan Ganda";
@@ -262,16 +269,17 @@
                 var safeSubject = escapeHTML(item.subject_name || "");
                 var safeCategory = escapeHTML(item.category_name || "Tanpa kategori");
                 var safePoints = escapeHTML(item.points || "0");
+                var checkboxId = buildSafeDomId("available-question-", item.id);
                 return (
-                    '<label class="list-group-item list-group-item-action question-picker-item py-3" data-question-id="' + item.id + '" data-category-id="' + escapeHTML(item.category_id || "") + '">' +
-                        '<div class="d-flex align-items-start gap-2">' +
-                            '<input type="checkbox" class="form-check-input question-picker-checkbox mt-1" value="' + item.id + '" title="Pilih soal">' +
-                            '<div class="w-100">' +
-                                '<p class="mb-1 fw-semibold">' + safeText + '</p>' +
+                    '<div class="list-group-item list-group-item-action question-picker-item py-3" data-question-id="' + item.id + '" data-category-id="' + escapeHTML(item.category_id || "") + '">' +
+                        '<div class="form-check d-flex align-items-center gap-2 mb-0">' +
+                            '<input type="checkbox" class="form-check-input question-picker-checkbox mt-0" id="' + checkboxId + '" value="' + item.id + '" title="Pilih soal">' +
+                            '<div class="flex-grow-1">' +
+                                '<label class="form-check-label d-block fw-semibold mb-1" for="' + checkboxId + '">' + safeText + '</label>' +
                                 '<p class="small text-muted mb-0">' + safeSubject + ' &bull; ' + safeCategory + ' &bull; ' + safePoints + ' poin &bull; ' + questionTypeLabel(item.question_type) + '</p>' +
                             '</div>' +
                         '</div>' +
-                    "</label>"
+                    "</div>"
                 );
             }).join("");
 
@@ -438,38 +446,41 @@
                 var safeCategoryName = escapeHTML(item.category_name || "");
                 var safeDefaultPoints = escapeHTML(item.default_points || "");
                 var safePointsOverride = escapeHTML(item.points_override || "");
+                var overrideNavId = buildSafeDomId("selected-question-override-nav-", item.question_id);
+                var bulkCheckId = buildSafeDomId("selected-question-bulk-", item.question_id);
+                var titleId = buildSafeDomId("selected-question-title-", item.question_id);
                 return (
                     '<div class="selected-question-item list-group-item mb-2 rounded" data-question-id="' + item.question_id + '">' +
                         '<div class="d-flex align-items-center gap-2">' +
                             '<i class="ri-draggable drag-handle fs-5 text-secondary px-1" title="Geser untuk ubah urutan" style="cursor: grab;"></i>' +
-                            '<input type="checkbox" class="form-check-input selected-question-bulk-check m-0" title="Pilih untuk bulk action">' +
+                            '<input type="checkbox" class="form-check-input selected-question-bulk-check m-0" id="' + bulkCheckId + '" title="Pilih untuk bulk action" aria-label="Pilih soal untuk aksi massal: ' + safeQuestionText + '">' +
                             '<div class="flex-grow-1">' +
-                                '<p class="mb-1 fw-semibold">' + safeQuestionText + '</p>' +
+                                '<p class="mb-1 fw-semibold" id="' + titleId + '">' + safeQuestionText + '</p>' +
                                 '<p class="small text-muted mb-0">' + safeSubjectName + ' &bull; ' + safeCategoryName + ' &bull; ' + (item.question_type === "multiple_choice" ? "Pilihan Ganda" : (item.question_type === "essay" ? "Esai" : "Jawaban Singkat")) + '</p>' +
                                 '<div class="d-flex flex-wrap align-items-center gap-2 mt-2">' +
-                                    '<input type="number" min="0.01" step="0.01" class="form-control form-control-sm selected-question-points" value="' + safePointsOverride + '" placeholder="Poin (' + safeDefaultPoints + ')" style="width: 140px;">' +
-                                    '<div class="d-inline-flex align-items-center gap-1 mb-0 px-2 py-1 border rounded bg-white">' +
-                                        '<input type="checkbox" class="form-check-input selected-question-override-nav m-0" ' + (item.override_navigation ? "checked" : "") + '>' +
-                                        '<span class="small">Timpa Navigasi</span>' +
+                                    '<input type="number" min="0.01" step="0.01" class="form-control form-control-sm selected-question-points" value="' + safePointsOverride + '" placeholder="Poin (' + safeDefaultPoints + ')" style="width: 140px;" aria-label="Timpa poin untuk soal ini">' +
+                                    '<div class="form-check mb-0 small">' +
+                                        '<input type="checkbox" class="form-check-input selected-question-override-nav" id="' + overrideNavId + '" ' + (item.override_navigation ? "checked" : "") + '>' +
+                                        '<label class="form-check-label" for="' + overrideNavId + '">Timpa Navigasi</label>' +
                                     '</div>' +
-                                    '<select class="form-select form-select-sm selected-question-allow-prev" style="width: 150px;">' +
+                                    '<select class="form-select form-select-sm selected-question-allow-prev" style="width: 150px;" aria-label="Override navigasi sebelumnya">' +
                                         '<option value="inherit" ' + (selectValue(item.allow_previous_override) === "inherit" ? "selected" : "") + '>Prev: Ikuti</option>' +
                                         '<option value="true" ' + (selectValue(item.allow_previous_override) === "true" ? "selected" : "") + '>Prev: Ya</option>' +
                                         '<option value="false" ' + (selectValue(item.allow_previous_override) === "false" ? "selected" : "") + '>Prev: Tidak</option>' +
                                     '</select>' +
-                                    '<select class="form-select form-select-sm selected-question-allow-next" style="width: 150px;">' +
+                                    '<select class="form-select form-select-sm selected-question-allow-next" style="width: 150px;" aria-label="Override navigasi berikutnya">' +
                                         '<option value="inherit" ' + (selectValue(item.allow_next_override) === "inherit" ? "selected" : "") + '>Next: Ikuti</option>' +
                                         '<option value="true" ' + (selectValue(item.allow_next_override) === "true" ? "selected" : "") + '>Next: Ya</option>' +
                                         '<option value="false" ' + (selectValue(item.allow_next_override) === "false" ? "selected" : "") + '>Next: Tidak</option>' +
                                     '</select>' +
-                                    '<select class="form-select form-select-sm selected-question-force-seq" style="width: 170px;">' +
+                                    '<select class="form-select form-select-sm selected-question-force-seq" style="width: 170px;" aria-label="Override aturan berurutan">' +
                                         '<option value="inherit" ' + (selectValue(item.force_sequential_override) === "inherit" ? "selected" : "") + '>Berurutan: Ikuti</option>' +
                                         '<option value="true" ' + (selectValue(item.force_sequential_override) === "true" ? "selected" : "") + '>Berurutan: Ya</option>' +
                                         '<option value="false" ' + (selectValue(item.force_sequential_override) === "false" ? "selected" : "") + '>Berurutan: Tidak</option>' +
                                     '</select>' +
                                 '</div>' +
                             '</div>' +
-                            '<button type="button" class="btn btn-sm btn-outline-danger d-inline-flex align-items-center justify-content-center p-0 remove-selected-question-btn" style="width: 2.125rem; height: 2.125rem;" title="Hapus soal dari pilihan">' +
+                            '<button type="button" class="btn btn-sm btn-outline-danger remove-selected-question-btn" title="Hapus soal dari pilihan" aria-label="Hapus soal dari pilihan: ' + safeQuestionText + '">' +
                                 '<i class="ri-delete-bin-line"></i>' +
                             '</button>' +
                         '</div>' +
@@ -576,6 +587,7 @@
             var payload = getCheckedAssignments();
             assignmentPayloadInput.value = JSON.stringify(payload);
             renderAssignmentSummary(payload);
+            syncStudentAssignmentToggleState();
             return payload;
         }
 
@@ -595,15 +607,44 @@
             }).join("");
         }
 
+        function getStudentAssignmentCheckboxes() {
+            if (!studentAssignmentListEl) {
+                return [];
+            }
+            return Array.from(studentAssignmentListEl.querySelectorAll('.assignment-checkbox[data-type="student"]'));
+        }
+
+        function syncStudentAssignmentToggleState() {
+            if (!studentAssignmentToggleBtn || !studentAssignmentToggleLabel) {
+                return;
+            }
+            var checkboxes = getStudentAssignmentCheckboxes();
+            var hasStudents = checkboxes.length > 0;
+            var allChecked = hasStudents && checkboxes.every(function (checkbox) { return checkbox.checked; });
+            studentAssignmentToggleBtn.disabled = !hasStudents;
+            studentAssignmentToggleLabel.textContent = allChecked ? "Batal Pilih" : "Pilih Semua";
+        }
+
         function setStep(stepNumber) {
             currentStep = Math.max(1, Math.min(7, stepNumber));
             stepCards.forEach(function (card) {
                 var step = parseInt(card.getAttribute("data-step"), 10);
-                card.classList.toggle("d-none", step !== currentStep);
+                var isActive = step === currentStep;
+                card.classList.toggle("d-none", !isActive);
+                card.toggleAttribute("hidden", !isActive);
+                card.setAttribute("aria-hidden", isActive ? "false" : "true");
             });
             stepIndicators.forEach(function (indicator) {
                 var step = parseInt(indicator.getAttribute("data-step-indicator"), 10);
-                indicator.classList.toggle("active", step === currentStep);
+                var isActive = step === currentStep;
+                indicator.classList.toggle("active", isActive);
+                indicator.setAttribute("aria-selected", isActive ? "true" : "false");
+                indicator.setAttribute("tabindex", isActive ? "0" : "-1");
+                if (isActive) {
+                    indicator.setAttribute("aria-current", "step");
+                } else {
+                    indicator.removeAttribute("aria-current");
+                }
             });
             prevBtn.disabled = currentStep === 1;
             nextBtn.classList.toggle("d-none", currentStep === 7);
@@ -613,6 +654,33 @@
             if (currentStep === 7) {
                 renderReviewSummary();
             }
+        }
+
+        function canMoveToStep(targetStep) {
+            var desiredStep = Math.max(1, Math.min(7, targetStep));
+            if (desiredStep <= currentStep) {
+                return true;
+            }
+
+            for (var step = currentStep; step < desiredStep; step += 1) {
+                if (step === 3 && Object.keys(selectedQuestions).length === 0) {
+                    window.alert("Pilih minimal satu soal sebelum lanjut.");
+                    return false;
+                }
+                if (step === 4 && allowRetakeField && allowRetakeField.checked) {
+                    var attemptsValue = parseInt((maxRetakeAttemptsField && maxRetakeAttemptsField.value) || "0", 10);
+                    if (isNaN(attemptsValue) || attemptsValue < 2 || attemptsValue > 10) {
+                        window.alert("Maksimal percobaan retake harus berada di rentang 2 sampai 10.");
+                        return false;
+                    }
+                }
+                if (step === 6 && getCheckedAssignments().length === 0) {
+                    window.alert("Pilih minimal satu penugasan kelas atau siswa sebelum lanjut.");
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         function findInitialStepFromErrors() {
@@ -682,6 +750,7 @@
             }
             var enabled = !!allowRetakeField.checked;
             retakeSettingsFields.classList.toggle("d-none", !enabled);
+            retakeSettingsFields.toggleAttribute("hidden", !enabled);
             if (!enabled && maxRetakeAttemptsField && maxRetakeAttemptsField.value === "") {
                 maxRetakeAttemptsField.value = "1";
             }
@@ -938,6 +1007,21 @@
             });
         });
 
+        if (studentAssignmentToggleBtn) {
+            studentAssignmentToggleBtn.addEventListener("click", function () {
+                var checkboxes = getStudentAssignmentCheckboxes();
+                if (!checkboxes.length) {
+                    return;
+                }
+                var shouldSelectAll = checkboxes.some(function (checkbox) { return !checkbox.checked; });
+                checkboxes.forEach(function (checkbox) {
+                    checkbox.checked = shouldSelectAll;
+                });
+                syncAssignmentPayload();
+                renderReviewSummary();
+            });
+        }
+
         if (prevBtn) {
             prevBtn.addEventListener("click", function () {
                 setStep(currentStep - 1);
@@ -946,24 +1030,38 @@
 
         if (nextBtn) {
             nextBtn.addEventListener("click", function () {
-                if (currentStep === 3 && Object.keys(selectedQuestions).length === 0) {
-                    window.alert("Pilih minimal satu soal sebelum lanjut.");
-                    return;
+                if (canMoveToStep(currentStep + 1)) {
+                    setStep(currentStep + 1);
                 }
-                if (currentStep === 4 && allowRetakeField && allowRetakeField.checked) {
-                    var attemptsValue = parseInt((maxRetakeAttemptsField && maxRetakeAttemptsField.value) || "0", 10);
-                    if (isNaN(attemptsValue) || attemptsValue < 2 || attemptsValue > 10) {
-                        window.alert("Maksimal percobaan retake harus berada di rentang 2 sampai 10.");
-                        return;
-                    }
-                }
-                if (currentStep === 6 && getCheckedAssignments().length === 0) {
-                    window.alert("Pilih minimal satu penugasan kelas atau siswa sebelum lanjut.");
-                    return;
-                }
-                setStep(currentStep + 1);
             });
         }
+
+        stepIndicators.forEach(function (indicator, index) {
+            indicator.addEventListener("click", function () {
+                var step = parseInt(indicator.getAttribute("data-step-indicator"), 10);
+                if (!isNaN(step) && canMoveToStep(step)) {
+                    setStep(step);
+                }
+            });
+
+            indicator.addEventListener("keydown", function (event) {
+                var targetIndex = index;
+                if (event.key === "ArrowRight") {
+                    targetIndex = (index + 1) % stepIndicators.length;
+                } else if (event.key === "ArrowLeft") {
+                    targetIndex = (index - 1 + stepIndicators.length) % stepIndicators.length;
+                } else if (event.key === "Home") {
+                    targetIndex = 0;
+                } else if (event.key === "End") {
+                    targetIndex = stepIndicators.length - 1;
+                } else {
+                    return;
+                }
+
+                event.preventDefault();
+                stepIndicators[targetIndex].focus();
+            });
+        });
 
         submitButtons.forEach(function (button) {
             button.addEventListener("click", function () {
@@ -1018,6 +1116,7 @@
         syncAssignmentPayload();
         renderReviewSummary();
         toggleRetakeSettings();
+        syncStudentAssignmentToggleState();
 
         if (window.Sortable && selectedListEl) {
             window.Sortable.create(selectedListEl, {
@@ -1039,4 +1138,3 @@
         setStep(findInitialStepFromErrors());
     });
 })();
-

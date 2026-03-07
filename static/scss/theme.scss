@@ -76,7 +76,6 @@ $form-check-label-color: #2b3f5a;
 
 @import "bootstrap/scss/bootstrap";
 
-label,
 .form-label,
 .col-form-label {
   font-size: .84rem;
@@ -95,10 +94,10 @@ fieldset > legend {
   letter-spacing: .045em;
 }
 
-.form-check-label {
-  text-transform: uppercase;
-  letter-spacing: .04em;
-}
+// .form-check-label {
+//   text-transform: uppercase;
+//   letter-spacing: .04em;
+// }
 
 // Unify header/footer surfaces with body in cards and modals.
 .card-header,
