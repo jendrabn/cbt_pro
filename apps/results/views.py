@@ -12,7 +12,7 @@ from apps.core.mixins import RoleRequiredMixin
 from apps.exams.models import Exam
 from apps.results.models import ExamResult
 
-from .exporters import export_results_to_pdf, export_results_to_xlsx
+from .exporters import export_results_to_csv, export_results_to_pdf, export_results_to_xlsx
 from .services import (
     build_attempt_history_rows,
     build_analytics_chart_data,
@@ -32,6 +32,7 @@ from .services import (
     build_student_results_summary,
     calculate_exam_summary,
     calculate_statistics_cards,
+    current_sort_option,
     get_certificate_download_url,
     get_exam_results_queryset,
     get_student_filter_options,
@@ -111,6 +112,22 @@ class ExamResultsDetailView(TeacherResultsBaseView, DetailView):
     context_object_name = "exam"
     template_name = "results/result_detail.html"
     paginate_by = 20
+    sort_option_choices = [
+        ("rank_asc", "Peringkat Tertinggi"),
+        ("rank_desc", "Peringkat Terendah"),
+        ("name_asc", "Nama A-Z"),
+        ("name_desc", "Nama Z-A"),
+        ("score_desc", "Skor Tertinggi"),
+        ("score_asc", "Skor Terendah"),
+        ("percentage_desc", "Persentase Tertinggi"),
+        ("percentage_asc", "Persentase Terendah"),
+        ("time_asc", "Waktu Tercepat"),
+        ("time_desc", "Waktu Terlama"),
+        ("violations_desc", "Pelanggaran Terbanyak"),
+        ("violations_asc", "Pelanggaran Tersedikit"),
+        ("attempts_desc", "Attempts Terbanyak"),
+        ("attempts_asc", "Attempts Tersedikit"),
+    ]
 
     def get_queryset(self):
         return (
@@ -118,6 +135,42 @@ class ExamResultsDetailView(TeacherResultsBaseView, DetailView):
             .select_related("subject")
             .prefetch_related("assignments__class_obj", "exam_questions__question__options")
         )
+
+    def _current_querystring_without_page(self):
+        return _querystring_without_page(self.request)
+
+    def _redirect_to_current_detail(self, exam):
+        base_url = reverse("exam_results_detail", kwargs={"exam_id": exam.id})
+        qs = self._current_querystring_without_page()
+        return redirect(f"{base_url}?{qs}" if qs else base_url)
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        action = (request.POST.get("action") or "").strip()
+        selected_ids = request.POST.getlist("selected_ids")
+        sort_by, direction = parse_sorting_params(request)
+
+        if action in {"export_csv", "export_excel"}:
+            if not selected_ids:
+                messages.warning(request, "Pilih minimal satu siswa untuk aksi bulk.")
+                return self._redirect_to_current_detail(self.object)
+
+            rows = build_export_rows(
+                self.object,
+                selected_ids=selected_ids,
+                sort_by=sort_by,
+                direction=direction,
+            )
+            if not rows:
+                messages.warning(request, "Tidak ada data hasil yang dapat diekspor.")
+                return self._redirect_to_current_detail(self.object)
+
+            if action == "export_csv":
+                return export_results_to_csv(self.object, rows)
+            return export_results_to_xlsx(self.object, rows)
+
+        messages.warning(request, "Aksi tidak dikenali.")
+        return self._redirect_to_current_detail(self.object)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -134,8 +187,8 @@ class ExamResultsDetailView(TeacherResultsBaseView, DetailView):
         paginator = Paginator(student_rows, self.paginate_by)
         page_obj = paginator.get_page(self.request.GET.get("page"))
 
-        query_without_page = _querystring_without_page(self.request)
-        export_query = _querystring_without(self.request, ["page", "format", "ids", "selected_ids"])
+        query_without_page = self._current_querystring_without_page()
+        export_query = _querystring_without(self.request, ["page", "format", "ids", "selected_ids", "sort", "dir"])
         export_base = reverse("export_results", kwargs={"exam_id": self.object.id})
 
         context.update(
@@ -153,13 +206,15 @@ class ExamResultsDetailView(TeacherResultsBaseView, DetailView):
                 "is_paginated": page_obj.has_other_pages(),
                 "sort_by": sort_by,
                 "sort_dir": direction,
+                "current_sort_option": current_sort_option(sort_by, direction),
+                "sort_option_choices": self.sort_option_choices,
                 "querystring": query_without_page,
+                "export_csv_url": f"{export_base}?{export_query}&format=csv"
+                if export_query
+                else f"{export_base}?format=csv",
                 "export_xlsx_url": f"{export_base}?{export_query}&format=xlsx"
                 if export_query
                 else f"{export_base}?format=xlsx",
-                "export_pdf_url": f"{export_base}?{export_query}&format=pdf"
-                if export_query
-                else f"{export_base}?format=pdf",
                 "analytics_url": reverse("teacher_results_analytics"),
             }
         )
@@ -229,7 +284,8 @@ class ExportResultsView(TeacherResultsBaseView, View):
             id=exam_id,
         )
         selected_ids = parse_selected_result_ids(request)
-        rows = build_export_rows(exam, selected_ids=selected_ids)
+        sort_by, direction = parse_sorting_params(request)
+        rows = build_export_rows(exam, selected_ids=selected_ids, sort_by=sort_by, direction=direction)
 
         if not rows:
             messages.warning(request, "Tidak ada data hasil yang dapat diekspor.")
@@ -239,6 +295,8 @@ class ExportResultsView(TeacherResultsBaseView, View):
         export_format = (request.GET.get("format") or "xlsx").strip().lower()
         if export_format == "pdf":
             return export_results_to_pdf(exam, rows, summary)
+        if export_format == "csv":
+            return export_results_to_csv(exam, rows)
         return export_results_to_xlsx(exam, rows)
 
 

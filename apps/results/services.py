@@ -30,6 +30,25 @@ SORTABLE_STUDENT_COLUMNS = {
     "attempts",
 }
 
+SORT_OPTION_MAP = {
+    "rank_asc": ("rank", "asc"),
+    "rank_desc": ("rank", "desc"),
+    "name_asc": ("name", "asc"),
+    "name_desc": ("name", "desc"),
+    "score_desc": ("score", "desc"),
+    "score_asc": ("score", "asc"),
+    "percentage_desc": ("percentage", "desc"),
+    "percentage_asc": ("percentage", "asc"),
+    "status_asc": ("status", "asc"),
+    "status_desc": ("status", "desc"),
+    "time_asc": ("time", "asc"),
+    "time_desc": ("time", "desc"),
+    "violations_desc": ("violations", "desc"),
+    "violations_asc": ("violations", "asc"),
+    "attempts_desc": ("attempts", "desc"),
+    "attempts_asc": ("attempts", "asc"),
+}
+
 SCORE_BINS = [
     ("0-20", 0, 20),
     ("21-40", 21, 40),
@@ -1021,8 +1040,16 @@ def build_answer_review_context(result):
 
 
 def parse_sorting_params(request):
-    sort_by = (request.GET.get("sort") or "rank").strip()
-    direction = (request.GET.get("dir") or "asc").strip().lower()
+    sort_option = (
+        request.GET.get("sort_option")
+        or request.POST.get("sort_option")
+        or ""
+    ).strip().lower()
+    if sort_option in SORT_OPTION_MAP:
+        return SORT_OPTION_MAP[sort_option]
+
+    sort_by = (request.GET.get("sort") or request.POST.get("sort") or "rank").strip()
+    direction = (request.GET.get("dir") or request.POST.get("dir") or "asc").strip().lower()
     if sort_by not in SORTABLE_STUDENT_COLUMNS:
         sort_by = "rank"
     if direction not in {"asc", "desc"}:
@@ -1030,13 +1057,25 @@ def parse_sorting_params(request):
     return sort_by, direction
 
 
+def current_sort_option(sort_by, direction):
+    for option_value, pair in SORT_OPTION_MAP.items():
+        if pair == (sort_by, direction):
+            return option_value
+    return "rank_asc"
+
+
 def parse_selected_result_ids(request):
     ids = [value for value in request.GET.getlist("ids") if value]
     ids += [value for value in request.POST.getlist("ids") if value]
+    ids += [value for value in request.GET.getlist("selected_ids") if value]
+    ids += [value for value in request.POST.getlist("selected_ids") if value]
     csv_value = (request.GET.get("selected_ids") or request.POST.get("selected_ids") or "").strip()
     if csv_value:
         ids += [item.strip() for item in csv_value.split(",") if item.strip()]
-    return sorted(set(ids))
+    normalized = []
+    for value in ids:
+        normalized += [item.strip() for item in str(value).split(",") if item.strip()]
+    return sorted(set(normalized))
 
 
 def build_attempt_history_rows(exam, student):
@@ -1087,13 +1126,13 @@ def build_attempt_history_rows(exam, student):
     return rows
 
 
-def build_export_rows(exam, selected_ids=None):
+def build_export_rows(exam, selected_ids=None, sort_by="rank", direction="asc"):
     base_qs = ExamResult.objects.filter(exam=exam).select_related("student").order_by(
         "-percentage",
         "-total_score",
         "time_taken_seconds",
     )
-    ordered_rows = build_student_result_rows(base_qs, sort_by="rank", direction="asc")
+    ordered_rows = build_student_result_rows(base_qs, sort_by=sort_by, direction=direction)
     if selected_ids:
         selected_set = set(selected_ids)
         ordered_rows = [row for row in ordered_rows if row["id"] in selected_set]

@@ -277,6 +277,30 @@ class TeacherResultsViewTests(TestCase):
             response["Content-Type"],
         )
 
+    def test_teacher_can_export_results_csv(self):
+        self.client.force_login(self.teacher)
+        response = self.client.get(
+            reverse("export_results", kwargs={"exam_id": self.exam.id}),
+            data={"format": "csv"},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("text/csv", response["Content-Type"])
+
+    def test_teacher_can_bulk_export_selected_results_xlsx(self):
+        self.client.force_login(self.teacher)
+        response = self.client.post(
+            reverse("exam_results_detail", kwargs={"exam_id": self.exam.id}),
+            data={
+                "action": "export_excel",
+                "selected_ids": [str(self.result_one.id)],
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            response["Content-Type"],
+        )
+
     def test_teacher_can_export_results_pdf(self):
         self.client.force_login(self.teacher)
         response = self.client.get(

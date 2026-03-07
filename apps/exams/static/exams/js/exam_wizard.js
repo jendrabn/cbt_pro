@@ -72,9 +72,7 @@
         var filterSubjectSelect = document.getElementById("questionFilterSubject");
         var filterTypeSelect = document.getElementById("questionFilterType");
         var filterCategorySelect = document.getElementById("questionFilterCategory");
-        var filterApplyBtn = document.getElementById("questionFilterApplyBtn");
         var filterResetBtn = document.getElementById("questionFilterResetBtn");
-        var questionFilterModalEl = document.getElementById("questionFilterModal");
 
         var selectedBulkCheckAll = document.getElementById("selectedBulkCheckAll");
         var bulkPointsInput = document.getElementById("bulkPointsOverride");
@@ -83,7 +81,6 @@
         var bulkForceSeqSelect = document.getElementById("bulkForceSequential");
         var applyBulkSelectedBtn = document.getElementById("applyBulkSelectedBtn");
         var deleteBulkSelectedBtn = document.getElementById("deleteBulkSelectedBtn");
-        var selectedBulkModalEl = document.getElementById("selectedBulkModal");
 
         var stepIndicators = Array.from(document.querySelectorAll("[data-step-indicator]"));
         var stepCards = Array.from(document.querySelectorAll("[data-step]"));
@@ -606,18 +603,24 @@
             });
         }
 
-        if (filterApplyBtn) {
-            filterApplyBtn.addEventListener("click", function () {
+        if (filterSearchInput) {
+            filterSearchInput.addEventListener("input", function () {
                 applyQuestionFilters();
-                hideModal(questionFilterModalEl);
             });
         }
-        if (filterSearchInput) {
-            filterSearchInput.addEventListener("keydown", function (event) {
-                if (event.key === "Enter") {
-                    event.preventDefault();
-                    applyQuestionFilters();
-                }
+        if (filterSubjectSelect) {
+            filterSubjectSelect.addEventListener("change", function () {
+                applyQuestionFilters();
+            });
+        }
+        if (filterTypeSelect) {
+            filterTypeSelect.addEventListener("change", function () {
+                applyQuestionFilters();
+            });
+        }
+        if (filterCategorySelect) {
+            filterCategorySelect.addEventListener("change", function () {
+                applyQuestionFilters();
             });
         }
         if (filterResetBtn) {
@@ -667,7 +670,6 @@
 
                 renderSelectedQuestions();
                 renderReviewSummary();
-                hideModal(selectedBulkModalEl);
             });
         }
 
@@ -684,7 +686,6 @@
                 syncAvailableCheckboxState();
                 renderSelectedQuestions();
                 renderReviewSummary();
-                hideModal(selectedBulkModalEl);
             });
         }
 

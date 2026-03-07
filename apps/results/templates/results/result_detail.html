@@ -21,12 +21,6 @@
                                 <a href="{{ analytics_url }}" class="btn btn-outline-info" title="Buka dashboard analitik">
                                     <i class="ri-line-chart-line me-1"></i>Analitik
                                 </a>
-                                <a href="{{ export_xlsx_url }}" class="btn btn-outline-success" title="Ekspor semua hasil ke Excel">
-                                    <i class="ri-download-line me-1"></i>Excel
-                                </a>
-                                <a href="{{ export_pdf_url }}" class="btn btn-outline-danger" title="Ekspor semua hasil ke PDF">
-                                    <i class="ri-file-pdf-2-line me-1"></i>Ekspor PDF
-                                </a>
                             </div>
             </div>
         </div>
@@ -110,126 +104,121 @@
         </section>
 
         <section class="card border-0 shadow-sm mb-4">
-            <div class="card-header bg-white border-0 pt-3 px-3 px-md-4">
-                <div class="d-flex flex-wrap gap-2 align-items-center justify-content-between">
-                    <h3 class="h6 mb-0">Hasil Siswa</h3>
-                    <div class="d-flex flex-wrap gap-2">
-                        <form method="get" class="d-flex flex-wrap gap-2 align-items-center">
-                            <label class="small text-muted" for="sortField">Urutkan</label>
-                            <select id="sortField" class="form-select form-select-sm" name="sort">
-                                <option value="rank" {% if sort_by == 'rank' %}selected{% endif %}>Peringkat</option>
-                                <option value="name" {% if sort_by == 'name' %}selected{% endif %}>Nama</option>
-                                <option value="score" {% if sort_by == 'score' %}selected{% endif %}>Skor</option>
-                                <option value="percentage" {% if sort_by == 'percentage' %}selected{% endif %}>Persentase</option>
-                                <option value="status" {% if sort_by == 'status' %}selected{% endif %}>Status</option>
-                                <option value="time" {% if sort_by == 'time' %}selected{% endif %}>Waktu</option>
-                                <option value="violations" {% if sort_by == 'violations' %}selected{% endif %}>Pelanggaran</option>
-                                <option value="attempts" {% if sort_by == 'attempts' %}selected{% endif %}>Attempts</option>
-                            </select>
-                            <select class="form-select form-select-sm" name="dir">
-                                <option value="asc" {% if sort_dir == 'asc' %}selected{% endif %}>Naik</option>
-                                <option value="desc" {% if sort_dir == 'desc' %}selected{% endif %}>Turun</option>
-                            </select>
-                            <button type="submit" class="btn btn-sm btn-outline-primary" title="Terapkan urutan data siswa">
-                                Terapkan
-                            </button>
-                        </form>
-
-                        <form id="exportSelectedForm" method="get" action="{% url 'export_results' exam.id %}" class="d-flex flex-wrap gap-2">
-                            <input type="hidden" name="selected_ids" id="selectedResultIds" value="">
-                            <button type="submit" class="btn btn-sm btn-outline-success" name="format" value="xlsx" title="Ekspor siswa terpilih ke Excel">
-                                Ekspor Terpilih Excel
-                            </button>
-                            <button type="submit" class="btn btn-sm btn-outline-danger" name="format" value="pdf" title="Ekspor siswa terpilih ke PDF">
-                                Ekspor Terpilih PDF
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
             <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th class="ps-3" style="width:42px;">
-                                    <input type="checkbox" class="form-check-input" id="selectAllResults" title="Pilih semua siswa pada halaman ini">
-                                </th>
-                                <th>Peringkat</th>
-                                <th>Nama Siswa</th>
-                                <th>Kelas</th>
-                                <th>Skor</th>
-                                <th>Persentase</th>
-                                <th>Status</th>
-                                <th>Waktu</th>
-                                <th>Attempts</th>
-                                <th>Pelanggaran</th>
-                                <th class="text-end pe-3">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for row in student_rows %}
-                            <tr>
-                                <td class="ps-3">
-                                    <input type="checkbox" class="form-check-input result-select-item" value="{{ row.id }}" title="Pilih siswa ini">
-                                </td>
-                                <td>#{{ row.rank }}</td>
-                                <td>
-                                    <p class="mb-0 fw-semibold">{{ row.student_name }}</p>
-                                    <span class="small text-muted">@{{ row.student_username }}</span>
-                                </td>
-                                <td>{{ row.class_label }}</td>
-                                <td title="Nilai final ({{ row.final_policy_label }} dari {{ row.attempts_used }} attempt)">{{ row.total_score }}</td>
-                                <td>{{ row.percentage }}%</td>
-                                <td>
-                                    <span class="badge {% if row.passed %}text-bg-success{% else %}text-bg-danger{% endif %}">
-                                        {{ row.status_label }}
-                                    </span>
-                                </td>
-                                <td>{{ row.time_taken_human }}</td>
-                                <td>
-                                    {% if row.allow_retake %}
-                                    <a href="{% url 'retake_history' exam.id row.result.student_id %}" class="btn btn-sm btn-outline-secondary" title="Buka riwayat attempt siswa ini">
-                                        {{ row.attempts_label }}
-                                    </a>
-                                    {% else %}
-                                    {{ row.attempts_label }}
-                                    {% endif %}
-                                </td>
-                                <td>{{ row.total_violations }}</td>
-                                <td class="text-end pe-3">
-                                    <div class="d-flex justify-content-end gap-1">
-                                        <button
-                                            type="button"
-                                            class="btn btn-sm btn-outline-info student-detail-btn"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#studentDetailModal"
-                                            data-student-name="{{ row.student_name }}"
-                                            data-score="{{ row.total_score }}"
-                                            data-percentage="{{ row.percentage }}"
-                                            data-status="{{ row.status_label }}"
-                                            data-time="{{ row.time_taken_human }}"
-                                            data-violations="{{ row.total_violations }}"
-                                            data-class="{{ row.class_label }}"
-                                            data-review-url="{% url 'answer_review' row.id %}?next={{ request.get_full_path|urlencode }}"
-                                            title="Lihat ringkasan detail hasil siswa"
-                                        >
-                                            <i class="ri-eye-line"></i>
-                                        </button>
-                                        <a href="{% url 'answer_review' row.id %}?next={{ request.get_full_path|urlencode }}" class="btn btn-sm btn-outline-primary" title="Review jawaban lengkap siswa">
-                                            <i class="ri-file-list-3-line"></i>
+                <h3 class="h6 mb-3">Hasil Siswa</h3>
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                    <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-3">
+                        <div class="d-flex flex-wrap gap-2 align-items-center">
+                            <select class="form-select form-select-sm" name="action" style="width: 210px;">
+                                <option value="">Pilih Aksi Bulk</option>
+                                <option value="export_csv">Ekspor CSV</option>
+                                <option value="export_excel">Ekspor Excel</option>
+                            </select>
+                            <button type="submit" class="btn btn-sm btn-outline-primary" title="Terapkan aksi bulk ke hasil siswa terpilih">
+                                <i class="ri-check-line me-1"></i>Terapkan
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" id="toggle-select-all" title="Pilih semua siswa">
+                                <i class="ri-check-double-line me-1"></i><span class="toggle-select-all-label">Pilih Semua</span>
+                            </button>
+                            <select id="result-sort-option" class="form-select form-select-sm" style="width: 230px;" title="Urutkan hasil siswa">
+                                {% for sort_value, sort_label in sort_option_choices %}
+                                <option value="{{ sort_value }}" {% if current_sort_option == sort_value %}selected{% endif %}>{{ sort_label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="d-flex flex-wrap gap-2 justify-content-end">
+                            <a href="{{ export_csv_url }}" class="btn btn-sm btn-outline-success" title="Ekspor semua hasil ke CSV">
+                                <i class="ri-download-line me-1"></i>CSV
+                            </a>
+                            <a href="{{ export_xlsx_url }}" class="btn btn-sm btn-outline-success" title="Ekspor semua hasil ke Excel">
+                                <i class="ri-download-line me-1"></i>Excel
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-3" style="width:42px;"></th>
+                                    <th>Peringkat</th>
+                                    <th>Nama Siswa</th>
+                                    <th>Kelas</th>
+                                    <th>Skor</th>
+                                    <th>Persentase</th>
+                                    <th>Status</th>
+                                    <th>Waktu</th>
+                                    <th>Attempts</th>
+                                    <th>Pelanggaran</th>
+                                    <th class="text-end pe-3">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for row in student_rows %}
+                                <tr>
+                                    <td class="ps-3">
+                                        <input type="checkbox" class="form-check-input row-check result-select-item" name="selected_ids" value="{{ row.id }}" title="Pilih siswa ini">
+                                    </td>
+                                    <td>#{{ row.rank }}</td>
+                                    <td>
+                                        <p class="mb-0 fw-semibold">{{ row.student_name }}</p>
+                                        <span class="small text-muted">@{{ row.student_username }}</span>
+                                    </td>
+                                    <td>{{ row.class_label }}</td>
+                                    <td title="Nilai final ({{ row.final_policy_label }} dari {{ row.attempts_used }} attempt)">{{ row.total_score }}</td>
+                                    <td>{{ row.percentage }}%</td>
+                                    <td>
+                                        <span class="badge {% if row.passed %}text-bg-success{% else %}text-bg-danger{% endif %}">
+                                            {{ row.status_label }}
+                                        </span>
+                                    </td>
+                                    <td>{{ row.time_taken_human }}</td>
+                                    <td>
+                                        {% if row.allow_retake %}
+                                        <a href="{% url 'retake_history' exam.id row.result.student_id %}" class="btn btn-sm btn-outline-secondary" title="Buka riwayat attempt siswa ini">
+                                            {{ row.attempts_label }}
                                         </a>
-                                    </div>
-                                </td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="11" class="text-center text-muted py-5">Belum ada hasil siswa untuk ujian ini.</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+                                        {% else %}
+                                        {{ row.attempts_label }}
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ row.total_violations }}</td>
+                                    <td class="text-end pe-3">
+                                        <div class="d-flex justify-content-end gap-1">
+                                            <button
+                                                type="button"
+                                                class="btn btn-sm btn-outline-info student-detail-btn"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#studentDetailModal"
+                                                data-student-name="{{ row.student_name }}"
+                                                data-score="{{ row.total_score }}"
+                                                data-percentage="{{ row.percentage }}"
+                                                data-status="{{ row.status_label }}"
+                                                data-time="{{ row.time_taken_human }}"
+                                                data-violations="{{ row.total_violations }}"
+                                                data-class="{{ row.class_label }}"
+                                                data-review-url="{% url 'answer_review' row.id %}?next={{ request.get_full_path|urlencode }}"
+                                                title="Lihat ringkasan detail hasil siswa"
+                                            >
+                                                <i class="ri-eye-line"></i>
+                                            </button>
+                                            <a href="{% url 'answer_review' row.id %}?next={{ request.get_full_path|urlencode }}" class="btn btn-sm btn-outline-primary" title="Review jawaban lengkap siswa">
+                                                <i class="ri-file-list-3-line"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="11" class="text-center text-muted py-5">Belum ada hasil siswa untuk ujian ini.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </form>
             </div>
 
             {% if is_paginated %}
@@ -364,5 +353,5 @@
     {{ class_comparison_chart|json_script:"result-class-comparison-data" }}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script src="{% static 'results/js/charts.js' %}"></script>
-    <script src="{% static 'results/js/analytics.js' %}"></script>
+    <script src="{% static 'results/js/analytics.js' %}?v=20260307"></script>
 {% endblock %}

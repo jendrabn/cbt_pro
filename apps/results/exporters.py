@@ -132,6 +132,46 @@ def export_results_to_xlsx(exam, rows):
     return response
 
 
+def export_results_to_csv(exam, rows):
+    response = HttpResponse(content_type="text/csv")
+    response["Content-Disposition"] = (
+        f'attachment; filename="hasil_ujian_{exam.id}_{_filename_timestamp()}.csv"'
+    )
+    response.write("\ufeff")
+
+    headers = [
+        "Peringkat",
+        "Nama Siswa",
+        "Username",
+        "Kelas",
+        "Skor",
+        "Persentase",
+        "Status",
+        "Waktu Pengerjaan",
+        "Total Pelanggaran",
+    ]
+    response.write(",".join(headers) + "\n")
+
+    def _csv_escape(value):
+        return '"' + str(value).replace('"', '""') + '"'
+
+    for row in rows:
+        values = [
+            row["rank"],
+            row["student_name"],
+            row["student_username"],
+            row["class_label"],
+            row["total_score"],
+            row["percentage"],
+            row["status_label"],
+            row["time_taken_human"],
+            row["total_violations"],
+        ]
+        escaped = [_csv_escape(value) for value in values]
+        response.write(",".join(escaped) + "\n")
+    return response
+
+
 def export_results_to_pdf(exam, rows, summary):
     branding = _branding_payload()
     buffer = BytesIO()
