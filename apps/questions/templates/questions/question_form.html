@@ -70,6 +70,7 @@
                                 <div class="col-md-6">
                                     <label class="form-label">{{ form.category.label }}</label>
                                     {{ form.category }}
+                                    {% if form.category.help_text %}<div class="form-text">{{ form.category.help_text }}</div>{% endif %}
                                     {% if form.category.errors %}<div class="text-danger small mt-1">{{ form.category.errors|join:", " }}</div>{% endif %}
                                 </div>
                                 <div class="col-md-6">
@@ -348,4 +349,3 @@
     {% endif %}
     <script src="{% static 'questions/js/question_form.js' %}?v=20260217-3"></script>
 {% endblock %}
-

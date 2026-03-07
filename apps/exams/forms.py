@@ -144,16 +144,31 @@ class ExamWizardForm(forms.ModelForm):
 
         self.available_questions = Question.objects.none()
         self.available_categories = QuestionCategory.objects.none()
+        self.available_question_subjects = Subject.objects.none()
         self.available_classes = Class.objects.none()
         self.available_students = User.objects.none()
 
         if self.teacher:
-            self.available_questions = (
-                Question.objects.filter(created_by=self.teacher, is_deleted=False, is_active=True)
-                .select_related("subject", "category")
-                .order_by("-updated_at")
+            self.available_categories = (
+                QuestionCategory.objects.filter(
+                    is_active=True,
+                    questions__created_by=self.teacher,
+                    questions__is_deleted=False,
+                    questions__is_active=True,
+                )
+                .distinct()
+                .order_by("name")
             )
-            self.available_categories = QuestionCategory.objects.filter(is_active=True).order_by("name")
+            self.available_question_subjects = (
+                Subject.objects.filter(
+                    is_active=True,
+                    questions__created_by=self.teacher,
+                    questions__is_deleted=False,
+                    questions__is_active=True,
+                )
+                .distinct()
+                .order_by("name")
+            )
             self.available_classes = Class.objects.filter(is_active=True).order_by("name")
             self.available_students = User.objects.filter(
                 role="student",

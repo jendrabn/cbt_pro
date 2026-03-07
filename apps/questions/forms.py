@@ -118,11 +118,11 @@ class QuestionForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        subject_queryset = Subject.objects.filter(is_active=True)
+        subject_queryset = Subject.objects.filter(is_active=True).only("id", "name")
         if self.instance and self.instance.pk and self.instance.subject_id:
-            subject_queryset = Subject.objects.filter(Q(is_active=True) | Q(id=self.instance.subject_id))
+            subject_queryset = Subject.objects.filter(Q(is_active=True) | Q(id=self.instance.subject_id)).only("id", "name")
         self.fields["subject"].queryset = subject_queryset.order_by("name")
-        self.fields["category"].queryset = QuestionCategory.objects.filter(is_active=True).order_by("name")
+        self.fields["category"].queryset = QuestionCategory.objects.filter(is_active=True).only("id", "name").order_by("name")
         self.fields["question_type"].choices = [
             ("multiple_choice", "Pilihan Ganda"),
             ("essay", "Esai"),
@@ -151,7 +151,7 @@ class QuestionForm(forms.ModelForm):
         self.fields["tags"].widget.attrs["placeholder"] = "contoh: aljabar, persamaan"
         self.fields["keywords"].widget.attrs["placeholder"] = "contoh: variabel, koefisien"
 
-        if self.instance and self.instance.pk:
+        if self.instance and self.instance.pk and not self.instance._state.adding:
             options = {opt.option_letter: opt for opt in self.instance.options.all()}
             for letter in OPTION_LETTERS:
                 field_name = f"option_{letter.lower()}"
@@ -232,10 +232,13 @@ class QuestionForm(forms.ModelForm):
 
         category_name = (cleaned_data.get("category_name") or "").strip()
         if category_name:
-            category, _ = QuestionCategory.objects.get_or_create(
-                name=category_name,
-                defaults={"is_active": True},
-            )
+            category = QuestionCategory.objects.filter(name__iexact=category_name).first()
+            if category:
+                if not category.is_active:
+                    category.is_active = True
+                    category.save(update_fields=["is_active"])
+            else:
+                category = QuestionCategory.objects.create(name=category_name, is_active=True)
             cleaned_data["category"] = category
 
         return cleaned_data

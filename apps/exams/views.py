@@ -1,14 +1,19 @@
 from __future__ import annotations
 
 from django.contrib import messages
+from django.core.paginator import Paginator
+from django.db.models import Q
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.utils.decorators import method_decorator
+from django.utils.html import strip_tags
 from django.views.decorators.clickjacking import xframe_options_sameorigin
 from django.urls import reverse, reverse_lazy
 from django.views import View
 from django.views.generic import CreateView, DetailView, ListView, UpdateView
 
 from apps.core.mixins import RoleRequiredMixin
+from apps.questions.models import Question
 from apps.subjects.models import Subject
 
 from .forms import ExamWizardForm
@@ -104,6 +109,96 @@ class ExamCreateWizard(TeacherExamBaseView, CreateView):
             }
         )
         return context
+
+
+class ExamQuestionPickerView(TeacherExamBaseView, View):
+    VALID_TYPES = {"multiple_choice", "essay", "short_answer"}
+    MAX_PAGE_SIZE = 100
+    DEFAULT_PAGE_SIZE = 50
+
+    def get(self, request):
+        keyword = (request.GET.get("q") or "").strip()
+        subject_id = (request.GET.get("subject") or "").strip()
+        category_id = (request.GET.get("category") or "").strip()
+        question_type = (request.GET.get("question_type") or "").strip()
+
+        try:
+            page = max(int(request.GET.get("page", 1)), 1)
+        except (TypeError, ValueError):
+            page = 1
+
+        try:
+            page_size = int(request.GET.get("page_size", self.DEFAULT_PAGE_SIZE))
+        except (TypeError, ValueError):
+            page_size = self.DEFAULT_PAGE_SIZE
+        page_size = max(10, min(page_size, self.MAX_PAGE_SIZE))
+
+        queryset = (
+            Question.objects.filter(created_by=request.user, is_deleted=False, is_active=True)
+            .select_related("subject", "category")
+            .only(
+                "id",
+                "question_text",
+                "question_type",
+                "points",
+                "allow_previous",
+                "allow_next",
+                "force_sequential",
+                "subject_id",
+                "subject__name",
+                "category_id",
+                "category__name",
+                "updated_at",
+            )
+            .order_by("-updated_at")
+        )
+
+        if keyword:
+            queryset = queryset.filter(
+                Q(question_text__icontains=keyword)
+                | Q(subject__name__icontains=keyword)
+                | Q(category__name__icontains=keyword)
+            )
+        if subject_id:
+            queryset = queryset.filter(subject_id=subject_id)
+        if category_id:
+            queryset = queryset.filter(category_id=category_id)
+        if question_type in self.VALID_TYPES:
+            queryset = queryset.filter(question_type=question_type)
+
+        paginator = Paginator(queryset, page_size)
+        page_obj = paginator.get_page(page)
+
+        items = [
+            {
+                "id": str(question.id),
+                "text": strip_tags(question.question_text or ""),
+                "subject_id": str(question.subject_id) if question.subject_id else "",
+                "subject_name": question.subject.name if question.subject_id else "",
+                "category_id": str(question.category_id) if question.category_id else "",
+                "category_name": question.category.name if question.category_id else "Tanpa kategori",
+                "question_type": question.question_type,
+                "points": str(question.points),
+                "allow_previous": bool(question.allow_previous),
+                "allow_next": bool(question.allow_next),
+                "force_sequential": bool(question.force_sequential),
+            }
+            for question in page_obj.object_list
+        ]
+
+        return JsonResponse(
+            {
+                "items": items,
+                "pagination": {
+                    "page": page_obj.number,
+                    "page_size": page_size,
+                    "total_items": paginator.count,
+                    "total_pages": paginator.num_pages,
+                    "has_next": page_obj.has_next(),
+                    "has_previous": page_obj.has_previous(),
+                },
+            }
+        )
 
 
 class ExamUpdateView(TeacherExamBaseView, UpdateView):

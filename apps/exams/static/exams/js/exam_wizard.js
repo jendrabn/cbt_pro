@@ -48,7 +48,7 @@
             return;
         }
 
-        var availableQuestions = parseJSONScript("available-questions-data", []);
+        var questionPickerConfig = parseJSONScript("question-picker-config", {});
         var assignmentData = parseJSONScript("available-assignment-data", { classes: [], students: [] });
         var initialSelected = normalizeArrayPayload(parseJSONScript("initial-selected-questions", []));
         var initialAssignments = normalizeArrayPayload(parseJSONScript("initial-assignment-payload", []));
@@ -63,6 +63,8 @@
         var selectedCountTopEl = document.getElementById("selectedQuestionCountTop");
         var selectedPointsTopEl = document.getElementById("selectedQuestionTotalPointsTop");
         var availableVisibleCountEl = document.getElementById("availableQuestionVisibleCount");
+        var availableListEl = document.getElementById("availableQuestionList");
+        var availableLoadMoreBtn = document.getElementById("availableQuestionLoadMoreBtn");
         var assignmentSummaryEl = document.getElementById("assignmentSummaryList");
         var reviewSummaryEl = document.getElementById("reviewSummary");
 
@@ -94,11 +96,24 @@
         var retakeCooldownField = document.getElementById("id_retake_cooldown_minutes");
         var retakeShowReviewField = document.getElementById("id_retake_show_review");
 
-        var availableById = {};
-        availableQuestions.forEach(function (item) {
-            availableById[item.id] = item;
-        });
+        if (!initialSelected.length && selectedPayloadInput && selectedPayloadInput.value) {
+            initialSelected = normalizeArrayPayload(selectedPayloadInput.value);
+        }
 
+        var questionSearchUrl = questionPickerConfig.search_url || "";
+        var questionPageSize = parseInt(questionPickerConfig.page_size || 50, 10);
+        if (isNaN(questionPageSize) || questionPageSize < 10) {
+            questionPageSize = 50;
+        }
+        var availableState = {
+            page: 1,
+            hasNext: false,
+            totalItems: 0,
+            isLoading: false
+        };
+        var filterDebounceTimer = null;
+
+        var availableById = {};
         var selectedQuestions = {};
 
         function normalizeQuestionFromAvailable(item) {
@@ -172,64 +187,171 @@
             modalInstance.hide();
         }
 
-        function populateQuestionSubjectFilter() {
-            if (!filterSubjectSelect) {
+        function escapeHTML(value) {
+            return String(value || "")
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/\"/g, "&quot;")
+                .replace(/'/g, "&#39;");
+        }
+
+        function questionTypeLabel(value) {
+            if (value === "multiple_choice") {
+                return "Pilihan Ganda";
+            }
+            if (value === "essay") {
+                return "Esai";
+            }
+            return "Jawaban Singkat";
+        }
+
+        function buildQuestionQueryParams(page, extraFilters) {
+            var params = new URLSearchParams();
+            params.set("page", String(page || 1));
+            params.set("page_size", String(questionPageSize));
+
+            var keyword = normalizeFilterText(filterSearchInput && filterSearchInput.value);
+            var subject = String((filterSubjectSelect && filterSubjectSelect.value) || "").trim();
+            var questionType = String((filterTypeSelect && filterTypeSelect.value) || "").trim();
+            var category = String((filterCategorySelect && filterCategorySelect.value) || "").trim();
+
+            if (keyword) {
+                params.set("q", keyword);
+            }
+            if (subject) {
+                params.set("subject", subject);
+            }
+            if (questionType) {
+                params.set("question_type", questionType);
+            }
+            if (category) {
+                params.set("category", category);
+            }
+
+            if (extraFilters) {
+                Object.keys(extraFilters).forEach(function (key) {
+                    var val = extraFilters[key];
+                    if (val === null || val === undefined || val === "") {
+                        return;
+                    }
+                    params.set(key, String(val));
+                });
+            }
+            return params;
+        }
+
+        function renderAvailableQuestionItems(items, appendMode) {
+            if (!availableListEl) {
                 return;
             }
-            var seen = {};
-            availableQuestions.forEach(function (item) {
-                var normalized = normalizeFilterText(item.subject_name);
-                if (!normalized || seen[normalized]) {
-                    return;
-                }
-                seen[normalized] = item.subject_name || "";
-            });
-            var current = filterSubjectSelect.value;
-            Object.keys(seen).sort().forEach(function (key) {
-                var option = document.createElement("option");
-                option.value = key;
-                option.textContent = seen[key];
-                filterSubjectSelect.appendChild(option);
-            });
-            filterSubjectSelect.value = current;
+            if (!appendMode) {
+                availableListEl.innerHTML = "";
+            }
+            if (!items.length && !appendMode) {
+                availableListEl.innerHTML = '<div class="list-group-item text-muted">Tidak ada soal ditemukan.</div>';
+                return;
+            }
+
+            var rowsHTML = items.map(function (item) {
+                var safeText = escapeHTML(item.text || "");
+                var safeSubject = escapeHTML(item.subject_name || "");
+                var safeCategory = escapeHTML(item.category_name || "Tanpa kategori");
+                var safePoints = escapeHTML(item.points || "0");
+                var safeType = escapeHTML(item.question_type || "");
+                return (
+                    '<label class="list-group-item list-group-item-action question-picker-item py-3" data-question-id="' + item.id + '" data-category-id="' + escapeHTML(item.category_id || "") + '">' +
+                        '<div class="d-flex align-items-start gap-2">' +
+                            '<input type="checkbox" class="form-check-input question-picker-checkbox mt-1" value="' + item.id + '" title="Pilih soal">' +
+                            '<div class="w-100">' +
+                                '<p class="mb-1 fw-semibold">' + safeText + '</p>' +
+                                '<p class="small text-muted mb-0">' + safeSubject + ' &bull; ' + safeCategory + ' &bull; ' + safePoints + ' poin &bull; ' + questionTypeLabel(item.question_type) + '</p>' +
+                            '</div>' +
+                        '</div>' +
+                    "</label>"
+                );
+            }).join("");
+
+            if (appendMode) {
+                availableListEl.insertAdjacentHTML("beforeend", rowsHTML);
+            } else {
+                availableListEl.innerHTML = rowsHTML;
+            }
+            syncAvailableCheckboxState();
+        }
+
+        function updateAvailablePaginationUI() {
+            if (availableVisibleCountEl) {
+                availableVisibleCountEl.textContent = String(availableState.totalItems || 0);
+            }
+            if (availableLoadMoreBtn) {
+                availableLoadMoreBtn.classList.toggle("d-none", !availableState.hasNext);
+                availableLoadMoreBtn.disabled = !!availableState.isLoading;
+                availableLoadMoreBtn.innerHTML = availableState.isLoading ? "Memuat..." : "Muat lebih banyak";
+            }
+        }
+
+        function fetchAvailableQuestions(options) {
+            if (!questionSearchUrl || !availableListEl) {
+                return;
+            }
+            options = options || {};
+            var appendMode = !!options.append;
+            if (availableState.isLoading) {
+                return;
+            }
+            if (appendMode && !availableState.hasNext) {
+                return;
+            }
+
+            var page = appendMode ? (availableState.page + 1) : 1;
+            var params = buildQuestionQueryParams(page, options.extraFilters || null);
+            availableState.isLoading = true;
+            updateAvailablePaginationUI();
+
+            if (!appendMode) {
+                availableListEl.innerHTML = '<div class="list-group-item text-muted small">Memuat daftar soal...</div>';
+            }
+
+            fetch(questionSearchUrl + "?" + params.toString(), {
+                method: "GET",
+                headers: { "X-Requested-With": "XMLHttpRequest" }
+            })
+                .then(function (response) {
+                    if (!response.ok) {
+                        throw new Error("Gagal memuat bank soal.");
+                    }
+                    return response.json();
+                })
+                .then(function (payload) {
+                    var items = Array.isArray(payload.items) ? payload.items : [];
+                    items.forEach(function (item) {
+                        availableById[item.id] = item;
+                    });
+                    renderAvailableQuestionItems(items, appendMode);
+                    var pagination = payload.pagination || {};
+                    availableState.page = pagination.page || page;
+                    availableState.hasNext = !!pagination.has_next;
+                    availableState.totalItems = parseInt(pagination.total_items || 0, 10) || 0;
+                })
+                .catch(function () {
+                    if (!appendMode && availableListEl) {
+                        availableListEl.innerHTML = '<div class="list-group-item text-danger">Gagal memuat soal. Coba lagi.</div>';
+                    }
+                })
+                .finally(function () {
+                    availableState.isLoading = false;
+                    updateAvailablePaginationUI();
+                });
         }
 
         function applyQuestionFilters() {
-            var keyword = normalizeFilterText(filterSearchInput && filterSearchInput.value);
-            var subject = normalizeFilterText(filterSubjectSelect && filterSubjectSelect.value);
-            var questionType = normalizeFilterText(filterTypeSelect && filterTypeSelect.value);
-            var categoryId = normalizeFilterText(filterCategorySelect && filterCategorySelect.value);
-            var visibleCount = 0;
-
-            document.querySelectorAll(".question-picker-item").forEach(function (item) {
-                var itemText = normalizeFilterText(item.getAttribute("data-question-text"));
-                var itemSubject = normalizeFilterText(item.getAttribute("data-subject-name"));
-                var itemType = normalizeFilterText(item.getAttribute("data-question-type"));
-                var itemCategory = normalizeFilterText(item.getAttribute("data-category-id"));
-
-                var isVisible = true;
-                if (keyword && itemText.indexOf(keyword) === -1) {
-                    isVisible = false;
-                }
-                if (subject && itemSubject !== subject) {
-                    isVisible = false;
-                }
-                if (questionType && itemType !== questionType) {
-                    isVisible = false;
-                }
-                if (categoryId && itemCategory !== categoryId) {
-                    isVisible = false;
-                }
-
-                item.classList.toggle("d-none", !isVisible);
-                if (isVisible) {
-                    visibleCount += 1;
-                }
-            });
-
-            if (availableVisibleCountEl) {
-                availableVisibleCountEl.textContent = String(visibleCount);
+            if (filterDebounceTimer) {
+                window.clearTimeout(filterDebounceTimer);
             }
+            filterDebounceTimer = window.setTimeout(function () {
+                fetchAvailableQuestions({ append: false });
+            }, 250);
         }
 
         function syncAvailableCheckboxState() {
@@ -564,22 +686,112 @@
             }
         }
 
-        function bindAvailableQuestionCheckboxes() {
-            document.querySelectorAll(".question-picker-checkbox").forEach(function (checkbox) {
-                checkbox.addEventListener("change", function () {
-                    var questionId = checkbox.value;
-                    if (checkbox.checked) {
-                        if (!selectedQuestions[questionId] && availableById[questionId]) {
-                            var item = normalizeQuestionFromAvailable(availableById[questionId]);
-                            item.display_order = Object.keys(selectedQuestions).length + 1;
-                            selectedQuestions[questionId] = item;
+        function addQuestionToSelection(questionId) {
+            if (!selectedQuestions[questionId] && availableById[questionId]) {
+                var item = normalizeQuestionFromAvailable(availableById[questionId]);
+                item.display_order = Object.keys(selectedQuestions).length + 1;
+                selectedQuestions[questionId] = item;
+            }
+        }
+
+        function removeQuestionFromSelection(questionId) {
+            delete selectedQuestions[questionId];
+        }
+
+        function fetchAllByCategoryAndSelect(categoryId) {
+            if (!questionSearchUrl || !categoryId) {
+                return;
+            }
+            var page = 1;
+            var hasNext = true;
+            var addedCount = 0;
+            var hasFailed = false;
+
+            function finishCategoryLoad() {
+                if (addCategoryBtn) {
+                    addCategoryBtn.disabled = false;
+                    addCategoryBtn.innerHTML = '<i class="ri-add-line me-1"></i>Tambah Kategori';
+                }
+                if (hasFailed) {
+                    window.alert("Gagal menambahkan soal dari kategori terpilih.");
+                }
+                renderSelectedQuestions();
+                syncAvailableCheckboxState();
+                renderReviewSummary();
+                if (addedCount > 0) {
+                    fetchAvailableQuestions({ append: false });
+                }
+            }
+
+            function loadNextPage() {
+                if (!hasNext) {
+                    finishCategoryLoad();
+                    return;
+                }
+                var params = new URLSearchParams();
+                params.set("page", String(page));
+                params.set("page_size", String(Math.max(questionPageSize, 100)));
+                params.set("category", categoryId);
+
+                fetch(questionSearchUrl + "?" + params.toString(), {
+                    method: "GET",
+                    headers: { "X-Requested-With": "XMLHttpRequest" }
+                })
+                    .then(function (response) {
+                        if (!response.ok) {
+                            throw new Error("Gagal memuat soal kategori.");
                         }
-                    } else {
-                        delete selectedQuestions[questionId];
-                    }
-                    renderSelectedQuestions();
-                    renderReviewSummary();
-                });
+                        return response.json();
+                    })
+                    .then(function (payload) {
+                        var items = Array.isArray(payload.items) ? payload.items : [];
+                        items.forEach(function (item) {
+                            availableById[item.id] = item;
+                            if (!selectedQuestions[item.id]) {
+                                addQuestionToSelection(item.id);
+                                addedCount += 1;
+                            }
+                        });
+                        var pagination = payload.pagination || {};
+                        hasNext = !!pagination.has_next;
+                        page += 1;
+                        loadNextPage();
+                    })
+                    .catch(function () {
+                        hasFailed = true;
+                        hasNext = false;
+                        finishCategoryLoad();
+                    });
+            }
+
+            if (addCategoryBtn) {
+                addCategoryBtn.disabled = true;
+                addCategoryBtn.textContent = "Memuat...";
+            }
+
+            loadNextPage();
+        }
+
+        if (availableListEl) {
+            availableListEl.addEventListener("change", function (event) {
+                var checkbox = event.target;
+                if (!checkbox || !checkbox.classList.contains("question-picker-checkbox")) {
+                    return;
+                }
+                var questionId = checkbox.value;
+                if (checkbox.checked) {
+                    addQuestionToSelection(questionId);
+                } else {
+                    removeQuestionFromSelection(questionId);
+                }
+                renderSelectedQuestions();
+                renderReviewSummary();
+            });
+        }
+
+        if (availableLoadMoreBtn) {
+            availableLoadMoreBtn.addEventListener("click", function () {
+                fetchAvailableQuestions({ append: true });
             });
         }
 
@@ -590,41 +802,33 @@
                     window.alert("Pilih kategori terlebih dahulu.");
                     return;
                 }
-                document.querySelectorAll(".question-picker-item").forEach(function (row) {
-                    if (row.getAttribute("data-category-id") !== categoryId) {
-                        return;
-                    }
-                    var checkbox = row.querySelector(".question-picker-checkbox");
-                    if (checkbox && !checkbox.checked) {
-                        checkbox.checked = true;
-                        checkbox.dispatchEvent(new Event("change"));
-                    }
-                });
+                fetchAllByCategoryAndSelect(categoryId);
             });
         }
 
         if (filterSearchInput) {
-            filterSearchInput.addEventListener("input", function () {
-                applyQuestionFilters();
-            });
+            filterSearchInput.addEventListener("input", applyQuestionFilters);
         }
         if (filterSubjectSelect) {
             filterSubjectSelect.addEventListener("change", function () {
-                applyQuestionFilters();
+                fetchAvailableQuestions({ append: false });
             });
         }
         if (filterTypeSelect) {
             filterTypeSelect.addEventListener("change", function () {
-                applyQuestionFilters();
+                fetchAvailableQuestions({ append: false });
             });
         }
         if (filterCategorySelect) {
             filterCategorySelect.addEventListener("change", function () {
-                applyQuestionFilters();
+                fetchAvailableQuestions({ append: false });
             });
         }
         if (filterResetBtn) {
             filterResetBtn.addEventListener("click", function () {
+                if (filterSearchInput) {
+                    filterSearchInput.value = "";
+                }
                 if (filterSubjectSelect) {
                     filterSubjectSelect.value = "";
                 }
@@ -634,7 +838,7 @@
                 if (filterCategorySelect) {
                     filterCategorySelect.value = "";
                 }
-                applyQuestionFilters();
+                fetchAvailableQuestions({ append: false });
             });
         }
 
@@ -761,11 +965,8 @@
         });
 
         loadInitialSelected();
-        populateQuestionSubjectFilter();
-        bindAvailableQuestionCheckboxes();
-        applyQuestionFilters();
-        syncAvailableCheckboxState();
         renderSelectedQuestions();
+        fetchAvailableQuestions({ append: false });
 
         if (Array.isArray(initialAssignments)) {
             initialAssignments.forEach(function (item) {

@@ -133,6 +133,9 @@
                                                 <label class="form-label small mb-1" for="questionFilterSubject">Mata Pelajaran</label>
                                                 <select class="form-select form-select-sm" id="questionFilterSubject">
                                                     <option value="">Semua mata pelajaran</option>
+                                                    {% for question_subject in form.available_question_subjects %}
+                                                    <option value="{{ question_subject.id }}">{{ question_subject.name }}</option>
+                                                    {% endfor %}
                                                 </select>
                                             </div>
                                             <div class="col-md-2">
@@ -163,28 +166,12 @@
                                 </div>
                             </div>
                             <div class="list-group" id="availableQuestionList" style="max-height: 30rem; overflow:auto;">
-                                {% for question in form.available_questions %}
-                                <label
-                                    class="list-group-item list-group-item-action question-picker-item py-3"
-                                    data-category-id="{{ question.category_id|default:'' }}"
-                                    data-subject-name="{{ question.subject.name|lower|escapejs }}"
-                                    data-question-type="{{ question.question_type }}"
-                                    data-question-text="{{ question.question_text|striptags|lower|escapejs }}"
-                                >
-                                    <div class="d-flex align-items-start gap-2">
-                                        <input type="checkbox" class="form-check-input question-picker-checkbox mt-1" value="{{ question.id }}" title="Pilih soal">
-                                        <div class="w-100">
-                                            <p class="mb-1 fw-semibold">{{ question.question_text|striptags|truncatechars:92 }}</p>
-                                            <p class="small text-muted mb-0">
-                                                {{ question.subject.name }} &bull; {{ question.category.name|default:'Tanpa kategori' }} &bull; {{ question.points }} poin &bull;
-                                                {% if question.question_type == 'multiple_choice' %}Pilihan Ganda{% elif question.question_type == 'essay' %}Esai{% else %}Jawaban Singkat{% endif %}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </label>
-                                {% empty %}
-                                <div class="list-group-item text-muted">Belum ada soal aktif di bank soal Anda.</div>
-                                {% endfor %}
+                                <div class="list-group-item text-muted small">Memuat daftar soal...</div>
+                            </div>
+                            <div class="d-grid mt-2">
+                                <button type="button" class="btn btn-sm btn-outline-secondary d-none" id="availableQuestionLoadMoreBtn" title="Muat data soal berikutnya">
+                                    Muat lebih banyak
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -478,24 +465,8 @@
 
 {{ form.initial.selected_questions_payload|default:"[]"|json_script:"initial-selected-questions" }}
 {{ form.initial.assignment_payload|default:"[]"|json_script:"initial-assignment-payload" }}
-
-<script id="available-questions-data" type="application/json">
-[
-{% for question in form.available_questions %}
-    {
-        "id": "{{ question.id }}",
-        "text": "{{ question.question_text|striptags|escapejs }}",
-        "subject_name": "{{ question.subject.name|escapejs }}",
-        "category_id": "{{ question.category_id|default:'' }}",
-        "category_name": "{{ question.category.name|default:'Tanpa kategori'|escapejs }}",
-        "question_type": "{{ question.question_type }}",
-        "points": "{{ question.points }}",
-        "allow_previous": {{ question.allow_previous|yesno:"true,false" }},
-        "allow_next": {{ question.allow_next|yesno:"true,false" }},
-        "force_sequential": {{ question.force_sequential|yesno:"true,false" }}
-    }{% if not forloop.last %},{% endif %}
-{% endfor %}
-]
+<script id="question-picker-config" type="application/json">
+{"search_url":"{% url 'exam_question_picker' %}","page_size":50}
 </script>
 
 <script id="available-assignment-data" type="application/json">

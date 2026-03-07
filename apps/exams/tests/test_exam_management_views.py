@@ -32,6 +32,15 @@ class ExamManagementViewTests(TestCase):
             role="student",
             is_active=True,
         )
+        cls.other_teacher = User.objects.create_user(
+            username="teacher_exam_other",
+            email="teacher.exam.other@cbt.com",
+            password="TeacherPass123!",
+            first_name="Guru",
+            last_name="Lain",
+            role="teacher",
+            is_active=True,
+        )
         cls.subject = Subject.objects.create(name="Fisika", code="FIS", is_active=True)
         cls.class_obj = Class.objects.create(name="XII IPA 2", is_active=True)
         cls.question = Question.objects.create(
@@ -40,6 +49,18 @@ class ExamManagementViewTests(TestCase):
             question_type="multiple_choice",
             question_text="Gaya gravitasi dipengaruhi oleh ...",
             points=10,
+            difficulty_level="medium",
+            allow_previous=True,
+            allow_next=True,
+            force_sequential=False,
+            is_active=True,
+        )
+        cls.other_question = Question.objects.create(
+            created_by=cls.other_teacher,
+            subject=cls.subject,
+            question_type="essay",
+            question_text="Jelaskan konsep energi potensial.",
+            points=15,
             difficulty_level="medium",
             allow_previous=True,
             allow_next=True,
@@ -161,3 +182,25 @@ class ExamManagementViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Pratinjau Tampilan Siswa")
         self.assertEqual(response.get("X-Frame-Options"), "SAMEORIGIN")
+
+    def test_teacher_can_fetch_exam_question_picker_data(self):
+        self.client.force_login(self.teacher)
+        response = self.client.get(
+            reverse("exam_question_picker"),
+            {"q": "gravitasi", "page_size": 20, "page": 1},
+        )
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertIn("items", payload)
+        self.assertIn("pagination", payload)
+        self.assertEqual(payload["pagination"]["page_size"], 20)
+        self.assertEqual(len(payload["items"]), 1)
+        self.assertEqual(payload["items"][0]["id"], str(self.question.id))
+
+    def test_question_picker_only_returns_teacher_questions(self):
+        self.client.force_login(self.teacher)
+        response = self.client.get(reverse("exam_question_picker"), {"page": 1, "page_size": 50})
+        self.assertEqual(response.status_code, 200)
+        ids = {item["id"] for item in response.json().get("items", [])}
+        self.assertIn(str(self.question.id), ids)
+        self.assertNotIn(str(self.other_question.id), ids)
