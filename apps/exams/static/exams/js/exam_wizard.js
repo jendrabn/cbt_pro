@@ -76,13 +76,16 @@
         var filterCategorySelect = document.getElementById("questionFilterCategory");
         var filterResetBtn = document.getElementById("questionFilterResetBtn");
 
-        var selectedBulkCheckAll = document.getElementById("selectedBulkCheckAll");
+        var availableToggleSelectBtn = document.getElementById("availableToggleSelectBtn");
+        var selectedToggleSelectBtn = document.getElementById("selectedToggleSelectBtn");
         var bulkPointsInput = document.getElementById("bulkPointsOverride");
         var bulkAllowPrevSelect = document.getElementById("bulkAllowPrevious");
         var bulkAllowNextSelect = document.getElementById("bulkAllowNext");
         var bulkForceSeqSelect = document.getElementById("bulkForceSequential");
         var applyBulkSelectedBtn = document.getElementById("applyBulkSelectedBtn");
         var deleteBulkSelectedBtn = document.getElementById("deleteBulkSelectedBtn");
+        var availableToggleSelectLabel = availableToggleSelectBtn ? availableToggleSelectBtn.querySelector(".available-toggle-select-label") : null;
+        var selectedToggleSelectLabel = selectedToggleSelectBtn ? selectedToggleSelectBtn.querySelector(".selected-toggle-select-label") : null;
 
         var stepIndicators = Array.from(document.querySelectorAll("[data-step-indicator]"));
         var stepCards = Array.from(document.querySelectorAll("[data-step]"));
@@ -250,6 +253,7 @@
             }
             if (!items.length && !appendMode) {
                 availableListEl.innerHTML = '<div class="list-group-item text-muted">Tidak ada soal ditemukan.</div>';
+                syncAvailableToggleState();
                 return;
             }
 
@@ -258,7 +262,6 @@
                 var safeSubject = escapeHTML(item.subject_name || "");
                 var safeCategory = escapeHTML(item.category_name || "Tanpa kategori");
                 var safePoints = escapeHTML(item.points || "0");
-                var safeType = escapeHTML(item.question_type || "");
                 return (
                     '<label class="list-group-item list-group-item-action question-picker-item py-3" data-question-id="' + item.id + '" data-category-id="' + escapeHTML(item.category_id || "") + '">' +
                         '<div class="d-flex align-items-start gap-2">' +
@@ -337,6 +340,7 @@
                 .catch(function () {
                     if (!appendMode && availableListEl) {
                         availableListEl.innerHTML = '<div class="list-group-item text-danger">Gagal memuat soal. Coba lagi.</div>';
+                        syncAvailableToggleState();
                     }
                 })
                 .finally(function () {
@@ -354,10 +358,23 @@
             }, 250);
         }
 
+        function syncAvailableToggleState() {
+            if (!availableToggleSelectLabel || !availableListEl) {
+                return;
+            }
+            var checkboxes = Array.from(availableListEl.querySelectorAll(".question-picker-checkbox"));
+            var allChecked = !!checkboxes.length && checkboxes.every(function (checkbox) { return checkbox.checked; });
+            availableToggleSelectLabel.textContent = allChecked ? "Batal Pilih" : "Pilih Semua";
+        }
+
         function syncAvailableCheckboxState() {
-            document.querySelectorAll(".question-picker-checkbox").forEach(function (checkbox) {
+            if (!availableListEl) {
+                return;
+            }
+            availableListEl.querySelectorAll(".question-picker-checkbox").forEach(function (checkbox) {
                 checkbox.checked = !!selectedQuestions[checkbox.value];
             });
+            syncAvailableToggleState();
         }
 
         function serializeSelectedQuestions() {
@@ -402,9 +419,7 @@
                     selectedPointsTopEl.textContent = "0";
                 }
                 selectedPayloadInput.value = "[]";
-                if (selectedBulkCheckAll) {
-                    selectedBulkCheckAll.checked = false;
-                }
+                syncSelectedBulkCheckAllState();
                 return;
             }
 
@@ -418,54 +433,45 @@
                     }
                     return "inherit";
                 }
+                var safeQuestionText = escapeHTML(item.question_text || "");
+                var safeSubjectName = escapeHTML(item.subject_name || "");
+                var safeCategoryName = escapeHTML(item.category_name || "");
+                var safeDefaultPoints = escapeHTML(item.default_points || "");
+                var safePointsOverride = escapeHTML(item.points_override || "");
                 return (
                     '<div class="selected-question-item list-group-item mb-2 rounded" data-question-id="' + item.question_id + '">' +
-                        '<div class="d-flex justify-content-between align-items-start gap-2">' +
-                            '<div class="d-flex align-items-start gap-2">' +
-                                '<input type="checkbox" class="form-check-input selected-question-bulk-check mt-1" title="Pilih untuk bulk action">' +
-                                '<i class="ri-draggable drag-handle mt-1 text-secondary" title="Geser untuk ubah urutan"></i>' +
-                                '<div>' +
-                                    '<p class="mb-1 fw-semibold">' + item.question_text + '</p>' +
-                                    '<p class="small text-muted mb-0">' + item.subject_name + ' &bull; ' + item.category_name + ' &bull; ' + (item.question_type === "multiple_choice" ? "Pilihan Ganda" : (item.question_type === "essay" ? "Esai" : "Jawaban Singkat")) + '</p>' +
+                        '<div class="d-flex align-items-center gap-2">' +
+                            '<i class="ri-draggable drag-handle fs-5 text-secondary px-1" title="Geser untuk ubah urutan" style="cursor: grab;"></i>' +
+                            '<input type="checkbox" class="form-check-input selected-question-bulk-check m-0" title="Pilih untuk bulk action">' +
+                            '<div class="flex-grow-1">' +
+                                '<p class="mb-1 fw-semibold">' + safeQuestionText + '</p>' +
+                                '<p class="small text-muted mb-0">' + safeSubjectName + ' &bull; ' + safeCategoryName + ' &bull; ' + (item.question_type === "multiple_choice" ? "Pilihan Ganda" : (item.question_type === "essay" ? "Esai" : "Jawaban Singkat")) + '</p>' +
+                                '<div class="d-flex flex-wrap align-items-center gap-2 mt-2">' +
+                                    '<input type="number" min="0.01" step="0.01" class="form-control form-control-sm selected-question-points" value="' + safePointsOverride + '" placeholder="Poin (' + safeDefaultPoints + ')" style="width: 140px;">' +
+                                    '<div class="d-inline-flex align-items-center gap-1 mb-0 px-2 py-1 border rounded bg-white">' +
+                                        '<input type="checkbox" class="form-check-input selected-question-override-nav m-0" ' + (item.override_navigation ? "checked" : "") + '>' +
+                                        '<span class="small">Timpa Navigasi</span>' +
+                                    '</div>' +
+                                    '<select class="form-select form-select-sm selected-question-allow-prev" style="width: 150px;">' +
+                                        '<option value="inherit" ' + (selectValue(item.allow_previous_override) === "inherit" ? "selected" : "") + '>Prev: Ikuti</option>' +
+                                        '<option value="true" ' + (selectValue(item.allow_previous_override) === "true" ? "selected" : "") + '>Prev: Ya</option>' +
+                                        '<option value="false" ' + (selectValue(item.allow_previous_override) === "false" ? "selected" : "") + '>Prev: Tidak</option>' +
+                                    '</select>' +
+                                    '<select class="form-select form-select-sm selected-question-allow-next" style="width: 150px;">' +
+                                        '<option value="inherit" ' + (selectValue(item.allow_next_override) === "inherit" ? "selected" : "") + '>Next: Ikuti</option>' +
+                                        '<option value="true" ' + (selectValue(item.allow_next_override) === "true" ? "selected" : "") + '>Next: Ya</option>' +
+                                        '<option value="false" ' + (selectValue(item.allow_next_override) === "false" ? "selected" : "") + '>Next: Tidak</option>' +
+                                    '</select>' +
+                                    '<select class="form-select form-select-sm selected-question-force-seq" style="width: 170px;">' +
+                                        '<option value="inherit" ' + (selectValue(item.force_sequential_override) === "inherit" ? "selected" : "") + '>Berurutan: Ikuti</option>' +
+                                        '<option value="true" ' + (selectValue(item.force_sequential_override) === "true" ? "selected" : "") + '>Berurutan: Ya</option>' +
+                                        '<option value="false" ' + (selectValue(item.force_sequential_override) === "false" ? "selected" : "") + '>Berurutan: Tidak</option>' +
+                                    '</select>' +
                                 '</div>' +
                             '</div>' +
-                            '<button type="button" class="btn btn-sm btn-outline-danger remove-selected-question-btn" title="Hapus soal dari pilihan"><i class="ri-close-line"></i></button>' +
-                        '</div>' +
-                        '<div class="row g-2 mt-2">' +
-                            '<div class="col-md-3">' +
-                                '<label class="form-label small mb-1">Poin Timpa</label>' +
-                                '<input type="number" min="0.01" step="0.01" class="form-control form-control-sm selected-question-points" value="' + item.points_override + '" placeholder="' + item.default_points + '">' +
-                            '</div>' +
-                            '<div class="col-md-3 d-flex align-items-end">' +
-                                '<label class="form-check small mb-0">' +
-                                    '<input type="checkbox" class="form-check-input selected-question-override-nav" ' + (item.override_navigation ? "checked" : "") + '>' +
-                                    '<span>Timpa Navigasi</span>' +
-                                '</label>' +
-                            '</div>' +
-                            '<div class="col-md-2">' +
-                                '<label class="form-label small mb-1">Sebelumnya</label>' +
-                                '<select class="form-select form-select-sm selected-question-allow-prev">' +
-                                    '<option value="inherit" ' + (selectValue(item.allow_previous_override) === "inherit" ? "selected" : "") + '>Ikuti</option>' +
-                                    '<option value="true" ' + (selectValue(item.allow_previous_override) === "true" ? "selected" : "") + '>Ya</option>' +
-                                    '<option value="false" ' + (selectValue(item.allow_previous_override) === "false" ? "selected" : "") + '>Tidak</option>' +
-                                '</select>' +
-                            '</div>' +
-                            '<div class="col-md-2">' +
-                                '<label class="form-label small mb-1">Berikutnya</label>' +
-                                '<select class="form-select form-select-sm selected-question-allow-next">' +
-                                    '<option value="inherit" ' + (selectValue(item.allow_next_override) === "inherit" ? "selected" : "") + '>Ikuti</option>' +
-                                    '<option value="true" ' + (selectValue(item.allow_next_override) === "true" ? "selected" : "") + '>Ya</option>' +
-                                    '<option value="false" ' + (selectValue(item.allow_next_override) === "false" ? "selected" : "") + '>Tidak</option>' +
-                                '</select>' +
-                            '</div>' +
-                            '<div class="col-md-2">' +
-                                '<label class="form-label small mb-1">Berurutan</label>' +
-                                '<select class="form-select form-select-sm selected-question-force-seq">' +
-                                    '<option value="inherit" ' + (selectValue(item.force_sequential_override) === "inherit" ? "selected" : "") + '>Ikuti</option>' +
-                                    '<option value="true" ' + (selectValue(item.force_sequential_override) === "true" ? "selected" : "") + '>Ya</option>' +
-                                    '<option value="false" ' + (selectValue(item.force_sequential_override) === "false" ? "selected" : "") + '>Tidak</option>' +
-                                '</select>' +
-                            '</div>' +
+                            '<button type="button" class="btn btn-sm btn-outline-danger d-inline-flex align-items-center justify-content-center p-0 remove-selected-question-btn" style="width: 2.125rem; height: 2.125rem;" title="Hapus soal dari pilihan">' +
+                                '<i class="ri-delete-bin-line"></i>' +
+                            '</button>' +
                         '</div>' +
                     '</div>'
                 );
@@ -489,11 +495,12 @@
         }
 
         function syncSelectedBulkCheckAllState() {
-            if (!selectedBulkCheckAll) {
+            if (!selectedToggleSelectLabel) {
                 return;
             }
             var bulkChecks = Array.from(selectedListEl.querySelectorAll(".selected-question-bulk-check"));
-            selectedBulkCheckAll.checked = !!bulkChecks.length && bulkChecks.every(function (checkbox) { return checkbox.checked; });
+            var allChecked = !!bulkChecks.length && bulkChecks.every(function (checkbox) { return checkbox.checked; });
+            selectedToggleSelectLabel.textContent = allChecked ? "Batal Pilih" : "Pilih Semua";
         }
 
         function getSelectedBulkQuestionIds() {
@@ -786,6 +793,31 @@
                 }
                 renderSelectedQuestions();
                 renderReviewSummary();
+                syncAvailableToggleState();
+            });
+        }
+
+        if (availableToggleSelectBtn) {
+            availableToggleSelectBtn.addEventListener("click", function () {
+                if (!availableListEl) {
+                    return;
+                }
+                var checkboxes = Array.from(availableListEl.querySelectorAll(".question-picker-checkbox"));
+                if (!checkboxes.length) {
+                    return;
+                }
+                var shouldSelectAll = checkboxes.some(function (checkbox) { return !checkbox.checked; });
+                checkboxes.forEach(function (checkbox) {
+                    checkbox.checked = shouldSelectAll;
+                    if (shouldSelectAll) {
+                        addQuestionToSelection(checkbox.value);
+                    } else {
+                        removeQuestionFromSelection(checkbox.value);
+                    }
+                });
+                renderSelectedQuestions();
+                renderReviewSummary();
+                syncAvailableToggleState();
             });
         }
 
@@ -842,11 +874,17 @@
             });
         }
 
-        if (selectedBulkCheckAll) {
-            selectedBulkCheckAll.addEventListener("change", function () {
-                selectedListEl.querySelectorAll(".selected-question-bulk-check").forEach(function (checkbox) {
-                    checkbox.checked = selectedBulkCheckAll.checked;
+        if (selectedToggleSelectBtn) {
+            selectedToggleSelectBtn.addEventListener("click", function () {
+                var bulkChecks = Array.from(selectedListEl.querySelectorAll(".selected-question-bulk-check"));
+                if (!bulkChecks.length) {
+                    return;
+                }
+                var shouldSelectAll = bulkChecks.some(function (checkbox) { return !checkbox.checked; });
+                bulkChecks.forEach(function (checkbox) {
+                    checkbox.checked = shouldSelectAll;
                 });
+                syncSelectedBulkCheckAllState();
             });
         }
 

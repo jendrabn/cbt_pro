@@ -97,146 +97,123 @@
                 <h2 class="h6 mb-1">Langkah 3: Pemilihan Soal</h2>
                 <p class="text-muted small mb-0">Cari soal dari bank soal, pilih, lalu atur parameter soal secara massal atau per-soal.</p>
             </div>
-            <div class="d-flex flex-wrap gap-2 align-items-center">
-                <select class="form-select form-select-sm w-auto" id="bulkCategorySelector" title="Pilih kategori untuk menambah soal massal" style="min-width: 240px;">
-                    <option value="">Tambah berdasarkan kategori...</option>
-                    {% for category in form.available_categories %}
-                    <option value="{{ category.id }}">{{ category.name }}</option>
-                    {% endfor %}
-                </select>
-                <button type="button" id="addCategoryQuestionsBtn" class="btn btn-sm btn-outline-primary" title="Tambahkan semua soal dari kategori terpilih">
-                    <i class="ri-add-line me-1"></i>Tambah Kategori
-                </button>
-            </div>
         </div>
         <div class="card-body pt-3">
             {% if form.selected_questions_payload.errors %}
             <div class="alert alert-danger py-2">{{ form.selected_questions_payload.errors|join:", " }}</div>
             {% endif %}
-            <div class="row g-3">
-                <div class="col-xl-5">
-                    <div class="card h-100">
-                        <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                            <h3 class="h6 mb-0">Bank Soal Tersedia</h3>
-                            <span class="badge text-bg-light"><span id="availableQuestionVisibleCount">0</span> soal</span>
-                        </div>
-                        <div class="card-body">
-                            <div class="row g-2 align-items-end mb-3">
-                                <div class="col-12">
-                                    <div class="border rounded p-2 bg-light">
-                                        <div class="row g-2 align-items-end">
-                                            <div class="col-md-4">
-                                                <label class="form-label small mb-1">Pencarian</label>
-                                                <input type="search" class="form-control form-control-sm" id="questionFilterSearch" placeholder="Cari teks soal..." title="Cari soal di bank soal">
-                                            </div>
-                                            <div class="col-md-3">
-                                                <label class="form-label small mb-1" for="questionFilterSubject">Mata Pelajaran</label>
-                                                <select class="form-select form-select-sm" id="questionFilterSubject">
-                                                    <option value="">Semua mata pelajaran</option>
-                                                    {% for question_subject in form.available_question_subjects %}
-                                                    <option value="{{ question_subject.id }}">{{ question_subject.name }}</option>
-                                                    {% endfor %}
-                                                </select>
-                                            </div>
-                                            <div class="col-md-2">
-                                                <label class="form-label small mb-1" for="questionFilterType">Tipe</label>
-                                                <select class="form-select form-select-sm" id="questionFilterType">
-                                                    <option value="">Semua tipe</option>
-                                                    <option value="multiple_choice">Pilihan Ganda</option>
-                                                    <option value="essay">Esai</option>
-                                                    <option value="short_answer">Jawaban Singkat</option>
-                                                </select>
-                                            </div>
-                                            <div class="col-md-2">
-                                                <label class="form-label small mb-1" for="questionFilterCategory">Kategori</label>
-                                                <select class="form-select form-select-sm" id="questionFilterCategory">
-                                                    <option value="">Semua kategori</option>
-                                                    {% for category in form.available_categories %}
-                                                    <option value="{{ category.id }}">{{ category.name }}</option>
-                                                    {% endfor %}
-                                                </select>
-                                            </div>
-                                            <div class="col-md-1 d-grid">
-                                                <button type="button" class="btn btn-sm btn-outline-secondary" id="questionFilterResetBtn" title="Reset filter">
-                                                    <i class="ri-reset-left-line"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
+            <div class="vstack gap-3">
+                <div class="card">
+                    <div class="card-header bg-white d-flex flex-wrap justify-content-between align-items-center gap-2">
+                        <h3 class="h6 mb-0">Bank Soal Tersedia</h3>
+                        <span class="badge text-bg-light"><span id="availableQuestionVisibleCount">0</span> soal</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="border rounded p-2 bg-light mb-3">
+                            <div class="row g-2">
+                                <div class="col-12 col-lg-4">
+                                    <input type="search" class="form-control form-control-sm" id="questionFilterSearch" placeholder="Cari teks soal..." title="Cari soal di bank soal">
+                                </div>
+                                <div class="col-6 col-lg-3">
+                                    <select class="form-select form-select-sm" id="questionFilterSubject">
+                                        <option value="">Semua mata pelajaran</option>
+                                        {% for question_subject in form.available_question_subjects %}
+                                        <option value="{{ question_subject.id }}">{{ question_subject.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-6 col-lg-2">
+                                    <select class="form-select form-select-sm" id="questionFilterType">
+                                        <option value="">Semua tipe</option>
+                                        <option value="multiple_choice">Pilihan Ganda</option>
+                                        <option value="essay">Esai</option>
+                                        <option value="short_answer">Jawaban Singkat</option>
+                                    </select>
+                                </div>
+                                <div class="col-9 col-lg-2">
+                                    <select class="form-select form-select-sm" id="questionFilterCategory">
+                                        <option value="">Semua kategori</option>
+                                        {% for category in form.available_categories %}
+                                        <option value="{{ category.id }}">{{ category.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-3 col-lg-1 d-grid">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" id="questionFilterResetBtn" title="Reset filter">
+                                        <i class="ri-refresh-line me-1"></i><span class="d-none d-lg-inline">Reset</span>
+                                    </button>
                                 </div>
                             </div>
-                            <div class="list-group" id="availableQuestionList" style="max-height: 30rem; overflow:auto;">
-                                <div class="list-group-item text-muted small">Memuat daftar soal...</div>
-                            </div>
-                            <div class="d-grid mt-2">
-                                <button type="button" class="btn btn-sm btn-outline-secondary d-none" id="availableQuestionLoadMoreBtn" title="Muat data soal berikutnya">
-                                    Muat lebih banyak
-                                </button>
-                            </div>
+                        </div>
+
+                        <div class="d-flex flex-wrap gap-2 align-items-center mb-3">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" id="availableToggleSelectBtn" title="Toggle pilih semua pada daftar soal tersedia">
+                                <i class="ri-check-double-line me-1"></i><span class="available-toggle-select-label">Pilih Semua</span>
+                            </button>
+                            <select class="form-select form-select-sm" id="bulkCategorySelector" title="Pilih kategori untuk menambah soal massal" style="width: 240px; max-width: 100%;">
+                                <option value="">Tambah berdasarkan kategori...</option>
+                                {% for category in form.available_categories %}
+                                <option value="{{ category.id }}">{{ category.name }}</option>
+                                {% endfor %}
+                            </select>
+                            <button type="button" id="addCategoryQuestionsBtn" class="btn btn-sm btn-outline-primary" title="Tambahkan semua soal dari kategori terpilih">
+                                <i class="ri-add-line me-1"></i>Tambah Kategori
+                            </button>
+                        </div>
+
+                        <div class="list-group" id="availableQuestionList" style="max-height: 32rem; overflow: auto;">
+                            <div class="list-group-item text-muted small">Memuat daftar soal...</div>
+                        </div>
+                        <div class="d-grid mt-2">
+                            <button type="button" class="btn btn-sm btn-outline-secondary d-none" id="availableQuestionLoadMoreBtn" title="Muat data soal berikutnya">
+                                Muat lebih banyak
+                            </button>
                         </div>
                     </div>
                 </div>
-                <div class="col-xl-7">
-                    <div class="card h-100">
-                        <div class="card-header bg-white d-flex flex-wrap justify-content-between align-items-center gap-2">
-                            <h3 class="h6 mb-0">Soal Terpilih</h3>
-                            <div class="d-flex flex-wrap gap-2">
-                                <span class="badge text-bg-primary">Total Soal: <span id="selectedQuestionCountTop">0</span></span>
-                                <span class="badge text-bg-secondary">Total Poin: <span id="selectedQuestionTotalPointsTop">0.00</span></span>
+
+                <div class="card">
+                    <div class="card-header bg-white d-flex flex-wrap justify-content-between align-items-center gap-2">
+                        <h3 class="h6 mb-0">Soal Terpilih</h3>
+                        <div class="d-flex flex-wrap gap-2">
+                            <span class="badge text-bg-primary">Total Soal: <span id="selectedQuestionCountTop">0</span></span>
+                            <span class="badge text-bg-secondary">Total Poin: <span id="selectedQuestionTotalPointsTop">0.00</span></span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="border rounded p-2 mb-3 bg-light">
+                            <div class="d-flex flex-wrap gap-2 align-items-center">
+                                <button type="button" class="btn btn-sm btn-outline-secondary" id="selectedToggleSelectBtn" title="Toggle pilih semua pada daftar soal terpilih">
+                                    <i class="ri-check-double-line me-1"></i><span class="selected-toggle-select-label">Pilih Semua</span>
+                                </button>
+                                <input type="number" min="0.01" step="0.01" class="form-control form-control-sm" id="bulkPointsOverride" placeholder="Poin timpa" style="width: 140px;">
+                                <select class="form-select form-select-sm" id="bulkAllowPrevious" style="width: 170px;">
+                                    <option value="inherit">Nav Prev: Ikuti</option>
+                                    <option value="true">Nav Prev: Ya</option>
+                                    <option value="false">Nav Prev: Tidak</option>
+                                </select>
+                                <select class="form-select form-select-sm" id="bulkAllowNext" style="width: 170px;">
+                                    <option value="inherit">Nav Next: Ikuti</option>
+                                    <option value="true">Nav Next: Ya</option>
+                                    <option value="false">Nav Next: Tidak</option>
+                                </select>
+                                <select class="form-select form-select-sm" id="bulkForceSequential" style="width: 190px;">
+                                    <option value="inherit">Paksa Berurutan: Ikuti</option>
+                                    <option value="true">Paksa Berurutan: Ya</option>
+                                    <option value="false">Paksa Berurutan: Tidak</option>
+                                </select>
+                                <button type="button" class="btn btn-sm btn-outline-primary" id="applyBulkSelectedBtn" title="Terapkan pengaturan ke soal terpilih">
+                                    <i class="ri-check-line me-1"></i>Terapkan
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-danger" id="deleteBulkSelectedBtn" title="Hapus semua soal yang dicentang dari daftar terpilih">
+                                    <i class="ri-delete-bin-line me-1"></i>Hapus
+                                </button>
                             </div>
                         </div>
-                        <div class="card-body">
-                            <div class="border rounded p-3 mb-3 bg-light">
-                                <div class="row g-2 align-items-end">
-                                    <div class="col-12 mb-2">
-                                        <div class="form-check">
-                                            <input type="checkbox" class="form-check-input" id="selectedBulkCheckAll">
-                                            <label class="form-check-label fw-semibold" for="selectedBulkCheckAll">Pilih semua soal</label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4 col-lg-3">
-                                        <label class="form-label small mb-1" for="bulkPointsOverride">Poin Timpa</label>
-                                        <input type="number" min="0.01" step="0.01" class="form-control form-control-sm" id="bulkPointsOverride" placeholder="Kosongkan jika tidak diubah">
-                                    </div>
-                                    <div class="col-md-4 col-lg-2">
-                                        <label class="form-label small mb-1" for="bulkAllowPrevious">Nav. Sebelumnya</label>
-                                        <select class="form-select form-select-sm" id="bulkAllowPrevious">
-                                            <option value="inherit">Ikuti pengaturan</option>
-                                            <option value="true">Ya</option>
-                                            <option value="false">Tidak</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-4 col-lg-2">
-                                        <label class="form-label small mb-1" for="bulkAllowNext">Nav. Berikutnya</label>
-                                        <select class="form-select form-select-sm" id="bulkAllowNext">
-                                            <option value="inherit">Ikuti pengaturan</option>
-                                            <option value="true">Ya</option>
-                                            <option value="false">Tidak</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-6 col-lg-3">
-                                        <label class="form-label small mb-1" for="bulkForceSequential">Paksa Berurutan</label>
-                                        <select class="form-select form-select-sm" id="bulkForceSequential">
-                                            <option value="inherit">Ikuti pengaturan</option>
-                                            <option value="true">Ya</option>
-                                            <option value="false">Tidak</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-6 col-lg-2 d-flex gap-2">
-                                        <button type="button" class="btn btn-outline-danger btn-sm flex-grow-1" id="deleteBulkSelectedBtn" title="Hapus semua soal yang dicentang dari daftar terpilih">
-                                            <i class="ri-delete-bin-line"></i>
-                                        </button>
-                                        <button type="button" class="btn btn-primary btn-sm flex-grow-1" id="applyBulkSelectedBtn" title="Terapkan pengaturan ke soal terpilih">
-                                            <i class="ri-magic-line"></i> Terapkan
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div id="selectedQuestionList" class="list-group border rounded bg-light p-2" style="min-height: 14rem;"></div>
-                            <div class="d-none">
-                                <span id="selectedQuestionCount">0</span>
-                                <span id="selectedQuestionTotalPoints">0</span>
-                            </div>
+                        <div id="selectedQuestionList" class="list-group border rounded bg-light p-2" style="min-height: 14rem;"></div>
+                        <div class="d-none">
+                            <span id="selectedQuestionCount">0</span>
+                            <span id="selectedQuestionTotalPoints">0</span>
                         </div>
                     </div>
                 </div>

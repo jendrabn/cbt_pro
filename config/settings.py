@@ -8,6 +8,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import json
 import os
 from pathlib import Path
 from dotenv import load_dotenv
@@ -19,6 +20,23 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
+def _env_bool(name, default=False):
+    return os.getenv(name, str(default)).lower() in ("true", "1", "yes", "on")
+
+
+def _env_list(name, default=""):
+    raw_value = os.getenv(name, default)
+    return [item.strip() for item in raw_value.split(",") if item.strip()]
+
+
+def _env_json(name, default):
+    raw_value = os.getenv(name, default)
+    try:
+        return json.loads(str(raw_value).replace("'", '"'))
+    except json.JSONDecodeError:
+        return json.loads(str(default).replace("'", '"'))
+
+
 # =============================================================================
 # SECURITY SETTINGS
 # =============================================================================
@@ -27,9 +45,14 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-change-this-in-production'
 
 CBT_SITE_NAME = os.getenv('CBT_SITE_NAME', 'Sistem CBT')
 
-DEBUG = os.getenv('DEBUG', 'True').lower() in ('true', '1', 'yes')
+DEBUG = _env_bool('DEBUG', True)
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+ALLOWED_HOSTS = _env_list('ALLOWED_HOSTS', 'localhost,127.0.0.1')
+CSRF_TRUSTED_ORIGINS = _env_list('CSRF_TRUSTED_ORIGINS')
+USE_X_FORWARDED_HOST = _env_bool('USE_X_FORWARDED_HOST', not DEBUG)
+
+if _env_bool('SECURE_PROXY_SSL_HEADER_ENABLED', not DEBUG):
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 
 # =============================================================================
@@ -98,14 +121,7 @@ WSGI_APPLICATION = "config.wsgi.application"
 # DATABASE CONFIGURATION
 # =============================================================================
 
-# Parse database options from environment variable
-import json
-db_options = {}
-try:
-    db_options_str = os.getenv('DB_OPTIONS', "{'charset': 'utf8mb4'}")
-    db_options = json.loads(db_options_str.replace("'", '"'))
-except json.JSONDecodeError:
-    db_options = {'charset': 'utf8mb4'}
+db_options = _env_json('DB_OPTIONS', "{'charset': 'utf8mb4'}")
 
 DATABASES = {
     "default": {
@@ -117,7 +133,7 @@ DATABASES = {
         "PORT": os.getenv('DB_PORT', '3306'),
         "OPTIONS": db_options,
         "CONN_MAX_AGE": int(os.getenv('DB_CONN_MAX_AGE', '600')),
-        "CONN_HEALTH_CHECKS": os.getenv('DB_CONN_HEALTH_CHECKS', 'True').lower() in ('true', '1', 'yes'),
+        "CONN_HEALTH_CHECKS": _env_bool('DB_CONN_HEALTH_CHECKS', True),
     }
 }
 
@@ -152,7 +168,7 @@ TIME_ZONE = os.getenv('TIME_ZONE', 'Asia/Jakarta')
 
 USE_I18N = True
 
-USE_TZ = os.getenv('USE_TZ', 'True').lower() in ('true', '1', 'yes')
+USE_TZ = _env_bool('USE_TZ', True)
 
 
 # =============================================================================
@@ -183,7 +199,7 @@ TINYMCE_API_KEY = os.getenv('TINYMCE_API_KEY', '').strip()
 EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
 EMAIL_HOST = os.getenv('EMAIL_HOST', 'localhost')
 EMAIL_PORT = int(os.getenv('EMAIL_PORT', '587'))
-EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True').lower() in ('true', '1', 'yes')
+EMAIL_USE_TLS = _env_bool('EMAIL_USE_TLS', True)
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'CBT System <noreply@cbt.com>')
@@ -203,13 +219,14 @@ QUESTION_IMPORT_CHUNK_SIZE = int(os.getenv("QUESTION_IMPORT_CHUNK_SIZE", "200"))
 # CELERY & REDIS CONFIGURATION
 # =============================================================================
 
-CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://localhost:6379/0')
-CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', 'redis://localhost:6379/0')
+REDIS_URL = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', REDIS_URL)
+CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', REDIS_URL)
 CELERY_TIMEZONE = os.getenv('CELERY_TIMEZONE', 'Asia/Jakarta')
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
-CELERY_TASK_SYNC_FALLBACK = os.getenv("CELERY_TASK_SYNC_FALLBACK", "True").lower() in ("true", "1", "yes")
+CELERY_TASK_SYNC_FALLBACK = _env_bool("CELERY_TASK_SYNC_FALLBACK", True)
 
 
 # =============================================================================
@@ -217,12 +234,15 @@ CELERY_TASK_SYNC_FALLBACK = os.getenv("CELERY_TASK_SYNC_FALLBACK", "True").lower
 # =============================================================================
 
 if not DEBUG:
-    SECURE_SSL_REDIRECT = True
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
-    SECURE_BROWSER_XSS_FILTER = True
-    SECURE_CONTENT_TYPE_NOSNIFF = True
-    X_FRAME_OPTIONS = 'DENY'
+    SECURE_SSL_REDIRECT = _env_bool('SECURE_SSL_REDIRECT', True)
+    SESSION_COOKIE_SECURE = _env_bool('SESSION_COOKIE_SECURE', True)
+    CSRF_COOKIE_SECURE = _env_bool('CSRF_COOKIE_SECURE', True)
+    SECURE_BROWSER_XSS_FILTER = _env_bool('SECURE_BROWSER_XSS_FILTER', True)
+    SECURE_CONTENT_TYPE_NOSNIFF = _env_bool('SECURE_CONTENT_TYPE_NOSNIFF', True)
+    SECURE_HSTS_SECONDS = int(os.getenv('SECURE_HSTS_SECONDS', '0'))
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = _env_bool('SECURE_HSTS_INCLUDE_SUBDOMAINS', False)
+    SECURE_HSTS_PRELOAD = _env_bool('SECURE_HSTS_PRELOAD', False)
+    X_FRAME_OPTIONS = os.getenv('X_FRAME_OPTIONS', 'DENY')
 
 
 # =============================================================================
@@ -262,7 +282,7 @@ LOGGING = {
 # PROCTORING SETTINGS
 # =============================================================================
 
-ENABLE_SCREENSHOT_PROCTORING = os.getenv('ENABLE_SCREENSHOT_PROCTORING', 'False').lower() in ('true', '1', 'yes')
+ENABLE_SCREENSHOT_PROCTORING = _env_bool('ENABLE_SCREENSHOT_PROCTORING', False)
 SCREENSHOT_INTERVAL_SECONDS = int(os.getenv('SCREENSHOT_INTERVAL_SECONDS', '300'))
 MAX_VIOLATIONS_ALLOWED = int(os.getenv('MAX_VIOLATIONS_ALLOWED', '3'))
 
