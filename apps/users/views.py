@@ -7,7 +7,7 @@ from urllib.parse import urlencode
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
-from django.db.models import Q
+from django.db.models import Avg, Count, Max, Q
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
@@ -18,9 +18,10 @@ from django.views.generic import DetailView, FormView, ListView, UpdateView
 from openpyxl import Workbook
 
 from apps.accounts.models import UserImportLog, UserProfile
-from apps.attempts.models import ExamAttempt
+from apps.attempts.models import ExamAttempt, ExamViolation
 from apps.core.mixins import RoleRequiredMixin
-from apps.exams.models import Exam
+from apps.exams.models import Class, ClassStudent, Exam, ExamAssignment
+from apps.results.models import ExamResult
 from apps.subjects.models import Subject
 
 from .exporters import ImportTemplateExporter
@@ -102,13 +103,222 @@ def _safe_filename_timestamp():
     return timezone.localtime().strftime("%Y%m%d_%H%M%S")
 
 
+def _get_user_profile(user):
+    try:
+        return user.profile
+    except UserProfile.DoesNotExist:
+        return None
+
+
+def _completed_attempt_statuses():
+    return ["submitted", "auto_submitted", "completed"]
+
+
+def _teacher_exam_ids(teacher):
+    return list(
+        Exam.objects.filter(created_by=teacher, is_deleted=False).values_list("id", flat=True)
+    )
+
+
+def _teacher_related_class_ids(teacher):
+    exam_ids = _teacher_exam_ids(teacher)
+    if not exam_ids:
+        return []
+    return list(
+        ExamAssignment.objects.filter(
+            exam_id__in=exam_ids,
+            assigned_to_type="class",
+            class_obj__isnull=False,
+        )
+        .values_list("class_obj_id", flat=True)
+        .distinct()
+    )
+
+
+def _teacher_student_ids(teacher):
+    exam_ids = _teacher_exam_ids(teacher)
+    if not exam_ids:
+        return []
+
+    direct_student_ids = ExamAssignment.objects.filter(
+        exam_id__in=exam_ids,
+        assigned_to_type="student",
+        student__isnull=False,
+    ).values_list("student_id", flat=True)
+    class_student_ids = ClassStudent.objects.filter(
+        class_obj_id__in=_teacher_related_class_ids(teacher)
+    ).values_list("student_id", flat=True)
+
+    return sorted(set(direct_student_ids) | set(class_student_ids))
+
+
+def _teacher_student_queryset(teacher):
+    student_ids = _teacher_student_ids(teacher)
+    if not student_ids:
+        return User.objects.none()
+    return (
+        User.objects.filter(
+            id__in=student_ids,
+            role="student",
+            is_deleted=False,
+        )
+        .select_related("profile")
+        .distinct()
+    )
+
+
+def _filter_teacher_student_queryset(request, queryset):
+    q = (request.GET.get("q") or "").strip()
+    status = (request.GET.get("status") or "").strip()
+    class_id = (request.GET.get("class_id") or "").strip()
+
+    if q:
+        queryset = queryset.filter(
+            Q(username__icontains=q)
+            | Q(email__icontains=q)
+            | Q(first_name__icontains=q)
+            | Q(last_name__icontains=q)
+            | Q(profile__student_id__icontains=q)
+            | Q(profile__class_grade__icontains=q)
+        )
+
+    status_value = _parse_bool_status(status)
+    if status_value is not None:
+        queryset = queryset.filter(is_active=status_value)
+
+    if class_id:
+        queryset = queryset.filter(classes__class_obj_id=class_id)
+
+    sort = request.GET.get("sort", "username")
+    allowed_sort = {
+        "username",
+        "-username",
+        "first_name",
+        "-first_name",
+        "email",
+        "-email",
+        "date_joined",
+        "-date_joined",
+        "last_login",
+        "-last_login",
+    }
+    if sort not in allowed_sort:
+        sort = "username"
+    return queryset.order_by(sort, "username").distinct()
+
+
+def _teacher_student_assignment_map(teacher, student_ids):
+    assignment_map = {student_id: set() for student_id in student_ids}
+    if not student_ids:
+        return assignment_map
+
+    direct_assignments = ExamAssignment.objects.filter(
+        exam__created_by=teacher,
+        exam__is_deleted=False,
+        assigned_to_type="student",
+        student_id__in=student_ids,
+    ).values("student_id", "exam_id")
+    for row in direct_assignments:
+        assignment_map.setdefault(row["student_id"], set()).add(row["exam_id"])
+
+    class_assignments = ExamAssignment.objects.filter(
+        exam__created_by=teacher,
+        exam__is_deleted=False,
+        assigned_to_type="class",
+        class_obj__students__student_id__in=student_ids,
+    ).values("class_obj__students__student_id", "exam_id")
+    for row in class_assignments:
+        assignment_map.setdefault(row["class_obj__students__student_id"], set()).add(row["exam_id"])
+
+    return assignment_map
+
+
+def _teacher_student_classes_map(teacher, student_ids):
+    classes_map = {student_id: [] for student_id in student_ids}
+    if not student_ids:
+        return classes_map
+
+    rows = (
+        ClassStudent.objects.filter(
+            student_id__in=student_ids,
+            class_obj_id__in=_teacher_related_class_ids(teacher),
+        )
+        .select_related("class_obj")
+        .order_by("class_obj__grade_level", "class_obj__name")
+    )
+    for membership in rows:
+        classes_map.setdefault(membership.student_id, []).append(membership.class_obj)
+    return classes_map
+
+
+def _teacher_student_metrics_map(teacher, student_ids):
+    metrics_map = {
+        student_id: {
+            "attempt_count": 0,
+            "completed_attempt_count": 0,
+            "average_score": None,
+            "best_score": None,
+            "last_attempt_at": None,
+            "total_violations": 0,
+        }
+        for student_id in student_ids
+    }
+    if not student_ids:
+        return metrics_map
+
+    for row in (
+        ExamAttempt.objects.filter(
+            exam__created_by=teacher,
+            exam__is_deleted=False,
+            student_id__in=student_ids,
+        )
+        .values("student_id")
+        .annotate(
+            attempt_count=Count("id"),
+            completed_attempt_count=Count("id", filter=Q(status__in=_completed_attempt_statuses())),
+            last_attempt_at=Max("submit_time"),
+        )
+    ):
+        metrics = metrics_map.setdefault(row["student_id"], {})
+        metrics["attempt_count"] = row["attempt_count"]
+        metrics["completed_attempt_count"] = row["completed_attempt_count"]
+        metrics["last_attempt_at"] = row["last_attempt_at"]
+
+    for row in (
+        ExamResult.objects.filter(
+            exam__created_by=teacher,
+            exam__is_deleted=False,
+            student_id__in=student_ids,
+        )
+        .values("student_id")
+        .annotate(
+            average_score=Avg("percentage"),
+            best_score=Max("percentage"),
+        )
+    ):
+        metrics = metrics_map.setdefault(row["student_id"], {})
+        metrics["average_score"] = row["average_score"]
+        metrics["best_score"] = row["best_score"]
+
+    for row in (
+        ExamViolation.objects.filter(
+            attempt__exam__created_by=teacher,
+            attempt__exam__is_deleted=False,
+            attempt__student_id__in=student_ids,
+        )
+        .values("attempt__student_id")
+        .annotate(total_violations=Count("id"))
+    ):
+        metrics = metrics_map.setdefault(row["attempt__student_id"], {})
+        metrics["total_violations"] = row["total_violations"]
+
+    return metrics_map
+
+
 def _user_rows(queryset):
     rows = []
     for user in queryset:
-        try:
-            profile = user.profile
-        except UserProfile.DoesNotExist:
-            profile = None
+        profile = _get_user_profile(user)
         rows.append(
             {
                 "id": str(user.id),
@@ -449,6 +659,178 @@ class UserDetailView(AdminUserBaseView, DetailView):
                     "exam_created_count": exam_created_count,
                     "exam_attempt_count": exam_attempt_count,
                     "completed_attempt_count": completed_attempt_count,
+                },
+                "back_querystring": urlencode(
+                    {
+                        key: value
+                        for key, value in self.request.GET.items()
+                        if key != "page"
+                    }
+                ),
+            }
+        )
+        return context
+
+
+class TeacherStudentBaseView(RoleRequiredMixin):
+    required_role = "teacher"
+    permission_denied_message = "Hanya guru yang dapat mengakses halaman data siswa."
+
+
+class TeacherStudentListView(TeacherStudentBaseView, ListView):
+    model = User
+    template_name = "users/teacher_student_list.html"
+    context_object_name = "students"
+    paginate_by = 10
+
+    def get_base_queryset(self):
+        return _teacher_student_queryset(self.request.user)
+
+    def get_queryset(self):
+        return _filter_teacher_student_queryset(self.request, self.get_base_queryset())
+
+    def _current_querystring_without_page(self):
+        querydict = self.request.GET.copy()
+        querydict.pop("page", None)
+        return querydict.urlencode()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        teacher = self.request.user
+        base_queryset = self.get_base_queryset()
+        page_students = list(context["page_obj"].object_list) if context.get("page_obj") else list(context["students"])
+        student_ids = [student.id for student in page_students]
+
+        assignment_map = _teacher_student_assignment_map(teacher, student_ids)
+        classes_map = _teacher_student_classes_map(teacher, student_ids)
+        metrics_map = _teacher_student_metrics_map(teacher, student_ids)
+
+        student_rows = []
+        for student in page_students:
+            profile = _get_user_profile(student)
+            related_classes = classes_map.get(student.id, [])
+            metrics = metrics_map.get(student.id, {})
+            assigned_exam_ids = assignment_map.get(student.id, set())
+            student_rows.append(
+                {
+                    "user": student,
+                    "profile": profile,
+                    "related_classes": related_classes,
+                    "class_names": ", ".join(class_obj.name for class_obj in related_classes)
+                    or getattr(profile, "class_grade", "")
+                    or "-",
+                    "assigned_exam_count": len(assigned_exam_ids),
+                    "attempt_count": metrics.get("attempt_count", 0),
+                    "completed_attempt_count": metrics.get("completed_attempt_count", 0),
+                    "average_score": round(float(metrics["average_score"]), 1)
+                    if metrics.get("average_score") is not None
+                    else None,
+                    "best_score": round(float(metrics["best_score"]), 1)
+                    if metrics.get("best_score") is not None
+                    else None,
+                    "total_violations": metrics.get("total_violations", 0),
+                }
+            )
+
+        base_student_ids = list(base_queryset.values_list("id", flat=True))
+        overall_avg_score = (
+            ExamResult.objects.filter(
+                exam__created_by=teacher,
+                exam__is_deleted=False,
+                student_id__in=base_student_ids,
+            ).aggregate(avg=Avg("percentage"))["avg"]
+            if base_student_ids
+            else None
+        )
+        students_with_attempts = (
+            ExamAttempt.objects.filter(
+                exam__created_by=teacher,
+                exam__is_deleted=False,
+                student_id__in=base_student_ids,
+            )
+            .values("student_id")
+            .distinct()
+            .count()
+            if base_student_ids
+            else 0
+        )
+        sort_query = self.request.GET.copy()
+        sort_query.pop("sort", None)
+        sort_query.pop("page", None)
+
+        context.update(
+            {
+                "student_rows": student_rows,
+                "filters": {
+                    "q": self.request.GET.get("q", ""),
+                    "status": self.request.GET.get("status", ""),
+                    "class_id": self.request.GET.get("class_id", ""),
+                    "sort": self.request.GET.get("sort", "username"),
+                },
+                "querystring": self._current_querystring_without_page(),
+                "sort_querystring": sort_query.urlencode(),
+                "available_classes": Class.objects.filter(
+                    id__in=_teacher_related_class_ids(teacher),
+                    is_active=True,
+                ).order_by("grade_level", "name"),
+                "summary": {
+                    "total": base_queryset.count(),
+                    "active": base_queryset.filter(is_active=True).count(),
+                    "inactive": base_queryset.filter(is_active=False).count(),
+                    "students_with_attempts": students_with_attempts,
+                    "average_score": round(float(overall_avg_score or 0), 1),
+                },
+            }
+        )
+        return context
+
+
+class TeacherStudentDetailView(TeacherStudentBaseView, DetailView):
+    model = User
+    template_name = "users/teacher_student_detail.html"
+    context_object_name = "student_user"
+
+    def get_queryset(self):
+        return _teacher_student_queryset(self.request.user)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        teacher = self.request.user
+        student_user = self.object
+        profile = _get_user_profile(student_user)
+
+        assignment_map = _teacher_student_assignment_map(teacher, [student_user.id])
+        classes_map = _teacher_student_classes_map(teacher, [student_user.id])
+        metrics_map = _teacher_student_metrics_map(teacher, [student_user.id])
+
+        assigned_exam_ids = assignment_map.get(student_user.id, set())
+        related_classes = classes_map.get(student_user.id, [])
+        metrics = metrics_map.get(student_user.id, {})
+
+        attempt_rows = ExamAttempt.objects.filter(
+            exam__created_by=teacher,
+            exam__is_deleted=False,
+            student=student_user,
+        ).select_related("exam__subject").order_by("-created_at", "-attempt_number")[:10]
+        assigned_exams = Exam.objects.filter(id__in=assigned_exam_ids).select_related("subject").order_by("-start_time")[:8]
+
+        context.update(
+            {
+                "profile": profile,
+                "related_classes": related_classes,
+                "assigned_exams": assigned_exams,
+                "attempt_rows": attempt_rows,
+                "stats": {
+                    "assigned_exam_count": len(assigned_exam_ids),
+                    "attempt_count": metrics.get("attempt_count", 0),
+                    "completed_attempt_count": metrics.get("completed_attempt_count", 0),
+                    "average_score": round(float(metrics["average_score"]), 1)
+                    if metrics.get("average_score") is not None
+                    else None,
+                    "best_score": round(float(metrics["best_score"]), 1)
+                    if metrics.get("best_score") is not None
+                    else None,
+                    "total_violations": metrics.get("total_violations", 0),
                 },
                 "back_querystring": urlencode(
                     {

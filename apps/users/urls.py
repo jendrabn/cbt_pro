@@ -2,6 +2,8 @@ from django.urls import path
 
 from .views import (
     DownloadImportTemplateView,
+    TeacherStudentDetailView,
+    TeacherStudentListView,
     ToggleUserStatusView,
     UserCreateView,
     UserDeleteView,
@@ -14,6 +16,8 @@ from .views import (
 )
 
 urlpatterns = [
+    path("teacher/students/", TeacherStudentListView.as_view(), name="teacher_student_list"),
+    path("teacher/students/<int:pk>/", TeacherStudentDetailView.as_view(), name="teacher_student_detail"),
     path("admin/users/", UserListView.as_view(), name="user_list"),
     path("admin/users/create/", UserCreateView.as_view(), name="user_create"),
     path("admin/users/export/", UserExportView.as_view(), name="user_export"),

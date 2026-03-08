@@ -1,0 +1,192 @@
+{% extends "layouts/base_teacher.html" %}
+{% load static %}
+
+{% block title %}Data Siswa - CBT{% endblock %}
+
+{% block topbar %}
+    {% include "partials/topbar_teacher.html" with current_label="Data Siswa" %}
+{% endblock %}
+
+{% block main_attrs %}class="container-fluid px-3 px-md-4 py-4"{% endblock %}
+
+{% block page_header %}
+    <section class="cbt-page-header">
+        <div class="cbt-page-header-body">
+            {% include "partials/page_header.html" with eyebrow="Panel Guru" title="Data Siswa" subtitle="Lihat daftar siswa yang terhubung ke ujian Anda beserta ringkasan progresnya." %}
+        </div>
+    </section>
+{% endblock %}
+
+{% block content %}
+        {% if messages %}
+            <div class="mb-3">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'info' }} py-2 mb-2" role="alert">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <section class="row row-cols-2 row-cols-md-3 row-cols-xl-5 g-3 mb-4 cbt-stats-grid">
+            <div class="col">
+                {% include "partials/stats_card.html" with title="Total Siswa" value=summary.total icon="ri-group-line" tone="primary" %}
+            </div>
+            <div class="col">
+                {% include "partials/stats_card.html" with title="Aktif" value=summary.active icon="ri-checkbox-circle-line" tone="success" %}
+            </div>
+            <div class="col">
+                {% include "partials/stats_card.html" with title="Nonaktif" value=summary.inactive icon="ri-user-unfollow-line" tone="secondary" %}
+            </div>
+            <div class="col">
+                {% include "partials/stats_card.html" with title="Sudah Attempt" value=summary.students_with_attempts icon="ri-timer-line" tone="info" %}
+            </div>
+            <div class="col">
+                {% include "partials/stats_card.html" with title="Rata-rata Nilai" value=summary.average_score value_suffix="%" icon="ri-line-chart-line" tone="warning" %}
+            </div>
+        </section>
+
+        <section class="card filter-card border-0 shadow-sm mb-4">
+            <div class="card-body">
+                <form method="get" class="cbt-inline-filter">
+                    <div class="cbt-inline-filter-search">
+                        <i class="ri-search-line"></i>
+                        <input
+                            type="search"
+                            name="q"
+                            value="{{ filters.q }}"
+                            class="form-control"
+                            placeholder="Cari nama, username, email, NIS, atau kelas..."
+                        >
+                    </div>
+                    <div class="cbt-inline-filter-select">
+                        <select name="class_id" class="form-select">
+                            <option value="">Semua Kelas Terkait</option>
+                            {% for class_item in available_classes %}
+                            <option value="{{ class_item.id }}" {% if filters.class_id == class_item.id|stringformat:'s' %}selected{% endif %}>{{ class_item.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="cbt-inline-filter-select">
+                        <select name="status" class="form-select">
+                            <option value="">Semua Status</option>
+                            <option value="active" {% if filters.status == 'active' %}selected{% endif %}>Aktif</option>
+                            <option value="inactive" {% if filters.status == 'inactive' %}selected{% endif %}>Nonaktif</option>
+                        </select>
+                    </div>
+                    <div class="cbt-inline-filter-select">
+                        <select name="sort" class="form-select">
+                            <option value="username" {% if filters.sort == 'username' %}selected{% endif %}>Username A-Z</option>
+                            <option value="-username" {% if filters.sort == '-username' %}selected{% endif %}>Username Z-A</option>
+                            <option value="first_name" {% if filters.sort == 'first_name' %}selected{% endif %}>Nama A-Z</option>
+                            <option value="-date_joined" {% if filters.sort == '-date_joined' %}selected{% endif %}>Terbaru Bergabung</option>
+                            <option value="-last_login" {% if filters.sort == '-last_login' %}selected{% endif %}>Login Terakhir</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary" title="Terapkan filter">
+                        <i class="ri-filter-3-line me-1"></i>Terapkan
+                    </button>
+                    <a href="{% url 'teacher_student_list' %}" class="btn btn-outline-secondary cbt-inline-filter-reset" title="Reset semua filter">
+                        <i class="ri-refresh-line me-1"></i>Reset
+                    </a>
+                </form>
+            </div>
+        </section>
+
+        <section class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-3">Siswa</th>
+                                <th>NIS</th>
+                                <th>Kelas Terkait</th>
+                                <th>Email</th>
+                                <th>Status</th>
+                                <th>Ujian Terkait</th>
+                                <th>Attempt</th>
+                                <th>Rata-rata</th>
+                                <th class="text-end pe-3">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in student_rows %}
+                            <tr>
+                                <td class="ps-3">
+                                    <p class="mb-1 fw-semibold">{{ row.user.get_full_name|default:row.user.username }}</p>
+                                    <p class="small text-muted mb-0">@{{ row.user.username }}</p>
+                                </td>
+                                <td>{{ row.profile.student_id|default:"-" }}</td>
+                                <td>{{ row.class_names }}</td>
+                                <td>{{ row.user.email }}</td>
+                                <td>
+                                    {% if row.user.is_active %}
+                                    <span class="badge text-bg-success">Aktif</span>
+                                    {% else %}
+                                    <span class="badge text-bg-secondary">Nonaktif</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ row.assigned_exam_count }}</td>
+                                <td>
+                                    <span class="d-block">{{ row.attempt_count }} total</span>
+                                    <small class="text-muted">{{ row.completed_attempt_count }} selesai</small>
+                                </td>
+                                <td>
+                                    {% if row.average_score is not None %}
+                                    <span class="fw-semibold">{{ row.average_score }}%</span>
+                                    {% else %}
+                                    <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end pe-3">
+                                    <a href="{% url 'teacher_student_detail' row.user.id %}{% if querystring %}?{{ querystring }}{% endif %}" class="btn btn-sm btn-outline-primary" title="Lihat detail siswa">
+                                        <i class="ri-eye-line"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="9" class="text-center py-5 text-muted">Belum ada siswa yang terhubung ke ujian Anda.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {% if is_paginated %}
+            <div class="card-footer bg-white">
+                <nav aria-label="Pagination data siswa">
+                    <ul class="pagination pagination-sm mb-0">
+                        {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.previous_page_number }}">Sebelumnya</a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled"><span class="page-link">Sebelumnya</span></li>
+                        {% endif %}
+
+                        {% for num in paginator.page_range %}
+                            {% if page_obj.number == num %}
+                            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                            {% elif num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
+                            <li class="page-item">
+                                <a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ num }}">{{ num }}</a>
+                            </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.next_page_number }}">Berikutnya</a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled"><span class="page-link">Berikutnya</span></li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+            {% endif %}
+        </section>
+{% endblock %}

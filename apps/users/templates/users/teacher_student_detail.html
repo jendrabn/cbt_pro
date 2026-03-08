@@ -1,0 +1,199 @@
+{% extends "layouts/base_teacher.html" %}
+{% load static %}
+
+{% block title %}Detail Siswa - CBT{% endblock %}
+
+{% block topbar %}
+    {% include "partials/topbar_teacher.html" with parent_label="Data Siswa" parent_url="/teacher/students/" current_label="Detail Siswa" %}
+{% endblock %}
+
+{% block main_attrs %}class="container-fluid px-3 px-md-4 py-4"{% endblock %}
+
+{% block page_header %}
+    <section class="cbt-page-header">
+        <div class="cbt-page-header-body">
+            {% include "partials/page_header.html" with eyebrow="Panel Guru" title=student_user.get_full_name|default:student_user.username subtitle=student_user.email %}
+            <div class="d-flex align-items-center gap-2 cbt-page-header-actions">
+                <a href="{% url 'teacher_student_list' %}{% if back_querystring %}?{{ back_querystring }}{% endif %}" class="btn btn-outline-primary" title="Kembali ke daftar siswa">
+                    <i class="ri-arrow-left-line me-1"></i>Kembali ke List
+                </a>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block content %}
+        <section class="row g-4 mb-4">
+            <div class="col-xl-8">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white border-0 pt-3">
+                        <h2 class="h6 mb-0">Informasi Utama</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <small class="text-muted d-block">Nama Lengkap</small>
+                                <strong>{{ student_user.get_full_name|default:"-" }}</strong>
+                            </div>
+                            <div class="col-md-6">
+                                <small class="text-muted d-block">Username</small>
+                                <strong>{{ student_user.username }}</strong>
+                            </div>
+                            <div class="col-md-6">
+                                <small class="text-muted d-block">Email</small>
+                                <strong>{{ student_user.email }}</strong>
+                            </div>
+                            <div class="col-md-6">
+                                <small class="text-muted d-block">Status</small>
+                                {% if student_user.is_active %}
+                                <span class="badge text-bg-success">Aktif</span>
+                                {% else %}
+                                <span class="badge text-bg-secondary">Nonaktif</span>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <small class="text-muted d-block">NIS</small>
+                                <strong>{{ profile.student_id|default:"-" }}</strong>
+                            </div>
+                            <div class="col-md-6">
+                                <small class="text-muted d-block">Nomor Telepon</small>
+                                <strong>{{ profile.phone_number|default:"-" }}</strong>
+                            </div>
+                            <div class="col-md-6">
+                                <small class="text-muted d-block">Kelas Profil</small>
+                                <strong>{{ profile.class_grade|default:"-" }}</strong>
+                            </div>
+                            <div class="col-md-6">
+                                <small class="text-muted d-block">Tanggal Gabung</small>
+                                <strong>{{ student_user.date_joined|date:"d M Y H:i" }}</strong>
+                            </div>
+                            <div class="col-md-6">
+                                <small class="text-muted d-block">Login Terakhir</small>
+                                <strong>{{ student_user.last_login|date:"d M Y H:i"|default:"-" }}</strong>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+                        <h3 class="h6">Kelas Terkait dari Ujian Anda</h3>
+                        <div class="d-flex flex-wrap gap-2">
+                            {% for class_obj in related_classes %}
+                            <span class="badge text-bg-light">{{ class_obj.name }}</span>
+                            {% empty %}
+                            <span class="text-muted">Siswa ini tidak terhubung lewat assignment kelas pada ujian Anda.</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-4">
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white border-0 pt-3">
+                        <h2 class="h6 mb-0">Ringkasan Akademik</h2>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-2">
+                            <span class="text-muted">Ujian terkait:</span>
+                            <strong>{{ stats.assigned_exam_count }}</strong>
+                        </p>
+                        <p class="mb-2">
+                            <span class="text-muted">Total attempt:</span>
+                            <strong>{{ stats.attempt_count }}</strong>
+                        </p>
+                        <p class="mb-2">
+                            <span class="text-muted">Attempt selesai:</span>
+                            <strong>{{ stats.completed_attempt_count }}</strong>
+                        </p>
+                        <p class="mb-2">
+                            <span class="text-muted">Rata-rata nilai:</span>
+                            <strong>{% if stats.average_score is not None %}{{ stats.average_score }}%{% else %}-{% endif %}</strong>
+                        </p>
+                        <p class="mb-2">
+                            <span class="text-muted">Nilai terbaik:</span>
+                            <strong>{% if stats.best_score is not None %}{{ stats.best_score }}%{% else %}-{% endif %}</strong>
+                        </p>
+                        <p class="mb-0">
+                            <span class="text-muted">Total pelanggaran:</span>
+                            <strong>{{ stats.total_violations }}</strong>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white border-0 pt-3">
+                <h2 class="h6 mb-0">Ujian yang Terkait</h2>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-3">Ujian</th>
+                                <th>Mata Pelajaran</th>
+                                <th>Jadwal</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for exam in assigned_exams %}
+                            <tr>
+                                <td class="ps-3">{{ exam.title }}</td>
+                                <td>{{ exam.subject.name }}</td>
+                                <td>
+                                    <div class="small">{{ exam.start_time|date:"d M Y H:i" }}</div>
+                                    <div class="small text-muted">{{ exam.end_time|date:"d M Y H:i" }}</div>
+                                </td>
+                                <td><span class="badge text-bg-info">{{ exam.get_status_display }}</span></td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-4">Belum ada ujian terkait untuk siswa ini.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-0 pt-3">
+                <h2 class="h6 mb-0">Riwayat Attempt pada Ujian Anda</h2>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-3">Ujian</th>
+                                <th>Attempt</th>
+                                <th>Status</th>
+                                <th>Nilai</th>
+                                <th>Submit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for attempt in attempt_rows %}
+                            <tr>
+                                <td class="ps-3">
+                                    <p class="mb-1 fw-semibold">{{ attempt.exam.title }}</p>
+                                    <p class="small text-muted mb-0">{{ attempt.exam.subject.name }}</p>
+                                </td>
+                                <td>{{ attempt.attempt_number }}</td>
+                                <td><span class="badge text-bg-secondary">{{ attempt.get_status_display }}</span></td>
+                                <td>{{ attempt.percentage }}%</td>
+                                <td>{{ attempt.submit_time|date:"d M Y H:i"|default:"-" }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center text-muted py-4">Belum ada attempt pada ujian Anda.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+{% endblock %}
