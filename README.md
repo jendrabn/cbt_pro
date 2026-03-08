@@ -5,13 +5,14 @@ CBT Pro adalah aplikasi Computer-Based Testing berbasis Django dengan modul utam
 ## Hasil analisis proyek
 
 - Stack utama: Django 6, MySQL, Redis, Celery, Nginx, Gunicorn, SCSS via `sass` + `npm`.
-- Domain app yang aktif: `accounts`, `users`, `subjects`, `questions`, `exams`, `attempts`, `monitoring`, `results`, `notifications`, `analytics`, `dashboard`, `core`.
+- Domain app yang aktif: `accounts`, `users`, `subjects`, `questions`, `exams`, `attempts`, `monitoring`, `results`, `proctoring`, `notifications`, `analytics`, `dashboard`, `core`.
 - Database runtime mengikuti `config/settings.py` dan `.env.example`, yaitu `django.db.backends.mysql`. Beberapa dokumen di folder `docs/` masih memuat catatan historis seperti PostgreSQL, jadi untuk deployment ikuti konfigurasi kode, bukan dokumen lama tersebut.
 - Background job yang benar-benar dipakai saat ini adalah task Celery untuk pengiriman kredensial email hasil import user di `apps/users/tasks.py`. Jika Redis/Celery tidak tersedia, aplikasi masih punya fallback sinkron melalui `apps/core/tasking.py`, tetapi worker tetap direkomendasikan untuk production.
 - `celery beat` belum diperlukan saat ini. `django-celery-beat` ada di `requirements.txt`, tetapi belum dipakai pada `INSTALLED_APPS` dan tidak ada periodic task aktif.
 - Monitoring real-time saat ini memakai endpoint HTTP polling. Consumer Channels memang ada di `apps/monitoring/consumers.py`, tetapi wiring ASGI/Channels belum lengkap, jadi deployment production saat ini cukup memakai WSGI (`gunicorn`) dan tidak butuh Daphne/Uvicorn/WebSocket gateway.
 - File media dipakai untuk branding, import/export, dan screenshot proctoring. Direktori `media/`, `logs/`, dan `staticfiles/` harus writable oleh user service.
 - Build CSS wajib dijalankan di server. File hasil compile `static/css/main.css` dipakai oleh template, tetapi folder `static/css/` tidak disimpan di Git.
+- Sebagian asset frontend masih dimuat dari CDN publik saat runtime browser, termasuk Bootstrap JS, Remix Icon, Alpine.js, Axios, Chart.js, TinyMCE, dan Google Fonts. Untuk deployment intranet/offline, asset tersebut perlu divendor ke `static/` atau browser klien harus diizinkan mengakses CDN terkait.
 - Command bootstrap data tersedia di `apps/core/management/commands/seed.py`. Ini cocok untuk staging/demo, bukan production, karena membuat akun default dengan password yang harus segera diganti.
 
 ## Topologi deployment yang direkomendasikan
@@ -41,16 +42,41 @@ Jika server masih baru, siapkan paket dasar berikut:
 sudo apt update && sudo apt upgrade -y
 sudo apt install -y \
   git curl nginx redis-server mysql-server \
-  python3 python3-venv python3-dev \
+  software-properties-common \
   build-essential pkg-config default-libmysqlclient-dev \
   libffi-dev libmagic1 libcairo2 libpango-1.0-0 \
   libgdk-pixbuf-2.0-0 shared-mime-info \
   nodejs npm
 ```
 
+Lalu siapkan runtime Python 3.12+ sesuai versi Ubuntu:
+
+```bash
+cat /etc/os-release
+python3 --version
+```
+
+Untuk Ubuntu 24.04 LTS (`VERSION_ID="24.04"`), pastikan repo `universe` aktif lalu install Python 3.12:
+
+```bash
+sudo add-apt-repository universe
+sudo apt update
+sudo apt install -y python3.12 python3.12-venv python3.12-dev
+```
+
+Untuk Ubuntu 22.04 LTS (`VERSION_ID="22.04"`), paket `python3` bawaan masih 3.10, jadi tambah PPA `deadsnakes` terlebih dahulu:
+
+```bash
+sudo add-apt-repository ppa:deadsnakes/ppa
+sudo apt update
+sudo apt install -y python3.12 python3.12-venv python3.12-dev
+```
+
 Catatan:
 
-- Jika Anda memakai Ubuntu 22.04, siapkan Python 3.12+ terlebih dahulu sebelum membuat virtualenv.
+- Pada Ubuntu 22.04, paket `python3` default biasanya masih `3.10`, jadi jangan membuat virtualenv dari binary tersebut.
+- Jika `apt` menampilkan `Unable to locate package python3.12`, cek lagi `cat /etc/os-release`. Pada Ubuntu 24.04 biasanya `universe` belum aktif, sedangkan pada Ubuntu 22.04 Anda perlu `ppa:deadsnakes/ppa`.
+- Jangan membuat virtualenv dengan interpreter yang masih `Python 3.10` atau `Python 3.11`. Dependency seperti `Django 6` dan `autobahn 25.12.2` akan gagal diinstall pada versi tersebut.
 - Jika Anda memakai database/Redis managed service, bagian instalasi `mysql-server` dan `redis-server` boleh dilewati.
 
 Opsional, aktifkan firewall dasar:
@@ -88,14 +114,26 @@ cd /var/www/cbt_pro
 
 ```bash
 cd /var/www/cbt_pro
-python3 -m venv .venv
+python3 --version
+# output wajib 3.12.x atau lebih baru
+# jika python3 masih 3.10/3.11, kembali ke langkah persiapan server lalu install Python 3.12+
+PYTHON_BIN=python3.12
+$PYTHON_BIN --version
+$PYTHON_BIN -m venv .venv
 source .venv/bin/activate
+python --version
 pip install --upgrade pip wheel
 pip install -r requirements.txt
-pip install gunicorn
 ```
 
-`gunicorn` tidak ada di `requirements.txt`, jadi install terpisah untuk deployment Linux.
+Jika sebelumnya Anda sudah terlanjur membuat `.venv` dengan Python yang salah, hapus dulu virtualenv lama sebelum menjalankan perintah di atas:
+
+```bash
+cd /var/www/cbt_pro
+rm -rf .venv
+```
+
+`gunicorn` sudah ada di `requirements.txt`, jadi tidak perlu install terpisah.
 
 ## 4. Build asset frontend
 
@@ -108,6 +146,11 @@ npm run build:css
 ```
 
 Jika build gagal, pastikan `nodejs` dan `npm` sudah terpasang serta file `package-lock.json` ikut ter-clone.
+
+Catatan runtime frontend:
+
+- Halaman login, dashboard, exam room, monitoring, analytics, dan editor soal masih memakai beberapa asset dari CDN publik.
+- Jika deployment berada di jaringan intranet/offline, vendor asset tersebut ke `static/` dan ubah template yang masih mengarah ke CDN.
 
 ## 5. Database MySQL
 
@@ -242,7 +285,7 @@ python -c "from django.core.management.utils import get_random_secret_key; print
 ```
 
 - Jika SSL belum dipasang, set sementara `SECURE_SSL_REDIRECT=False`, lalu aktifkan kembali setelah Certbot/Nginx HTTPS selesai.
-- Jika SMTP belum siap, Anda bisa memakai `EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend` sementara. Email akan masuk ke log aplikasi, bukan terkirim ke user.
+- Jika SMTP belum siap, Anda bisa memakai `EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend` sementara. Email tidak akan terkirim ke user; output-nya akan muncul di stdout proses Django, yang pada systemd biasanya terlihat lewat `journalctl`.
 
 ## 9. Migrasi, static files, dan user admin
 
@@ -362,7 +405,7 @@ server {
 Aktifkan site:
 
 ```bash
-sudo ln -s /etc/nginx/sites-available/cbt_pro /etc/nginx/sites-enabled/
+sudo ln -sfn /etc/nginx/sites-available/cbt_pro /etc/nginx/sites-enabled/cbt_pro
 sudo nginx -t
 sudo systemctl reload nginx
 ```
@@ -391,7 +434,8 @@ sudo systemctl restart cbt_pro-gunicorn cbt_pro-celery nginx
 Jalankan pemeriksaan berikut:
 
 ```bash
-curl -I -H "Host: cbt.example.com" http://127.0.0.1:8000
+curl -I -H "Host: cbt.example.com" -H "X-Forwarded-Proto: https" http://127.0.0.1:8000
+curl -I -H "Host: cbt.example.com" http://127.0.0.1
 curl -I https://cbt.example.com
 sudo systemctl status nginx cbt_pro-gunicorn cbt_pro-celery redis-server
 ```
@@ -423,7 +467,6 @@ cd /var/www/cbt_pro
 git pull
 source .venv/bin/activate
 pip install -r requirements.txt
-pip install gunicorn
 npm ci
 npm run build:css
 python manage.py migrate
@@ -439,6 +482,9 @@ sudo systemctl restart cbt_pro-gunicorn cbt_pro-celery
 - `CSRF verification failed`: cek `CSRF_TRUSTED_ORIGINS`, domain HTTPS, dan header `X-Forwarded-Proto` di Nginx.
 - Redirect loop HTTP/HTTPS: biasanya `SECURE_SSL_REDIRECT=True` tetapi SSL belum aktif atau header proxy belum benar.
 - `mysqlclient` gagal install: paket `python3-dev`, `pkg-config`, dan `default-libmysqlclient-dev` belum lengkap.
+- `Unable to locate package python3.12` saat `apt install`: cek `cat /etc/os-release`. Jika server Ubuntu 24.04, aktifkan `universe` lalu `apt update`. Jika server Ubuntu 22.04, tambah `ppa:deadsnakes/ppa` lalu install ulang paket Python 3.12.
+- `Could not find a version that satisfies the requirement autobahn==25.12.2` atau pesan `Requires-Python >=3.11` / `>=3.12`: virtualenv dibuat dengan Python lama. Cek `python --version` di dalam venv. Jika masih `3.10.x` atau `3.11.x`, hapus `.venv`, lalu buat ulang dengan `python3.12 -m venv .venv`.
 - CSS tidak muncul: jalankan `npm ci`, `npm run build:css`, lalu `python manage.py collectstatic --noinput`.
+- Halaman login/monitoring/exam room/analytics terlihat rusak atau tombol interaktif tidak bekerja di jaringan intranet: browser klien kemungkinan tidak bisa memuat asset CDN seperti Bootstrap JS, Axios, Chart.js, Alpine.js, Remix Icon, TinyMCE, atau Google Fonts. Vendor asset tersebut ke `static/` atau buka akses ke CDN yang dipakai.
 - Import user terasa lambat: pastikan Redis dan service `cbt_pro-celery` aktif.
 - Media/proctoring gagal disimpan: cek permission `media/` dan user systemd yang menjalankan aplikasi.
