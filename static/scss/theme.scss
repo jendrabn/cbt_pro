@@ -1,13 +1,24 @@
+/* ========================================================================== */
+/* Bootstrap color overrides */
+/* ========================================================================== */
 $primary: #1B3A6B;
 $secondary: #4A6080;
 $success: #1E6B4A;
 $danger: #B82020;
 $warning: #9A7200;
 $info: #1E6B98;
+$light: #F8FAFC;
+$dark: #101828;
 
+/* ==========================================================================
+   Brand tokens
+   ========================================================================== */
 $link-color: $primary;
 $link-hover-color: #2E5598;
 
+/* ==========================================================================
+   Dashboard palette
+   ========================================================================== */
 $dashboard-border-color: #dbe4f0;
 $dashboard-input-border-color: #ccd9ea;
 $dashboard-table-head-color: #22324a;
@@ -20,6 +31,9 @@ $dashboard-focus-shadow-color: rgba($primary, .13);
 $login-focus-border-color: #8ab4ff;
 $login-focus-shadow-color: rgba($primary, .15);
 
+/* ==========================================================================
+   Badge palette
+   ========================================================================== */
 $badge-soft-primary-bg: #eef4ff;
 $badge-soft-primary-border: #cfddff;
 $badge-soft-primary-text: #1f4fa8;
@@ -42,7 +56,9 @@ $badge-soft-light-bg: #f8fafc;
 $badge-soft-light-border: #e4e7ec;
 $badge-soft-light-text: #475467;
 
-// Color-only overrides for form controls.
+/* ==========================================================================
+   Form controls
+   ========================================================================== */
 $input-bg: #f9fbff;
 $input-color: #12243b;
 $input-border-color: #c7d5e7;

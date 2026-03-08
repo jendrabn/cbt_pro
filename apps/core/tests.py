@@ -133,6 +133,28 @@ class SystemSettingsViewTests(TestCase):
         self.assertIn("settings", payload)
         self.assertGreaterEqual(len(payload["settings"]), 1)
 
+    def test_save_security_toggles(self):
+        self.client.force_login(self.admin)
+        response = self.client.post(
+            reverse("system_settings"),
+            data={
+                "action": "save_security",
+                "password_min_length": 9,
+                "session_timeout_minutes": 90,
+                "max_login_attempts": 7,
+                "ip_whitelist": "[]",
+                "auth_enable_forgot_password": "on",
+                "auth_enable_password_reset": "on",
+                "auth_enable_teacher_registration": "",
+                "auth_enable_student_registration": "on",
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(SystemSetting.objects.get(setting_key="auth_enable_forgot_password").get_value())
+        self.assertTrue(SystemSetting.objects.get(setting_key="auth_enable_password_reset").get_value())
+        self.assertFalse(SystemSetting.objects.get(setting_key="auth_enable_teacher_registration").get_value())
+        self.assertTrue(SystemSetting.objects.get(setting_key="auth_enable_student_registration").get_value())
+
     def test_landing_redirects_to_login_when_disabled(self):
         SystemSetting.objects.update_or_create(
             setting_key="landing_page_enabled",

@@ -2,14 +2,29 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import logout, update_session_auth_hash
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.views import LoginView as DjangoLoginView
+from django.contrib.auth.views import (
+    LoginView as DjangoLoginView,
+    PasswordResetCompleteView,
+    PasswordResetConfirmView,
+    PasswordResetDoneView,
+    PasswordResetView,
+)
+from django.http import Http404
 from django.shortcuts import redirect
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.views import View
-from django.views.generic import TemplateView
+from django.views.generic import FormView, TemplateView
 
-from .forms import LoginForm, ProfileUpdateForm, AvatarUploadForm, CustomPasswordChangeForm
-from .models import UserProfile
+from apps.core.services import get_auth_feature_settings, get_branding_settings
+
+from .forms import (
+    AvatarUploadForm,
+    CustomPasswordChangeForm,
+    LoginForm,
+    ProfileUpdateForm,
+    RoleRegistrationForm,
+)
+from .models import User, UserProfile
 
 
 def get_role_redirect_url(user):
@@ -41,6 +56,41 @@ class LoginView(DjangoLoginView):
         if redirect_url:
             return redirect_url
         return get_role_redirect_url(self.request.user)
+
+
+class AuthFeatureToggleMixin:
+    feature_key = None
+
+    def dispatch(self, request, *args, **kwargs):
+        if self.feature_key:
+            features = get_auth_feature_settings()
+            if not features.get(self.feature_key, False):
+                raise Http404("Fitur autentikasi ini belum diaktifkan.")
+        return super().dispatch(request, *args, **kwargs)
+
+
+class ForgotPasswordView(AuthFeatureToggleMixin, PasswordResetView):
+    template_name = "accounts/password_reset_form.html"
+    email_template_name = "accounts/password_reset_email.html"
+    subject_template_name = "accounts/password_reset_subject.txt"
+    success_url = reverse_lazy("password_reset_done")
+    feature_key = "auth_enable_forgot_password"
+
+
+class ForgotPasswordDoneView(AuthFeatureToggleMixin, PasswordResetDoneView):
+    template_name = "accounts/password_reset_done.html"
+    feature_key = "auth_enable_password_reset"
+
+
+class ResetPasswordConfirmView(AuthFeatureToggleMixin, PasswordResetConfirmView):
+    template_name = "accounts/password_reset_confirm.html"
+    success_url = reverse_lazy("password_reset_complete")
+    feature_key = "auth_enable_password_reset"
+
+
+class ResetPasswordCompleteView(AuthFeatureToggleMixin, PasswordResetCompleteView):
+    template_name = "accounts/password_reset_complete.html"
+    feature_key = "auth_enable_password_reset"
 
 
 class LogoutView(LoginRequiredMixin, View):
@@ -111,3 +161,53 @@ class ChangePasswordView(LoginRequiredMixin, TemplateView):
             return redirect("change_password")
 
         return self.render_to_response(self.get_context_data(password_form=password_form))
+
+
+class BaseRegistrationView(AuthFeatureToggleMixin, FormView):
+    template_name = "accounts/register.html"
+    form_class = RoleRegistrationForm
+    success_url = reverse_lazy("login")
+    role = None
+    role_title = ""
+    role_description = ""
+
+    def dispatch(self, request, *args, **kwargs):
+        if self.role is None:
+            raise Http404("Role registrasi tidak valid.")
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        user = form.save(commit=False)
+        user.role = self.role
+        user.is_active = True
+        user.save()
+        form.save_m2m()
+        messages.success(
+            self.request,
+            f"Akun {self.role_title} berhasil dibuat. Silakan masuk untuk melanjutkan.",
+        )
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update(
+            {
+                "role_title": self.role_title,
+                "role_description": self.role_description,
+            }
+        )
+        return context
+
+
+class TeacherRegistrationView(BaseRegistrationView):
+    role = User.Role.TEACHER
+    role_title = "Guru"
+    role_description = "Daftarkan akun guru agar bisa mengelola ujian, bank soal, dan pengawasan."
+    feature_key = "auth_enable_teacher_registration"
+
+
+class StudentRegistrationView(BaseRegistrationView):
+    role = User.Role.STUDENT
+    role_title = "Siswa"
+    role_description = "Buat akses siswa untuk mengikuti ujian digital secara mandiri."
+    feature_key = "auth_enable_student_registration"

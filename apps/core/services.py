@@ -117,3 +117,45 @@ def get_branding_settings() -> dict[str, Any]:
 
     cache.set(BRANDING_CACHE_KEY, branding, BRANDING_CACHE_TTL_SECONDS)
     return branding
+
+
+AUTH_FEATURE_CACHE_KEY = "cbt_auth_features"
+AUTH_FEATURE_CACHE_TTL_SECONDS = 300
+
+AUTH_FEATURE_DEFAULTS = {
+    "auth_enable_forgot_password": True,
+    "auth_enable_password_reset": True,
+    "auth_enable_teacher_registration": False,
+    "auth_enable_student_registration": False,
+}
+
+
+def get_auth_feature_settings() -> dict[str, bool]:
+    cached = cache.get(AUTH_FEATURE_CACHE_KEY)
+    if isinstance(cached, dict):
+        return cached
+
+    rows = {
+        row.setting_key: row
+        for row in SystemSetting.objects.filter(setting_key__in=AUTH_FEATURE_DEFAULTS.keys()).only(
+            "setting_key",
+            "setting_value",
+            "setting_type",
+        )
+    }
+
+    features: dict[str, bool] = {}
+    for key, default in AUTH_FEATURE_DEFAULTS.items():
+        row = rows.get(key)
+        raw_value = row.get_value() if row else default
+        if isinstance(default, bool):
+            features[key] = _normalize_boolean(raw_value, default)
+        else:
+            features[key] = bool(raw_value)
+
+    cache.set(AUTH_FEATURE_CACHE_KEY, features, AUTH_FEATURE_CACHE_TTL_SECONDS)
+    return features
+
+
+def invalidate_auth_feature_cache():
+    cache.delete(AUTH_FEATURE_CACHE_KEY)

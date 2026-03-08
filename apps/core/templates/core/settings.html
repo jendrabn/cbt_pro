@@ -346,11 +346,51 @@
                                     {{ security_form.max_login_attempts }}
                                     {% for error in security_form.max_login_attempts.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
                                 </div>
-                                <div class="col-md-12">
-                                    <label class="form-label">{{ security_form.ip_whitelist.label }}</label>
-                                    {{ security_form.ip_whitelist }}
-                                    {% for error in security_form.ip_whitelist.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                            <div class="col-md-12">
+                                <label class="form-label">{{ security_form.ip_whitelist.label }}</label>
+                                {{ security_form.ip_whitelist }}
+                                {% for error in security_form.ip_whitelist.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                            </div>
+                            <div class="row g-3 mt-3">
+                                <div class="col-md-6 d-flex align-items-end">
+                                    <div class="form-check mb-0">
+                                        {{ security_form.auth_enable_forgot_password }}
+                                        <label class="form-check-label" for="{{ security_form.auth_enable_forgot_password.id_for_label }}">
+                                            {{ security_form.auth_enable_forgot_password.label }}
+                                        </label>
+                                        {% for error in security_form.auth_enable_forgot_password.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                                    </div>
                                 </div>
+                                <div class="col-md-6 d-flex align-items-end">
+                                    <div class="form-check mb-0">
+                                        {{ security_form.auth_enable_password_reset }}
+                                        <label class="form-check-label" for="{{ security_form.auth_enable_password_reset.id_for_label }}">
+                                            {{ security_form.auth_enable_password_reset.label }}
+                                        </label>
+                                        {% for error in security_form.auth_enable_password_reset.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row g-3 mt-3">
+                                <div class="col-md-6 d-flex align-items-end">
+                                    <div class="form-check mb-0">
+                                        {{ security_form.auth_enable_teacher_registration }}
+                                        <label class="form-check-label" for="{{ security_form.auth_enable_teacher_registration.id_for_label }}">
+                                            {{ security_form.auth_enable_teacher_registration.label }}
+                                        </label>
+                                        {% for error in security_form.auth_enable_teacher_registration.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                                    </div>
+                                </div>
+                                <div class="col-md-6 d-flex align-items-end">
+                                    <div class="form-check mb-0">
+                                        {{ security_form.auth_enable_student_registration }}
+                                        <label class="form-check-label" for="{{ security_form.auth_enable_student_registration.id_for_label }}">
+                                            {{ security_form.auth_enable_student_registration.label }}
+                                        </label>
+                                        {% for error in security_form.auth_enable_student_registration.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                                    </div>
+                                </div>
+                            </div>
                             </div>
                             <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
                                 <button type="submit" class="btn btn-primary" title="Simpan pengaturan keamanan">

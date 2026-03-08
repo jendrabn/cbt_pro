@@ -153,6 +153,22 @@ class SecuritySettingsForm(SettingsForm):
         required=False,
         widget=forms.Textarea(attrs={"rows": 4, "placeholder": '["127.0.0.1", "192.168.1.10"]'}),
     )
+    auth_enable_forgot_password = forms.BooleanField(
+        label="Aktifkan fitur lupa password",
+        required=False,
+    )
+    auth_enable_password_reset = forms.BooleanField(
+        label="Aktifkan konfirmasi reset password",
+        required=False,
+    )
+    auth_enable_teacher_registration = forms.BooleanField(
+        label="Aktifkan pendaftaran Guru",
+        required=False,
+    )
+    auth_enable_student_registration = forms.BooleanField(
+        label="Aktifkan pendaftaran Siswa",
+        required=False,
+    )
 
     def clean_ip_whitelist(self):
         value = self.cleaned_data.get("ip_whitelist", "").strip()

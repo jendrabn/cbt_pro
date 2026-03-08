@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth import get_user_model
-from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
+from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm, UserCreationForm
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
@@ -161,7 +161,77 @@ class CustomPasswordChangeForm(PasswordChangeForm):
                 "autocomplete": "new-password",
             }
         ),
+        )
+
+
+class RoleRegistrationForm(UserCreationForm):
+    username = forms.CharField(
+        label="Username",
+        max_length=150,
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Username unik (tanpa spasi)",
+                "autocomplete": "username",
+            }
+        ),
     )
+    email = forms.EmailField(
+        label="Email",
+        widget=forms.EmailInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Email aktif",
+                "autocomplete": "email",
+            }
+        ),
+    )
+    first_name = forms.CharField(
+        label="Nama Depan",
+        max_length=150,
+        widget=forms.TextInput(
+            attrs={"class": "form-control", "placeholder": "Nama depan"},
+        ),
+    )
+    last_name = forms.CharField(
+        label="Nama Belakang",
+        max_length=150,
+        widget=forms.TextInput(
+            attrs={"class": "form-control", "placeholder": "Nama belakang"},
+        ),
+    )
+    password1 = forms.CharField(
+        label="Password",
+        strip=False,
+        widget=forms.PasswordInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Buat password",
+                "autocomplete": "new-password",
+            }
+        ),
+    )
+    password2 = forms.CharField(
+        label="Konfirmasi Password",
+        strip=False,
+        widget=forms.PasswordInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Ulangi password",
+                "autocomplete": "new-password",
+            }
+        ),
+    )
+
+    class Meta:
+        model = User
+        fields = ("username", "email", "first_name", "last_name")
+
+    def clean_email(self):
+        email = (self.cleaned_data.get("email") or "").strip()
+        if User.objects.filter(email__iexact=email).exists():
+            raise ValidationError("Email sudah terdaftar.")
+        return email
     new_password2 = forms.CharField(
         label="Konfirmasi Password Baru",
         strip=False,

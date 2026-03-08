@@ -24,7 +24,7 @@ from apps.core.forms import (
     SecuritySettingsForm,
 )
 from apps.core.mixins import RoleRequiredMixin
-from apps.core.services import invalidate_branding_cache
+from apps.core.services import invalidate_auth_feature_cache, invalidate_branding_cache
 from apps.notifications.models import SystemSetting
 
 
@@ -141,6 +141,34 @@ SETTING_META = {
     "session_timeout_minutes": ("number", "security", "Durasi timeout sesi", False, 120),
     "max_login_attempts": ("number", "security", "Maks percobaan login", False, 5),
     "ip_whitelist": ("json", "security", "Daftar IP yang diizinkan", False, []),
+    "auth_enable_forgot_password": (
+        "boolean",
+        "security",
+        "Aktifkan fitur lupa password",
+        False,
+        True,
+    ),
+    "auth_enable_password_reset": (
+        "boolean",
+        "security",
+        "Aktifkan reset password lewat email",
+        False,
+        True,
+    ),
+    "auth_enable_teacher_registration": (
+        "boolean",
+        "security",
+        "Aktifkan registrasi Guru",
+        False,
+        False,
+    ),
+    "auth_enable_student_registration": (
+        "boolean",
+        "security",
+        "Aktifkan registrasi Siswa",
+        False,
+        False,
+    ),
     "default_exam_duration": ("number", "exam_defaults", "Durasi ujian default", False, 120),
     "default_passing_score": ("number", "exam_defaults", "Nilai lulus default", False, 60),
     "require_fullscreen_default": ("boolean", "exam_defaults", "Wajib fullscreen", False, True),
@@ -324,6 +352,11 @@ class SystemSettingsView(RoleRequiredMixin, TemplateView):
         self._upsert_setting("session_timeout_minutes", cleaned["session_timeout_minutes"])
         self._upsert_setting("max_login_attempts", cleaned["max_login_attempts"])
         self._upsert_setting("ip_whitelist", json.loads(cleaned["ip_whitelist"]))
+        self._upsert_setting("auth_enable_forgot_password", cleaned["auth_enable_forgot_password"])
+        self._upsert_setting("auth_enable_password_reset", cleaned["auth_enable_password_reset"])
+        self._upsert_setting("auth_enable_teacher_registration", cleaned["auth_enable_teacher_registration"])
+        self._upsert_setting("auth_enable_student_registration", cleaned["auth_enable_student_registration"])
+        invalidate_auth_feature_cache()
 
     def _save_exam_defaults(self, form):
         cleaned = form.cleaned_data
@@ -399,6 +432,7 @@ class SystemSettingsView(RoleRequiredMixin, TemplateView):
             )
             restored += 1
         invalidate_branding_cache()
+        invalidate_auth_feature_cache()
         return restored
 
     def _backup_history(self):
@@ -453,6 +487,10 @@ class SystemSettingsView(RoleRequiredMixin, TemplateView):
                 "session_timeout_minutes": self._setting_value("session_timeout_minutes", setting_map),
                 "max_login_attempts": self._setting_value("max_login_attempts", setting_map),
                 "ip_whitelist": json.dumps(self._setting_value("ip_whitelist", setting_map)),
+                "auth_enable_forgot_password": self._setting_value("auth_enable_forgot_password", setting_map),
+                "auth_enable_password_reset": self._setting_value("auth_enable_password_reset", setting_map),
+                "auth_enable_teacher_registration": self._setting_value("auth_enable_teacher_registration", setting_map),
+                "auth_enable_student_registration": self._setting_value("auth_enable_student_registration", setting_map),
             },
             "exam_defaults": {
                 "default_exam_duration": self._setting_value("default_exam_duration", setting_map),
