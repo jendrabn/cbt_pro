@@ -1,259 +1,568 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="id" data-bs-theme="light">
+<html lang="id" prefix="og: https://ogp.me/ns#">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ branding.institution_name|default:"CBT Platform" }} - Platform Ujian Online</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@500;600;700&display=swap" rel="stylesheet">
-    <link href="{% static 'css/main.css' %}" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.0.0/fonts/remixicon.css" rel="stylesheet">
-    <style>
-        :root { --cbt-primary: {{ branding.primary_color|default:'#0d6efd' }}; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>{{ branding.institution_name|default:"CBT Pro" }} — Platform Ujian CBT Online untuk Sekolah &amp; Lembaga Pendidikan</title>
+<meta name="description" content="{{ branding.institution_name|default:"CBT Pro" }} adalah platform ujian digital yang cepat, aman, dan rapi. Harga Rp499.000 sudah termasuk pemasangan dan konfigurasi awal.">
+<meta name="keywords" content="CBT online, platform ujian sekolah, computer based test, ujian digital, software CBT, aplikasi ujian online, CBT Pro">
+<meta name="author" content="{{ branding.institution_name|default:"CBT Pro" }}">
+<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+<meta name="theme-color" content="#1B3A6B">
+<link rel="canonical" href="{{ request.build_absolute_uri }}">
+<meta property="og:type" content="website">
+<meta property="og:url" content="{{ request.build_absolute_uri }}">
+<meta property="og:title" content="{{ branding.institution_name|default:"CBT Pro" }} — Platform Ujian CBT Online untuk Sekolah">
+<meta property="og:description" content="Ujian digital yang cepat, aman, dan rapi. Dari pembuatan soal hingga rekap nilai dalam satu platform. Mulai Rp499.000 sudah termasuk pemasangan.">
+<meta property="og:image" content="https://cbtpro.id/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="id_ID">
+<meta property="og:site_name" content="{{ branding.institution_name|default:"CBT Pro" }}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ branding.institution_name|default:"CBT Pro" }} — Platform Ujian CBT Online untuk Sekolah">
+<meta name="twitter:description" content="Ujian digital yang cepat, aman, dan rapi. Dari pembuatan soal hingga rekap nilai dalam satu platform.">
+<meta name="twitter:image" content="https://cbtpro.id/og-image.jpg">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@graph":[
+  {"@type":"SoftwareApplication","name":"{{ branding.institution_name|default:"CBT Pro" }}","applicationCategory":"EducationalApplication","operatingSystem":"Web","url":"{{ request.build_absolute_uri }}","offers":{"@type":"Offer","price":"499000","priceCurrency":"IDR","availability":"https://schema.org/InStock"}},
+  {"@type":"Organization","name":"{{ branding.institution_name|default:"CBT Pro" }}","url":"{{ request.build_absolute_uri }}"},
+  {"@type":"FAQPage","mainEntity":[
+    {"@type":"Question","name":"Apa yang termasuk dalam harga Rp499.000?","acceptedAnswer":{"@type":"Answer","text":"Lisensi software dan jasa pemasangan. Biaya VPS dan domain ditanggung sekolah."}},
+    {"@type":"Question","name":"Apakah CBT Pro bisa diakses dari HP?","acceptedAnswer":{"@type":"Answer","text":"Ya, sepenuhnya responsif — smartphone, tablet, maupun laptop, tanpa instalasi."}}
+  ]}
+]}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="{% static 'css/main.css' %}" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@4.0.0/fonts/remixicon.css" rel="stylesheet">
+
+
 </head>
-<body>
-    <div class="bg-orb bg-orb-a"></div>
-    <div class="bg-orb bg-orb-b"></div>
 
-    <nav id="landingNav" class="navbar navbar-expand-lg fixed-top landing-nav">
-        <div class="container">
-            <a class="navbar-brand d-flex align-items-center gap-2 fw-bold" href="#home">
-                <img
-                    src="{{ branding.institution_logo_url|default:'/static/images/logo-dark.png' }}"
-                    alt="{{ branding.institution_name|default:'Logo Institusi' }}"
-                    class="landing-brand-logo"
-                    onerror="this.onerror=null;this.src='{% static 'images/logo-dark.png' %}';"
-                >
-            </a>
-            <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#landingMenu" aria-controls="landingMenu" aria-expanded="false" aria-label="Toggle navigation">
-                <i class="ri-menu-line fs-4"></i>
-            </button>
-            <div class="collapse navbar-collapse landing-nav-collapse" id="landingMenu">
-                <ul class="navbar-nav mb-3 mb-lg-0">
-                    <li class="nav-item">
-                        <a class="nav-link landing-nav-link active" href="#home">Beranda</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link landing-nav-link" href="#features">Fitur</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link landing-nav-link" href="#about">Tentang</a>
-                    </li>
-                </ul>
-                <a href="{{ dashboard_url }}" class="btn btn-primary rounded-pill px-4 mt-2 mt-lg-0">
-                    <i class="{{ dashboard_icon }} me-1"></i>{{ dashboard_label }}
-                </a>
-            </div>
+<body class="bg-white">
+
+<!-- ════════ NAVBAR ════════ -->
+<header>
+  <nav id="navbar" aria-label="Menu utama">
+    <div class="container py-3">
+      <div class="d-flex align-items-center justify-content-between">
+        <a href="/" class="brand" aria-label="{{ branding.institution_name|default:"CBT Pro" }}">
+          <img src="{% static 'images/logo-dark.png' %}" alt="{{ branding.institution_name|default:"CBT Pro" }}" style="height: 32px;">
+        </a>
+        <div class="d-none d-lg-flex align-items-center gap-1">
+          <a href="#fitur"     class="nav-lnk">Fitur</a>
+          <a href="#tentang"   class="nav-lnk">Tentang</a>
+          <a href="#teknologi" class="nav-lnk">Teknologi</a>
+          <a href="#harga"     class="nav-lnk">Harga</a>
         </div>
-    </nav>
+        <a href="{{ dashboard_url }}" class="btn-blue" aria-label="{{ dashboard_label }}">
+          <i class="{{ dashboard_icon }} me-1" aria-hidden="true"></i>
+          {{ dashboard_label }}
+        </a>
+      </div>
+    </div>
+  </nav>
+</header>
 
-    <main>
-        <section id="home" class="hero-section">
-            <div class="container">
-                <div class="row align-items-center gy-5">
-                    <div class="col-lg-7 pe-lg-4 pe-xl-5" data-reveal>
-                        <h1 class="hero-title mb-3 text-primary fw-bolder">
-                            <span class="d-block hero-title-line">Platform Ujian</span>
-                            <span class="d-block hero-title-line">Berbasis Komputer</span>
-                            <span class="d-block hero-title-line">yang Modern</span>
-                        </h1>
-                        <p class="hero-lead mb-4">
-                            CBT Pro membantu sekolah dan institusi menyelenggarakan ujian digital yang cepat, aman,
-                            dan rapi. Guru fokus pada kualitas soal, siswa fokus pada jawaban, sistem mengurus sisanya.
-                        </p>
-                        <div class="d-flex flex-wrap gap-2 gap-md-3">
-                            <a href="{{ dashboard_url }}" class="btn btn-primary btn-lg rounded-pill px-4">
-                                <i class="ri-login-box-line me-1"></i>Mulai Sekarang
-                            </a>
-                            <a href="#features" class="btn btn-outline-dark btn-lg rounded-pill px-4">
-                                Lihat Fitur
-                            </a>
-                        </div>
-                        <div class="d-flex flex-wrap gap-3 mt-4">
-                            <div class="chip">
-                                <i class="ri-checkbox-circle-line text-success"></i>
-                                <span>Server stabil dan andal</span>
-                            </div>
-                            <div class="chip">
-                                <i class="ri-smartphone-line text-primary"></i>
-                                <span>Responsif di semua perangkat</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-5" data-reveal>
-                        <div class="hero-panel shadow-lg">
-                            <div class="hero-panel-head">
-                                <span class="hero-dot"></span>
-                                <span class="hero-dot"></span>
-                                <span class="hero-dot"></span>
-                            </div>
-                            <div class="hero-panel-body">
-                                <h2 class="h6 text-uppercase text-muted mb-3">Tampilan Ujian Berlangsung</h2>
-                                <div class="d-flex align-items-center justify-content-between card-mini mb-3">
-                                    <div>
-                                        <p class="mb-1 fw-semibold">Matematika XII - Sesi A</p>
-                                        <small class="text-muted">45 dari 50 peserta aktif</small>
-                                    </div>
-                                    <span class="cbt-status-badge is-success">Sedang Berjalan</span>
-                                </div>
-                                <div class="progress mb-3" role="progressbar" aria-label="Exam progress">
-                                    <div class="progress-bar bg-primary" style="width: 78%;">78%</div>
-                                </div>
-                                <div class="row g-2">
-                                    <div class="col-6">
-                                        <div class="stat-mini">
-                                            <p class="mb-1">Auto Save</p>
-                                            <strong>Aktif</strong>
-                                        </div>
-                                    </div>
-                                    <div class="col-6">
-                                        <div class="stat-mini">
-                                            <p class="mb-1">Peringatan</p>
-                                            <strong>2 peringatan</strong>
-                                        </div>
-                                    </div>
-                                    <div class="col-12">
-                                        <div class="stat-mini">
-                                            <p class="mb-1">Sinkronisasi Nilai</p>
-                                            <strong>Dashboard real-time siap digunakan</strong>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
+<main>
 
-        <section id="features" class="section-space">
-            <div class="container">
-                <div class="row justify-content-center mb-4 mb-md-5" data-reveal>
-                    <div class="col-lg-8 text-center">
-                        <h2 class="section-title">Fitur yang Dibutuhkan Tim Akademik</h2>
-                        <p class="section-subtitle mb-0">
-                            Dirancang untuk sekolah yang ingin proses ujian lebih profesional, dengan antarmuka bersih dan alur kerja yang ringkas.
-                        </p>
-                    </div>
-                </div>
-                <div class="row g-3 g-md-4">
-                    {% for feature in features %}
-                    <div class="col-sm-6 col-lg-4 d-flex" data-reveal>
-                        <article class="card feature-card border-0 shadow-sm w-100">
-                            <div class="card-body p-4">
-                                <span class="feature-icon mb-3">
-                                    <i class="{{ feature.icon }}"></i>
-                                </span>
-                                <h3 class="h5 mb-2">{{ feature.title }}</h3>
-                                <p class="text-muted mb-0">{{ feature.description }}</p>
-                            </div>
-                        </article>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-        </section>
+<!-- ════════ HERO ════════ -->
+<section class="hero py-5 py-lg-0" aria-labelledby="hero-h">
+  <div class="container py-lg-5">
+    <div class="row align-items-center g-4 g-xl-5 py-lg-4">
 
-        <section class="section-space section-stats text-white">
-            <div class="container">
-                <div class="stats-shell" data-reveal>
-                    <div class="stats-head text-center mx-auto">
-                        <h2 class="stats-title mb-2">Teruji untuk Skala Besar</h2>
-                        <p class="stats-subtitle mb-0">
-                            Stabil saat puncak pelaksanaan ujian, tetap nyaman digunakan tim akademik.
-                        </p>
-                    </div>
-                    <div class="row g-0 stats-grid">
-                        {% for item in stats %}
-                        <div class="col-6 col-lg" data-reveal>
-                            <div class="stats-item text-center">
-                                <p class="stats-value mb-1">
-                                    <span data-counter data-target="{{ item.value }}" data-suffix="{{ item.suffix }}">0</span>
-                                </p>
-                                <p class="stats-label mb-0">{{ item.label }}</p>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section id="about" class="section-space about-lite">
-            <div class="container">
-                <div class="row justify-content-center mb-4 mb-md-5" data-reveal>
-                    <div class="col-lg-9 text-center">
-                        <h2 class="section-title">Tentang CBT Pro</h2>
-                        <p class="section-subtitle mb-0">
-                            Kami percaya kualitas evaluasi pembelajaran meningkat saat teknologi bekerja di belakang layar, bukan menambah beban tim pengajar.
-                        </p>
-                    </div>
-                </div>
-                <div class="row g-4 g-lg-5 about-lite-grid">
-                    <div class="col-md-6 col-lg-4" data-reveal>
-                        <article class="about-lite-item">
-                            <i class="ri-layout-grid-line about-lite-icon"></i>
-                            <div>
-                                <h3 class="h4">Antarmuka Bersih</h3>
-                                <p>Tampilan dibuat fokus pada tugas utama, jadi pengguna baru pun bisa langsung produktif.</p>
-                            </div>
-                        </article>
-                    </div>
-                    <div class="col-md-6 col-lg-4" data-reveal>
-                        <article class="about-lite-item">
-                            <i class="ri-time-line about-lite-icon"></i>
-                            <div>
-                                <h3 class="h4">Operasional Ringkas</h3>
-                                <p>Mulai dari setup ujian sampai rekap hasil dipersingkat agar tim punya lebih banyak waktu untuk evaluasi.</p>
-                            </div>
-                        </article>
-                    </div>
-                    <div class="col-md-6 col-lg-4" data-reveal>
-                        <article class="about-lite-item">
-                            <i class="ri-lock-2-line about-lite-icon"></i>
-                            <div>
-                                <h3 class="h4">Keamanan Terjaga</h3>
-                                <p>Setiap sesi dirancang dengan kontrol akses dan jejak aktivitas agar proses ujian lebih terpercaya.</p>
-                            </div>
-                        </article>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section class="cta-shell">
-            <div class="container" data-reveal>
-                <div class="cta-panel">
-                    <div>
-                        <h2>Siap Memulai?</h2>
-                        <p>Masuk ke CBT Pro dan kelola ujian digital dari satu dashboard terpadu.</p>
-                    </div>
-                    <a href="{{ dashboard_url }}" class="btn btn-light btn-lg rounded-3 px-4 cta-btn">
-                        <i class="ri-login-box-line me-1"></i>Masuk Sekarang
-                    </a>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <footer class="landing-footer">
-        <div class="container d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-4">
-            <p class="mb-0 text-body-secondary small">
-                &copy; {{ current_year }} CBT Pro. Hak cipta dilindungi.
-            </p>
-            <div class="d-flex align-items-center gap-2">
-                <a href="#" class="btn btn-ghost footer-icon-btn" aria-label="Instagram"><i class="ri-instagram-line fs-4"></i></a>
-                <a href="#" class="btn btn-ghost footer-icon-btn" aria-label="Facebook"><i class="ri-facebook-line fs-4"></i></a>
-                <a href="#" class="btn btn-ghost footer-icon-btn" aria-label="YouTube"><i class="ri-youtube-line fs-4"></i></a>
-                <a href="#" class="btn btn-ghost footer-icon-btn" aria-label="WhatsApp"><i class="ri-whatsapp-line fs-4"></i></a>
-            </div>
+      <div class="col-lg-6">
+        <h1 class="hero-title mb-4" id="hero-h">
+          Ujian Digital<br>Tanpa Ribet,<br>
+          <span class="accent">Hasil Lebih Akurat</span>
+        </h1>
+        <p class="mb-4 lh-lg" style="font-size:1rem;color:var(--c-ink-2);max-width:460px">
+          Dari pembuatan soal hingga rekap nilai — semua tersedia dalam satu platform. {{ branding.institution_name|default:"CBT Pro" }} menjaga guru tetap fokus mengajar, bukan mengurus administrasi ujian.
+        </p>
+        <div class="d-flex flex-wrap gap-2">
+          <a href="{{ whatsapp_url }}?text=Halo%2C%20saya%20tertarik%20dengan%20CBT%20Pro.%20Boleh%20minta%20info%3F"
+             target="_blank" rel="noopener noreferrer"
+             class="btn-green rounded-3 px-4 py-3" style="font-size:.9rem">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.553 4.116 1.524 5.849L.057 23.7a.75.75 0 0 0 .938.938l5.86-1.488A11.95 11.95 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.907 0-3.695-.502-5.24-1.38l-.372-.212-3.849.977.998-3.829-.232-.383A9.952 9.952 0 0 1 2 12C2 6.486 6.486 2 12 2s10 4.486 10 10-4.486 10-10 10z"/></svg>
+            Mulai Sekarang
+          </a>
+          <a href="#fitur" class="btn-ghost rounded-3 px-4 py-3" style="font-size:.9rem">
+            Lihat Fitur
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </a>
         </div>
-    </footer>
+        <ul class="list-unstyled d-flex flex-wrap gap-3 mt-4 mb-0">
+          <li class="d-flex align-items-center gap-2 small fw-medium" style="color:var(--c-ink-3)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--c-blue)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            Tanpa instalasi, langsung pakai
+          </li>
+          <li class="d-flex align-items-center gap-2 small fw-medium" style="color:var(--c-ink-3)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--c-blue)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+            Bisa diakses dari HP maupun laptop
+          </li>
+        </ul>
+      </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="{% static 'dashboard/js/dashboard.js' %}"></script>
+      <div class="col-lg-5 offset-lg-1">
+        <div class="live-card bg-white border rounded-4 p-4 shadow-lg"
+             role="img" aria-label="Tampilan dashboard ujian berlangsung">
+          <div class="d-flex gap-1 mb-3" aria-hidden="true">
+            <span class="wd" style="background:#FF5F57"></span>
+            <span class="wd" style="background:#FEBC2E"></span>
+            <span class="wd" style="background:#28C840"></span>
+          </div>
+          <div class="text-uppercase fw-semibold mb-1" style="font-size:.6875rem;letter-spacing:.08em;color:var(--c-ink-4)">Tampilan Ujian Berlangsung</div>
+          <div class="d-flex justify-content-between align-items-center flex-wrap gap-1 mb-1">
+            <strong style="font-size:.9375rem;color:var(--c-ink)">Matematika XII – Sesi A</strong>
+            <span class="badge-live">Sedang Berjalan</span>
+          </div>
+          <p class="mb-3 small" style="color:var(--c-ink-3)">45 dari 50 peserta aktif</p>
+          <div class="position-relative mb-4">
+            <div class="bar-track">
+              <div class="bar-fill" style="width:78%;background:var(--c-blue)"></div>
+            </div>
+            <span class="position-absolute end-0 fw-bold" style="top:-18px;font-size:.6875rem;color:var(--c-blue)">78%</span>
+          </div>
+          <div class="row g-2 mb-3">
+            <div class="col-6">
+              <div class="p-2 rounded-3 border" style="background:var(--c-bg)">
+                <div class="small" style="color:var(--c-ink-4)">Auto Save</div>
+                <div class="fw-bold" style="font-size:.875rem;color:var(--c-green-2)">Aktif</div>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="p-2 rounded-3 border" style="background:var(--c-bg)">
+                <div class="small" style="color:var(--c-ink-4)">Peringatan</div>
+                <div class="fw-bold" style="font-size:.875rem;color:var(--c-ink)">2 peserta</div>
+              </div>
+            </div>
+          </div>
+          <div class="d-flex align-items-center gap-2 px-3 py-2 fw-semibold"
+               style="background:var(--c-blue-lt);border-left:3px solid var(--c-blue);border-radius:0 8px 8px 0;font-size:.78rem;color:var(--c-blue)">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            Dashboard real-time siap digunakan
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ════════ FITUR ════════ -->
+<section id="fitur" class="py-5" style="background:var(--c-bg)" aria-labelledby="fitur-h">
+  <div class="container py-4">
+
+    <div class="text-center mb-5 sr">
+      <span class="sec-chip mb-3 d-inline-block">Fitur</span>
+      <h2 class="sec-title mb-3" id="fitur-h">Satu Platform,<br>Semua Kebutuhan Ujian</h2>
+      <p class="mx-auto mb-0" style="font-size:.9375rem;line-height:1.7;color:var(--c-ink-2);max-width:480px">
+        Fitur yang dirancang sesuai alur kerja nyata di sekolah — tidak berlebihan, tidak kurang.
+      </p>
+    </div>
+
+    <div class="row g-3 g-md-4">
+      {% for feature in features %}
+        <div class="col-sm-6 col-lg-4 sr {{ feature.delay_class }}">
+          <article class="feat-card">
+            <div class="feat-ic mb-3" aria-hidden="true">
+              <i class="{{ feature.icon }}"></i>
+            </div>
+            <h5 class="fw-bold mb-2" style="font-size:.9375rem">{{ feature.title }}</h5>
+            <p class="mb-0 small lh-lg" style="color:var(--c-ink-2)">{{ feature.description }}</p>
+          </article>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ════════ STATS ════════ -->
+<section class="py-5" style="background:var(--c-ink)" aria-labelledby="stats-h">
+  <div class="container py-4">
+    <div class="text-center mb-5 sr">
+      <h2 class="sec-title text-white mb-3" id="stats-h">Sudah Digunakan,<br>Bukan Sekadar Klaim</h2>
+      <p class="mx-auto mb-0" style="font-size:.9375rem;color:var(--c-ink-4);max-width:400px">Angka di bawah ini berasal dari penggunaan nyata di lapangan.</p>
+    </div>
+    <div class="row g-0 stats-grid sr">
+      {% for stat in stats %}
+        {% cycle 'd1' 'd2' 'd3' 'd4' as stats_delay %}
+        <div class="col-6 col-lg sr {{ stats_delay }}">
+          <div class="stats-item text-center">
+            <p class="stat-n mb-1"><span class="cnt" data-to="{{ stat.value }}">0</span><span class="suf">{{ stat.suffix }}</span></p>
+            <p class="stats-label mb-0">{{ stat.label }}</p>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ════════ TENTANG ════════ -->
+<section id="tentang" class="bg-white py-5" aria-labelledby="tentang-h">
+  <div class="container py-4">
+
+    <div class="text-center mb-5 sr">
+      <span class="sec-chip mb-3 d-inline-block">Tentang</span>
+      <h2 class="sec-title mb-3" id="tentang-h">Dibuat untuk Kemudahan<br>Tim Pengajar</h2>
+      <p class="mx-auto mb-0" style="font-size:.9375rem;line-height:1.7;color:var(--c-ink-2);max-width:480px">
+        CBT Pro dirancang agar siapa pun di sekolah bisa langsung menggunakannya — tanpa pelatihan panjang.
+      </p>
+    </div>
+
+    <div class="row g-3 justify-content-center">
+
+      <div class="col-md-6 col-lg-4 sr d1">
+        <div class="d-flex gap-3 align-items-start h-100 p-4 rounded-3 border" style="background:var(--c-bg)">
+          <div class="about-ic" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+          </div>
+          <div>
+            <h6 class="fw-bold mb-1" style="font-size:.9rem">Antarmuka yang Tidak Membingungkan</h6>
+            <p class="mb-0 small lh-lg" style="color:var(--c-ink-2)">Setiap halaman dirancang agar penggunanya tahu apa yang harus dilakukan selanjutnya — tanpa perlu membaca panduan.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-4 sr d2">
+        <div class="d-flex gap-3 align-items-start h-100 p-4 rounded-3 border" style="background:var(--c-bg)">
+          <div class="about-ic" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <div>
+            <h6 class="fw-bold mb-1" style="font-size:.9rem">Setup Ujian dalam Hitungan Menit</h6>
+            <p class="mb-0 small lh-lg" style="color:var(--c-ink-2)">Buat ujian, atur peserta, dan kirim akses — semua bisa selesai sebelum jam pelajaran dimulai.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-4 sr d3">
+        <div class="d-flex gap-3 align-items-start h-100 p-4 rounded-3 border" style="background:var(--c-bg)">
+          <div class="about-ic" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          <div>
+            <h6 class="fw-bold mb-1" style="font-size:.9rem">Aman dari Awal sampai Akhir</h6>
+            <p class="mb-0 small lh-lg" style="color:var(--c-ink-2)">Setiap akses tercatat, setiap sesi terlindungi. Hasil ujian tidak bisa direkayasa.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ════════ TEKNOLOGI ════════ -->
+<section id="teknologi" class="py-5 border-top" style="background:var(--c-bg)" aria-labelledby="tech-h">
+  <div class="container py-4">
+
+    <div class="text-center mb-4 sr">
+      <span class="sec-chip mb-3 d-inline-block">Teknologi</span>
+      <h2 class="sec-title mb-3" id="tech-h">Dibangun di Atas Teknologi Modern</h2>
+      <p class="mx-auto mb-0" style="font-size:.9375rem;line-height:1.7;color:var(--c-ink-2);max-width:480px">
+        Django 6 dan Python 3.13 — dilengkapi WebSocket real-time, task queue asinkron, dan monitoring produksi.
+      </p>
+    </div>
+
+    <div class="border rounded-4 overflow-hidden shadow-sm sr d1">
+
+      <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 p-4 p-md-5" style="background:var(--c-blue)">
+        <div>
+          <h3 class="fw-bold text-white mb-1" style="font-size:clamp(1.1rem,2.5vw,1.4rem);letter-spacing:-.5px">Django 6.0 + Python 3.13</h3>
+          <p class="mb-0" style="font-size:.875rem;color:rgba(255,255,255,.7)">Stack yang sama dengan Instagram dan Pinterest untuk melayani jutaan pengguna.</p>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+          <span class="tech-badge"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>Django 6.0.3</span>
+          <span class="tech-badge"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>ASGI + Daphne</span>
+          <span class="tech-badge"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/></svg>Celery + Redis</span>
+          <span class="tech-badge"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>PostgreSQL</span>
+        </div>
+      </div>
+
+      <div class="p-4 p-md-5 bg-white">
+        <div class="row g-3">
+
+          <div class="col-md-4">
+            <div class="p-3 h-100 rounded-3 border" style="background:var(--c-bg)">
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="fw-bold" style="font-size:.8125rem">Python + Django 6</span>
+                <span class="badge rounded-pill fw-bold" style="font-size:.7rem;background:var(--c-green-lt);color:var(--c-green)">Pilihan Kami</span>
+              </div>
+              <div class="bar-track mb-2"><div class="bar-fill" style="width:88%;background:var(--c-blue)"></div></div>
+              <p class="mb-0 small lh-lg" style="color:var(--c-ink-3)">ASGI + Daphne menangani ribuan koneksi WebSocket bersamaan. Python 3.13 menghadirkan peningkatan kecepatan eksekusi. Celery + Redis mengelola proses berat secara asinkron.</p>
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <div class="p-3 h-100 rounded-3 border" style="background:var(--c-bg)">
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="fw-bold" style="font-size:.8125rem">Node.js (Express/Fastify)</span>
+                <span class="badge rounded-pill fw-bold" style="font-size:.7rem;background:#FEF3C7;color:#B45309">I/O-bound</span>
+              </div>
+              <div class="bar-track mb-2"><div class="bar-fill" style="width:93%;background:#84CC16"></div></div>
+              <p class="mb-0 small lh-lg" style="color:var(--c-ink-3)">RPS sangat tinggi untuk I/O ringan. Namun untuk aplikasi ujian yang butuh ORM relasional dan logika bisnis kompleks, ekosistem Node kurang terstruktur dibanding Django.</p>
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <div class="p-3 h-100 rounded-3 border" style="background:var(--c-bg)">
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="fw-bold" style="font-size:.8125rem">PHP (Laravel / CI)</span>
+                <span class="badge rounded-pill fw-bold" style="font-size:.7rem;background:#FEF3C7;color:#B45309">Umum Dipakai</span>
+              </div>
+              <div class="bar-track mb-2"><div class="bar-fill" style="width:45%;background:#D1D5DB"></div></div>
+              <p class="mb-0 small lh-lg" style="color:var(--c-ink-3)">Mayoritas CBT Indonesia berbasis PHP. Model PHP-FPM membuat setiap request spawn proses baru — throughput jauh di bawah ASGI Python saat ujian serentak ratusan siswa.</p>
+            </div>
+          </div>
+
+        </div>
+        <p class="mt-3 mb-0" style="font-size:.72rem;color:var(--c-ink-4)">* Perbandingan bersifat indikatif. Hasil aktual bergantung pada infrastruktur dan konfigurasi server.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ════════ HARGA ════════ -->
+<section id="harga" class="bg-white border-top py-5" aria-labelledby="harga-h">
+  <div class="container py-4">
+
+    <div class="text-center mb-5 sr">
+      <span class="sec-chip mb-3 d-inline-block">Harga</span>
+      <h2 class="sec-title mb-3" id="harga-h">Harga Transparan,<br>Tanpa Biaya Tersembunyi</h2>
+      <p class="mx-auto mb-0" style="font-size:.9375rem;line-height:1.7;color:var(--c-ink-2);max-width:420px">
+        Satu paket lengkap, sudah termasuk pemasangan. Tidak ada biaya langganan bulanan.
+      </p>
+    </div>
+
+    <div class="d-flex price-card-wrap border rounded-4 overflow-hidden shadow sr">
+
+      <div class="price-left">
+        <span class="d-block text-decoration-line-through mb-1" style="font-size:.875rem;color:rgba(255,255,255,.4)">Rp 999.999</span>
+        <div class="text-white lh-1 mb-2" style="font-size:2.75rem;font-weight:900;letter-spacing:-2px">
+          <sup style="font-size:.9rem;font-weight:700;vertical-align:super">Rp</sup>499.000
+        </div>
+        <p class="mb-0" style="font-size:.78rem;color:rgba(255,255,255,.55);line-height:1.6">Bayar sekali,<br>pakai selamanya</p>
+      </div>
+
+      <div class="flex-fill p-4 p-md-5 d-flex flex-column gap-4 justify-content-center bg-white">
+
+        <div>
+          <h3 class="fw-bold mb-1" style="font-size:1.1rem">CBT Pro — Lisensi Sekolah</h3>
+          <p class="mb-0 small lh-lg" style="color:var(--c-ink-3)">Cocok untuk sekolah, madrasah, bimbel, dan lembaga kursus yang ingin menyelenggarakan ujian digital secara mandiri.</p>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-sm-6">
+            <div class="text-uppercase fw-bold mb-2" style="font-size:.72rem;letter-spacing:.07em;color:var(--c-green)">Sudah termasuk</div>
+            <ul class="list-unstyled d-flex flex-column gap-2 mb-0">
+              <li class="d-flex align-items-center gap-2 small" style="color:var(--c-ink-2)">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--c-green-2)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                Jasa pemasangan &amp; deployment
+              </li>
+              <li class="d-flex align-items-center gap-2 small" style="color:var(--c-ink-2)">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--c-green-2)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                Konfigurasi database &amp; environment
+              </li>
+              <li class="d-flex align-items-center gap-2 small" style="color:var(--c-ink-2)">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--c-green-2)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                Panduan &amp; onboarding admin
+              </li>
+            </ul>
+          </div>
+          <div class="col-sm-6">
+            <div class="text-uppercase fw-bold mb-2" style="font-size:.72rem;letter-spacing:.07em;color:var(--c-ink-4)">Tidak termasuk</div>
+            <ul class="list-unstyled d-flex flex-column gap-2 mb-0">
+              <li class="d-flex align-items-center gap-2 small" style="color:var(--c-ink-3)">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink-4)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                Biaya VPS / server hosting
+              </li>
+              <li class="d-flex align-items-center gap-2 small" style="color:var(--c-ink-3)">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink-4)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                Biaya domain
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div>
+          <a href="{{ whatsapp_url }}?text=Halo%2C%20saya%20ingin%20memesan%20CBT%20Pro.%20Bisa%20minta%20info%3F"
+             target="_blank" rel="noopener noreferrer"
+             class="btn-green rounded-3 px-4 py-3 fw-bold"
+             style="font-size:.9rem"
+             aria-label="Pesan CBT Pro via WhatsApp">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.553 4.116 1.524 5.849L.057 23.7a.75.75 0 0 0 .938.938l5.86-1.488A11.95 11.95 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.907 0-3.695-.502-5.24-1.38l-.372-.212-3.849.977.998-3.829-.232-.383A9.952 9.952 0 0 1 2 12C2 6.486 6.486 2 12 2s10 4.486 10 10-4.486 10-10 10z"/></svg>
+            Pesan via WhatsApp
+          </a>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ════════ FAQ ════════ -->
+<section class="py-5 border-top" style="background:var(--c-bg)" aria-labelledby="faq-h">
+  <div class="container py-4">
+
+    <div class="text-center mb-5 sr">
+      <span class="sec-chip mb-3 d-inline-block">FAQ</span>
+      <h2 class="sec-title" id="faq-h">Pertanyaan yang Sering Ditanyakan</h2>
+    </div>
+
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <div class="d-flex flex-column gap-2">
+
+          <div class="faq-item sr d1">
+            <div class="faq-q" role="button" tabindex="0" aria-expanded="false">
+              Apakah Rp499.000 sudah termasuk pemasangan?
+              <svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="faq-a">Ya, harga Rp499.000 sudah termasuk jasa pemasangan dan konfigurasi awal di server Anda. Yang perlu Anda siapkan sendiri hanya VPS dan domain.</div>
+          </div>
+
+          <div class="faq-item sr d2">
+            <div class="faq-q" role="button" tabindex="0" aria-expanded="false">
+              Berapa spesifikasi VPS minimal yang dibutuhkan?
+              <svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="faq-a">Untuk penggunaan standar hingga 200 peserta serentak, VPS dengan 2 vCPU dan 2 GB RAM sudah cukup. Kami bantu rekomendasikan spesifikasi yang sesuai saat konsultasi.</div>
+          </div>
+
+          <div class="faq-item sr d3">
+            <div class="faq-q" role="button" tabindex="0" aria-expanded="false">
+              Apakah ada biaya tambahan setelah pembelian?
+              <svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="faq-a">Tidak ada biaya langganan bulanan atau tahunan. Update fitur dan perbaikan bug juga gratis. Biaya rutin hanya VPS dan domain yang Anda kelola sendiri.</div>
+          </div>
+
+          <div class="faq-item sr d1">
+            <div class="faq-q" role="button" tabindex="0" aria-expanded="false">
+              Berapa lama proses pemasangan?
+              <svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="faq-a">Biasanya selesai dalam 1 hari kerja setelah Anda menyediakan akses server dan domain. Kami memandu seluruh prosesnya melalui WhatsApp.</div>
+          </div>
+
+          <div class="faq-item sr d2">
+            <div class="faq-q" role="button" tabindex="0" aria-expanded="false">
+              Apakah bisa diakses dari HP siswa?
+              <svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="faq-a">Ya, CBT Pro sepenuhnya responsif. Siswa bisa mengerjakan ujian dari smartphone Android maupun iOS, tablet, atau laptop — tanpa perlu menginstal aplikasi apapun.</div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ════════ CTA ════════ -->
+<section class="py-5 border-top" style="background:var(--c-bg)" aria-labelledby="cta-h">
+  <div class="container py-4">
+    <div class="bg-white border rounded-4 p-4 p-md-5 sr">
+      <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-md-between gap-4">
+        <div>
+          <h2 class="fw-bold mb-2" id="cta-h"
+              style="font-size:clamp(1.35rem,2.5vw,1.75rem);letter-spacing:-.6px;line-height:1.25">
+            Tertarik menggunakan CBT Pro<br>di sekolah Anda?
+          </h2>
+          <p class="mb-0 small lh-lg" style="color:var(--c-ink-2);max-width:380px">
+            Hubungi kami lewat WhatsApp — kami bantu dari konsultasi hingga sistem siap digunakan.
+          </p>
+        </div>
+        <div class="flex-shrink-0 d-flex flex-column align-items-start align-items-md-end gap-2">
+          <a href="{{ whatsapp_url }}?text=Halo%2C%20saya%20tertarik%20dengan%20CBT%20Pro%20untuk%20sekolah%20kami.%20Bisa%20minta%20info%3F"
+             target="_blank" rel="noopener noreferrer"
+             class="btn-green rounded-3 px-4 py-3 fw-semibold text-nowrap"
+             style="font-size:.9rem"
+             aria-label="Hubungi CBT Pro via WhatsApp">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.553 4.116 1.524 5.849L.057 23.7a.75.75 0 0 0 .938.938l5.86-1.488A11.95 11.95 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.907 0-3.695-.502-5.24-1.38l-.372-.212-3.849.977.998-3.829-.232-.383A9.952 9.952 0 0 1 2 12C2 6.486 6.486 2 12 2s10 4.486 10 10-4.486 10-10 10z"/></svg>
+            Hubungi Kami via WhatsApp
+          </a>
+          <span class="small" style="color:var(--c-ink-4)">Gratis konsultasi &nbsp;·&nbsp; Tanpa kontrak jangka panjang</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ════════ FOOTER ════════ -->
+<footer class="bg-white border-top py-4" role="contentinfo">
+  <div class="container">
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-3">
+      <small style="color:var(--c-ink-3)">© 2026 CBT Pro. Hak cipta dilindungi.</small>
+      <nav class="d-flex align-items-center gap-3" aria-label="Media sosial">
+        <a href="#" class="soc" aria-label="Instagram CBT Pro">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+        </a>
+        <a href="#" class="soc" aria-label="Facebook CBT Pro">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+        </a>
+        <a href="#" class="soc" aria-label="YouTube CBT Pro">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 0 0 1.46 6.42 29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58 2.78 2.78 0 0 0 1.95 1.96C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.96A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/></svg>
+        </a>
+        <a href="{{ whatsapp_url }}" target="_blank" rel="noopener noreferrer" class="soc" aria-label="WhatsApp CBT Pro">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.553 4.116 1.524 5.849L.057 23.7a.75.75 0 0 0 .938.938l5.86-1.488A11.95 11.95 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.907 0-3.695-.502-5.24-1.38l-.372-.212-3.849.977.998-3.829-.232-.383A9.952 9.952 0 0 1 2 12C2 6.486 6.486 2 12 2s10 4.486 10 10-4.486 10-10 10z"/></svg>
+        </a>
+      </nav>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+'use strict';
+
+// Navbar shadow on scroll
+const navbar = document.getElementById('navbar');
+window.addEventListener('scroll', () => {
+  navbar.classList.toggle('scrolled', window.scrollY > 8);
+}, { passive: true });
+
+// Scroll reveal
+const srObs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('vis'); srObs.unobserve(e.target); } });
+}, { threshold: 0.1 });
+document.querySelectorAll('.sr').forEach(el => srObs.observe(el));
+
+// Animated counter
+const cntObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (!e.isIntersecting) return;
+    const el = e.target, tgt = +el.dataset.to;
+    let n = 0; const step = Math.ceil(tgt / 60);
+    const t = setInterval(() => { n = Math.min(n + step, tgt); el.textContent = n; if (n >= tgt) clearInterval(t); }, 20);
+    cntObs.unobserve(el);
+  });
+}, { threshold: 0.5 });
+document.querySelectorAll('.cnt[data-to]').forEach(el => cntObs.observe(el));
+
+// FAQ accordion
+document.querySelectorAll('.faq-q').forEach(btn => {
+  const toggle = () => {
+    const item = btn.closest('.faq-item'), isOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item.open').forEach(o => {
+      o.classList.remove('open');
+      o.querySelector('.faq-q').setAttribute('aria-expanded', 'false');
+    });
+    if (!isOpen) { item.classList.add('open'); btn.setAttribute('aria-expanded', 'true'); }
+  };
+  btn.addEventListener('click', toggle);
+  btn.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } });
+});
+</script>
 </body>
 </html>

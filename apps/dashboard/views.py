@@ -1,3 +1,4 @@
+import re
 import shutil
 from datetime import datetime
 
@@ -21,6 +22,8 @@ from apps.questions.models import Question
 from apps.results.models import ExamResult
 from apps.results.services import build_student_results_rows
 from apps.subjects.models import Subject
+
+DEFAULT_WHATSAPP_NUMBER = "628xxxxxxxxxx"
 
 
 class LandingView(TemplateView):
@@ -83,6 +86,15 @@ class LandingView(TemplateView):
                 "description": "Admin, guru, dan siswa mendapat dashboard sesuai kebutuhan masing-masing agar alur kerja tetap fokus dan efisien.",
             },
         ]
+        for idx, feature in enumerate(context["features"]):
+            feature["delay_class"] = f"d{(idx % 4) + 1}"
+
+        whatsapp_raw = getattr(settings, "WHATSAPP_NUMBER", DEFAULT_WHATSAPP_NUMBER) or DEFAULT_WHATSAPP_NUMBER
+        whatsapp_digits = re.sub(r"\D", "", whatsapp_raw)
+        if not whatsapp_digits:
+            whatsapp_digits = DEFAULT_WHATSAPP_NUMBER
+        context["whatsapp_number"] = whatsapp_digits
+        context["whatsapp_url"] = f"https://wa.me/{whatsapp_digits}"
         context["stats"] = [
             {"label": "Pengguna Aktif", "value": 1280, "suffix": "+"},
             {"label": "Bank Soal", "value": 5400, "suffix": "+"},

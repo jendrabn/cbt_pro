@@ -44,6 +44,7 @@ def _env_json(name, default):
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-change-this-in-production')
 
 CBT_SITE_NAME = os.getenv('CBT_SITE_NAME', 'Sistem CBT')
+WHATSAPP_NUMBER = os.getenv('WHATSAPP_NUMBER', '628xxxxxxxxxx')
 
 DEBUG = _env_bool('DEBUG', True)
 
