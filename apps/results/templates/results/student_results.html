@@ -1,5 +1,5 @@
 {% extends "layouts/base_student.html" %}
-{% load static %}
+{% load static cbt_extras %}
 
 {% block title %}Hasil & Review Ujian - Siswa{% endblock %}
 
@@ -155,7 +155,7 @@
                                     <p class="mb-1 fw-semibold">
                                         {{ row.exam.title }}
                                         {% if row.allow_retake %}
-                                        <span class="badge text-bg-secondary ms-1"><i class="ri-repeat-line me-1"></i>Retake</span>
+                                        {% soft_badge "Retake" "secondary" "ms-1" %}
                                         {% endif %}
                                     </p>
                                     <p class="small text-muted mb-0">{{ row.subject_name }}</p>
@@ -163,7 +163,7 @@
                                 <td>{{ row.submitted_label }}</td>
                                 <td title="Nilai final ({{ row.policy_label }} dari {{ row.attempts_used }} attempt)">{{ row.total_score }}</td>
                                 <td>{{ row.percentage }}%</td>
-                                <td><span class="badge {{ row.status_badge }}">{{ row.status_label }}</span></td>
+                                <td>{% soft_badge row.status_label row.status_tone %}</td>
                                 <td>{{ row.time_taken_human }}</td>
                                 <td class="text-end pe-3">
                                     <div class="d-flex justify-content-end gap-1">

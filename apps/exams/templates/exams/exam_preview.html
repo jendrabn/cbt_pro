@@ -1,4 +1,4 @@
-{% load static %}
+{% load static cbt_extras %}
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -48,22 +48,28 @@
             <div class="card-header bg-white border-0 pt-3 d-flex justify-content-between align-items-center">
                 <h2 class="h6 mb-0">Soal {{ row.exam_question.display_order }}</h2>
                 <div class="d-flex gap-1">
-                    <span class="badge {% if row.effective.allow_previous %}text-bg-success{% else %}text-bg-secondary{% endif %}">
-                        Sebelumnya: {{ row.effective.allow_previous|yesno:"Ya,Tidak" }}
-                    </span>
-                    <span class="badge {% if row.effective.allow_next %}text-bg-success{% else %}text-bg-secondary{% endif %}">
-                        Berikutnya: {{ row.effective.allow_next|yesno:"Ya,Tidak" }}
-                    </span>
-                    <span class="badge {% if row.effective.force_sequential %}text-bg-warning{% else %}text-bg-secondary{% endif %}">
-                        Berurutan: {{ row.effective.force_sequential|yesno:"Ya,Tidak" }}
-                    </span>
+                    {% if row.effective.allow_previous %}
+                    {% soft_badge "Sebelumnya: Ya" "success" %}
+                    {% else %}
+                    {% soft_badge "Sebelumnya: Tidak" "secondary" %}
+                    {% endif %}
+                    {% if row.effective.allow_next %}
+                    {% soft_badge "Berikutnya: Ya" "success" %}
+                    {% else %}
+                    {% soft_badge "Berikutnya: Tidak" "secondary" %}
+                    {% endif %}
+                    {% if row.effective.force_sequential %}
+                    {% soft_badge "Berurutan: Ya" "warning" %}
+                    {% else %}
+                    {% soft_badge "Berurutan: Tidak" "secondary" %}
+                    {% endif %}
                 </div>
             </div>
             <div class="card-body">
                 <p class="mb-2">{{ row.exam_question.question.question_text|striptags }}</p>
                 <p class="small text-muted mb-2">
                     Tipe:
-                    {% if row.exam_question.question.question_type == 'multiple_choice' %}Pilihan Ganda{% elif row.exam_question.question.question_type == 'essay' %}Esai{% else %}Jawaban Singkat{% endif %}
+                    {{ row.exam_question.question.get_question_type_display }}
                     • Poin: {{ row.exam_question.points_override|default:row.exam_question.question.points }}
                 </p>
                 <div class="d-flex flex-wrap gap-2">

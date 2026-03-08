@@ -1,5 +1,5 @@
 {% extends "layouts/base_student.html" %}
-{% load static %}
+{% load static cbt_extras %}
 
 {% block title %}Review Jawaban - Siswa{% endblock %}
 
@@ -42,9 +42,11 @@
                         <p class="mb-1"><span class="text-muted">Skor:</span> <strong>{{ result.total_score }}</strong></p>
                         <p class="mb-1"><span class="text-muted">Persentase:</span> <strong>{{ result.percentage }}%</strong></p>
                         <p class="mb-0"><span class="text-muted">Status:</span>
-                            <span class="badge {% if result.passed %}text-bg-success{% else %}text-bg-danger{% endif %}">
-                                {% if result.passed %}Lulus{% else %}Belum Lulus{% endif %}
-                            </span>
+                            {% if result.passed %}
+                            {% soft_badge "Lulus" "success" %}
+                            {% else %}
+                            {% soft_badge "Belum Lulus" "danger" %}
+                            {% endif %}
                         </p>
                     </div>
                     <div class="col-md-6">
@@ -77,7 +79,7 @@
                     <article class="border rounded-3 p-3 review-answer-card review-status-{{ row.status_type }}">
                         <div class="d-flex flex-wrap gap-2 align-items-center justify-content-between mb-2">
                             <h4 class="h6 mb-0">Soal {{ row.display_order }}</h4>
-                            <span class="badge text-bg-{{ row.status_type }}">{{ row.status_label }}</span>
+                            {% soft_badge row.status_label row.status_type %}
                         </div>
 
                         <div class="mb-3 question-richtext">{{ row.question.question_text|safe }}</div>

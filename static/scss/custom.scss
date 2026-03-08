@@ -1522,35 +1522,6 @@ body.exam-room-body {
     border-radius: 0.9rem;
 }
 
-.exam-status-badge {
-    font-size: 0.72rem;
-}
-
-.exam-status-badge.status-draft {
-    background: #6c757d;
-    color: #fff;
-}
-
-.exam-status-badge.status-published {
-    background: #0d6efd;
-    color: #fff;
-}
-
-.exam-status-badge.status-ongoing {
-    background: #198754;
-    color: #fff;
-}
-
-.exam-status-badge.status-completed {
-    background: #20c997;
-    color: #fff;
-}
-
-.exam-status-badge.status-cancelled {
-    background: #dc3545;
-    color: #fff;
-}
-
 .exam-preview-frame {
     width: 100%;
     min-height: 72vh;
@@ -1645,21 +1616,6 @@ body.exam-room-body {
     width: 100%;
     min-height: 74vh;
     border: 0;
-}
-
-.badge-difficulty-easy {
-    background-color: #198754;
-    color: #fff;
-}
-
-.badge-difficulty-medium {
-    background-color: #ffc107;
-    color: #212529;
-}
-
-.badge-difficulty-hard {
-    background-color: #dc3545;
-    color: #fff;
 }
 
 .option-preview-item {

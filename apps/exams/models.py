@@ -8,19 +8,21 @@ from apps.subjects.models import Subject
 
 class Exam(BaseModelSoftDelete):
     """Exam/ujian"""
-    
-    STATUS_CHOICES = [
-        ('draft', 'Draft'),
-        ('published', 'Published'),
-        ('ongoing', 'Ongoing'),
-        ('completed', 'Completed'),
-        ('cancelled', 'Cancelled'),
-    ]
-    RETAKE_SCORE_POLICY_CHOICES = [
-        ("highest", "Highest"),
-        ("latest", "Latest"),
-        ("average", "Average"),
-    ]
+
+    class Status(models.TextChoices):
+        DRAFT = "draft", "Draf"
+        PUBLISHED = "published", "Dipublikasikan"
+        ONGOING = "ongoing", "Berlangsung"
+        COMPLETED = "completed", "Selesai"
+        CANCELLED = "cancelled", "Dibatalkan"
+
+    class RetakeScorePolicy(models.TextChoices):
+        HIGHEST = "highest", "Nilai Tertinggi"
+        LATEST = "latest", "Nilai Terakhir"
+        AVERAGE = "average", "Rata-rata"
+
+    STATUS_CHOICES = Status.choices
+    RETAKE_SCORE_POLICY_CHOICES = RetakeScorePolicy.choices
     
     created_by = models.ForeignKey(User, on_delete=models.RESTRICT, related_name='exams')
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='exams')
@@ -47,7 +49,7 @@ class Exam(BaseModelSoftDelete):
     retake_score_policy = models.CharField(
         max_length=20,
         choices=RETAKE_SCORE_POLICY_CHOICES,
-        default="highest",
+        default=RetakeScorePolicy.HIGHEST,
     )
     retake_cooldown_minutes = models.IntegerField(default=0)
     retake_show_review = models.BooleanField(default=False)
@@ -66,7 +68,7 @@ class Exam(BaseModelSoftDelete):
     max_violations_allowed = models.IntegerField(default=3)
     
     # Status
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=Status.DRAFT)
     
     class Meta:
         db_table = 'exams'
@@ -158,12 +160,13 @@ class ClassStudent(models.Model):
 
 class ExamAssignment(BaseModel):
     """Exam assignments to classes or students"""
-    
-    ASSIGNMENT_TYPE_CHOICES = [
-        ('class', 'Class'),
-        ('student', 'Student'),
-    ]
-    
+
+    class AssignmentType(models.TextChoices):
+        CLASS = "class", "Kelas"
+        STUDENT = "student", "Siswa"
+
+    ASSIGNMENT_TYPE_CHOICES = AssignmentType.choices
+
     exam = models.ForeignKey(Exam, on_delete=models.CASCADE, related_name='assignments')
     assigned_to_type = models.CharField(max_length=20, choices=ASSIGNMENT_TYPE_CHOICES)
     class_obj = models.ForeignKey(Class, on_delete=models.CASCADE, null=True, blank=True, related_name='exam_assignments')
@@ -179,14 +182,14 @@ class ExamAssignment(BaseModel):
         constraints = [
             models.CheckConstraint(
                 condition=(
-                    models.Q(assigned_to_type='class', class_obj__isnull=False, student__isnull=True) |
-                    models.Q(assigned_to_type='student', student__isnull=False, class_obj__isnull=True)
+                    models.Q(assigned_to_type="class", class_obj__isnull=False, student__isnull=True) |
+                    models.Q(assigned_to_type="student", student__isnull=False, class_obj__isnull=True)
                 ),
                 name='valid_assignment_type'
             ),
         ]
-    
+
     def __str__(self):
-        if self.assigned_to_type == 'class':
+        if self.assigned_to_type == self.AssignmentType.CLASS:
             return f"{self.exam.title} - {self.class_obj.name}"
         return f"{self.exam.title} - {self.student.username}"

@@ -1,5 +1,5 @@
 {% extends "layouts/base_student.html" %}
-{% load static %}
+{% load static cbt_extras %}
 
 {% block title %}Detail Hasil Ujian - Siswa{% endblock %}
 
@@ -50,7 +50,7 @@
                         <p class="small text-muted mb-1">Skor Akhir</p>
                         <h2 class="display-6 mb-1">{{ score_total }} <small class="fs-5 text-muted">/ {{ score_max }}</small></h2>
                         <p class="mb-0">
-                            <span class="badge {{ status_badge }}">{{ status_label }}</span>
+                            {% soft_badge status_label status_tone %}
                         </p>
                         {% if allow_retake %}
                         <p class="small text-muted mt-2 mb-0">
@@ -114,7 +114,7 @@
                                     {% for row in answer_rows_preview %}
                                     <tr>
                                         <td>Soal {{ row.display_order }}</td>
-                                        <td><span class="badge text-bg-{{ row.status_type }}">{{ row.status_label }}</span></td>
+                                        <td>{% soft_badge row.status_label row.status_type %}</td>
                                         <td>{{ row.points_earned }} / {{ row.points_possible }}</td>
                                         <td>{{ row.time_spent_human }}</td>
                                     </tr>
@@ -208,9 +208,15 @@
                                 <td>{{ row.submit_time_label }}</td>
                                 <td>{{ row.total_score }}</td>
                                 <td>{{ row.percentage }}%</td>
-                                <td>{{ row.status_label }}</td>
+                                <td>
+                                    {% if row.passed %}
+                                    {% soft_badge row.status_label "success" %}
+                                    {% else %}
+                                    {% soft_badge row.status_label "danger" %}
+                                    {% endif %}
+                                </td>
                                 <td>{{ row.duration_label }}</td>
-                                <td class="pe-3">{% if row.is_final %}★ Final{% else %}-{% endif %}</td>
+                                <td class="pe-3">{% if row.is_final %}{% soft_badge "Final" "primary" %}{% else %}-{% endif %}</td>
                             </tr>
                             {% empty %}
                             <tr>

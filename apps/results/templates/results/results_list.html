@@ -1,5 +1,5 @@
 {% extends "layouts/base_teacher.html" %}
-{% load static %}
+{% load static cbt_extras %}
 
 {% block title %}Hasil & Analitik Ujian - CBT{% endblock %}
 
@@ -117,7 +117,7 @@
                             <tr>
                                 <td class="ps-3">
                                     <p class="mb-1 fw-semibold">{{ row.exam.title }}</p>
-                                    <p class="small text-muted mb-0">Status: {{ row.exam.get_status_display }}</p>
+                                    <p class="small text-muted mb-0">Status: {% enum_badge "exam_status" row.exam.status %}</p>
                                 </td>
                                 <td>{{ row.exam.subject.name }}</td>
                                 <td>{{ row.class_names }}</td>
@@ -128,9 +128,13 @@
                                 <td>{{ row.participants }}</td>
                                 <td>{{ row.average_score }}%</td>
                                 <td>
-                                    <span class="badge {% if row.pass_rate >= 70 %}text-bg-success{% elif row.pass_rate >= 50 %}text-bg-warning{% else %}text-bg-danger{% endif %}">
-                                        {{ row.pass_rate }}%
-                                    </span>
+                                    {% if row.pass_rate >= 70 %}
+                                    {% soft_badge row.pass_rate|stringformat:"s"|add:"%" "success" %}
+                                    {% elif row.pass_rate >= 50 %}
+                                    {% soft_badge row.pass_rate|stringformat:"s"|add:"%" "warning" %}
+                                    {% else %}
+                                    {% soft_badge row.pass_rate|stringformat:"s"|add:"%" "danger" %}
+                                    {% endif %}
                                 </td>
                                 <td class="text-end pe-3">
                                     <div class="d-flex justify-content-end gap-1">

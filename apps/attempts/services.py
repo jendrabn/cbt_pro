@@ -16,17 +16,28 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.dateparse import parse_date
 
+from apps.core.enums import choice_label
 from apps.exams.models import ClassStudent, Exam
 from apps.exams.services import resolve_effective_navigation
-from apps.questions.models import QuestionOption
+from apps.questions.models import Question, QuestionOption
 from apps.results.models import ExamResult
 
 from .models import ExamAttempt, ExamViolation, ProctoringScreenshot, StudentAnswer
 
 
-FINISHED_ATTEMPT_STATUSES = ("submitted", "auto_submitted", "completed", "grading")
+FINISHED_ATTEMPT_STATUSES = (
+    ExamAttempt.Status.SUBMITTED,
+    ExamAttempt.Status.AUTO_SUBMITTED,
+    ExamAttempt.Status.COMPLETED,
+    ExamAttempt.Status.GRADING,
+)
 LIST_TABS = ("upcoming", "ongoing", "completed", "missed")
-EXAM_ROOM_COMPLETED_STATUSES = {"submitted", "auto_submitted", "completed", "grading"}
+EXAM_ROOM_COMPLETED_STATUSES = {
+    ExamAttempt.Status.SUBMITTED,
+    ExamAttempt.Status.AUTO_SUBMITTED,
+    ExamAttempt.Status.COMPLETED,
+    ExamAttempt.Status.GRADING,
+}
 
 
 class RetakeNotAllowed(Exception):
@@ -46,28 +57,19 @@ class CooldownActive(Exception):
         self.next_available_at = next_available_at
 
 STATUS_META = {
-    "upcoming": {"label": "Akan Datang", "badge": "text-bg-primary"},
-    "ongoing": {"label": "Sedang Berlangsung", "badge": "text-bg-success"},
-    "completed": {"label": "Selesai", "badge": "text-bg-secondary"},
-    "missed": {"label": "Terlewat", "badge": "text-bg-danger"},
-}
-
-ATTEMPT_STATUS_LABELS = {
-    "not_started": "Belum Mulai",
-    "in_progress": "Sedang Berlangsung",
-    "submitted": "Sudah Submit",
-    "auto_submitted": "Auto Submit",
-    "grading": "Sedang Dinilai",
-    "completed": "Selesai",
+    "upcoming": {"label": "Akan Datang", "tone": "primary"},
+    "ongoing": {"label": "Sedang Berlangsung", "tone": "success"},
+    "completed": {"label": "Selesai", "tone": "secondary"},
+    "missed": {"label": "Terlewat", "tone": "danger"},
 }
 
 VIOLATION_SEVERITY_MAP = {
-    "tab_switch": "medium",
-    "fullscreen_exit": "high",
-    "copy_attempt": "medium",
-    "paste_attempt": "medium",
-    "right_click": "low",
-    "suspicious_activity": "high",
+    ExamViolation.ViolationType.TAB_SWITCH: ExamViolation.Severity.MEDIUM,
+    ExamViolation.ViolationType.FULLSCREEN_EXIT: ExamViolation.Severity.HIGH,
+    ExamViolation.ViolationType.COPY_ATTEMPT: ExamViolation.Severity.MEDIUM,
+    ExamViolation.ViolationType.PASTE_ATTEMPT: ExamViolation.Severity.MEDIUM,
+    ExamViolation.ViolationType.RIGHT_CLICK: ExamViolation.Severity.LOW,
+    ExamViolation.ViolationType.SUSPICIOUS_ACTIVITY: ExamViolation.Severity.HIGH,
 }
 
 
@@ -109,7 +111,7 @@ def get_student_assigned_exam_queryset(student):
             ),
             is_deleted=False,
         )
-        .exclude(status__in=["draft", "cancelled"])
+        .exclude(status__in=[Exam.Status.DRAFT, Exam.Status.CANCELLED])
         .select_related("subject")
         .prefetch_related("assignments__class_obj", "exam_questions")
         .distinct()
@@ -302,7 +304,7 @@ def create_retake_attempt(*, exam_id, student_id, ip_address="", user_agent=""):
         exam_id=exam_id,
         student_id=student_id,
         attempt_number=int(latest_attempt.attempt_number) + 1,
-        status="not_started",
+        status=ExamAttempt.Status.NOT_STARTED,
         ip_address=ip_address,
         user_agent=(user_agent or "")[:1000],
     )
@@ -361,11 +363,11 @@ def _result_map(student, exam_ids):
 def classify_exam_status(exam, latest_attempt, now):
     if latest_attempt and latest_attempt.status in FINISHED_ATTEMPT_STATUSES:
         return "completed"
-    if exam.end_time < now or exam.status == "completed":
+    if exam.end_time < now or exam.status == Exam.Status.COMPLETED:
         return "missed"
     if exam.start_time > now:
         return "upcoming"
-    if exam.start_time <= now <= exam.end_time and exam.status in {"published", "ongoing"}:
+    if exam.start_time <= now <= exam.end_time and exam.status in {Exam.Status.PUBLISHED, Exam.Status.ONGOING}:
         return "ongoing"
     return "upcoming"
 
@@ -504,7 +506,7 @@ def build_exam_card_rows(student, exams_qs, selected_tab):
             "exam": exam,
             "status_key": status_key,
             "status_label": status_meta["label"],
-            "status_badge": status_meta["badge"],
+            "status_tone": status_meta["tone"],
             "question_count": exam.exam_questions.count(),
             "countdown_target": exam.start_time.isoformat() if status_key == "upcoming" else "",
             "start_allowed": start_allowed,
@@ -574,7 +576,7 @@ def _coerce_int(value, default=0):
 def _answer_is_filled(answer):
     if not answer:
         return False
-    if answer.answer_type == "multiple_choice":
+    if answer.answer_type == StudentAnswer.AnswerType.MULTIPLE_CHOICE:
         return bool(answer.selected_option_id)
     return bool((answer.answer_text or "").strip())
 
@@ -862,7 +864,7 @@ def build_exam_room_payload(
             "max_attempts": int(exam.max_retake_attempts or 1),
             "allow_retake": bool(exam.allow_retake),
             "attempt_status": attempt.status,
-            "attempt_status_label": ATTEMPT_STATUS_LABELS.get(attempt.status, attempt.status),
+            "attempt_status_label": choice_label(ExamAttempt.Status, attempt.status, default=attempt.status),
             "current_number": 0,
             "total_questions": 0,
             "question": None,
@@ -940,7 +942,7 @@ def build_exam_room_payload(
         "max_attempts": int(exam.max_retake_attempts or 1),
         "allow_retake": bool(exam.allow_retake),
         "attempt_status": attempt.status,
-        "attempt_status_label": ATTEMPT_STATUS_LABELS.get(attempt.status, attempt.status),
+        "attempt_status_label": choice_label(ExamAttempt.Status, attempt.status, default=attempt.status),
         "current_number": current_number,
         "total_questions": total_questions,
         "question": question_payload,
@@ -989,7 +991,7 @@ def build_exam_submit_summary(exam, attempt):
         "exam_id": str(exam.id),
         "exam_title": exam.title,
         "status": attempt.status,
-        "status_label": ATTEMPT_STATUS_LABELS.get(attempt.status, attempt.status),
+        "status_label": choice_label(ExamAttempt.Status, attempt.status, default=attempt.status),
         "total_questions": total_questions,
         "answered_count": answered_count,
         "unanswered_count": max(total_questions - answered_count, 0),
@@ -1135,10 +1137,10 @@ def upsert_exam_result_for_attempt(*, exam, attempt):
         evaluated_correct = answer.is_correct
         points_earned = _rounded_decimal(answer.points_earned if answer else Decimal("0.00"))
 
-        if question.question_type == "multiple_choice":
+        if question.question_type == Question.QuestionType.MULTIPLE_CHOICE:
             evaluated_correct = bool(answer.selected_option and answer.selected_option.is_correct)
             points_earned = points_possible if evaluated_correct else Decimal("0.00")
-        elif question.question_type == "short_answer":
+        elif question.question_type == Question.QuestionType.SHORT_ANSWER:
             short_result = _evaluate_short_answer(question, answer.answer_text)
             if short_result is not None:
                 evaluated_correct = short_result
@@ -1292,7 +1294,7 @@ def get_attempt_history_for_exam(*, exam, student):
                 "attempt_id": str(attempt.id),
                 "attempt_number": int(attempt.attempt_number or 0),
                 "status": attempt.status,
-                "status_label": ATTEMPT_STATUS_LABELS.get(attempt.status, attempt.status),
+                "status_label": choice_label(ExamAttempt.Status, attempt.status, default=attempt.status),
                 "start_time": attempt.start_time,
                 "submit_time": attempt.submit_time,
                 "retake_available_from": attempt.retake_available_from,
@@ -1327,7 +1329,7 @@ def submit_attempt(*, exam, attempt, auto_submit=False, reason=""):
         return {
             "attempt": attempt,
             "summary": build_exam_submit_summary(exam, attempt),
-            "auto_submitted": attempt.status == "auto_submitted",
+            "auto_submitted": attempt.status == ExamAttempt.Status.AUTO_SUBMITTED,
             "reason": "",
             "already_submitted": True,
             "retake_eligibility": eligibility,
@@ -1341,7 +1343,7 @@ def submit_attempt(*, exam, attempt, auto_submit=False, reason=""):
     attempt.time_spent_seconds = max(int(attempt.time_spent_seconds or 0), elapsed)
     attempt.submit_time = now
     attempt.end_time = now
-    attempt.status = "auto_submitted" if auto_submit else "submitted"
+    attempt.status = ExamAttempt.Status.AUTO_SUBMITTED if auto_submit else ExamAttempt.Status.SUBMITTED
     if exam.allow_retake and int(attempt.attempt_number or 0) < int(exam.max_retake_attempts or 1):
         attempt.retake_available_from = now + timedelta(minutes=int(exam.retake_cooldown_minutes or 0))
     else:
@@ -1422,7 +1424,7 @@ def save_attempt_answer(*, exam, attempt, question_number, payload):
     selected_option = answer.selected_option if answer else None
     answer_text = (answer.answer_text or "") if answer else ""
 
-    if question.question_type == "multiple_choice":
+    if question.question_type == Question.QuestionType.MULTIPLE_CHOICE:
         selected_option_id = ""
         if clear_answer:
             selected_option_id = ""
@@ -1448,7 +1450,7 @@ def save_attempt_answer(*, exam, attempt, question_number, payload):
             answer_text = answer.answer_text or ""
         selected_option = None
 
-    has_answer = bool(selected_option) if question.question_type == "multiple_choice" else bool(answer_text.strip())
+    has_answer = bool(selected_option) if question.question_type == Question.QuestionType.MULTIPLE_CHOICE else bool(answer_text.strip())
     points_possible = _resolve_points_possible(current_row)
 
     if answer is None and (has_answer or is_marked_for_review):
@@ -1465,7 +1467,7 @@ def save_attempt_answer(*, exam, attempt, question_number, payload):
         answer.points_possible = points_possible
         answer.answer_order = question_number
         answer.is_marked_for_review = is_marked_for_review
-        if question.question_type == "multiple_choice":
+        if question.question_type == Question.QuestionType.MULTIPLE_CHOICE:
             answer.selected_option = selected_option
             answer.answer_text = None
         else:
@@ -1496,7 +1498,7 @@ def save_attempt_answer(*, exam, attempt, question_number, payload):
 @transaction.atomic
 def record_exam_violation(*, exam, attempt, violation_type, description=""):
     normalized_type = (violation_type or "").strip()
-    valid_types = {choice[0] for choice in ExamViolation.VIOLATION_TYPE_CHOICES}
+    valid_types = {member.value for member in ExamViolation.ViolationType}
     if normalized_type not in valid_types:
         raise ValueError("Jenis pelanggaran tidak valid.")
 
@@ -1516,7 +1518,7 @@ def record_exam_violation(*, exam, attempt, violation_type, description=""):
         attempt=attempt,
         violation_type=normalized_type,
         description=clean_description,
-        severity=VIOLATION_SEVERITY_MAP.get(normalized_type, "medium"),
+        severity=VIOLATION_SEVERITY_MAP.get(normalized_type, ExamViolation.Severity.MEDIUM),
     )
 
     violations_count = ExamViolation.objects.filter(attempt=attempt).count()

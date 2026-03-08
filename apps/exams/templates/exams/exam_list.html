@@ -1,5 +1,5 @@
 {% extends "layouts/base_teacher.html" %}
-{% load static %}
+{% load static cbt_extras %}
 
 {% block title %}Manajemen Ujian Guru - CBT{% endblock %}
 
@@ -113,10 +113,10 @@
                             <div>
                                 <h2 class="h6 mb-1">{{ row.exam.title }}</h2>
                                 {% if row.retake_badge %}
-                                <span class="badge text-bg-secondary">{{ row.retake_badge }}</span>
+                                <span class="cbt-status-badge is-secondary">{{ row.retake_badge }}</span>
                                 {% endif %}
                             </div>
-                            <span class="badge exam-status-badge status-{{ row.exam.status }}">{{ row.status_label }}</span>
+                            {% enum_badge "exam_status" row.exam.status %}
                         </div>
                         <p class="small text-muted mb-2">{{ row.exam.subject.name }}</p>
                         <ul class="list-unstyled small mb-3">
@@ -175,7 +175,7 @@
                                     <p class="mb-1 fw-semibold">
                                         {{ row.exam.title }}
                                         {% if row.retake_badge %}
-                                        <span class="badge text-bg-secondary ms-1">{{ row.retake_badge }}</span>
+                                        <span class="cbt-status-badge is-secondary ms-1">{{ row.retake_badge }}</span>
                                         {% endif %}
                                     </p>
                                     <p class="small text-muted mb-0">Soal: {{ row.question_count }}</p>
@@ -187,7 +187,7 @@
                                 </td>
                                 <td>{{ row.exam.duration_minutes }} menit</td>
                                 <td>{{ row.participant_count }}</td>
-                                <td><span class="badge exam-status-badge status-{{ row.exam.status }}">{{ row.status_label }}</span></td>
+                                <td>{% enum_badge "exam_status" row.exam.status %}</td>
                                         <td class="text-end pe-3">
                                             <div class="d-flex justify-content-end gap-1">
                                         <a href="{% url 'exam_detail' row.exam.id %}" class="btn btn-sm btn-outline-primary" title="Lihat detail ujian"><i class="ri-file-list-3-line"></i></a>

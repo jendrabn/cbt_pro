@@ -9,10 +9,10 @@ from django.utils.html import strip_tags
 
 from apps.subjects.models import Subject
 
-from .models import Question, QuestionAnswer, QuestionCategory, QuestionTagRelation
+from .models import Question, QuestionAnswer, QuestionCategory, QuestionOption, QuestionTagRelation
 
 
-OPTION_LETTERS = ["A", "B", "C", "D", "E"]
+OPTION_LETTERS = [choice.value for choice in QuestionOption.OptionLetter]
 
 
 def _bootstrap_widget(field):

@@ -87,7 +87,7 @@ class MonitoringDashboardView(TeacherMonitoringBaseView, TemplateView):
                         reverse("monitoring_announcement", kwargs={"exam_id": self.exam.id})
                     ),
                 },
-                "violation_types": ExamViolation.VIOLATION_TYPE_CHOICES,
+                "violation_types": ExamViolation.ViolationType.choices,
             }
         )
         return context

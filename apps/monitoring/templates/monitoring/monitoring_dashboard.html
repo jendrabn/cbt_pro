@@ -1,5 +1,5 @@
 {% extends "layouts/base_teacher.html" %}
-{% load static %}
+{% load static cbt_extras %}
 
 {% block title %}Monitoring Siswa - {{ exam.title }}{% endblock %}
 
@@ -57,10 +57,10 @@
             <div class="card-body d-flex flex-wrap align-items-center justify-content-between gap-3">
                 <div class="d-flex flex-wrap align-items-center gap-2">
                     <span class="small text-muted">Indikator Status:</span>
-                    <span class="badge rounded-pill text-bg-success">Hijau: Normal</span>
-                    <span class="badge rounded-pill text-bg-warning">Kuning: Warning/Idle</span>
-                    <span class="badge rounded-pill text-bg-danger">Merah: Pelanggaran Tinggi</span>
-                    <span class="badge rounded-pill text-bg-secondary">Abu-abu: Belum Mulai</span>
+                    {% soft_badge "Hijau: Normal" "success" %}
+                    {% soft_badge "Kuning: Warning/Idle" "warning" %}
+                    {% soft_badge "Merah: Pelanggaran Tinggi" "danger" %}
+                    {% soft_badge "Abu-abu: Belum Mulai" "secondary" %}
                 </div>
                 <div class="d-flex flex-wrap align-items-center gap-2">
                     <label for="refreshIntervalSelect" class="small text-muted mb-0">Auto Refresh</label>

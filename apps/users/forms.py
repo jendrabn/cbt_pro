@@ -149,7 +149,10 @@ class UserImportForm(forms.Form):
     )
     role = forms.ChoiceField(
         label="Role User",
-        choices=[("teacher", "Teacher"), ("student", "Student")],
+        choices=[
+            (User.Role.TEACHER, User.Role.TEACHER.label),
+            (User.Role.STUDENT, User.Role.STUDENT.label),
+        ],
         required=True,
     )
     send_credentials_email = forms.BooleanField(

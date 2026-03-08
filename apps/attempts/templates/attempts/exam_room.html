@@ -14,7 +14,7 @@
                 <h1 class="h5 mb-0">{{ exam.title }}</h1>
                 <p class="small text-muted mb-0 mt-1">{{ exam.subject.name }}</p>
                 {% if exam.allow_retake and exam.max_retake_attempts > 1 %}
-                <span id="attemptCounterBadge" class="badge text-bg-secondary mt-1">
+                <span id="attemptCounterBadge" class="cbt-status-badge is-secondary mt-1">
                     Attempt {{ attempt.attempt_number }} dari {{ exam.max_retake_attempts }}
                 </span>
                 {% endif %}
@@ -24,7 +24,7 @@
                     <p class="small text-muted mb-0">Sisa Waktu</p>
                     <strong id="timerDisplay">00:00</strong>
                 </div>
-                <span class="badge text-bg-warning" id="violationCounterChip">Pelanggaran: 0</span>
+                <span class="cbt-status-badge is-warning" id="violationCounterChip">Pelanggaran: 0</span>
                 <button type="button" class="btn btn-sm btn-primary" id="openSubmitModalBtn" title="Buka konfirmasi kirim ujian">
                     <i class="ri-send-plane-fill me-1"></i>Kirim Ujian
                 </button>

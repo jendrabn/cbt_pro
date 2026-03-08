@@ -1,5 +1,5 @@
 {% extends "layouts/base_teacher.html" %}
-{% load static %}
+{% load static cbt_extras %}
 
 {% block title %}Dashboard Guru - CBT{% endblock %}
 
@@ -98,7 +98,7 @@
                                     <tr>
                                         <td>{{ exam.title }}</td>
                                         <td>{{ exam.start_time|date:"d M Y H:i" }}</td>
-                                        <td><span class="badge text-bg-info">{{ exam.get_status_display }}</span></td>
+                                        <td>{% enum_badge "exam_status" exam.status %}</td>
                                     </tr>
                                     {% empty %}
                                     <tr>
@@ -135,9 +135,9 @@
                                         <td>{{ result.percentage }}%</td>
                                         <td>
                                             {% if result.passed %}
-                                            <span class="badge text-bg-success">Lulus</span>
+                                            {% soft_badge "Lulus" "success" %}
                                             {% else %}
-                                            <span class="badge text-bg-danger">Belum Lulus</span>
+                                            {% soft_badge "Belum Lulus" "danger" %}
                                             {% endif %}
                                         </td>
                                     </tr>

@@ -5,12 +5,17 @@ from uuid import uuid4
 
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.template import Context, Template
 from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from apps.accounts.models import User
+from apps.attempts.models import ExamViolation
+from apps.core.enums import choice_dict, choice_label, get_enum_badge, get_enum_badge_tone
 from apps.core.services import invalidate_branding_cache
+from apps.exams.models import Exam
 from apps.notifications.models import SystemSetting
+from apps.questions.models import Question
 
 
 class SystemSettingsViewTests(TestCase):
@@ -141,3 +146,27 @@ class SystemSettingsViewTests(TestCase):
         response = self.client.get(reverse("landing"))
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, reverse("login"))
+
+
+class EnumBadgeHelpersTests(TestCase):
+    def test_choice_helpers_follow_textchoices_labels(self):
+        self.assertEqual(choice_label(Exam.Status, Exam.Status.ONGOING), "Berlangsung")
+        self.assertEqual(choice_dict(Question.QuestionType)["essay"], "Esai")
+
+    def test_enum_badge_registry_maps_soft_tones(self):
+        self.assertEqual(get_enum_badge_tone("question_difficulty", Question.Difficulty.HARD), "danger")
+        self.assertEqual(get_enum_badge_tone("violation_severity", ExamViolation.Severity.CRITICAL), "danger")
+        self.assertEqual(
+            get_enum_badge("exam_status", Exam.Status.CANCELLED),
+            {"label": "Dibatalkan", "tone": "danger"},
+        )
+
+    def test_template_tags_render_soft_badges(self):
+        rendered = Template(
+            "{% load cbt_extras %}{% enum_badge 'exam_status' 'cancelled' %} {% soft_badge 'Aktif' 'success' %}"
+        ).render(Context())
+
+        self.assertIn("cbt-status-badge is-danger", rendered)
+        self.assertIn("Dibatalkan", rendered)
+        self.assertIn("cbt-status-badge is-success", rendered)
+        self.assertIn("Aktif", rendered)

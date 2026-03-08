@@ -6,14 +6,15 @@ from apps.accounts.models import User
 
 class Notification(BaseModel):
     """User notifications"""
-    
-    NOTIFICATION_TYPE_CHOICES = [
-        ('info', 'Info'),
-        ('success', 'Success'),
-        ('warning', 'Warning'),
-        ('error', 'Error'),
-        ('announcement', 'Announcement'),
-    ]
+
+    class Type(models.TextChoices):
+        INFO = "info", "Info"
+        SUCCESS = "success", "Sukses"
+        WARNING = "warning", "Peringatan"
+        ERROR = "error", "Error"
+        ANNOUNCEMENT = "announcement", "Pengumuman"
+
+    NOTIFICATION_TYPE_CHOICES = Type.choices
     
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
     title = models.CharField(max_length=255)
@@ -38,13 +39,14 @@ class Notification(BaseModel):
 
 class SystemSetting(BaseModel):
     """System settings"""
-    
-    SETTING_TYPE_CHOICES = [
-        ('string', 'String'),
-        ('number', 'Number'),
-        ('boolean', 'Boolean'),
-        ('json', 'JSON'),
-    ]
+
+    class SettingType(models.TextChoices):
+        STRING = "string", "Teks"
+        NUMBER = "number", "Angka"
+        BOOLEAN = "boolean", "Boolean"
+        JSON = "json", "JSON"
+
+    SETTING_TYPE_CHOICES = SettingType.choices
     
     setting_key = models.CharField(max_length=100, unique=True)
     setting_value = models.TextField()
@@ -66,16 +68,16 @@ class SystemSetting(BaseModel):
     
     def get_value(self):
         """Get setting value with proper type conversion"""
-        if self.setting_type == 'boolean':
+        if self.setting_type == self.SettingType.BOOLEAN:
             return self.setting_value.lower() in ('true', '1', 'yes', 'on')
-        elif self.setting_type == 'number':
+        elif self.setting_type == self.SettingType.NUMBER:
             try:
                 if '.' in self.setting_value:
                     return float(self.setting_value)
                 return int(self.setting_value)
             except ValueError:
                 return 0
-        elif self.setting_type == 'json':
+        elif self.setting_type == self.SettingType.JSON:
             import json
             try:
                 return json.loads(self.setting_value)
@@ -86,14 +88,15 @@ class SystemSetting(BaseModel):
 
 class SystemLog(BaseModel):
     """System logs"""
-    
-    LOG_LEVEL_CHOICES = [
-        ('DEBUG', 'Debug'),
-        ('INFO', 'Info'),
-        ('WARNING', 'Warning'),
-        ('ERROR', 'Error'),
-        ('CRITICAL', 'Critical'),
-    ]
+
+    class Level(models.TextChoices):
+        DEBUG = "DEBUG", "Debug"
+        INFO = "INFO", "Info"
+        WARNING = "WARNING", "Warning"
+        ERROR = "ERROR", "Error"
+        CRITICAL = "CRITICAL", "Kritis"
+
+    LOG_LEVEL_CHOICES = Level.choices
     
     log_level = models.CharField(max_length=20, choices=LOG_LEVEL_CHOICES)
     logger_name = models.CharField(max_length=100, null=True, blank=True)

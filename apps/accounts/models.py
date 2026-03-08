@@ -8,21 +8,22 @@ class UserManager(DjangoUserManager):
     """Custom user manager with role default for superuser."""
 
     def create_superuser(self, username, email=None, password=None, **extra_fields):
-        extra_fields.setdefault("role", "admin")
+        extra_fields.setdefault("role", User.Role.ADMIN)
         return super().create_superuser(username, email=email, password=password, **extra_fields)
 
 
 class User(AbstractUser):
     """Custom User model using Django auth_user table."""
 
-    ROLE_CHOICES = [
-        ("admin", "Admin"),
-        ("teacher", "Teacher"),
-        ("student", "Student"),
-    ]
+    class Role(models.TextChoices):
+        ADMIN = "admin", "Admin"
+        TEACHER = "teacher", "Guru"
+        STUDENT = "student", "Siswa"
+
+    ROLE_CHOICES = Role.choices
 
     email = models.EmailField(max_length=254, unique=True)
-    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default="student")
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default=Role.STUDENT)
     is_deleted = models.BooleanField(default=False)
 
     REQUIRED_FIELDS = ["email", "first_name", "last_name"]
@@ -41,15 +42,15 @@ class User(AbstractUser):
 
     @property
     def is_admin(self):
-        return self.role == "admin"
+        return self.role == self.Role.ADMIN
 
     @property
     def is_teacher(self):
-        return self.role == "teacher"
+        return self.role == self.Role.TEACHER
 
     @property
     def is_student(self):
-        return self.role == "student"
+        return self.role == self.Role.STUDENT
 
 
 class UserProfile(BaseModel):
@@ -97,12 +98,14 @@ class UserActivityLog(BaseModel):
 
 class UserImportLog(models.Model):
     """Log for bulk user import from Excel"""
-    STATUS_CHOICES = [
-        ('pending', 'Pending'),
-        ('processing', 'Processing'),
-        ('completed', 'Completed'),
-        ('failed', 'Failed'),
-    ]
+
+    class Status(models.TextChoices):
+        PENDING = "pending", "Menunggu"
+        PROCESSING = "processing", "Diproses"
+        COMPLETED = "completed", "Selesai"
+        FAILED = "failed", "Gagal"
+
+    STATUS_CHOICES = Status.choices
     
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     imported_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='import_logs')
@@ -112,7 +115,7 @@ class UserImportLog(models.Model):
     total_created = models.IntegerField(default=0)
     total_skipped = models.IntegerField(default=0)
     total_failed = models.IntegerField(default=0)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=Status.PENDING)
     error_details = models.JSONField(null=True, blank=True, default=list)
     skip_details = models.JSONField(null=True, blank=True, default=list)
     send_credentials_email = models.BooleanField(default=False)

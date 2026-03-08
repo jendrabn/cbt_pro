@@ -1,5 +1,5 @@
 {% extends "layouts/base_admin.html" %}
-{% load static %}
+{% load static cbt_extras %}
 
 {% block title %}Impor Pengguna - CBT{% endblock %}
 
@@ -174,10 +174,10 @@
                                     <tr>
                                         <td>{{ row.created_at|date:"d M Y H:i" }}</td>
                                         <td>{{ row.original_filename }}</td>
-                                        <td class="text-center"><span class="badge text-bg-success">{{ row.total_created }}</span></td>
-                                        <td class="text-center"><span class="badge text-bg-warning">{{ row.total_skipped }}</span></td>
-                                        <td class="text-center"><span class="badge text-bg-danger">{{ row.total_failed }}</span></td>
-                                        <td><span class="badge text-bg-secondary">{{ row.get_status_display }}</span></td>
+                                        <td class="text-center">{% soft_badge row.total_created "success" %}</td>
+                                        <td class="text-center">{% soft_badge row.total_skipped "warning" %}</td>
+                                        <td class="text-center">{% soft_badge row.total_failed "danger" %}</td>
+                                        <td>{% enum_badge "user_import_status" row.status %}</td>
                                         <td class="text-end pe-3">
                                             <div class="d-flex justify-content-end gap-1">
                                                 <a href="{% url 'user_import_report' row.id %}" class="btn btn-sm btn-outline-primary">

@@ -320,7 +320,7 @@ def build_student_results_rows(results_qs, status_filter=""):
         )
 
         status_label = "Lulus" if metrics["passed"] else "Belum Lulus"
-        status_badge = "text-bg-success" if metrics["passed"] else "text-bg-danger"
+        status_tone = "success" if metrics["passed"] else "danger"
 
         rows.append(
             {
@@ -334,7 +334,7 @@ def build_student_results_rows(results_qs, status_filter=""):
                 "percentage": round(metrics["final_percentage"], 2),
                 "passed": bool(metrics["passed"]),
                 "status_label": status_label,
-                "status_badge": status_badge,
+                "status_tone": status_tone,
                 "correct_answers": int(selected_result.correct_answers or 0),
                 "wrong_answers": int(selected_result.wrong_answers or 0),
                 "unanswered": int(selected_result.unanswered or 0),
@@ -484,7 +484,7 @@ def build_student_result_detail_context(result):
         "score_max": score_max,
         "percentage_value": round(final_metrics["final_percentage"], 2),
         "status_label": "Lulus" if final_metrics["passed"] else "Belum Lulus",
-        "status_badge": "text-bg-success" if final_metrics["passed"] else "text-bg-danger",
+        "status_tone": "success" if final_metrics["passed"] else "danger",
         "rank_label": selected_result.rank_in_exam or "-",
         "percentile_label": round(_to_float(selected_result.percentile), 2) if selected_result.percentile is not None else None,
         "time_taken_human": format_seconds_human(selected_result.time_taken_seconds or 0),

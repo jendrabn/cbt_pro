@@ -108,7 +108,7 @@
                 <div class="card">
                     <div class="card-header bg-white d-flex flex-wrap justify-content-between align-items-center gap-2">
                         <h3 class="h6 mb-0">Bank Soal Tersedia</h3>
-                        <span class="badge text-bg-light"><span id="availableQuestionVisibleCount">0</span> soal</span>
+                        <span class="cbt-status-badge is-secondary"><span id="availableQuestionVisibleCount">0</span> soal</span>
                     </div>
                     <div class="card-body">
                         <div class="border rounded p-2 bg-light mb-3">
@@ -178,8 +178,8 @@
                     <div class="card-header bg-white d-flex flex-wrap justify-content-between align-items-center gap-2">
                         <h3 class="h6 mb-0">Soal Terpilih</h3>
                         <div class="d-flex flex-wrap gap-2">
-                            <span class="badge text-bg-primary">Total Soal: <span id="selectedQuestionCountTop">0</span></span>
-                            <span class="badge text-bg-secondary">Total Poin: <span id="selectedQuestionTotalPointsTop">0.00</span></span>
+                            <span class="cbt-status-badge is-primary">Total Soal: <span id="selectedQuestionCountTop">0</span></span>
+                            <span class="cbt-status-badge is-secondary">Total Poin: <span id="selectedQuestionTotalPointsTop">0.00</span></span>
                         </div>
                     </div>
                     <div class="card-body">
@@ -394,7 +394,7 @@
                 <div class="col-md-6">
                     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
                         <h3 class="h6 mb-0">Pilih Kelas</h3>
-                        <span class="badge text-bg-light">Total Kelas: {{ form.available_classes|length }}</span>
+                        <span class="cbt-status-badge is-secondary">Total Kelas: {{ form.available_classes|length }}</span>
                     </div>
                     <div class="list-group" id="classAssignmentList" style="max-height: 22rem; overflow:auto;">
                         {% for class_obj in form.available_classes %}
@@ -413,7 +413,7 @@
                     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
                         <h3 class="h6 mb-0">Pilih Siswa Spesifik</h3>
                         <div class="d-flex flex-wrap align-items-center gap-2">
-                            <span class="badge text-bg-light">Total Siswa: {{ form.available_students|length }}</span>
+                            <span class="cbt-status-badge is-secondary">Total Siswa: {{ form.available_students|length }}</span>
                             <button type="button" class="btn btn-sm btn-outline-secondary" id="studentAssignmentToggleSelectBtn" {% if not form.available_students %}disabled{% endif %}>
                                 <i class="ri-check-double-line me-1"></i><span class="student-toggle-select-label">Pilih Semua</span>
                             </button>

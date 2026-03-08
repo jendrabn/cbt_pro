@@ -1,5 +1,5 @@
 {% extends "layouts/base_teacher.html" %}
-{% load static %}
+{% load static cbt_extras %}
 
 {% block title %}Data Siswa - CBT{% endblock %}
 
@@ -122,9 +122,9 @@
                                 <td>{{ row.user.email }}</td>
                                 <td>
                                     {% if row.user.is_active %}
-                                    <span class="badge text-bg-success">Aktif</span>
+                                    {% soft_badge "Aktif" "success" %}
                                     {% else %}
-                                    <span class="badge text-bg-secondary">Nonaktif</span>
+                                    {% soft_badge "Nonaktif" "secondary" %}
                                     {% endif %}
                                 </td>
                                 <td>{{ row.assigned_exam_count }}</td>

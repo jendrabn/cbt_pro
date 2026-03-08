@@ -515,15 +515,15 @@ class UserListView(AdminUserBaseView, ListView):
                     "date_to": self.request.GET.get("date_to", ""),
                     "sort": self.request.GET.get("sort", "-date_joined"),
                 },
-                "role_choices": User.ROLE_CHOICES,
+                "role_choices": User.Role.choices,
                 "querystring": self._current_querystring_without_page(),
                 "sort_querystring": sort_query.urlencode(),
                 "summary": {
                     "total": all_users.count(),
                     "active": all_users.filter(is_active=True).count(),
                     "inactive": all_users.filter(is_active=False).count(),
-                    "teacher": all_users.filter(role="teacher").count(),
-                    "student": all_users.filter(role="student").count(),
+                    "teacher": all_users.filter(role=User.Role.TEACHER).count(),
+                    "student": all_users.filter(role=User.Role.STUDENT).count(),
                 },
             }
         )

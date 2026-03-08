@@ -1,5 +1,5 @@
 {% extends "layouts/base_teacher.html" %}
-{% load static %}
+{% load static cbt_extras %}
 
 {% block title %}Detail Siswa - CBT{% endblock %}
 
@@ -46,9 +46,9 @@
                             <div class="col-md-6">
                                 <small class="text-muted d-block">Status</small>
                                 {% if student_user.is_active %}
-                                <span class="badge text-bg-success">Aktif</span>
+                                {% soft_badge "Aktif" "success" %}
                                 {% else %}
-                                <span class="badge text-bg-secondary">Nonaktif</span>
+                                {% soft_badge "Nonaktif" "secondary" %}
                                 {% endif %}
                             </div>
                             <div class="col-md-6">
@@ -77,7 +77,7 @@
                         <h3 class="h6">Kelas Terkait dari Ujian Anda</h3>
                         <div class="d-flex flex-wrap gap-2">
                             {% for class_obj in related_classes %}
-                            <span class="badge text-bg-light">{{ class_obj.name }}</span>
+                            <span class="cbt-status-badge is-secondary">{{ class_obj.name }}</span>
                             {% empty %}
                             <span class="text-muted">Siswa ini tidak terhubung lewat assignment kelas pada ujian Anda.</span>
                             {% endfor %}
@@ -145,7 +145,7 @@
                                     <div class="small">{{ exam.start_time|date:"d M Y H:i" }}</div>
                                     <div class="small text-muted">{{ exam.end_time|date:"d M Y H:i" }}</div>
                                 </td>
-                                <td><span class="badge text-bg-info">{{ exam.get_status_display }}</span></td>
+                                <td>{% enum_badge "exam_status" exam.status %}</td>
                             </tr>
                             {% empty %}
                             <tr>
@@ -182,7 +182,7 @@
                                     <p class="small text-muted mb-0">{{ attempt.exam.subject.name }}</p>
                                 </td>
                                 <td>{{ attempt.attempt_number }}</td>
-                                <td><span class="badge text-bg-secondary">{{ attempt.get_status_display }}</span></td>
+                                <td>{% enum_badge "attempt_status" attempt.status %}</td>
                                 <td>{{ attempt.percentage }}%</td>
                                 <td>{{ attempt.submit_time|date:"d M Y H:i"|default:"-" }}</td>
                             </tr>

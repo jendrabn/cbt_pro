@@ -1,5 +1,5 @@
 {% extends "layouts/base_teacher.html" %}
-{% load static %}
+{% load static cbt_extras %}
 
 {% block title %}Riwayat Attempt - {{ student.get_full_name|default:student.username }}{% endblock %}
 
@@ -50,13 +50,13 @@
                                 <td>{{ row.percentage }}%</td>
                                 <td>
                                     {% if row.passed %}
-                                    <span class="badge text-bg-success">Ya</span>
+                                    {% soft_badge "Ya" "success" %}
                                     {% else %}
-                                    <span class="badge text-bg-danger">Tidak</span>
+                                    {% soft_badge "Tidak" "danger" %}
                                     {% endif %}
                                 </td>
                                 <td>{{ row.duration_label }}</td>
-                                <td>{% if row.is_final %}★ Final{% else %}-{% endif %}</td>
+                                <td>{% if row.is_final %}{% soft_badge "Final" "primary" %}{% else %}-{% endif %}</td>
                             </tr>
                             {% empty %}
                             <tr>

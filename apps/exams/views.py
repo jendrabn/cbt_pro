@@ -375,7 +375,7 @@ class ExamCreateWizard(TeacherExamBaseView, CreateView):
         self.object = exam
         messages.success(
             self.request,
-            f"Ujian '{exam.title}' berhasil {'dipublikasikan' if exam.status == 'published' else 'disimpan sebagai draf'}.",
+            f"Ujian '{exam.title}' berhasil {'dipublikasikan' if exam.status == Exam.Status.PUBLISHED else 'disimpan sebagai draf'}.",
         )
         return redirect("exam_list")
 
@@ -392,7 +392,11 @@ class ExamCreateWizard(TeacherExamBaseView, CreateView):
 
 
 class ExamQuestionPickerView(TeacherExamBaseView, View):
-    VALID_TYPES = {"multiple_choice", "essay", "short_answer"}
+    VALID_TYPES = {
+        Question.QuestionType.MULTIPLE_CHOICE,
+        Question.QuestionType.ESSAY,
+        Question.QuestionType.SHORT_ANSWER,
+    }
     MAX_PAGE_SIZE = 100
     DEFAULT_PAGE_SIZE = 50
 
@@ -499,7 +503,7 @@ class ExamUpdateView(TeacherExamBaseView, UpdateView):
         exam = save_exam_from_form(form, self.request.user, instance=self.object)
         messages.success(
             self.request,
-            f"Ujian '{exam.title}' berhasil diperbarui ({'dipublikasikan' if exam.status == 'published' else 'draf'}).",
+            f"Ujian '{exam.title}' berhasil diperbarui ({'dipublikasikan' if exam.status == Exam.Status.PUBLISHED else 'draf'}).",
         )
         return redirect("exam_detail", pk=exam.pk)
 
@@ -532,7 +536,7 @@ class ExamPublishView(TeacherExamBaseView, View):
         updated = toggle_publish_exam(exam)
         if previous == updated.status:
             messages.info(request, f"Status ujian '{exam.title}' tidak berubah.")
-        elif updated.status == "published":
+        elif updated.status == Exam.Status.PUBLISHED:
             messages.success(request, f"Ujian '{exam.title}' berhasil dipublikasikan.")
         else:
             messages.success(request, f"Ujian '{exam.title}' dikembalikan ke draf.")

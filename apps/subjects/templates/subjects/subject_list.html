@@ -1,5 +1,5 @@
 {% extends "layouts/base_admin.html" %}
-{% load static %}
+{% load static cbt_extras %}
 
 {% block title %}Manajemen Mata Pelajaran - CBT{% endblock %}
 
@@ -114,7 +114,7 @@
                             >
                                 <td><small class="text-muted" title="{{ row.subject.id }}">{{ row.subject.id|truncatechars:8 }}</small></td>
                                 <td class="fw-semibold">{{ row.subject.name }}</td>
-                                <td><span class="badge text-bg-light">{{ row.subject.code }}</span></td>
+                                <td>{% soft_badge row.subject.code "secondary" %}</td>
                                 <td>
                                     {% if row.subject.is_active %}
                                         <span class="cbt-status-badge is-success">Aktif</span>

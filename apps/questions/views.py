@@ -108,9 +108,9 @@ class QuestionListView(TeacherQuestionBaseView, ListView):
                 "summary": {
                     "total": self.get_base_queryset().count(),
                     "filtered": self.object_list.count(),
-                    "multiple_choice": self.get_base_queryset().filter(question_type="multiple_choice").count(),
-                    "essay": self.get_base_queryset().filter(question_type="essay").count(),
-                    "short_answer": self.get_base_queryset().filter(question_type="short_answer").count(),
+                    "multiple_choice": self.get_base_queryset().filter(question_type=Question.QuestionType.MULTIPLE_CHOICE).count(),
+                    "essay": self.get_base_queryset().filter(question_type=Question.QuestionType.ESSAY).count(),
+                    "short_answer": self.get_base_queryset().filter(question_type=Question.QuestionType.SHORT_ANSWER).count(),
                 },
             }
         )

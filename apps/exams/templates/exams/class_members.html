@@ -1,5 +1,5 @@
 {% extends "layouts/base_admin.html" %}
-{% load static %}
+{% load static cbt_extras %}
 
 {% block title %}Anggota Kelas - CBT{% endblock %}
 
@@ -95,8 +95,8 @@
                             </button>
                         </div>
                         <div class="d-flex flex-wrap gap-2">
-                            <span class="badge text-bg-light" id="selectedMembersBadge">Total Siswa Terpilih: 0</span>
-                            <span class="badge text-bg-light">Total Baris: {{ student_rows|length }}</span>
+                            <span class="cbt-status-badge is-secondary" id="selectedMembersBadge">Total Siswa Terpilih: 0</span>
+                            <span class="cbt-status-badge is-secondary">Total Baris: {{ student_rows|length }}</span>
                         </div>
                     </div>
 
@@ -133,9 +133,9 @@
                                     <td>{% if row.profile %}{{ row.profile.class_grade|default:"-" }}{% else %}-{% endif %}</td>
                                     <td>
                                         {% if row.student.is_active %}
-                                        <span class="badge text-bg-success">Aktif</span>
+                                        {% soft_badge "Aktif" "success" %}
                                         {% else %}
-                                        <span class="badge text-bg-secondary">Nonaktif</span>
+                                        {% soft_badge "Nonaktif" "secondary" %}
                                         {% endif %}
                                     </td>
                                 </tr>

@@ -2,7 +2,10 @@ from __future__ import annotations
 
 from django import template
 from django.core.exceptions import ObjectDoesNotExist
+from django.utils.html import format_html
 from urllib.parse import quote_plus
+
+from apps.core.enums import get_enum_badge
 
 register = template.Library()
 
@@ -70,3 +73,21 @@ def cbt_active(context, *url_names: str) -> str:
     resolver_match = getattr(request, "resolver_match", None)
     current_name = getattr(resolver_match, "url_name", "")
     return "active" if current_name in set(url_names) else ""
+
+
+def _render_badge(label: str, tone: str, extra_classes: str = "") -> str:
+    classes = f"cbt-status-badge is-{tone}"
+    if extra_classes:
+        classes = f"{classes} {extra_classes}".strip()
+    return format_html('<span class="{}">{}</span>', classes, label)
+
+
+@register.simple_tag
+def soft_badge(label: str, tone: str = "secondary", extra_classes: str = "") -> str:
+    return _render_badge(str(label), str(tone or "secondary"), extra_classes=extra_classes)
+
+
+@register.simple_tag
+def enum_badge(kind: str, value, label: str | None = None, extra_classes: str = "") -> str:
+    badge = get_enum_badge(kind, value, label=label)
+    return _render_badge(badge["label"], badge["tone"], extra_classes=extra_classes)

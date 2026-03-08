@@ -1,5 +1,5 @@
 {% extends "layouts/base_teacher.html" %}
-{% load static %}
+{% load static cbt_extras %}
 
 {% block title %}Bank Soal Guru - CBT{% endblock %}
 
@@ -170,13 +170,7 @@
                                 </td>
                                 <td><small class="text-muted" title="{{ question.id }}">{{ question.id|truncatechars:8 }}</small></td>
                                 <td>
-                                    {% if question.question_type == 'multiple_choice' %}
-                                    <span class="badge text-bg-primary">Pilihan Ganda</span>
-                                    {% elif question.question_type == 'essay' %}
-                                    <span class="badge text-bg-info">Esai</span>
-                                    {% else %}
-                                    <span class="badge text-bg-secondary">Jawaban Singkat</span>
-                                    {% endif %}
+                                    {% enum_badge "question_type" question.question_type %}
                                 </td>
                                 <td>
                                     <p class="mb-1 fw-semibold">{{ question.question_text|striptags|truncatechars:80 }}</p>
@@ -186,12 +180,8 @@
                                 </td>
                                 <td>{{ question.category.name|default:"-" }}</td>
                                 <td>
-                                    {% if question.difficulty_level == 'easy' %}
-                                    <span class="badge badge-difficulty-easy">Mudah</span>
-                                    {% elif question.difficulty_level == 'medium' %}
-                                    <span class="badge badge-difficulty-medium">Sedang</span>
-                                    {% elif question.difficulty_level == 'hard' %}
-                                    <span class="badge badge-difficulty-hard">Sulit</span>
+                                    {% if question.difficulty_level %}
+                                    {% enum_badge "question_difficulty" question.difficulty_level %}
                                     {% else %}
                                     <span class="text-muted">-</span>
                                     {% endif %}

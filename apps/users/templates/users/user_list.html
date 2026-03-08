@@ -1,5 +1,5 @@
 {% extends "layouts/base_admin.html" %}
-{% load static %}
+{% load static cbt_extras %}
 
 {% block title %}Manajemen Pengguna - CBT{% endblock %}
 
@@ -169,12 +169,12 @@
                                     <td class="fw-semibold">{{ user.username }}</td>
                                     <td>{{ user.get_full_name|default:"-" }}</td>
                                     <td>{{ user.email }}</td>
-                                    <td><span class="badge text-bg-primary">{{ user.get_role_display }}</span></td>
+                                    <td>{% enum_badge "user_role" user.role %}</td>
                                     <td>
                                         {% if user.is_active %}
-                                        <span class="badge text-bg-success">Aktif</span>
+                                        {% soft_badge "Aktif" "success" %}
                                         {% else %}
-                                        <span class="badge text-bg-secondary">Nonaktif</span>
+                                        {% soft_badge "Nonaktif" "secondary" %}
                                         {% endif %}
                                     </td>
                                     <td>{{ user.date_joined|date:"d M Y" }}</td>

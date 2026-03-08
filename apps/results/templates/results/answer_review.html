@@ -1,5 +1,5 @@
 {% extends "layouts/base_teacher.html" %}
-{% load static %}
+{% load static cbt_extras %}
 
 {% block title %}Review Jawaban Siswa - CBT{% endblock %}
 
@@ -37,9 +37,11 @@
                         <p class="mb-1"><span class="text-muted">Mata Pelajaran:</span> {{ exam.subject.name }}</p>
                         <p class="mb-1"><span class="text-muted">Siswa:</span> {{ result.student.get_full_name|default:result.student.username }}</p>
                         <p class="mb-0"><span class="text-muted">Status:</span>
-                            <span class="badge {% if result.passed %}text-bg-success{% else %}text-bg-danger{% endif %}">
-                                {% if result.passed %}Lulus{% else %}Belum Lulus{% endif %}
-                            </span>
+                            {% if result.passed %}
+                            {% soft_badge "Lulus" "success" %}
+                            {% else %}
+                            {% soft_badge "Belum Lulus" "danger" %}
+                            {% endif %}
                         </p>
                     </div>
                     <div class="col-md-6">
@@ -72,7 +74,7 @@
                     <article class="border rounded-3 p-3 review-answer-card">
                         <div class="d-flex flex-wrap gap-2 align-items-center justify-content-between mb-2">
                             <h4 class="h6 mb-0">Soal {{ row.display_order }}</h4>
-                            <span class="badge text-bg-{{ row.status_type }}">{{ row.status_label }}</span>
+                            {% soft_badge row.status_label row.status_type %}
                         </div>
                         <div class="mb-2 question-richtext">{{ row.question.question_text|safe }}</div>
                         <div class="row g-2 small">
@@ -116,8 +118,8 @@
                             {% for violation in violations %}
                             <tr>
                                 <td class="ps-3">{{ violation.detected_at|date:"d M Y H:i:s" }}</td>
-                                <td>{{ violation.get_violation_type_display }}</td>
-                                <td>{{ violation.get_severity_display|default:"-" }}</td>
+                                <td>{% enum_badge "violation_type" violation.violation_type %}</td>
+                                <td>{% enum_badge "violation_severity" violation.severity %}</td>
                                 <td>{{ violation.description|default:"-" }}</td>
                             </tr>
                             {% empty %}

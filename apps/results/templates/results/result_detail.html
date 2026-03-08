@@ -1,5 +1,5 @@
 {% extends "layouts/base_teacher.html" %}
-{% load static %}
+{% load static cbt_extras %}
 
 {% block title %}Detail Hasil Ujian - CBT{% endblock %}
 
@@ -170,9 +170,11 @@
                                     <td title="Nilai final ({{ row.final_policy_label }} dari {{ row.attempts_used }} attempt)">{{ row.total_score }}</td>
                                     <td>{{ row.percentage }}%</td>
                                     <td>
-                                        <span class="badge {% if row.passed %}text-bg-success{% else %}text-bg-danger{% endif %}">
-                                            {{ row.status_label }}
-                                        </span>
+                                        {% if row.passed %}
+                                        {% soft_badge row.status_label "success" %}
+                                        {% else %}
+                                        {% soft_badge row.status_label "danger" %}
+                                        {% endif %}
                                     </td>
                                     <td>{{ row.time_taken_human }}</td>
                                     <td>
@@ -299,9 +301,9 @@
                                                 <td>{{ option.selected_percentage }}%</td>
                                                 <td>
                                                     {% if option.is_correct %}
-                                                    <span class="badge text-bg-success">Kunci</span>
+                                                    {% soft_badge "Kunci" "success" %}
                                                     {% else %}
-                                                    <span class="badge text-bg-secondary">Distraktor</span>
+                                                    {% soft_badge "Distraktor" "secondary" %}
                                                     {% endif %}
                                                 </td>
                                             </tr>

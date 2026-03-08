@@ -1,5 +1,5 @@
 {% extends "layouts/base_student.html" %}
-{% load static %}
+{% load static cbt_extras %}
 
 {% block title %}Riwayat Attempt - {{ exam.title }}{% endblock %}
 
@@ -49,9 +49,9 @@
                                 <td>{{ row.submitted_at_label }}</td>
                                 <td>{{ row.total_score }}</td>
                                 <td>{{ row.percentage }}%</td>
-                                <td>{{ row.status_label }}</td>
+                                <td>{% enum_badge "attempt_status" row.status %}</td>
                                 <td>{{ row.duration_label }}</td>
-                                <td>{% if row.is_final %}★ Final{% else %}-{% endif %}</td>
+                                <td>{% if row.is_final %}{% soft_badge "Final" "primary" %}{% else %}-{% endif %}</td>
                             </tr>
                             {% empty %}
                             <tr>

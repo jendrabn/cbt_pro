@@ -1,5 +1,5 @@
 {% extends "layouts/base_student.html" %}
-{% load static %}
+{% load static cbt_extras %}
 
 {% block title %}Daftar Ujian Siswa - CBT{% endblock %}
 
@@ -73,22 +73,22 @@
                 <ul class="nav nav-pills flex-wrap gap-2" role="tablist">
                     <li class="nav-item" role="presentation">
                         <a href="{{ tab_urls.upcoming }}" class="nav-link {% if active_tab == 'upcoming' %}active{% endif %}" title="Tampilkan ujian akan datang">
-                            {{ tab_labels.upcoming }} <span class="badge text-bg-light ms-1">{{ tab_counts.upcoming }}</span>
+                            {{ tab_labels.upcoming }} <span class="cbt-status-badge is-secondary ms-1">{{ tab_counts.upcoming }}</span>
                         </a>
                     </li>
                     <li class="nav-item" role="presentation">
                         <a href="{{ tab_urls.ongoing }}" class="nav-link {% if active_tab == 'ongoing' %}active{% endif %}" title="Tampilkan ujian yang sedang berlangsung">
-                            {{ tab_labels.ongoing }} <span class="badge text-bg-light ms-1">{{ tab_counts.ongoing }}</span>
+                            {{ tab_labels.ongoing }} <span class="cbt-status-badge is-secondary ms-1">{{ tab_counts.ongoing }}</span>
                         </a>
                     </li>
                     <li class="nav-item" role="presentation">
                         <a href="{{ tab_urls.completed }}" class="nav-link {% if active_tab == 'completed' %}active{% endif %}" title="Tampilkan ujian yang sudah selesai">
-                            {{ tab_labels.completed }} <span class="badge text-bg-light ms-1">{{ tab_counts.completed }}</span>
+                            {{ tab_labels.completed }} <span class="cbt-status-badge is-secondary ms-1">{{ tab_counts.completed }}</span>
                         </a>
                     </li>
                     <li class="nav-item" role="presentation">
                         <a href="{{ tab_urls.missed }}" class="nav-link {% if active_tab == 'missed' %}active{% endif %}" title="Tampilkan ujian yang terlewat">
-                            {{ tab_labels.missed }} <span class="badge text-bg-light ms-1">{{ tab_counts.missed }}</span>
+                            {{ tab_labels.missed }} <span class="cbt-status-badge is-secondary ms-1">{{ tab_counts.missed }}</span>
                         </a>
                     </li>
                 </ul>
@@ -106,11 +106,11 @@
                                 <h2 class="h6 mb-0">
                                     {{ row.exam.title }}
                                     {% if row.retake.enabled %}
-                                    <span class="badge text-bg-secondary ms-1"><i class="ri-repeat-line me-1"></i>{{ row.retake.max_attempts }}x</span>
+                                    <span class="cbt-status-badge is-secondary ms-1"><i class="ri-repeat-line me-1"></i>{{ row.retake.max_attempts }}x</span>
                                     {% endif %}
                                 </h2>
                             </div>
-                            <span class="badge {{ row.status_badge }}">{{ row.status_label }}</span>
+                            {% soft_badge row.status_label row.status_tone %}
                         </div>
 
                         <p class="small text-muted mb-2">{{ row.exam.description|default:"Tidak ada deskripsi."|striptags|truncatechars:115 }}</p>
@@ -283,7 +283,7 @@
     </div>
 
     <div class="modal fade" id="examResultModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
                     <h2 class="h6 mb-0">Ringkasan Hasil Ujian</h2>
@@ -312,4 +312,3 @@
 <script src="{% static 'attempts/js/exam_list.js' %}"></script>
     <script src="{% static 'attempts/js/retake_cooldown.js' %}"></script>
 {% endblock %}
-

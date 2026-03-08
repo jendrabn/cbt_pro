@@ -8,15 +8,16 @@ from apps.questions.models import Question, QuestionOption
 
 class ExamAttempt(BaseModel):
     """Student exam attempts"""
-    
-    STATUS_CHOICES = [
-        ('not_started', 'Not Started'),
-        ('in_progress', 'In Progress'),
-        ('submitted', 'Submitted'),
-        ('auto_submitted', 'Auto Submitted'),
-        ('grading', 'Grading'),
-        ('completed', 'Completed'),
-    ]
+
+    class Status(models.TextChoices):
+        NOT_STARTED = "not_started", "Belum Mulai"
+        IN_PROGRESS = "in_progress", "Sedang Berlangsung"
+        SUBMITTED = "submitted", "Sudah Submit"
+        AUTO_SUBMITTED = "auto_submitted", "Submit Otomatis"
+        GRADING = "grading", "Sedang Dinilai"
+        COMPLETED = "completed", "Selesai"
+
+    STATUS_CHOICES = Status.choices
     
     exam = models.ForeignKey(Exam, on_delete=models.CASCADE, related_name='attempts')
     student = models.ForeignKey(User, on_delete=models.RESTRICT, related_name='exam_attempts')
@@ -29,7 +30,7 @@ class ExamAttempt(BaseModel):
     retake_available_from = models.DateTimeField(null=True, blank=True)
     
     # Status
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='not_started')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=Status.NOT_STARTED)
     
     # Results
     total_score = models.DecimalField(max_digits=7, decimal_places=2, default=0)
@@ -58,12 +59,13 @@ class ExamAttempt(BaseModel):
 
 class StudentAnswer(BaseModel):
     """Individual answers submitted by students"""
-    
-    ANSWER_TYPE_CHOICES = [
-        ('multiple_choice', 'Multiple Choice'),
-        ('essay', 'Essay'),
-        ('short_answer', 'Short Answer'),
-    ]
+
+    class AnswerType(models.TextChoices):
+        MULTIPLE_CHOICE = "multiple_choice", "Pilihan Ganda"
+        ESSAY = "essay", "Esai"
+        SHORT_ANSWER = "short_answer", "Jawaban Singkat"
+
+    ANSWER_TYPE_CHOICES = AnswerType.choices
     
     attempt = models.ForeignKey(ExamAttempt, on_delete=models.CASCADE, related_name='answers')
     question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='student_answers')
@@ -116,22 +118,23 @@ class EssayGrading(BaseModel):
 
 class ExamViolation(BaseModel):
     """Anti-cheat violation tracking"""
-    
-    VIOLATION_TYPE_CHOICES = [
-        ('tab_switch', 'Tab Switch'),
-        ('fullscreen_exit', 'Fullscreen Exit'),
-        ('copy_attempt', 'Copy Attempt'),
-        ('paste_attempt', 'Paste Attempt'),
-        ('right_click', 'Right Click'),
-        ('suspicious_activity', 'Suspicious Activity'),
-    ]
-    
-    SEVERITY_CHOICES = [
-        ('low', 'Low'),
-        ('medium', 'Medium'),
-        ('high', 'High'),
-        ('critical', 'Critical'),
-    ]
+
+    class ViolationType(models.TextChoices):
+        TAB_SWITCH = "tab_switch", "Pindah Tab"
+        FULLSCREEN_EXIT = "fullscreen_exit", "Keluar Fullscreen"
+        COPY_ATTEMPT = "copy_attempt", "Percobaan Menyalin"
+        PASTE_ATTEMPT = "paste_attempt", "Percobaan Menempel"
+        RIGHT_CLICK = "right_click", "Klik Kanan"
+        SUSPICIOUS_ACTIVITY = "suspicious_activity", "Aktivitas Mencurigakan"
+
+    class Severity(models.TextChoices):
+        LOW = "low", "Rendah"
+        MEDIUM = "medium", "Sedang"
+        HIGH = "high", "Tinggi"
+        CRITICAL = "critical", "Kritis"
+
+    VIOLATION_TYPE_CHOICES = ViolationType.choices
+    SEVERITY_CHOICES = Severity.choices
     
     attempt = models.ForeignKey(ExamAttempt, on_delete=models.CASCADE, related_name='violations')
     violation_type = models.CharField(max_length=50, choices=VIOLATION_TYPE_CHOICES)

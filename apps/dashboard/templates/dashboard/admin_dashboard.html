@@ -1,5 +1,5 @@
 {% extends "layouts/base_admin.html" %}
-{% load static %}
+{% load static cbt_extras %}
 
 {% block title %}Dashboard Admin - CBT{% endblock %}
 
@@ -89,7 +89,7 @@
                                         <td>{{ activity.user.username }}</td>
                                         <td class="text-end pe-3">
                                             <div class="d-flex justify-content-end gap-1">
-                                                <span class="badge text-bg-primary">{{ activity.action }}</span>
+                                                {% soft_badge activity.action "primary" %}
                                             </div>
                                         </td>
                                         <td class="pe-3 text-muted">{{ activity.description|default:"-"|truncatechars:70 }}</td>
@@ -134,15 +134,19 @@
                     <div class="card-body px-3 px-md-4">
                         <div class="health-row">
                             <span>Status Server</span>
-                            <span class="badge {% if server_status == 'Sehat' %}text-bg-success{% else %}text-bg-warning{% endif %}">
-                                {{ server_status }}
-                            </span>
+                            {% if server_status == 'Sehat' %}
+                            {% soft_badge server_status "success" %}
+                            {% else %}
+                            {% soft_badge server_status "warning" %}
+                            {% endif %}
                         </div>
                         <div class="health-row">
                             <span>Status Database</span>
-                            <span class="badge {% if database_status == 'Sehat' %}text-bg-success{% else %}text-bg-danger{% endif %}">
-                                {{ database_status }}
-                            </span>
+                            {% if database_status == 'Sehat' %}
+                            {% soft_badge database_status "success" %}
+                            {% else %}
+                            {% soft_badge database_status "danger" %}
+                            {% endif %}
                         </div>
                         <div class="health-row">
                             <span>Sesi Aktif</span>

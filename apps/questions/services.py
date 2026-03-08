@@ -20,17 +20,8 @@ from .models import (
 )
 
 
-QUESTION_TYPE_LABELS = {
-    "multiple_choice": "Pilihan Ganda",
-    "essay": "Esai",
-    "short_answer": "Jawaban Singkat",
-}
-
-DIFFICULTY_LABELS = {
-    "easy": "Mudah",
-    "medium": "Sedang",
-    "hard": "Sulit",
-}
+QUESTION_TYPE_LABELS = dict(Question.QuestionType.choices)
+DIFFICULTY_LABELS = dict(Question.Difficulty.choices)
 
 
 @dataclass
@@ -130,7 +121,7 @@ def save_question_image(question, uploaded_file):
 
 def sync_question_options(question, cleaned_data):
     question_type = cleaned_data.get("question_type")
-    if question_type != "multiple_choice":
+    if question_type != Question.QuestionType.MULTIPLE_CHOICE:
         QuestionOption.objects.filter(question=question).delete()
         return
 
@@ -156,7 +147,7 @@ def sync_question_options(question, cleaned_data):
 
 def sync_question_answer(question, cleaned_data):
     question_type = cleaned_data.get("question_type")
-    if question_type == "multiple_choice":
+    if question_type == Question.QuestionType.MULTIPLE_CHOICE:
         QuestionAnswer.objects.filter(question=question).delete()
         return
 
@@ -164,7 +155,7 @@ def sync_question_answer(question, cleaned_data):
     defaults = {
         "answer_text": (cleaned_data.get("answer_text") or "").strip(),
         "keywords": keywords,
-        "is_case_sensitive": bool(cleaned_data.get("is_case_sensitive")) if question_type == "short_answer" else False,
+        "is_case_sensitive": bool(cleaned_data.get("is_case_sensitive")) if question_type == Question.QuestionType.SHORT_ANSWER else False,
         "max_word_count": cleaned_data.get("max_word_count"),
     }
     QuestionAnswer.objects.update_or_create(question=question, defaults=defaults)

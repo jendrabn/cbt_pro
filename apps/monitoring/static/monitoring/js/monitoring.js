@@ -39,20 +39,28 @@
             .replace(/'/g, "&#039;");
     }
 
-    function badgeClassByIndicator(indicator) {
+    function badgeToneByIndicator(indicator) {
         if (indicator === "success") {
-            return "text-bg-success";
+            return "success";
         }
         if (indicator === "warning") {
-            return "text-bg-warning";
+            return "warning";
         }
         if (indicator === "danger") {
-            return "text-bg-danger";
+            return "danger";
         }
         if (indicator === "primary") {
-            return "text-bg-primary";
+            return "primary";
         }
-        return "text-bg-secondary";
+        return "secondary";
+    }
+
+    function renderSoftBadge(label, tone, extraClasses) {
+        var classes = "cbt-status-badge is-" + (tone || "secondary");
+        if (extraClasses) {
+            classes += " " + extraClasses;
+        }
+        return '<span class="' + classes + '">' + escapeHtml(label || "-") + "</span>";
     }
 
     document.addEventListener("DOMContentLoaded", function () {
@@ -187,7 +195,7 @@
                                         '<p class="small text-muted mb-0">@' + escapeHtml(student.username) + "</p>" +
                                     "</div>" +
                                 "</div>" +
-                                '<span class="badge ' + badgeClassByIndicator(student.indicator) + '">' + escapeHtml(student.status_label) + "</span>" +
+                                renderSoftBadge(student.status_label || "-", badgeToneByIndicator(student.indicator)) +
                             "</div>" +
                             '<div class="small text-muted mb-2">Indikator: ' + escapeHtml(student.indicator_label || "-") + "</div>" +
                             '<div class="small mb-1 d-flex justify-content-between"><span>Progress</span><span>' + escapeHtml(String(student.progress_percent)) + "%</span></div>" +
@@ -228,7 +236,7 @@
                         '<div class="violation-feed-item">' +
                             '<div class="d-flex justify-content-between align-items-center mb-1">' +
                                 '<strong class="small">' + escapeHtml(item.student_name) + "</strong>" +
-                                '<span class="badge text-bg-' + escapeHtml(item.severity_badge || "secondary") + '">' + escapeHtml(item.severity_label || "-") + "</span>" +
+                                renderSoftBadge(item.severity_label || "-", item.severity_badge || "secondary") +
                             "</div>" +
                             '<p class="small mb-1">' + escapeHtml(item.violation_label || "-") + "</p>" +
                             '<p class="small text-muted mb-0">' + escapeHtml(item.detected_at_label || "-") + "</p>" +
@@ -343,8 +351,8 @@
             }
             detailScreenshotsGrid.innerHTML = items.map(function (item) {
                 var flaggedBadge = item.is_flagged
-                    ? '<span class="badge text-bg-danger">Flagged</span>'
-                    : '<span class="badge text-bg-secondary">Normal</span>';
+                    ? renderSoftBadge("Flagged", "danger")
+                    : renderSoftBadge("Normal", "secondary");
                 var reason = item.flag_reason ? '<p class="small text-danger mb-0">Alasan: ' + escapeHtml(item.flag_reason) + "</p>" : "";
                 return (
                     '<div class="col-md-4">' +
@@ -371,7 +379,7 @@
                     '<article class="detail-violation-item">' +
                         '<div class="d-flex align-items-center justify-content-between mb-1">' +
                             "<strong>" + escapeHtml(item.violation_label || "-") + "</strong>" +
-                            '<span class="badge text-bg-' + escapeHtml(item.severity_badge || "secondary") + '">' + escapeHtml(item.severity_label || "-") + "</span>" +
+                            renderSoftBadge(item.severity_label || "-", item.severity_badge || "secondary") +
                         "</div>" +
                         '<p class="small text-muted mb-1">' + escapeHtml(item.detected_at_label || "-") + "</p>" +
                         '<p class="small mb-0">' + escapeHtml(item.description || "-") + "</p>" +

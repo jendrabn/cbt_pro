@@ -1,5 +1,5 @@
 {% extends "layouts/base_admin.html" %}
-{% load static %}
+{% load static cbt_extras %}
 
 {% block title %}Detail Pengguna - CBT{% endblock %}
 
@@ -53,14 +53,14 @@
                             </div>
                             <div class="col-md-6">
                                 <small class="text-muted d-block">Role</small>
-                                <span class="badge text-bg-primary">{{ target_user.get_role_display }}</span>
+                                {% enum_badge "user_role" target_user.role %}
                             </div>
                             <div class="col-md-6">
                                 <small class="text-muted d-block">Status</small>
                                 {% if target_user.is_active %}
-                                <span class="badge text-bg-success">Aktif</span>
+                                {% soft_badge "Aktif" "success" %}
                                 {% else %}
-                                <span class="badge text-bg-secondary">Nonaktif</span>
+                                {% soft_badge "Nonaktif" "secondary" %}
                                 {% endif %}
                             </div>
                             <div class="col-md-6">
@@ -175,7 +175,7 @@
                                 <td class="ps-3">{{ log.created_at|date:"d M Y H:i" }}</td>
                                 <td class="text-end pe-3">
                                     <div class="d-flex justify-content-end gap-1">
-                                        <span class="badge text-bg-primary">{{ log.action }}</span>
+                                        {% soft_badge log.action "primary" %}
                                     </div>
                                 </td>
                                 <td class="pe-3 text-muted">{{ log.description|default:"-" }}</td>

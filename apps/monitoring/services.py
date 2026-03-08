@@ -10,12 +10,17 @@ from django.utils.html import strip_tags
 
 from apps.accounts.models import User, UserProfile
 from apps.attempts.models import ExamAttempt, ExamViolation, ProctoringScreenshot, StudentAnswer
+from apps.core.enums import choice_label, get_enum_badge_tone
 from apps.exams.models import ClassStudent, Exam
 from apps.notifications.models import Notification
 from apps.results.models import ExamResult
 
 
-COMPLETED_ATTEMPT_STATUSES = {"submitted", "auto_submitted", "completed"}
+COMPLETED_ATTEMPT_STATUSES = {
+    ExamAttempt.Status.SUBMITTED,
+    ExamAttempt.Status.AUTO_SUBMITTED,
+    ExamAttempt.Status.COMPLETED,
+}
 STATUS_PRIORITY = {
     "active": 0,
     "idle": 1,
@@ -25,16 +30,13 @@ STATUS_PRIORITY = {
     "unknown": 5,
 }
 SEVERITY_LABELS = {
-    "low": "Rendah",
-    "medium": "Sedang",
-    "high": "Tinggi",
-    "critical": "Kritis",
-}
-SEVERITY_BADGES = {
-    "low": "success",
-    "medium": "warning",
-    "high": "danger",
-    "critical": "dark",
+    value: choice_label(ExamViolation.Severity, value)
+    for value in (
+        ExamViolation.Severity.LOW,
+        ExamViolation.Severity.MEDIUM,
+        ExamViolation.Severity.HIGH,
+        ExamViolation.Severity.CRITICAL,
+    )
 }
 
 
@@ -76,14 +78,14 @@ def _remaining_seconds(exam: Exam, attempt: ExamAttempt, now):
 def _attempt_status(attempt: ExamAttempt, now):
     if attempt.status in COMPLETED_ATTEMPT_STATUSES:
         return "submitted", "Sudah Submit"
-    if attempt.status == "in_progress":
+    if attempt.status == ExamAttempt.Status.IN_PROGRESS:
         last_seen = attempt.updated_at or attempt.start_time or attempt.created_at
         if last_seen and (now - last_seen) >= timedelta(minutes=5):
             return "idle", "Idle"
         return "active", "Aktif"
-    if attempt.status == "not_started":
+    if attempt.status == ExamAttempt.Status.NOT_STARTED:
         return "not_started", "Belum Mulai"
-    if attempt.status == "grading":
+    if attempt.status == ExamAttempt.Status.GRADING:
         return "grading", "Penilaian"
     return "unknown", "Tidak Diketahui"
 
@@ -103,9 +105,9 @@ def _status_indicator(status_key: str, violations_count: int, max_violations_all
 
 
 def _serialize_violation(violation: ExamViolation):
-    severity = (violation.severity or "medium").lower()
+    severity = (violation.severity or ExamViolation.Severity.MEDIUM).lower()
     if severity not in SEVERITY_LABELS:
-        severity = "medium"
+        severity = ExamViolation.Severity.MEDIUM
     return {
         "id": str(violation.id),
         "student_id": str(violation.attempt.student_id),
@@ -114,8 +116,8 @@ def _serialize_violation(violation: ExamViolation):
         "violation_label": violation.get_violation_type_display(),
         "description": violation.description or "-",
         "severity": severity,
-        "severity_label": SEVERITY_LABELS[severity],
-        "severity_badge": SEVERITY_BADGES[severity],
+        "severity_label": choice_label(ExamViolation.Severity, severity, default=SEVERITY_LABELS[ExamViolation.Severity.MEDIUM]),
+        "severity_badge": get_enum_badge_tone("violation_severity", severity),
         "detected_at": timezone.localtime(violation.detected_at).isoformat(),
         "detected_at_label": timezone.localtime(violation.detected_at).strftime("%d %b %Y %H:%M:%S"),
     }
@@ -561,7 +563,7 @@ def extend_attempt_time(exam: Exam, student_id, minutes: int):
         user=attempt.student,
         title=f"Penambahan Waktu Ujian: {exam.title}",
         message=f"Waktu pengerjaan Anda ditambah {minutes} menit oleh guru.",
-        notification_type="announcement",
+        notification_type=Notification.Type.ANNOUNCEMENT,
         related_entity_type="exam",
         related_entity_id=exam.id,
     )
@@ -593,7 +595,7 @@ def force_submit_attempt(attempt_id, teacher: User):
     now = timezone.now()
     if attempt.start_time and (attempt.time_spent_seconds or 0) <= 0:
         attempt.time_spent_seconds = max(int((now - attempt.start_time).total_seconds()), 0)
-    attempt.status = "auto_submitted"
+    attempt.status = ExamAttempt.Status.AUTO_SUBMITTED
     attempt.submit_time = now
     attempt.end_time = now
     attempt.save(
@@ -610,7 +612,7 @@ def force_submit_attempt(attempt_id, teacher: User):
         user=attempt.student,
         title=f"Attempt Ujian Dihentikan: {attempt.exam.title}",
         message="Attempt ujian Anda dihentikan oleh guru dan otomatis disubmit.",
-        notification_type="warning",
+        notification_type=Notification.Type.WARNING,
         related_entity_type="exam",
         related_entity_id=attempt.exam_id,
     )
@@ -650,7 +652,7 @@ def send_monitoring_announcement(exam: Exam, message: str, title: str = "", targ
                 user=user,
                 title=clean_title,
                 message=clean_message,
-                notification_type="announcement",
+                notification_type=Notification.Type.ANNOUNCEMENT,
                 related_entity_type="exam",
                 related_entity_id=exam.id,
             )

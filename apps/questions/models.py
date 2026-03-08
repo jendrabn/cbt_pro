@@ -25,18 +25,19 @@ class QuestionCategory(BaseModel):
 
 class Question(BaseModelSoftDelete):
     """Question bank"""
-    
-    QUESTION_TYPE_CHOICES = [
-        ('multiple_choice', 'Multiple Choice'),
-        ('essay', 'Essay'),
-        ('short_answer', 'Short Answer'),
-    ]
-    
-    DIFFICULTY_CHOICES = [
-        ('easy', 'Easy'),
-        ('medium', 'Medium'),
-        ('hard', 'Hard'),
-    ]
+
+    class QuestionType(models.TextChoices):
+        MULTIPLE_CHOICE = "multiple_choice", "Pilihan Ganda"
+        ESSAY = "essay", "Esai"
+        SHORT_ANSWER = "short_answer", "Jawaban Singkat"
+
+    class Difficulty(models.TextChoices):
+        EASY = "easy", "Mudah"
+        MEDIUM = "medium", "Sedang"
+        HARD = "hard", "Sulit"
+
+    QUESTION_TYPE_CHOICES = QuestionType.choices
+    DIFFICULTY_CHOICES = Difficulty.choices
     
     created_by = models.ForeignKey(User, on_delete=models.RESTRICT, related_name='questions')
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='questions')
@@ -74,14 +75,15 @@ class Question(BaseModelSoftDelete):
 
 class QuestionOption(BaseModel):
     """Options for multiple choice questions"""
-    
-    OPTION_LETTERS = [
-        ('A', 'A'),
-        ('B', 'B'),
-        ('C', 'C'),
-        ('D', 'D'),
-        ('E', 'E'),
-    ]
+
+    class OptionLetter(models.TextChoices):
+        A = "A", "A"
+        B = "B", "B"
+        C = "C", "C"
+        D = "D", "D"
+        E = "E", "E"
+
+    OPTION_LETTERS = OptionLetter.choices
     
     question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='options')
     option_letter = models.CharField(max_length=1, choices=OPTION_LETTERS)
@@ -146,12 +148,13 @@ class QuestionTagRelation(models.Model):
 
 
 class QuestionImportLog(models.Model):
-    STATUS_CHOICES = [
-        ("pending", "Pending"),
-        ("processing", "Processing"),
-        ("completed", "Completed"),
-        ("failed", "Failed"),
-    ]
+    class Status(models.TextChoices):
+        PENDING = "pending", "Menunggu"
+        PROCESSING = "processing", "Diproses"
+        COMPLETED = "completed", "Selesai"
+        FAILED = "failed", "Gagal"
+
+    STATUS_CHOICES = Status.choices
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     imported_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name="question_import_logs")
@@ -161,7 +164,7 @@ class QuestionImportLog(models.Model):
     total_created = models.IntegerField(default=0)
     total_skipped = models.IntegerField(default=0)
     total_failed = models.IntegerField(default=0)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=Status.PENDING)
     error_details = models.JSONField(null=True, blank=True, default=list)
     skip_details = models.JSONField(null=True, blank=True, default=list)
     started_at = models.DateTimeField(null=True, blank=True)

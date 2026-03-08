@@ -14,13 +14,7 @@ from apps.accounts.models import User
 from .models import Class, ClassStudent, Exam, ExamAssignment, ExamQuestion
 
 
-STATUS_LABELS = {
-    "draft": "Draf",
-    "published": "Dipublikasikan",
-    "ongoing": "Berlangsung",
-    "completed": "Selesai",
-    "cancelled": "Dibatalkan",
-}
+STATUS_LABELS = dict(Exam.Status.choices)
 
 
 @transaction.atomic
@@ -281,7 +275,7 @@ def save_exam_from_form(form, teacher, instance=None):
     if is_create:
         exam.created_by = teacher
 
-    exam.status = "published" if cleaned.get("status_action") == "publish" else "draft"
+    exam.status = Exam.Status.PUBLISHED if cleaned.get("status_action") == "publish" else Exam.Status.DRAFT
     exam.save()
 
     question_items = sorted(cleaned.get("parsed_questions", []), key=lambda item: item["display_order"])
@@ -340,10 +334,10 @@ def soft_delete_exam(exam):
 
 @transaction.atomic
 def toggle_publish_exam(exam):
-    if exam.status == "draft":
-        exam.status = "published"
-    elif exam.status == "published":
-        exam.status = "draft"
+    if exam.status == Exam.Status.DRAFT:
+        exam.status = Exam.Status.PUBLISHED
+    elif exam.status == Exam.Status.PUBLISHED:
+        exam.status = Exam.Status.DRAFT
     exam.save(update_fields=["status", "updated_at"])
     return exam
 
@@ -379,7 +373,7 @@ def duplicate_exam(exam, teacher):
         enable_screenshot_proctoring=exam.enable_screenshot_proctoring,
         screenshot_interval_seconds=exam.screenshot_interval_seconds,
         max_violations_allowed=exam.max_violations_allowed,
-        status="draft",
+        status=Exam.Status.DRAFT,
     )
 
     exam_questions = exam.exam_questions.all().order_by("display_order")
