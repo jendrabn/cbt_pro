@@ -1,0 +1,96 @@
+{% extends "layouts/base_admin.html" %}
+{% load static %}
+
+{% block title %}Hapus Kelas - CBT{% endblock %}
+
+{% block topbar %}
+    {% include "partials/topbar_admin.html" with parent_label="Kelas" parent_url="/admin/classes/" current_label="Hapus Kelas" %}
+{% endblock %}
+
+{% block main_attrs %}class="container py-5"{% endblock %}
+
+{% block page_header %}
+    <section class="cbt-page-header">
+        <div class="cbt-page-header-body">
+            {% include "partials/page_header.html" with eyebrow="Admin Panel" title="Hapus Kelas" subtitle="Penghapusan hanya diizinkan bila kelas belum dipakai untuk penugasan ujian." %}
+        </div>
+    </section>
+{% endblock %}
+
+{% block content %}
+        {% if messages %}
+            <div class="mb-3">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'info' }} py-2 mb-2">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <section class="card border-danger border-2 shadow-sm">
+            <div class="card-header bg-danger-subtle">
+                <h1 class="h5 mb-0 text-danger"><i class="ri-error-warning-line me-1"></i>Hapus Kelas</h1>
+            </div>
+            <div class="card-body">
+                <p class="mb-2">Anda akan menghapus kelas:</p>
+                <p class="fw-bold fs-5">{{ class_obj.name }}</p>
+
+                <div class="border rounded p-3 bg-light">
+                    <p class="fw-semibold mb-2">Ringkasan data terkait:</p>
+                    <ul class="mb-0 ps-3">
+                        <li>Jumlah anggota kelas: <strong>{{ usage.student_count }}</strong></li>
+                        <li>Jumlah anggota aktif: <strong>{{ usage.active_student_count }}</strong></li>
+                        <li>Jumlah penugasan ujian: <strong>{{ usage.exam_assignment_count }}</strong></li>
+                    </ul>
+                </div>
+
+                {% if usage.exam_assignment_count > 0 %}
+                <div class="alert alert-warning mt-3 mb-0">
+                    Kelas ini masih dipakai pada penugasan ujian. Penghapusan diblokir untuk mencegah putus relasi data.
+                    Gunakan edit kelas untuk menonaktifkan kelas bila diperlukan.
+                </div>
+                {% else %}
+                <p class="text-danger fw-semibold mt-3">
+                    Data keanggotaan kelas ini akan ikut terhapus dan tidak dapat dipulihkan.
+                </p>
+
+                <form method="post" id="confirmDeleteForm">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label required" for="confirmNameInput">Ketik ulang nama kelas untuk konfirmasi</label>
+                        <input
+                            type="text"
+                            class="form-control"
+                            name="confirm_name"
+                            id="confirmNameInput"
+                            required
+                            autocomplete="off"
+                        >
+                        <div class="form-text">Ketik persis: {{ expected_confirm_text }}</div>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-danger" id="deleteBtn" disabled>Hapus Permanen</button>
+                        <a href="{{ cancel_url }}" class="btn btn-outline-secondary">Batal</a>
+                    </div>
+                </form>
+                {% endif %}
+            </div>
+        </section>
+{% endblock %}
+
+{% block vendor_js %}
+{% if usage.exam_assignment_count == 0 %}
+<script>
+        (function () {
+            var input = document.getElementById("confirmNameInput");
+            var button = document.getElementById("deleteBtn");
+            var expected = "{{ expected_confirm_text|escapejs }}";
+            if (!input || !button) {
+                return;
+            }
+            input.addEventListener("input", function () {
+                button.disabled = input.value !== expected;
+            });
+        })();
+    </script>
+{% endif %}
+{% endblock %}

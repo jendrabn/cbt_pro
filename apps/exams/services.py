@@ -5,11 +5,13 @@ from datetime import datetime, time
 from decimal import Decimal
 
 from django.db import transaction
-from django.db.models import Prefetch, Q
+from django.db.models import Count, Prefetch, Q
 from django.utils import timezone
 from django.utils.dateparse import parse_date
 
-from .models import ClassStudent, Exam, ExamAssignment, ExamQuestion
+from apps.accounts.models import User
+
+from .models import Class, ClassStudent, Exam, ExamAssignment, ExamQuestion
 
 
 STATUS_LABELS = {
@@ -19,6 +21,162 @@ STATUS_LABELS = {
     "completed": "Selesai",
     "cancelled": "Dibatalkan",
 }
+
+
+@transaction.atomic
+def sync_classes_from_student_profiles():
+    students = list(
+        User.objects.filter(
+            role="student",
+            is_active=True,
+            is_deleted=False,
+            profile__class_grade__isnull=False,
+        )
+        .exclude(profile__class_grade="")
+        .select_related("profile")
+        .order_by("profile__class_grade", "first_name", "last_name", "username")
+    )
+    if not students:
+        return {
+            "students_processed": 0,
+            "classes_created": 0,
+            "classes_reactivated": 0,
+            "memberships_created": 0,
+            "memberships_updated": 0,
+        }
+
+    class_names = sorted(
+        {
+            (student.profile.class_grade or "").strip()
+            for student in students
+            if getattr(student, "profile", None) and (student.profile.class_grade or "").strip()
+        }
+    )
+    if not class_names:
+        return {
+            "students_processed": len(students),
+            "classes_created": 0,
+            "classes_reactivated": 0,
+            "memberships_created": 0,
+            "memberships_updated": 0,
+        }
+
+    existing_by_name = {item.name: item for item in Class.objects.filter(name__in=class_names)}
+    missing_classes = [
+        Class(name=class_name, is_active=True)
+        for class_name in class_names
+        if class_name not in existing_by_name
+    ]
+    if missing_classes:
+        Class.objects.bulk_create(missing_classes, ignore_conflicts=True)
+
+    classes_to_reactivate = [
+        class_obj
+        for class_name, class_obj in existing_by_name.items()
+        if class_name in class_names and not class_obj.is_active
+    ]
+    if classes_to_reactivate:
+        for class_obj in classes_to_reactivate:
+            class_obj.is_active = True
+        Class.objects.bulk_update(classes_to_reactivate, ["is_active"])
+
+    class_by_name = {item.name: item for item in Class.objects.filter(name__in=class_names)}
+    memberships_by_student = {}
+    for membership in ClassStudent.objects.filter(student_id__in=[student.id for student in students]).select_related("class_obj"):
+        memberships_by_student.setdefault(membership.student_id, []).append(membership)
+
+    to_create = []
+    to_update = []
+    for student in students:
+        class_name = (student.profile.class_grade or "").strip()
+        class_obj = class_by_name.get(class_name)
+        if not class_obj:
+            continue
+        current_memberships = memberships_by_student.get(student.id, [])
+        if not current_memberships:
+            to_create.append(ClassStudent(class_obj=class_obj, student=student))
+            continue
+        if len(current_memberships) == 1 and current_memberships[0].class_obj_id != class_obj.id:
+            current_memberships[0].class_obj_id = class_obj.id
+            to_update.append(current_memberships[0])
+            continue
+        if all(membership.class_obj_id != class_obj.id for membership in current_memberships):
+            to_create.append(ClassStudent(class_obj=class_obj, student=student))
+
+    if to_create:
+        ClassStudent.objects.bulk_create(to_create, ignore_conflicts=True)
+    if to_update:
+        ClassStudent.objects.bulk_update(to_update, ["class_obj"])
+
+    return {
+        "students_processed": len(students),
+        "classes_created": len(missing_classes),
+        "classes_reactivated": len(classes_to_reactivate),
+        "memberships_created": len(to_create),
+        "memberships_updated": len(to_update),
+    }
+
+
+def annotate_class_usage(queryset):
+    return queryset.annotate(
+        student_count=Count("students", distinct=True),
+        active_student_count=Count(
+            "students",
+            filter=Q(students__student__role="student", students__student__is_active=True, students__student__is_deleted=False),
+            distinct=True,
+        ),
+        exam_assignment_count=Count("exam_assignments", distinct=True),
+    )
+
+
+def get_class_usage_summary(class_obj):
+    memberships = ClassStudent.objects.filter(class_obj=class_obj)
+    return {
+        "student_count": memberships.count(),
+        "active_student_count": memberships.filter(
+            student__role="student",
+            student__is_active=True,
+            student__is_deleted=False,
+        ).count(),
+        "exam_assignment_count": class_obj.exam_assignments.count(),
+        "profile_match_count": User.objects.filter(
+            role="student",
+            is_active=True,
+            is_deleted=False,
+            profile__class_grade=class_obj.name,
+        ).count(),
+    }
+
+
+@transaction.atomic
+def replace_class_members(class_obj, student_ids):
+    valid_student_ids = set(
+        User.objects.filter(
+            id__in=student_ids,
+            role="student",
+            is_deleted=False,
+        ).values_list("id", flat=True)
+    )
+    existing_student_ids = set(
+        ClassStudent.objects.filter(class_obj=class_obj).values_list("student_id", flat=True)
+    )
+
+    to_remove = existing_student_ids - valid_student_ids
+    to_add = valid_student_ids - existing_student_ids
+
+    if to_remove:
+        ClassStudent.objects.filter(class_obj=class_obj, student_id__in=to_remove).delete()
+    if to_add:
+        ClassStudent.objects.bulk_create(
+            [ClassStudent(class_obj=class_obj, student_id=student_id) for student_id in to_add],
+            ignore_conflicts=True,
+        )
+
+    return {
+        "selected_total": len(valid_student_ids),
+        "memberships_added": len(to_add),
+        "memberships_removed": len(to_remove),
+    }
 
 
 @dataclass

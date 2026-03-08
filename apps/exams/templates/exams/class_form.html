@@ -1,0 +1,75 @@
+{% extends "layouts/base_admin.html" %}
+{% load static %}
+
+{% block title %}{{ page_title }} - CBT{% endblock %}
+
+{% block topbar %}
+    {% include "partials/topbar_admin.html" with parent_label="Kelas" parent_url="/admin/classes/" current_label=page_title %}
+{% endblock %}
+
+{% block main_attrs %}class="container-fluid px-3 px-md-4 py-4"{% endblock %}
+
+{% block page_header %}
+    <section class="cbt-page-header">
+        <div class="cbt-page-header-body">
+            {% include "partials/page_header.html" with eyebrow="Admin Panel" title=page_title subtitle="Atur identitas dan status kelas yang akan dipakai pada penugasan ujian." %}
+            <div class="d-flex align-items-center gap-2 cbt-page-header-actions">
+                <a href="{{ cancel_url }}" class="btn btn-outline-primary" title="Kembali ke daftar kelas">
+                    Kembali
+                </a>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block content %}
+        {% if messages %}
+            <div class="mb-3">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'info' }} py-2 mb-2">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+            {% for error in form.non_field_errors %}
+            <div>{{ error }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <section class="card border-0 shadow-sm">
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label required" for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
+                        {{ form.name }}
+                        {% if form.name.errors %}<div class="text-danger small mt-1">{{ form.name.errors|join:", " }}</div>{% endif %}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="{{ form.grade_level.id_for_label }}">{{ form.grade_level.label }}</label>
+                        {{ form.grade_level }}
+                        {% if form.grade_level.errors %}<div class="text-danger small mt-1">{{ form.grade_level.errors|join:", " }}</div>{% endif %}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="{{ form.academic_year.id_for_label }}">{{ form.academic_year.label }}</label>
+                        {{ form.academic_year }}
+                        {% if form.academic_year.errors %}<div class="text-danger small mt-1">{{ form.academic_year.errors|join:", " }}</div>{% endif %}
+                    </div>
+                    <div class="form-check mb-4">
+                        {{ form.is_active }}
+                        <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                            {{ form.is_active.label }}
+                        </label>
+                        {% if form.is_active.errors %}<div class="text-danger small mt-1">{{ form.is_active.errors|join:", " }}</div>{% endif %}
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">{{ submit_label }}</button>
+                        <a href="{{ cancel_url }}" class="btn btn-outline-secondary">Batal</a>
+                    </div>
+                </form>
+            </div>
+        </section>
+{% endblock %}

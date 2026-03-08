@@ -1,6 +1,11 @@
 from django.urls import path
 
 from .views import (
+    ClassCreateView,
+    ClassDeleteView,
+    ClassListView,
+    ClassMembersView,
+    ClassUpdateView,
     ExamCreateWizard,
     ExamDeleteView,
     ExamDetailView,
@@ -13,6 +18,11 @@ from .views import (
 )
 
 urlpatterns = [
+    path("admin/classes/", ClassListView.as_view(), name="class_list"),
+    path("admin/classes/create/", ClassCreateView.as_view(), name="class_create"),
+    path("admin/classes/<uuid:pk>/edit/", ClassUpdateView.as_view(), name="class_edit"),
+    path("admin/classes/<uuid:pk>/members/", ClassMembersView.as_view(), name="class_members"),
+    path("admin/classes/<uuid:pk>/delete/", ClassDeleteView.as_view(), name="class_delete"),
     path("teacher/exams/", ExamListView.as_view(), name="exam_list"),
     path("teacher/exams/create/", ExamCreateWizard.as_view(), name="exam_create"),
     path("teacher/exams/questions/search/", ExamQuestionPickerView.as_view(), name="exam_question_picker"),

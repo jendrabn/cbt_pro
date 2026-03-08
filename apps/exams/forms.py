@@ -13,7 +13,8 @@ from apps.accounts.models import User
 from apps.questions.models import Question, QuestionCategory
 from apps.subjects.models import Subject
 
-from .models import Class, ClassStudent, Exam
+from .models import Class, Exam
+from .services import sync_classes_from_student_profiles
 
 
 def _bootstrap_widget(field):
@@ -40,6 +41,38 @@ def _coerce_nullable_bool(value):
     if raw in {"false", "0", "tidak", "no"}:
         return False
     raise ValidationError("Nilai override navigasi tidak valid.")
+
+
+class ClassForm(forms.ModelForm):
+    class Meta:
+        model = Class
+        fields = ["name", "grade_level", "academic_year", "is_active"]
+        labels = {
+            "name": "Nama Kelas",
+            "grade_level": "Tingkat",
+            "academic_year": "Tahun Ajaran",
+            "is_active": "Status Aktif",
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            _bootstrap_widget(field)
+        self.fields["grade_level"].required = False
+        self.fields["academic_year"].required = False
+        self.fields["grade_level"].widget.attrs.setdefault("placeholder", "Contoh: XII")
+        self.fields["academic_year"].widget.attrs.setdefault("placeholder", "Contoh: 2025/2026")
+
+    def clean_name(self):
+        value = (self.cleaned_data.get("name") or "").strip()
+        if not value:
+            raise forms.ValidationError("Nama kelas wajib diisi.")
+        queryset = Class.objects.filter(name__iexact=value)
+        if self.instance and self.instance.pk:
+            queryset = queryset.exclude(pk=self.instance.pk)
+        if queryset.exists():
+            raise forms.ValidationError("Nama kelas sudah digunakan. Gunakan nama yang berbeda.")
+        return value
 
 
 class ExamWizardForm(forms.ModelForm):
@@ -169,7 +202,7 @@ class ExamWizardForm(forms.ModelForm):
         self.available_students = User.objects.none()
 
         if self.teacher:
-            self._sync_classes_from_student_profiles()
+            sync_classes_from_student_profiles()
             self.available_categories = (
                 QuestionCategory.objects.filter(
                     is_active=True,
@@ -260,71 +293,6 @@ class ExamWizardForm(forms.ModelForm):
                         }
                     )
             self.initial.setdefault("assignment_payload", json.dumps(assignments_payload))
-
-    def _sync_classes_from_student_profiles(self):
-        students = list(
-            User.objects.filter(
-                role="student",
-                is_active=True,
-                is_deleted=False,
-                profile__class_grade__isnull=False,
-            )
-            .exclude(profile__class_grade="")
-            .select_related("profile")
-            .order_by("profile__class_grade", "first_name", "last_name", "username")
-        )
-        if not students:
-            return
-
-        class_names = sorted(
-            {
-                (student.profile.class_grade or "").strip()
-                for student in students
-                if getattr(student, "profile", None) and (student.profile.class_grade or "").strip()
-            }
-        )
-        if not class_names:
-            return
-
-        existing_by_name = {item.name: item for item in Class.objects.filter(name__in=class_names)}
-        missing_classes = [
-            Class(name=class_name, is_active=True)
-            for class_name in class_names
-            if class_name not in existing_by_name
-        ]
-        if missing_classes:
-            Class.objects.bulk_create(missing_classes, ignore_conflicts=True)
-
-        class_by_name = {
-            item.name: item
-            for item in Class.objects.filter(name__in=class_names, is_active=True)
-        }
-        memberships_by_student = {}
-        for membership in ClassStudent.objects.filter(student_id__in=[student.id for student in students]).select_related("class_obj"):
-            memberships_by_student.setdefault(membership.student_id, []).append(membership)
-
-        to_create = []
-        to_update = []
-        for student in students:
-            class_name = (student.profile.class_grade or "").strip()
-            class_obj = class_by_name.get(class_name)
-            if not class_obj:
-                continue
-            current_memberships = memberships_by_student.get(student.id, [])
-            if not current_memberships:
-                to_create.append(ClassStudent(class_obj=class_obj, student=student))
-                continue
-            if len(current_memberships) == 1 and current_memberships[0].class_obj_id != class_obj.id:
-                current_memberships[0].class_obj_id = class_obj.id
-                to_update.append(current_memberships[0])
-                continue
-            if all(membership.class_obj_id != class_obj.id for membership in current_memberships):
-                to_create.append(ClassStudent(class_obj=class_obj, student=student))
-
-        if to_create:
-            ClassStudent.objects.bulk_create(to_create, ignore_conflicts=True)
-        if to_update:
-            ClassStudent.objects.bulk_update(to_update, ["class_obj"])
 
     def _parse_selected_questions_payload(self):
         raw_payload = (self.cleaned_data.get("selected_questions_payload") or "").strip()

@@ -10,23 +10,28 @@ from django.utils.html import strip_tags
 from django.views.decorators.clickjacking import xframe_options_sameorigin
 from django.urls import reverse, reverse_lazy
 from django.views import View
-from django.views.generic import CreateView, DetailView, ListView, UpdateView
+from django.views.generic import CreateView, DetailView, ListView, TemplateView, UpdateView
 
+from apps.accounts.models import User
 from apps.core.mixins import RoleRequiredMixin
 from apps.questions.models import Question
 from apps.subjects.models import Subject
 
-from .forms import ExamWizardForm
-from .models import Exam
+from .forms import ClassForm, ExamWizardForm
+from .models import Class, ClassStudent, Exam
 from .services import (
     STATUS_LABELS,
+    annotate_class_usage,
     build_exam_detail_context,
     build_exam_list_rows,
     duplicate_exam,
     filter_teacher_exams,
+    get_class_usage_summary,
     get_teacher_exam_queryset,
+    replace_class_members,
     save_exam_from_form,
     soft_delete_exam,
+    sync_classes_from_student_profiles,
     toggle_publish_exam,
 )
 
@@ -35,6 +40,281 @@ def _querystring_without_page(request):
     querydict = request.GET.copy()
     querydict.pop("page", None)
     return querydict.urlencode()
+
+
+def _as_status_filter(value):
+    if value == "active":
+        return True
+    if value == "inactive":
+        return False
+    return None
+
+
+class AdminClassBaseView(RoleRequiredMixin):
+    required_role = "admin"
+    permission_denied_message = "Hanya admin yang dapat mengakses halaman manajemen kelas."
+
+
+class ClassListView(AdminClassBaseView, ListView):
+    model = Class
+    template_name = "exams/class_list.html"
+    context_object_name = "classes"
+    paginate_by = 10
+
+    def get_base_queryset(self):
+        return annotate_class_usage(Class.objects.all())
+
+    def get_queryset(self):
+        queryset = self.get_base_queryset()
+        q = (self.request.GET.get("q") or "").strip()
+        status = (self.request.GET.get("status") or "").strip()
+        sort = (self.request.GET.get("sort") or "name").strip()
+
+        if q:
+            queryset = queryset.filter(
+                Q(name__icontains=q)
+                | Q(grade_level__icontains=q)
+                | Q(academic_year__icontains=q)
+            )
+
+        status_value = _as_status_filter(status)
+        if status_value is not None:
+            queryset = queryset.filter(is_active=status_value)
+
+        allowed_sort = {
+            "name": "name",
+            "-name": "-name",
+            "students": "student_count",
+            "-students": "-student_count",
+            "assignments": "exam_assignment_count",
+            "-assignments": "-exam_assignment_count",
+            "updated": "updated_at",
+            "-updated": "-updated_at",
+        }
+        return queryset.order_by(allowed_sort.get(sort, "name"), "name")
+
+    def _redirect_to_current_list(self):
+        base_url = reverse("class_list")
+        qs = _querystring_without_page(self.request)
+        return redirect(f"{base_url}?{qs}" if qs else base_url)
+
+    def post(self, request, *args, **kwargs):
+        action = (request.POST.get("action") or "").strip()
+        if action != "sync_profiles":
+            messages.warning(request, "Aksi tidak dikenali.")
+            return self._redirect_to_current_list()
+
+        result = sync_classes_from_student_profiles()
+        if result["students_processed"] == 0:
+            messages.info(request, "Belum ada siswa aktif dengan data kelas pada profil.")
+            return self._redirect_to_current_list()
+
+        messages.success(
+            request,
+            "Sinkronisasi kelas selesai. "
+            f"Siswa diproses: {result['students_processed']}, "
+            f"kelas baru: {result['classes_created']}, "
+            f"kelas diaktifkan ulang: {result['classes_reactivated']}, "
+            f"anggota ditambah: {result['memberships_created']}, "
+            f"anggota diperbarui: {result['memberships_updated']}.",
+        )
+        return self._redirect_to_current_list()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        all_classes = annotate_class_usage(Class.objects.all())
+        context.update(
+            {
+                "querystring": _querystring_without_page(self.request),
+                "filters": {
+                    "q": self.request.GET.get("q", ""),
+                    "status": self.request.GET.get("status", ""),
+                    "sort": self.request.GET.get("sort", "name"),
+                },
+                "summary": {
+                    "total": all_classes.count(),
+                    "active": all_classes.filter(is_active=True).count(),
+                    "inactive": all_classes.filter(is_active=False).count(),
+                    "memberships": ClassStudent.objects.count(),
+                },
+            }
+        )
+        return context
+
+
+class ClassCreateView(AdminClassBaseView, CreateView):
+    model = Class
+    form_class = ClassForm
+    template_name = "exams/class_form.html"
+    success_url = reverse_lazy("class_list")
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        messages.success(self.request, f"Kelas '{self.object.name}' berhasil ditambahkan.")
+        return response
+
+    def form_invalid(self, form):
+        messages.error(self.request, "Gagal menambahkan kelas. Periksa kembali data yang diisi.")
+        return super().form_invalid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update(
+            {
+                "page_title": "Tambah Kelas",
+                "submit_label": "Simpan",
+                "cancel_url": reverse("class_list"),
+            }
+        )
+        return context
+
+
+class ClassUpdateView(AdminClassBaseView, UpdateView):
+    model = Class
+    form_class = ClassForm
+    template_name = "exams/class_form.html"
+    context_object_name = "class_obj"
+    success_url = reverse_lazy("class_list")
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        messages.success(self.request, f"Kelas '{self.object.name}' berhasil diperbarui.")
+        return response
+
+    def form_invalid(self, form):
+        messages.error(self.request, "Gagal memperbarui kelas. Periksa kembali data yang diisi.")
+        return super().form_invalid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update(
+            {
+                "page_title": "Edit Kelas",
+                "submit_label": "Simpan Perubahan",
+                "cancel_url": reverse("class_list"),
+            }
+        )
+        return context
+
+
+class ClassDeleteView(AdminClassBaseView, TemplateView):
+    template_name = "exams/class_delete_warning.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        self.class_obj = get_object_or_404(Class, pk=kwargs["pk"])
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        confirm_name = (request.POST.get("confirm_name") or "").strip()
+        if confirm_name != self.class_obj.name:
+            messages.error(
+                request,
+                "Konfirmasi penghapusan tidak cocok. "
+                f"Ketik persis nama kelas: {self.class_obj.name}",
+            )
+            return redirect("class_delete", pk=self.class_obj.pk)
+
+        usage = get_class_usage_summary(self.class_obj)
+        if usage["exam_assignment_count"] > 0:
+            messages.error(
+                request,
+                "Kelas tidak dapat dihapus karena masih dipakai pada "
+                f"{usage['exam_assignment_count']} penugasan ujian. Nonaktifkan kelas saja bila perlu.",
+            )
+            return redirect("class_delete", pk=self.class_obj.pk)
+
+        class_name = self.class_obj.name
+        self.class_obj.delete()
+        messages.success(request, f"Kelas '{class_name}' berhasil dihapus.")
+        return redirect("class_list")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update(
+            {
+                "class_obj": self.class_obj,
+                "usage": get_class_usage_summary(self.class_obj),
+                "expected_confirm_text": self.class_obj.name,
+                "cancel_url": reverse("class_list"),
+            }
+        )
+        return context
+
+
+class ClassMembersView(AdminClassBaseView, TemplateView):
+    template_name = "exams/class_members.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        self.class_obj = get_object_or_404(Class, pk=kwargs["pk"])
+        return super().dispatch(request, *args, **kwargs)
+
+    def _current_url(self):
+        base_url = reverse("class_members", kwargs={"pk": self.class_obj.pk})
+        qs = _querystring_without_page(self.request)
+        return f"{base_url}?{qs}" if qs else base_url
+
+    def get_student_queryset(self):
+        queryset = User.objects.filter(role="student", is_deleted=False).select_related("profile")
+        q = (self.request.GET.get("q") or "").strip()
+        status = (self.request.GET.get("status") or "").strip()
+
+        if q:
+            queryset = queryset.filter(
+                Q(username__icontains=q)
+                | Q(email__icontains=q)
+                | Q(first_name__icontains=q)
+                | Q(last_name__icontains=q)
+                | Q(profile__student_id__icontains=q)
+                | Q(profile__class_grade__icontains=q)
+            )
+
+        status_value = _as_status_filter(status)
+        if status_value is not None:
+            queryset = queryset.filter(is_active=status_value)
+
+        return queryset.order_by("first_name", "last_name", "username")
+
+    def post(self, request, *args, **kwargs):
+        selected_student_ids = request.POST.getlist("student_ids")
+        result = replace_class_members(self.class_obj, selected_student_ids)
+        messages.success(
+            request,
+            f"Anggota kelas '{self.class_obj.name}' berhasil disimpan. "
+            f"Terpilih: {result['selected_total']}, "
+            f"ditambahkan: {result['memberships_added']}, "
+            f"dilepas: {result['memberships_removed']}.",
+        )
+        return redirect(self._current_url())
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        member_ids = set(
+            ClassStudent.objects.filter(class_obj=self.class_obj).values_list("student_id", flat=True)
+        )
+        student_rows = []
+        for student in self.get_student_queryset():
+            profile = student.profile if hasattr(student, "profile") else None
+            student_rows.append(
+                {
+                    "student": student,
+                    "profile": profile,
+                    "is_member": student.id in member_ids,
+                }
+            )
+
+        context.update(
+            {
+                "class_obj": self.class_obj,
+                "student_rows": student_rows,
+                "summary": get_class_usage_summary(self.class_obj),
+                "filters": {
+                    "q": self.request.GET.get("q", ""),
+                    "status": self.request.GET.get("status", ""),
+                },
+                "querystring": _querystring_without_page(self.request),
+            }
+        )
+        return context
 
 
 class TeacherExamBaseView(RoleRequiredMixin):

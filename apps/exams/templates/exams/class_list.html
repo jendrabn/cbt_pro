@@ -1,0 +1,187 @@
+{% extends "layouts/base_admin.html" %}
+{% load static %}
+
+{% block title %}Manajemen Kelas - CBT{% endblock %}
+
+{% block topbar %}
+    {% include "partials/topbar_admin.html" with current_label="Manajemen Kelas" %}
+{% endblock %}
+
+{% block main_attrs %}class="container-fluid px-3 px-md-4 py-4"{% endblock %}
+
+{% block page_header %}
+    <section class="cbt-page-header">
+        <div class="cbt-page-header-body">
+            {% include "partials/page_header.html" with eyebrow="Admin Panel" title="Manajemen Kelas" subtitle="Kelola kelas dan anggota kelas yang dipakai untuk penugasan ujian." %}
+            <div class="d-flex align-items-center gap-2 cbt-page-header-actions">
+                <form method="post" action="{% url 'class_list' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="sync_profiles">
+                    <button type="submit" class="btn btn-outline-secondary" title="Sinkronkan kelas dari data kelas pada profil siswa">
+                        <i class="ri-refresh-line me-1"></i>Sinkronkan Profil Siswa
+                    </button>
+                </form>
+                <a href="{% url 'class_create' %}" class="btn btn-primary" title="Tambah kelas baru">
+                    <i class="ri-add-line me-1"></i>Tambah Kelas
+                </a>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block content %}
+        {% if messages %}
+            <div class="mb-3">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'info' }} py-2 mb-2" role="alert">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <section class="row row-cols-2 row-cols-md-4 g-3 mb-4 cbt-stats-grid">
+            <div class="col">
+                {% include "partials/stats_card.html" with title="Total Kelas" value=summary.total icon="ri-community-line" tone="primary" %}
+            </div>
+            <div class="col">
+                {% include "partials/stats_card.html" with title="Aktif" value=summary.active icon="ri-checkbox-circle-line" tone="success" %}
+            </div>
+            <div class="col">
+                {% include "partials/stats_card.html" with title="Nonaktif" value=summary.inactive icon="ri-close-circle-line" tone="secondary" %}
+            </div>
+            <div class="col">
+                {% include "partials/stats_card.html" with title="Total Keanggotaan" value=summary.memberships icon="ri-team-line" tone="info" %}
+            </div>
+        </section>
+
+        <section class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+                <form method="get" class="cbt-inline-filter">
+                    <div class="cbt-inline-filter-search">
+                        <i class="ri-search-line"></i>
+                        <input
+                            type="search"
+                            name="q"
+                            value="{{ filters.q }}"
+                            class="form-control"
+                            placeholder="Cari nama, tingkat, atau tahun ajaran..."
+                        >
+                    </div>
+                    <div class="cbt-inline-filter-select">
+                        <select name="status" class="form-select">
+                            <option value="">Semua Status</option>
+                            <option value="active" {% if filters.status == 'active' %}selected{% endif %}>Aktif</option>
+                            <option value="inactive" {% if filters.status == 'inactive' %}selected{% endif %}>Nonaktif</option>
+                        </select>
+                    </div>
+                    <div class="cbt-inline-filter-select">
+                        <select name="sort" class="form-select">
+                            <option value="name" {% if filters.sort == 'name' %}selected{% endif %}>Nama A-Z</option>
+                            <option value="-name" {% if filters.sort == '-name' %}selected{% endif %}>Nama Z-A</option>
+                            <option value="-students" {% if filters.sort == '-students' %}selected{% endif %}>Siswa Terbanyak</option>
+                            <option value="-assignments" {% if filters.sort == '-assignments' %}selected{% endif %}>Penugasan Terbanyak</option>
+                            <option value="-updated" {% if filters.sort == '-updated' %}selected{% endif %}>Terbaru</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary" title="Terapkan filter">
+                        <i class="ri-filter-3-line me-1"></i>Terapkan
+                    </button>
+                    <a href="{% url 'class_list' %}" class="btn btn-outline-secondary cbt-inline-filter-reset" title="Reset semua filter">
+                        <i class="ri-refresh-line me-1"></i>Reset
+                    </a>
+                </form>
+            </div>
+        </section>
+
+        <section class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 100px;">ID</th>
+                                <th>Nama Kelas</th>
+                                <th style="width: 120px;">Tingkat</th>
+                                <th style="width: 140px;">Tahun Ajaran</th>
+                                <th style="width: 120px;">Status</th>
+                                <th style="width: 120px;">Jumlah Siswa</th>
+                                <th style="width: 140px;">Penugasan Ujian</th>
+                                <th class="text-end" style="width: 220px;">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for class_obj in classes %}
+                            <tr>
+                                <td><small class="text-muted" title="{{ class_obj.id }}">{{ class_obj.id|truncatechars:8 }}</small></td>
+                                <td class="fw-semibold">{{ class_obj.name }}</td>
+                                <td>{{ class_obj.grade_level|default:"-" }}</td>
+                                <td>{{ class_obj.academic_year|default:"-" }}</td>
+                                <td>
+                                    {% if class_obj.is_active %}
+                                        <span class="cbt-status-badge is-success">Aktif</span>
+                                    {% else %}
+                                        <span class="cbt-status-badge is-secondary">Nonaktif</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ class_obj.student_count }}</td>
+                                <td>{{ class_obj.exam_assignment_count }}</td>
+                                <td class="text-end">
+                                    <div class="d-flex justify-content-end gap-1">
+                                        <a href="{% url 'class_members' class_obj.id %}" class="btn btn-sm btn-outline-primary" title="Kelola anggota kelas">
+                                            <i class="ri-team-line"></i>
+                                        </a>
+                                        <a href="{% url 'class_edit' class_obj.id %}" class="btn btn-sm btn-outline-secondary" title="Edit kelas">
+                                            <i class="ri-edit-line"></i>
+                                        </a>
+                                        <a href="{% url 'class_delete' class_obj.id %}" class="btn btn-sm btn-outline-danger" title="Hapus kelas">
+                                            <i class="ri-delete-bin-line"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="8" class="text-center text-muted py-5">Belum ada kelas untuk filter saat ini.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {% if is_paginated %}
+            <div class="card-footer bg-white">
+                <nav aria-label="Paginasi kelas">
+                    <ul class="pagination pagination-sm mb-0">
+                        {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.previous_page_number }}">Sebelumnya</a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled"><span class="page-link">Sebelumnya</span></li>
+                        {% endif %}
+
+                        {% for num in paginator.page_range %}
+                            {% if page_obj.number == num %}
+                            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                            {% elif num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
+                            <li class="page-item">
+                                <a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ num }}">{{ num }}</a>
+                            </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.next_page_number }}">Berikutnya</a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled"><span class="page-link">Berikutnya</span></li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+            {% endif %}
+        </section>
+{% endblock %}

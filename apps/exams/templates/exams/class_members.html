@@ -1,0 +1,199 @@
+{% extends "layouts/base_admin.html" %}
+{% load static %}
+
+{% block title %}Anggota Kelas - CBT{% endblock %}
+
+{% block topbar %}
+    {% include "partials/topbar_admin.html" with parent_label="Kelas" parent_url="/admin/classes/" current_label="Anggota Kelas" %}
+{% endblock %}
+
+{% block main_attrs %}class="container-fluid px-3 px-md-4 py-4"{% endblock %}
+
+{% block page_header %}
+    <section class="cbt-page-header">
+        <div class="cbt-page-header-body">
+            {% include "partials/page_header.html" with eyebrow="Admin Panel" title="Anggota Kelas" subtitle=class_obj.name %}
+            <div class="d-flex align-items-center gap-2 cbt-page-header-actions">
+                <a href="{% url 'class_edit' class_obj.id %}" class="btn btn-outline-secondary" title="Edit kelas">
+                    <i class="ri-edit-line me-1"></i>Edit Kelas
+                </a>
+                <a href="{% url 'class_list' %}" class="btn btn-outline-primary" title="Kembali ke daftar kelas">
+                    Kembali
+                </a>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block content %}
+        {% if messages %}
+            <div class="mb-3">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'info' }} py-2 mb-2" role="alert">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <section class="row row-cols-2 row-cols-md-4 g-3 mb-4 cbt-stats-grid">
+            <div class="col">
+                {% include "partials/stats_card.html" with title="Total Anggota" value=summary.student_count icon="ri-team-line" tone="primary" %}
+            </div>
+            <div class="col">
+                {% include "partials/stats_card.html" with title="Aktif" value=summary.active_student_count icon="ri-checkbox-circle-line" tone="success" %}
+            </div>
+            <div class="col">
+                {% include "partials/stats_card.html" with title="Penugasan Ujian" value=summary.exam_assignment_count icon="ri-file-list-3-line" tone="warning" %}
+            </div>
+            <div class="col">
+                {% include "partials/stats_card.html" with title="Sesuai Profil" value=summary.profile_match_count icon="ri-user-search-line" tone="info" %}
+            </div>
+        </section>
+
+        <section class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+                <form method="get" class="cbt-inline-filter">
+                    <div class="cbt-inline-filter-search">
+                        <i class="ri-search-line"></i>
+                        <input
+                            type="search"
+                            name="q"
+                            value="{{ filters.q }}"
+                            class="form-control"
+                            placeholder="Cari username, nama, email, NIS, atau kelas profil..."
+                        >
+                    </div>
+                    <div class="cbt-inline-filter-select">
+                        <select name="status" class="form-select">
+                            <option value="">Semua Status</option>
+                            <option value="active" {% if filters.status == 'active' %}selected{% endif %}>Aktif</option>
+                            <option value="inactive" {% if filters.status == 'inactive' %}selected{% endif %}>Nonaktif</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary" title="Terapkan filter siswa">
+                        <i class="ri-filter-3-line me-1"></i>Terapkan
+                    </button>
+                    <a href="{% url 'class_members' class_obj.id %}" class="btn btn-outline-secondary cbt-inline-filter-reset" title="Reset semua filter">
+                        <i class="ri-refresh-line me-1"></i>Reset
+                    </a>
+                </form>
+            </div>
+        </section>
+
+        <section class="card border-0 shadow-sm">
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-3">
+                        <div class="d-flex flex-wrap gap-2">
+                            <button type="submit" class="btn btn-sm btn-primary" title="Simpan anggota kelas terpilih">
+                                <i class="ri-save-line me-1"></i>Simpan Anggota
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" id="toggle-select-all-members" title="Pilih semua siswa pada daftar ini">
+                                <i class="ri-check-double-line me-1"></i><span class="toggle-select-members-label">Pilih Semua</span>
+                            </button>
+                        </div>
+                        <div class="d-flex flex-wrap gap-2">
+                            <span class="badge text-bg-light" id="selectedMembersBadge">Total Siswa Terpilih: 0</span>
+                            <span class="badge text-bg-light">Total Baris: {{ student_rows|length }}</span>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 52px;"></th>
+                                    <th>Username</th>
+                                    <th>Nama</th>
+                                    <th>Email</th>
+                                    <th>NIS</th>
+                                    <th>Kelas Profil</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for row in student_rows %}
+                                <tr>
+                                    <td>
+                                        <input
+                                            class="form-check-input member-check"
+                                            type="checkbox"
+                                            name="student_ids"
+                                            value="{{ row.student.id }}"
+                                            {% if row.is_member %}checked{% endif %}
+                                            aria-label="Pilih siswa {{ row.student.username }}"
+                                        >
+                                    </td>
+                                    <td class="fw-semibold">{{ row.student.username }}</td>
+                                    <td>{{ row.student.get_full_name|default:"-" }}</td>
+                                    <td>{{ row.student.email }}</td>
+                                    <td>{% if row.profile %}{{ row.profile.student_id|default:"-" }}{% else %}-{% endif %}</td>
+                                    <td>{% if row.profile %}{{ row.profile.class_grade|default:"-" }}{% else %}-{% endif %}</td>
+                                    <td>
+                                        {% if row.student.is_active %}
+                                        <span class="badge text-bg-success">Aktif</span>
+                                        {% else %}
+                                        <span class="badge text-bg-secondary">Nonaktif</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="7" class="text-center py-4 text-muted">Belum ada siswa untuk filter saat ini.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </form>
+            </div>
+        </section>
+{% endblock %}
+
+{% block vendor_js %}
+<script>
+        (function () {
+            var toggleBtn = document.getElementById("toggle-select-all-members");
+            var toggleLabel = document.querySelector(".toggle-select-members-label");
+            var selectedBadge = document.getElementById("selectedMembersBadge");
+            var memberChecks = Array.prototype.slice.call(document.querySelectorAll(".member-check"));
+
+            function updateSelectionState() {
+                var total = memberChecks.length;
+                var checked = memberChecks.filter(function (item) {
+                    return item.checked;
+                }).length;
+                var allSelected = total > 0 && checked === total;
+
+                if (toggleBtn) {
+                    toggleBtn.dataset.allSelected = allSelected ? "true" : "false";
+                    toggleBtn.title = allSelected ? "Batalkan semua pilihan siswa" : "Pilih semua siswa pada daftar ini";
+                }
+                if (toggleLabel) {
+                    toggleLabel.textContent = allSelected ? "Batalkan Semua" : "Pilih Semua";
+                }
+                if (selectedBadge) {
+                    selectedBadge.textContent = "Total Siswa Terpilih: " + checked;
+                }
+            }
+
+            if (toggleBtn) {
+                toggleBtn.addEventListener("click", function () {
+                    var shouldSelectAll = this.dataset.allSelected !== "true";
+                    memberChecks.forEach(function (item) {
+                        item.checked = shouldSelectAll;
+                    });
+                    updateSelectionState();
+                });
+            }
+
+            memberChecks.forEach(function (item) {
+                item.addEventListener("change", updateSelectionState);
+            });
+
+            updateSelectionState();
+        })();
+    </script>
+{% endblock %}

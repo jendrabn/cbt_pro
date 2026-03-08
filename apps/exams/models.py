@@ -79,11 +79,11 @@ class Exam(BaseModelSoftDelete):
         ]
         constraints = [
             models.CheckConstraint(
-                check=models.Q(max_retake_attempts__gte=1, max_retake_attempts__lte=10),
+                condition=models.Q(max_retake_attempts__gte=1, max_retake_attempts__lte=10),
                 name="exam_max_retake_attempts_range",
             ),
             models.CheckConstraint(
-                check=models.Q(retake_cooldown_minutes__gte=0),
+                condition=models.Q(retake_cooldown_minutes__gte=0),
                 name="exam_retake_cooldown_non_negative",
             ),
         ]
@@ -178,7 +178,7 @@ class ExamAssignment(BaseModel):
         ]
         constraints = [
             models.CheckConstraint(
-                check=(
+                condition=(
                     models.Q(assigned_to_type='class', class_obj__isnull=False, student__isnull=True) |
                     models.Q(assigned_to_type='student', student__isnull=False, class_obj__isnull=True)
                 ),
