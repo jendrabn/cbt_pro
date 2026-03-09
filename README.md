@@ -29,10 +29,16 @@ sudo apt install -y \
   git curl nginx redis-server mysql-server \
   certbot python3-certbot-nginx \
   build-essential pkg-config default-libmysqlclient-dev \
-  libffi-dev libmagic1 libcairo2 libpango-1.0-0 libpangocairo-1.0-0 \
-  libpangoft2-1.0-0 libharfbuzz-subset0 \
+  libffi-dev libmagic1 libcairo2 \
+  libpango-1.0-0 libpangocairo-1.0-0 \
   libgdk-pixbuf-2.0-0 shared-mime-info \
   python3.12 python3.12-venv python3.12-dev
+```
+
+Paket tambahan berikut tidak wajib untuk `CBT Pro`, tetapi aman dipasang bila memang diperlukan oleh lingkungan server:
+
+```bash
+sudo apt install -y libxml2 libxslt1.1
 ```
 
 Install Node.js LTS dari NodeSource agar kompatibel dengan `sass` yang dipakai project:
@@ -432,4 +438,4 @@ Jika update hanya mengubah file Python atau template, langkah di atas tetap aman
 - `DisallowedHost`: isi `ALLOWED_HOSTS` belum sesuai domain.
 - `CSRF verification failed`: cek `CSRF_TRUSTED_ORIGINS`, HTTPS, dan header `X-Forwarded-Proto` di Nginx.
 - Redirect loop HTTP/HTTPS: biasanya flag `SECURE_SSL_REDIRECT=True` aktif saat HTTPS atau proxy belum siap.
-- PDF sertifikat gagal dibuat: cek library sistem `libcairo2`, `libpango-1.0-0`, `libpangocairo-1.0-0`, `libpangoft2-1.0-0`, `libharfbuzz-subset0`, `libgdk-pixbuf-2.0-0`, dan `shared-mime-info`.
+- PDF sertifikat gagal dibuat: cek library sistem `libcairo2`, `libpango-1.0-0`, `libpangocairo-1.0-0`, `libgdk-pixbuf-2.0-0`, dan `shared-mime-info`. Jika lingkungan server membutuhkan dependency XML tambahan, `libxml2` dan `libxslt1.1` juga aman dipasang.
