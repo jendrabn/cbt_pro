@@ -23,9 +23,19 @@
                                     <i class="ri-file-list-3-line me-1"></i>Review Jawaban
                                 </a>
                                 {% endif %}
-                                {% if certificate_available %}
-                                <a href="{{ certificate_download_url }}" class="btn btn-outline-success" title="Unduh sertifikat hasil ujian">
-                                    <i class="ri-award-line me-1"></i>Unduh Sertifikat
+                                {% if certificate_state != "hidden" %}
+                                <a
+                                    id="studentResultCertificateBtn"
+                                    href="{% if certificate_state == 'active' %}{{ certificate_download_url }}{% else %}#{% endif %}"
+                                    class="btn {% if certificate_state == 'active' %}btn-outline-success{% elif certificate_state == 'revoked' %}btn-outline-danger disabled{% else %}btn-outline-warning disabled{% endif %}"
+                                    data-certificate-state="{{ certificate_state }}"
+                                    data-certificate-status-url="{{ certificate_status_url }}"
+                                    title="Status sertifikat hasil ujian"
+                                >
+                                    <i class="{% if certificate_state == 'active' %}ri-award-line{% elif certificate_state == 'revoked' %}ri-close-circle-line{% else %}ri-loader-4-line{% endif %} me-1"></i>
+                                    <span id="studentResultCertificateLabel">
+                                        {% if certificate_state == "active" %}Unduh Sertifikat{% elif certificate_state == "revoked" %}Sertifikat Dicabut{% else %}Sertifikat Diproses{% endif %}
+                                    </span>
                                 </a>
                                 {% endif %}
                             </div>
@@ -235,4 +245,66 @@
 {{ answer_breakdown_chart|json_script:"student-result-answer-breakdown-data" }}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script src="{% static 'results/js/student_results.js' %}"></script>
+<script>
+    (function () {
+        var btn = document.getElementById("studentResultCertificateBtn");
+        var label = document.getElementById("studentResultCertificateLabel");
+        var icon = btn ? btn.querySelector("i") : null;
+        if (!btn || !label) {
+            return;
+        }
+        var state = (btn.getAttribute("data-certificate-state") || "").toLowerCase();
+        var statusUrl = btn.getAttribute("data-certificate-status-url") || "";
+        if (state !== "loading" || !statusUrl) {
+            return;
+        }
+        function setLoadingView() {
+            btn.classList.remove("btn-outline-success", "btn-outline-danger");
+            btn.classList.add("btn-outline-warning", "disabled");
+            btn.setAttribute("href", "#");
+            if (icon) {
+                icon.className = "ri-loader-4-line me-1";
+            }
+            label.textContent = "Sertifikat Diproses";
+        }
+        function poll() {
+            fetch(statusUrl, { headers: { "X-Requested-With": "XMLHttpRequest" } })
+                .then(function (response) {
+                    if (!response.ok) {
+                        throw new Error("status fetch failed");
+                    }
+                    return response.json();
+                })
+                .then(function (payload) {
+                    var newState = (payload.state || "").toLowerCase();
+                    if (newState === "active") {
+                        btn.classList.remove("btn-outline-warning", "btn-outline-danger", "disabled");
+                        btn.classList.add("btn-outline-success");
+                        btn.setAttribute("href", payload.download_url || "#");
+                        if (icon) {
+                            icon.className = "ri-award-line me-1";
+                        }
+                        label.textContent = "Unduh Sertifikat";
+                        return;
+                    }
+                    if (newState === "revoked") {
+                        btn.classList.remove("btn-outline-success", "btn-outline-warning");
+                        btn.classList.add("btn-outline-danger", "disabled");
+                        btn.setAttribute("href", "#");
+                        if (icon) {
+                            icon.className = "ri-close-circle-line me-1";
+                        }
+                        label.textContent = "Sertifikat Dicabut";
+                        return;
+                    }
+                    setLoadingView();
+                    window.setTimeout(poll, 3000);
+                })
+                .catch(function () {
+                    window.setTimeout(poll, 5000);
+                });
+        }
+        window.setTimeout(poll, 1500);
+    })();
+</script>
 {% endblock %}

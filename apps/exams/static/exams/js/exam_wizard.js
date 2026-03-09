@@ -101,6 +101,9 @@
         var maxRetakeAttemptsField = document.getElementById("id_max_retake_attempts");
         var retakeCooldownField = document.getElementById("id_retake_cooldown_minutes");
         var retakeShowReviewField = document.getElementById("id_retake_show_review");
+        var certificateEnabledField = document.getElementById("id_certificate_enabled");
+        var certificateSettingsFields = document.getElementById("certificateSettingsFields");
+        var certificateTemplateField = document.getElementById("id_certificate_template");
 
         if (!initialSelected.length && selectedPayloadInput && selectedPayloadInput.value) {
             initialSelected = normalizeArrayPayload(selectedPayloadInput.value);
@@ -709,6 +712,11 @@
             var randomizeQ = (document.getElementById("id_randomize_questions") || {}).checked ? "Ya" : "Tidak";
             var randomizeOpt = (document.getElementById("id_randomize_options") || {}).checked ? "Ya" : "Tidak";
             var overrideGlobal = (document.getElementById("id_override_question_navigation") || {}).checked ? "Ya" : "Tidak";
+            var certificateEnabled = !!(certificateEnabledField && certificateEnabledField.checked);
+            var certificateTemplateText = "-";
+            if (certificateTemplateField && certificateTemplateField.selectedOptions && certificateTemplateField.selectedOptions.length) {
+                certificateTemplateText = certificateTemplateField.selectedOptions[0].textContent || "-";
+            }
             var allowRetake = !!(allowRetakeField && allowRetakeField.checked);
             var retakePolicy = (document.querySelector('input[name="retake_score_policy"]:checked') || {}).value || "highest";
             var retakePolicyLabelMap = {
@@ -738,6 +746,7 @@
                 ["Acak Soal", randomizeQ],
                 ["Acak Opsi", randomizeOpt],
                 ["Timpa Navigasi Global", overrideGlobal],
+                ["Sertifikat", certificateEnabled ? ("Aktif | " + certificateTemplateText) : "Nonaktif"],
                 ["Retake", retakeSummary]
             ].map(function (row) {
                 return '<div class="list-group-item d-flex justify-content-between gap-2"><span>' + row[0] + '</span><strong class="text-end">' + row[1] + '</strong></div>';
@@ -759,6 +768,18 @@
             }
             if (enabled && retakeCooldownField && retakeCooldownField.value === "") {
                 retakeCooldownField.value = "0";
+            }
+        }
+
+        function toggleCertificateSettings() {
+            if (!certificateSettingsFields || !certificateEnabledField) {
+                return;
+            }
+            var enabled = !!certificateEnabledField.checked;
+            certificateSettingsFields.classList.toggle("d-none", !enabled);
+            certificateSettingsFields.toggleAttribute("hidden", !enabled);
+            if (!enabled && certificateTemplateField) {
+                certificateTemplateField.value = "";
             }
         }
 
@@ -1087,6 +1108,15 @@
                 renderReviewSummary();
             });
         }
+        if (certificateEnabledField) {
+            certificateEnabledField.addEventListener("change", function () {
+                toggleCertificateSettings();
+                renderReviewSummary();
+            });
+        }
+        if (certificateTemplateField) {
+            certificateTemplateField.addEventListener("change", renderReviewSummary);
+        }
         if (maxRetakeAttemptsField) {
             maxRetakeAttemptsField.addEventListener("input", renderReviewSummary);
         }
@@ -1116,6 +1146,7 @@
         syncAssignmentPayload();
         renderReviewSummary();
         toggleRetakeSettings();
+        toggleCertificateSettings();
         syncStudentAssignmentToggleState();
 
         if (window.Sortable && selectedListEl) {

@@ -1,17 +1,34 @@
 from django.urls import path
 
 from .views import (
+    AdminCertificateTemplateListView,
+    AdminCertificateTemplatePreviewView,
     AnswerReviewView,
     ExamResultsDetailView,
     ExportResultsView,
     RetakeHistoryView,
+    SetDefaultTemplateView,
+    TeacherCertificateTemplateCreateView,
+    TeacherCertificateTemplateDetailView,
+    TeacherCertificateTemplateListView,
+    TeacherCertificateTemplatePreviewView,
+    StudentCertificateDetailView,
+    StudentCertificateDownloadByIdView,
+    StudentCertificateListView,
+    StudentCertificateStatusView,
     StudentAttemptHistory,
     StudentAnswerReviewView,
     StudentCertificateDownloadView,
     StudentResultDetailView,
     StudentResultsListView,
+    TeacherBulkIssueCertificatesView,
+    TeacherCertificateExportView,
+    TeacherCertificateListView,
+    TeacherRevokeCertificateView,
     TeacherResultsAnalyticsView,
     TeacherResultsListView,
+    VerifyCertificateNumberView,
+    VerifyCertificateTokenView,
 )
 
 urlpatterns = [
@@ -41,5 +58,82 @@ urlpatterns = [
         "student/results/<uuid:result_id>/certificate/",
         StudentCertificateDownloadView.as_view(),
         name="student_certificate_download",
+    ),
+    path("student/certificates/", StudentCertificateListView.as_view(), name="student_certificate_list"),
+    path(
+        "student/certificates/<uuid:cert_id>/",
+        StudentCertificateDetailView.as_view(),
+        name="student_certificate_detail",
+    ),
+    path(
+        "student/certificates/<uuid:cert_id>/download/",
+        StudentCertificateDownloadByIdView.as_view(),
+        name="student_certificate_download_by_id",
+    ),
+    path(
+        "student/certificates/<uuid:cert_id>/status/",
+        StudentCertificateStatusView.as_view(),
+        name="student_certificate_status",
+    ),
+    path("teacher/certificates/", TeacherCertificateListView.as_view(), name="teacher_certificate_list"),
+    path(
+        "teacher/certificates/export/",
+        TeacherCertificateExportView.as_view(),
+        name="teacher_certificate_export",
+    ),
+    path(
+        "teacher/certificates/<uuid:cert_id>/revoke/",
+        TeacherRevokeCertificateView.as_view(),
+        name="teacher_certificate_revoke",
+    ),
+    path(
+        "teacher/certificates/<uuid:exam_id>/bulk-issue/",
+        TeacherBulkIssueCertificatesView.as_view(),
+        name="teacher_certificate_bulk_issue",
+    ),
+    path(
+        "teacher/certificates/templates/",
+        TeacherCertificateTemplateListView.as_view(),
+        name="teacher_certificate_template_list",
+    ),
+    path(
+        "teacher/certificates/templates/create/",
+        TeacherCertificateTemplateCreateView.as_view(),
+        name="teacher_certificate_template_create",
+    ),
+    path(
+        "teacher/certificates/templates/<uuid:pk>/",
+        TeacherCertificateTemplateDetailView.as_view(),
+        name="teacher_certificate_template_detail",
+    ),
+    path(
+        "teacher/certificates/templates/<uuid:pk>/preview/",
+        TeacherCertificateTemplatePreviewView.as_view(),
+        name="teacher_certificate_template_preview",
+    ),
+    path(
+        "admin/certificates/templates/",
+        AdminCertificateTemplateListView.as_view(),
+        name="admin_certificate_template_list",
+    ),
+    path(
+        "admin/certificates/templates/<uuid:pk>/preview/",
+        AdminCertificateTemplatePreviewView.as_view(),
+        name="admin_certificate_template_preview",
+    ),
+    path(
+        "admin/certificates/templates/<uuid:pk>/set-default/",
+        SetDefaultTemplateView.as_view(),
+        name="admin_certificate_template_set_default",
+    ),
+    path(
+        "certificates/verify/<str:token>/",
+        VerifyCertificateTokenView.as_view(),
+        name="certificate_verify_token",
+    ),
+    path(
+        "certificates/verify/number/<str:cert_number>/",
+        VerifyCertificateNumberView.as_view(),
+        name="certificate_verify_number",
     ),
 ]

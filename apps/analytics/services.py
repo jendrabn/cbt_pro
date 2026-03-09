@@ -10,7 +10,7 @@ from django.utils.dateparse import parse_date
 from apps.accounts.models import UserActivityLog
 from apps.attempts.models import ExamAttempt
 from apps.exams.models import Class, Exam
-from apps.results.models import ExamResult
+from apps.results.models import Certificate, ExamResult
 from apps.subjects.models import Subject
 
 
@@ -223,6 +223,24 @@ def calculate_summary_metrics(exams_qs, filters):
         if final_rows
         else 0.0
     )
+    certificate_qs = Certificate.objects.filter(
+        exam__in=exams_qs,
+        issued_at__range=(date_start, date_end),
+    )
+    certificates_total = certificate_qs.count()
+    certificates_revoked = certificate_qs.filter(
+        Q(revoked_at__isnull=False) | Q(is_valid=False)
+    ).count()
+    certificates_active = certificate_qs.filter(
+        revoked_at__isnull=True,
+        is_valid=True,
+    ).count()
+    passed_total = sum(1 for row in final_rows if row["passed"])
+    active_coverage_total = certificate_qs.filter(
+        revoked_at__isnull=True,
+        is_valid=True,
+    ).values("exam_id", "student_id").distinct().count()
+    certificate_coverage = round((active_coverage_total / passed_total) * 100, 2) if passed_total else 0.0
 
     return {
         "total_exams": exams_qs.count(),
@@ -231,6 +249,10 @@ def calculate_summary_metrics(exams_qs, filters):
         "completed_attempts": completed_attempts,
         "completion_rate": completion_rate,
         "average_score": round(avg_score, 2),
+        "certificates_total": certificates_total,
+        "certificates_active": certificates_active,
+        "certificates_revoked": certificates_revoked,
+        "certificate_coverage": certificate_coverage,
     }
 
 
@@ -311,6 +333,24 @@ def build_chart_data(exams_qs, filters):
                 distribution_values[idx] += 1
                 break
 
+    certificate_qs = Certificate.objects.filter(
+        exam__in=exams_qs,
+        issued_at__range=(date_start, date_end),
+    )
+    certificate_revoked = certificate_qs.filter(
+        Q(revoked_at__isnull=False) | Q(is_valid=False)
+    ).count()
+    certificate_ready = certificate_qs.filter(
+        revoked_at__isnull=True,
+        is_valid=True,
+        pdf_generated_at__isnull=False,
+    ).count()
+    certificate_processing = certificate_qs.filter(
+        revoked_at__isnull=True,
+        is_valid=True,
+        pdf_generated_at__isnull=True,
+    ).count()
+
     return {
         "performance_trend": {
             "labels": trend_labels,
@@ -327,6 +367,10 @@ def build_chart_data(exams_qs, filters):
         "score_distribution": {
             "labels": [label for label, _, _ in SCORE_DISTRIBUTION_BINS],
             "values": distribution_values,
+        },
+        "certificate_status": {
+            "labels": ["Siap", "Diproses", "Dicabut"],
+            "values": [certificate_ready, certificate_processing, certificate_revoked],
         },
     }
 
@@ -427,4 +471,3 @@ def get_filter_options():
         "classes": [{"id": str(item["id"]), "name": item["name"]} for item in classes],
         "exam_types": [{"id": value, "name": label} for value, label in EXAM_TYPE_CHOICES],
     }
-

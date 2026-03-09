@@ -310,6 +310,38 @@
                 </div>
 
                 <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="form-check form-switch mb-3">
+                                {{ form.certificate_enabled }}
+                                <label class="form-check-label" for="{{ form.certificate_enabled.id_for_label }}">{{ form.certificate_enabled.label }}</label>
+                            </div>
+                            {% if form.certificate_enabled.errors %}<div class="text-danger small mt-1">{{ form.certificate_enabled.errors|join:", " }}</div>{% endif %}
+                        </div>
+                        <div class="card-body pt-0 d-none" id="certificateSettingsFields">
+                            <div class="row g-3">
+                                <div class="col-md-8 col-lg-6">
+                                    <label class="form-label" for="{{ form.certificate_template.id_for_label }}">{{ form.certificate_template.label }}</label>
+                                    {{ form.certificate_template }}
+                                    <div class="form-text">Kosongkan untuk memakai template default sistem.</div>
+                                    {% if form.certificate_template.errors %}<div class="text-danger small mt-1">{{ form.certificate_template.errors|join:", " }}</div>{% endif %}
+                                </div>
+                                <div class="col-md-4 col-lg-6 d-flex align-items-end">
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <a href="{% url 'teacher_certificate_template_list' %}" class="btn btn-outline-secondary" target="_blank" rel="noopener">
+                                            <i class="ri-file-list-3-line me-1"></i>Kelola Template
+                                        </a>
+                                        <a href="{% url 'teacher_certificate_template_create' %}" class="btn btn-outline-primary" target="_blank" rel="noopener">
+                                            <i class="ri-add-line me-1"></i>Buat Template Baru
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12">
                     <p class="form-label mb-2">Aturan Navigasi Global</p>
                     <div class="row g-2">
                         <div class="col-md-6">

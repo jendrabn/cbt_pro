@@ -8,7 +8,7 @@ from apps.accounts.models import User
 from apps.attempts.models import ExamAttempt
 from apps.exams.models import Class, Exam, ExamAssignment, ExamQuestion
 from apps.questions.models import Question
-from apps.results.models import ExamResult
+from apps.results.models import Certificate, ExamResult
 from apps.subjects.models import Subject
 
 
@@ -95,12 +95,25 @@ class AdminAnalyticsViewTests(TestCase):
             time_taken_seconds=3000,
             total_violations=0,
         )
+        Certificate.objects.create(
+            attempt=attempt,
+            exam=exam,
+            student=cls.student,
+            certificate_number="CERT-AN-001",
+            verification_token="token-an-001",
+            final_score=85,
+            final_percentage=85,
+            template_snapshot={},
+            is_valid=True,
+        )
 
     def test_admin_can_access_analytics_dashboard(self):
         self.client.force_login(self.admin)
         response = self.client.get(reverse("admin_analytics"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Analitik & Laporan")
+        self.assertContains(response, "Sertifikat Terbit")
+        self.assertContains(response, "Status Sertifikat")
 
     def test_non_admin_forbidden_analytics_dashboard(self):
         self.client.force_login(self.teacher)

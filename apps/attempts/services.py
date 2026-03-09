@@ -3,6 +3,7 @@ from __future__ import annotations
 import base64
 import binascii
 import hashlib
+import logging
 from dataclasses import dataclass
 from datetime import date, timedelta
 from decimal import Decimal
@@ -10,7 +11,7 @@ from urllib.parse import urljoin
 
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
-from django.db import transaction
+from django.db import OperationalError, transaction
 from django.db.models import Prefetch, Q
 from django.urls import reverse
 from django.utils import timezone
@@ -71,6 +72,9 @@ VIOLATION_SEVERITY_MAP = {
     ExamViolation.ViolationType.RIGHT_CLICK: ExamViolation.Severity.LOW,
     ExamViolation.ViolationType.SUSPICIOUS_ACTIVITY: ExamViolation.Severity.HIGH,
 }
+
+MYSQL_LOCK_TIMEOUT_CODES = {1205, 1213}
+logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -931,7 +935,7 @@ def build_exam_room_payload(
 
     now = timezone.now()
     remaining_seconds = get_attempt_remaining_seconds(exam, attempt, now=now)
-    violations_count = ExamViolation.objects.filter(attempt=attempt).count()
+    violations_count = _safe_violation_count(attempt.id)
     latest_saved_at = _build_latest_answer_timestamp(answer_map, attempt)
 
     return {
@@ -1070,9 +1074,27 @@ def _calculate_time_efficiency(exam, time_taken_seconds):
     return _rounded_decimal(efficiency)
 
 
-def _refresh_exam_rankings(exam):
+def _is_lock_wait_error(exc):
+    code = None
+    if isinstance(getattr(exc, "args", None), (list, tuple)) and exc.args:
+        code = exc.args[0]
+    try:
+        code = int(code)
+    except (TypeError, ValueError):
+        code = None
+    return code in MYSQL_LOCK_TIMEOUT_CODES
+
+
+def _safe_violation_count(attempt_id, fallback=0):
+    try:
+        return ExamViolation.objects.filter(attempt_id=attempt_id).count()
+    except OperationalError:
+        return int(fallback or 0)
+
+
+def _refresh_exam_rankings(exam_id):
     results = list(
-        ExamResult.objects.filter(exam=exam).order_by(
+        ExamResult.objects.filter(exam_id=exam_id).order_by(
             "-percentage",
             "-total_score",
             "time_taken_seconds",
@@ -1097,6 +1119,48 @@ def _refresh_exam_rankings(exam):
 
     if changed:
         ExamResult.objects.bulk_update(changed, ["rank_in_exam", "percentile", "updated_at"])
+
+
+def _refresh_exam_rankings_safe(exam_id):
+    try:
+        _refresh_exam_rankings(exam_id)
+    except Exception:
+        logger.exception("Failed to refresh exam rankings for exam_id=%s", exam_id)
+
+
+def _schedule_exam_rankings_refresh(exam_id):
+    safe_exam_id = str(exam_id)
+    transaction.on_commit(lambda: _refresh_exam_rankings_safe(safe_exam_id))
+
+
+def _run_post_submit_housekeeping(attempt_id, exam_id):
+    attempt_obj = (
+        ExamAttempt.objects.select_related("exam", "student")
+        .filter(id=attempt_id)
+        .first()
+    )
+    if attempt_obj is None:
+        return
+
+    try:
+        from apps.results.certificate_services import issue_certificate_for_attempt
+
+        issue_certificate_for_attempt(attempt_obj)
+    except Exception:
+        logger.exception("Certificate issuance failed after submit for attempt_id=%s", attempt_id)
+
+    try:
+        from apps.results.calculators import update_exam_statistics_with_retake
+
+        update_exam_statistics_with_retake(exam_id)
+    except Exception:
+        logger.exception("Exam statistics update failed after submit for exam_id=%s", exam_id)
+
+
+def _schedule_post_submit_housekeeping(attempt_id, exam_id):
+    safe_attempt_id = str(attempt_id)
+    safe_exam_id = str(exam_id)
+    transaction.on_commit(lambda: _run_post_submit_housekeeping(safe_attempt_id, safe_exam_id))
 
 
 @transaction.atomic
@@ -1188,7 +1252,7 @@ def upsert_exam_result_for_attempt(*, exam, attempt):
     attempt.passed = passed
     attempt.save(update_fields=["total_score", "percentage", "passed", "updated_at"])
 
-    total_violations = ExamViolation.objects.filter(attempt=attempt).count()
+    total_violations = _safe_violation_count(attempt.id)
     defaults = {
         "exam": exam,
         "student": attempt.student,
@@ -1205,7 +1269,7 @@ def upsert_exam_result_for_attempt(*, exam, attempt):
         "total_violations": total_violations,
     }
     result, _ = ExamResult.objects.update_or_create(attempt=attempt, defaults=defaults)
-    _refresh_exam_rankings(exam)
+    _schedule_exam_rankings_refresh(exam.id)
     return result
 
 
@@ -1322,9 +1386,8 @@ def submit_attempt(*, exam, attempt, auto_submit=False, reason=""):
             )
             attempt.save(update_fields=["retake_available_from", "updated_at"])
 
-        upsert_exam_result_for_attempt(exam=exam, attempt=attempt)
-        from apps.results.calculators import update_exam_statistics_with_retake
-        update_exam_statistics_with_retake(exam.id)
+        if not ExamResult.objects.filter(attempt_id=attempt.id).exists():
+            upsert_exam_result_for_attempt(exam=exam, attempt=attempt)
         eligibility = check_retake_eligibility(exam.id, attempt.student_id)
         return {
             "attempt": attempt,
@@ -1360,8 +1423,7 @@ def submit_attempt(*, exam, attempt, auto_submit=False, reason=""):
         ]
     )
     upsert_exam_result_for_attempt(exam=exam, attempt=attempt)
-    from apps.results.calculators import update_exam_statistics_with_retake
-    update_exam_statistics_with_retake(exam.id)
+    _schedule_post_submit_housekeeping(attempt.id, exam.id)
     eligibility = check_retake_eligibility(exam.id, attempt.student_id)
 
     return {
@@ -1507,21 +1569,38 @@ def record_exam_violation(*, exam, attempt, violation_type, description=""):
             "logged": False,
             "already_submitted": True,
             "auto_submitted": False,
-            "violations_count": ExamViolation.objects.filter(attempt=attempt).count(),
+            "violations_count": _safe_violation_count(attempt.id),
             "max_violations_allowed": int(exam.max_violations_allowed or 0),
             "message": "Attempt sudah selesai.",
             "submission": None,
         }
 
     clean_description = (description or "").strip()[:500]
-    ExamViolation.objects.create(
-        attempt=attempt,
-        violation_type=normalized_type,
-        description=clean_description,
-        severity=VIOLATION_SEVERITY_MAP.get(normalized_type, ExamViolation.Severity.MEDIUM),
-    )
+    try:
+        ExamViolation.objects.create(
+            attempt=attempt,
+            violation_type=normalized_type,
+            description=clean_description,
+            severity=VIOLATION_SEVERITY_MAP.get(normalized_type, ExamViolation.Severity.MEDIUM),
+        )
+        violations_count = _safe_violation_count(attempt.id)
+    except OperationalError as exc:
+        if not _is_lock_wait_error(exc):
+            raise
+        latest_status = (
+            ExamAttempt.objects.filter(id=attempt.id).values_list("status", flat=True).first()
+            or attempt.status
+        )
+        return {
+            "logged": False,
+            "already_submitted": latest_status in EXAM_ROOM_COMPLETED_STATUSES,
+            "auto_submitted": False,
+            "violations_count": _safe_violation_count(attempt.id),
+            "max_violations_allowed": int(exam.max_violations_allowed or 0),
+            "message": "Sistem sedang memproses submit ujian. Pelanggaran ini akan dilewati sementara.",
+            "submission": None,
+        }
 
-    violations_count = ExamViolation.objects.filter(attempt=attempt).count()
     max_violations_allowed = int(exam.max_violations_allowed or 0)
     auto_submitted = False
     submission = None
@@ -1578,12 +1657,20 @@ def record_proctoring_capture(
         else public_url
     )
 
-    screenshot = ProctoringScreenshot.objects.create(
-        attempt=attempt,
-        screenshot_url=screenshot_url,
-        file_size_kb=max(1, round(len(image_bytes) / 1024)),
-        is_flagged=False,
-    )
+    try:
+        screenshot = ProctoringScreenshot.objects.create(
+            attempt=attempt,
+            screenshot_url=screenshot_url,
+            file_size_kb=max(1, round(len(image_bytes) / 1024)),
+            is_flagged=False,
+        )
+    except OperationalError as exc:
+        if not _is_lock_wait_error(exc):
+            raise
+        return {
+            "captured": False,
+            "message": "Sistem sedang memproses submit ujian. Snapshot proctoring dilewati sementara.",
+        }
 
     return {
         "captured": True,

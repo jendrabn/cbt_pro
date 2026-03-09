@@ -1,7 +1,9 @@
 import json
 from urllib.parse import urlparse
 from datetime import timedelta
+from unittest.mock import patch
 
+from django.db import OperationalError
 from django.core.files.storage import default_storage
 from django.test import TestCase, override_settings
 from django.urls import reverse
@@ -155,6 +157,45 @@ class StudentExamRoomViewTests(TestCase):
         answer = StudentAnswer.objects.get(attempt=self.attempt, question=self.question_mc)
         self.assertEqual(answer.selected_option_id, self.option_a.id)
 
+    @patch("apps.attempts.views.save_attempt_answer")
+    def test_save_answer_api_handles_lock_timeout_gracefully(self, save_mock):
+        save_mock.side_effect = OperationalError(1205, "Lock wait timeout exceeded")
+        self.client.force_login(self.student)
+
+        response = self.client.post(
+            reverse("attempt_save_answer_api", kwargs={"attempt_id": self.attempt.id}),
+            data=json.dumps(
+                {
+                    "question_number": 1,
+                    "selected_option_id": str(self.option_a.id),
+                }
+            ),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertTrue(payload.get("success"))
+        self.assertFalse(payload.get("saved"))
+        self.assertFalse(payload.get("auto_submitted"))
+        self.assertIn("autosave", payload.get("message", "").lower())
+
+    @patch("apps.attempts.views.auto_submit_if_time_expired")
+    def test_question_api_handles_lock_timeout_gracefully(self, auto_submit_mock):
+        auto_submit_mock.side_effect = OperationalError(1205, "Lock wait timeout exceeded")
+        self.client.force_login(self.student)
+
+        response = self.client.get(
+            reverse("attempt_question_api", kwargs={"attempt_id": self.attempt.id, "number": 1}),
+            {"current_number": 1},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertTrue(payload.get("success"))
+        self.assertIn("sibuk", payload.get("message", "").lower())
+        self.assertIn("payload", payload)
+
     def test_submit_api_submits_attempt(self):
         self.client.force_login(self.student)
         response = self.client.post(
@@ -168,6 +209,42 @@ class StudentExamRoomViewTests(TestCase):
         self.assertIsNotNone(self.attempt.retake_available_from)
         self.assertTrue(ExamResult.objects.filter(attempt=self.attempt).exists())
         self.assertTrue(response.json().get("redirect_url"))
+
+    @patch("apps.attempts.views.submit_attempt")
+    def test_submit_api_handles_lock_timeout_when_already_submitted(self, submit_mock):
+        submit_mock.side_effect = OperationalError(1205, "Lock wait timeout exceeded")
+        self.attempt.status = "submitted"
+        self.attempt.submit_time = timezone.now()
+        self.attempt.save(update_fields=["status", "submit_time", "updated_at"])
+        self.client.force_login(self.student)
+
+        response = self.client.post(
+            reverse("attempt_submit_api", kwargs={"attempt_id": self.attempt.id}),
+            data=json.dumps({}),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertTrue(payload.get("success"))
+        self.assertTrue(payload.get("redirect_url"))
+        self.assertIn("sudah", payload.get("message", "").lower())
+
+    @patch("apps.attempts.views.submit_attempt")
+    def test_submit_api_handles_lock_timeout_with_retryable_response(self, submit_mock):
+        submit_mock.side_effect = OperationalError(1205, "Lock wait timeout exceeded")
+        self.client.force_login(self.student)
+
+        response = self.client.post(
+            reverse("attempt_submit_api", kwargs={"attempt_id": self.attempt.id}),
+            data=json.dumps({}),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 409)
+        payload = response.json()
+        self.assertFalse(payload.get("success"))
+        self.assertTrue(payload.get("retryable"))
 
     @override_settings(MEDIA_URL="/media/")
     def test_proctoring_api_stores_screenshot_file(self):
@@ -195,6 +272,25 @@ class StudentExamRoomViewTests(TestCase):
         path = parsed.path if parsed.path else screenshot.screenshot_url
         relative_path = path.split("/media/", 1)[-1].lstrip("/")
         self.assertTrue(default_storage.exists(relative_path))
+
+    @patch("apps.attempts.views.record_proctoring_capture")
+    def test_proctoring_api_handles_lock_timeout_gracefully(self, proctoring_mock):
+        proctoring_mock.side_effect = OperationalError(1205, "Lock wait timeout exceeded")
+        self.client.force_login(self.student)
+        response = self.client.post(
+            reverse("attempt_proctoring_api", kwargs={"attempt_id": self.attempt.id}),
+            data=json.dumps(
+                {
+                    "label": "interval",
+                    "screenshot_data_url": "data:image/png;base64,abc",
+                }
+            ),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertFalse(payload.get("success"))
+        self.assertIn("dilewati", payload.get("message", "").lower())
 
     def test_student_can_check_and_start_retake(self):
         self.client.force_login(self.student)
@@ -241,6 +337,23 @@ class StudentExamRoomViewTests(TestCase):
         self.assertTrue(ExamResult.objects.filter(attempt=self.attempt).exists())
         self.assertTrue(response.json().get("auto_submitted"))
         self.assertTrue(response.json().get("redirect_url"))
+
+    @patch("apps.attempts.views.record_exam_violation")
+    def test_violation_api_handles_lock_timeout_gracefully(self, record_mock):
+        record_mock.side_effect = OperationalError(1205, "Lock wait timeout exceeded")
+        self.client.force_login(self.student)
+
+        response = self.client.post(
+            reverse("attempt_violation_api", kwargs={"attempt_id": self.attempt.id}),
+            data=json.dumps({"type": "tab_switch", "description": "Pindah tab saat submit"}),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertTrue(payload.get("success"))
+        self.assertFalse(payload.get("auto_submitted"))
+        self.assertIn("sibuk", payload.get("message", "").lower())
 
     def test_submitted_attempt_can_open_submit_confirmation_page(self):
         self.attempt.status = "submitted"

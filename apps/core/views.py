@@ -17,6 +17,7 @@ from django.views.generic import TemplateView
 from apps.core.forms import (
     BackupRestoreForm,
     BrandingSettingsForm,
+    CertificateSettingsForm,
     EmailSettingsForm,
     ExamDefaultsForm,
     GeneralSettingsForm,
@@ -24,11 +25,24 @@ from apps.core.forms import (
     SecuritySettingsForm,
 )
 from apps.core.mixins import RoleRequiredMixin
-from apps.core.services import invalidate_auth_feature_cache, invalidate_branding_cache
+from apps.core.services import (
+    invalidate_auth_feature_cache,
+    invalidate_branding_cache,
+    invalidate_certificate_feature_cache,
+)
 from apps.notifications.models import SystemSetting
 
 
-TAB_CHOICES = ("general", "branding", "email", "security", "exam_defaults", "notifications", "backup")
+TAB_CHOICES = (
+    "general",
+    "branding",
+    "email",
+    "security",
+    "exam_defaults",
+    "notifications",
+    "certificates",
+    "backup",
+)
 
 SETTING_META = {
     "timezone": (
@@ -196,6 +210,48 @@ SETTING_META = {
         True,
     ),
     "notify_daily_summary": ("boolean", "notifications", "Ringkasan harian", False, False),
+    "certificates_enabled": (
+        "boolean",
+        "certificates",
+        "Master switch fitur sertifikat",
+        False,
+        True,
+    ),
+    "certificate_number_prefix": (
+        "string",
+        "certificates",
+        "Prefix nomor sertifikat",
+        False,
+        "CERT",
+    ),
+    "certificate_pdf_dpi": (
+        "number",
+        "certificates",
+        "Resolusi render PDF sertifikat",
+        False,
+        150,
+    ),
+    "certificate_storage_path": (
+        "string",
+        "certificates",
+        "Direktori penyimpanan PDF sertifikat",
+        False,
+        "certificates/",
+    ),
+    "certificate_email_enabled": (
+        "boolean",
+        "certificates",
+        "Kirim email saat sertifikat diterbitkan",
+        False,
+        False,
+    ),
+    "certificate_verify_public": (
+        "boolean",
+        "certificates",
+        "Verifikasi sertifikat publik",
+        True,
+        True,
+    ),
 }
 
 BRANDING_FILE_FIELDS = {
@@ -373,6 +429,16 @@ class SystemSettingsView(RoleRequiredMixin, TemplateView):
         self._upsert_setting("notify_system_announcement", cleaned["notify_system_announcement"])
         self._upsert_setting("notify_daily_summary", cleaned["notify_daily_summary"])
 
+    def _save_certificate_settings(self, form):
+        cleaned = form.cleaned_data
+        self._upsert_setting("certificates_enabled", cleaned["certificates_enabled"])
+        self._upsert_setting("certificate_number_prefix", cleaned["certificate_number_prefix"])
+        self._upsert_setting("certificate_pdf_dpi", cleaned["certificate_pdf_dpi"])
+        self._upsert_setting("certificate_storage_path", cleaned["certificate_storage_path"])
+        self._upsert_setting("certificate_email_enabled", cleaned["certificate_email_enabled"])
+        self._upsert_setting("certificate_verify_public", cleaned["certificate_verify_public"])
+        invalidate_certificate_feature_cache()
+
     def _create_backup(self):
         settings_payload = []
         for setting in SystemSetting.objects.order_by("category", "setting_key"):
@@ -433,6 +499,7 @@ class SystemSettingsView(RoleRequiredMixin, TemplateView):
             restored += 1
         invalidate_branding_cache()
         invalidate_auth_feature_cache()
+        invalidate_certificate_feature_cache()
         return restored
 
     def _backup_history(self):
@@ -505,6 +572,14 @@ class SystemSettingsView(RoleRequiredMixin, TemplateView):
                 "notify_system_announcement": self._setting_value("notify_system_announcement", setting_map),
                 "notify_daily_summary": self._setting_value("notify_daily_summary", setting_map),
             },
+            "certificates": {
+                "certificates_enabled": self._setting_value("certificates_enabled", setting_map),
+                "certificate_number_prefix": self._setting_value("certificate_number_prefix", setting_map),
+                "certificate_pdf_dpi": self._setting_value("certificate_pdf_dpi", setting_map),
+                "certificate_storage_path": self._setting_value("certificate_storage_path", setting_map),
+                "certificate_email_enabled": self._setting_value("certificate_email_enabled", setting_map),
+                "certificate_verify_public": self._setting_value("certificate_verify_public", setting_map),
+            },
         }
 
     def _storage_url(self, value):
@@ -530,6 +605,7 @@ class SystemSettingsView(RoleRequiredMixin, TemplateView):
             "security_form": form_overrides.get("security_form") or SecuritySettingsForm(initial=initial["security"]),
             "exam_defaults_form": form_overrides.get("exam_defaults_form") or ExamDefaultsForm(initial=initial["exam_defaults"]),
             "notification_form": form_overrides.get("notification_form") or NotificationSettingsForm(initial=initial["notifications"]),
+            "certificate_form": form_overrides.get("certificate_form") or CertificateSettingsForm(initial=initial["certificates"]),
             "backup_form": form_overrides.get("backup_form") or BackupRestoreForm(),
             "branding_logo_url": self._storage_url(initial["branding_paths"]["institution_logo_url"]),
             "branding_logo_dark_url": self._storage_url(initial["branding_paths"]["institution_logo_dark_url"]),
@@ -622,6 +698,16 @@ class SystemSettingsView(RoleRequiredMixin, TemplateView):
                 return redirect(f"{reverse('system_settings')}?tab=notifications")
             return self.render_to_response(
                 self.get_context_data(active_tab="notifications", form_overrides={"notification_form": form})
+            )
+
+        if action == "save_certificates":
+            form = CertificateSettingsForm(request.POST)
+            if form.is_valid():
+                self._save_certificate_settings(form)
+                messages.success(request, "Pengaturan sertifikat berhasil disimpan.")
+                return redirect(f"{reverse('system_settings')}?tab=certificates")
+            return self.render_to_response(
+                self.get_context_data(active_tab="certificates", form_overrides={"certificate_form": form})
             )
 
         if action == "create_backup":

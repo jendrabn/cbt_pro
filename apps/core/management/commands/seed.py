@@ -356,6 +356,54 @@ class Command(BaseCommand):
                 'description': 'User session timeout in minutes',
                 'is_public': False
             },
+            {
+                'setting_key': 'certificates_enabled',
+                'setting_value': 'true',
+                'setting_type': 'boolean',
+                'category': 'certificates',
+                'description': 'Master switch fitur sertifikat',
+                'is_public': False
+            },
+            {
+                'setting_key': 'certificate_number_prefix',
+                'setting_value': 'CERT',
+                'setting_type': 'string',
+                'category': 'certificates',
+                'description': 'Prefix nomor sertifikat',
+                'is_public': False
+            },
+            {
+                'setting_key': 'certificate_pdf_dpi',
+                'setting_value': '150',
+                'setting_type': 'number',
+                'category': 'certificates',
+                'description': 'Resolusi render PDF sertifikat',
+                'is_public': False
+            },
+            {
+                'setting_key': 'certificate_storage_path',
+                'setting_value': 'certificates/',
+                'setting_type': 'string',
+                'category': 'certificates',
+                'description': 'Direktori penyimpanan sertifikat',
+                'is_public': False
+            },
+            {
+                'setting_key': 'certificate_email_enabled',
+                'setting_value': 'false',
+                'setting_type': 'boolean',
+                'category': 'certificates',
+                'description': 'Kirim email saat sertifikat siap',
+                'is_public': False
+            },
+            {
+                'setting_key': 'certificate_verify_public',
+                'setting_value': 'true',
+                'setting_type': 'boolean',
+                'category': 'certificates',
+                'description': 'Verifikasi sertifikat publik',
+                'is_public': True
+            },
         ]
         
         for setting_data in settings_data:

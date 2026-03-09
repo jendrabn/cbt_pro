@@ -4,6 +4,7 @@ import json
 from datetime import timedelta
 
 from django.contrib import messages
+from django.db import OperationalError
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
@@ -17,6 +18,7 @@ from apps.results.models import ExamResult
 from .models import ExamAttempt, StudentAnswer
 from .services import (
     CooldownActive,
+    EXAM_ROOM_COMPLETED_STATUSES,
     LIST_TABS,
     MaxAttemptsReached,
     RetakeNotAllowed,
@@ -37,6 +39,8 @@ from .services import (
     save_attempt_answer,
     submit_attempt,
 )
+
+MYSQL_LOCK_TIMEOUT_CODES = {1205, 1213}
 
 
 def _querystring_without(request, keys):
@@ -74,6 +78,40 @@ def _json_error(message, status=400, **extra):
     payload = {"success": False, "message": message}
     payload.update(extra)
     return JsonResponse(payload, status=status)
+
+
+def _is_lock_wait_operational_error(exc):
+    code = None
+    if isinstance(getattr(exc, "args", None), (list, tuple)) and exc.args:
+        code = exc.args[0]
+    try:
+        code = int(code)
+    except (TypeError, ValueError):
+        code = None
+    return code in MYSQL_LOCK_TIMEOUT_CODES
+
+
+def _latest_attempt_status(attempt):
+    try:
+        return (
+            ExamAttempt.objects.filter(id=attempt.id).values_list("status", flat=True).first()
+            or attempt.status
+        )
+    except OperationalError:
+        return attempt.status
+
+
+def _build_payload_safe(*, exam, attempt, current_number):
+    try:
+        return build_exam_room_payload(
+            exam=exam,
+            attempt=attempt,
+            current_number=current_number,
+            requested_number=current_number,
+            enforce_navigation=False,
+        )
+    except Exception:
+        return None
 
 
 class StudentAttemptBaseView(RoleRequiredMixin):
@@ -283,7 +321,27 @@ class AttemptQuestionAPIView(StudentAttemptAPIBaseView, View):
         attempt = self.get_attempt(attempt_id)
         exam = attempt.exam
 
-        attempt, is_auto_submitted, _ = auto_submit_if_time_expired(exam=exam, attempt=attempt)
+        try:
+            attempt, is_auto_submitted, _ = auto_submit_if_time_expired(exam=exam, attempt=attempt)
+        except OperationalError as exc:
+            if not _is_lock_wait_operational_error(exc):
+                raise
+            latest_status = _latest_attempt_status(attempt)
+            if latest_status in EXAM_ROOM_COMPLETED_STATUSES:
+                return _json_error(
+                    "Ujian sedang diproses untuk dikirim. Silakan tunggu sebentar.",
+                    status=409,
+                    redirect_url=reverse("exam_submit", kwargs={"attempt_id": attempt.id}),
+                )
+            payload = _build_payload_safe(exam=exam, attempt=attempt, current_number=number)
+            response_payload = {
+                "success": True,
+                "message": "Sistem sedang sibuk memproses perubahan ujian. Menampilkan data terakhir.",
+            }
+            if payload is not None:
+                response_payload["payload"] = payload
+            return JsonResponse(response_payload)
+
         if is_auto_submitted:
             return _json_error(
                 "Waktu ujian habis. Ujian disubmit otomatis.",
@@ -328,11 +386,47 @@ class SaveAnswerAPIView(StudentAttemptAPIBaseView, View):
             )
         except ValueError as exc:
             return _json_error(str(exc))
+        except OperationalError as exc:
+            if not _is_lock_wait_operational_error(exc):
+                raise
+            latest_status = _latest_attempt_status(attempt)
+            if latest_status in EXAM_ROOM_COMPLETED_STATUSES:
+                fallback_payload = _build_payload_safe(
+                    exam=attempt.exam,
+                    attempt=attempt,
+                    current_number=question_number,
+                )
+                response_payload = {
+                    "success": False,
+                    "saved": False,
+                    "auto_submitted": True,
+                    "message": "Ujian sedang diproses untuk dikirim. Jawaban tidak dapat diubah lagi.",
+                    "redirect_url": reverse("exam_submit", kwargs={"attempt_id": attempt.id}),
+                }
+                if fallback_payload is not None:
+                    response_payload["payload"] = fallback_payload
+                return JsonResponse(response_payload, status=409)
+
+            fallback_payload = _build_payload_safe(
+                exam=attempt.exam,
+                attempt=attempt,
+                current_number=question_number,
+            )
+            response_payload = {
+                "success": True,
+                "saved": False,
+                "auto_submitted": False,
+                "message": "Sistem sedang sibuk. Autosave akan mencoba lagi pada perubahan berikutnya.",
+            }
+            if fallback_payload is not None:
+                response_payload["payload"] = fallback_payload
+            return JsonResponse(response_payload)
 
         if result["auto_submitted"]:
             return JsonResponse(
                 {
                     "success": False,
+                    "saved": False,
                     "auto_submitted": True,
                     "message": result["message"],
                     "payload": result["payload"],
@@ -344,6 +438,7 @@ class SaveAnswerAPIView(StudentAttemptAPIBaseView, View):
         return JsonResponse(
             {
                 "success": True,
+                "saved": bool(result.get("saved", True)),
                 "message": result["message"],
                 "payload": result["payload"],
             }
@@ -355,11 +450,34 @@ class SubmitAttemptAPIView(StudentAttemptAPIBaseView, View):
 
     def post(self, request, attempt_id):
         attempt = self.get_attempt(attempt_id)
-        submission = submit_attempt(
-            exam=attempt.exam,
-            attempt=attempt,
-            auto_submit=False,
-        )
+        try:
+            submission = submit_attempt(
+                exam=attempt.exam,
+                attempt=attempt,
+                auto_submit=False,
+            )
+        except OperationalError as exc:
+            if not _is_lock_wait_operational_error(exc):
+                raise
+            latest_status = _latest_attempt_status(attempt)
+            if latest_status in EXAM_ROOM_COMPLETED_STATUSES:
+                refreshed_attempt = self.get_attempt(attempt_id)
+                return JsonResponse(
+                    {
+                        "success": True,
+                        "message": "Pengumpulan ujian sedang diproses dan sudah tercatat.",
+                        "summary": build_exam_submit_summary(refreshed_attempt.exam, refreshed_attempt),
+                        "redirect_url": reverse("exam_submit", kwargs={"attempt_id": refreshed_attempt.id}),
+                    }
+                )
+            return JsonResponse(
+                {
+                    "success": False,
+                    "retryable": True,
+                    "message": "Sistem sedang sibuk memproses data ujian. Silakan kirim ulang beberapa detik lagi.",
+                },
+                status=409,
+            )
         return JsonResponse(
             {
                 "success": True,
@@ -391,6 +509,24 @@ class AttemptViolationAPIView(StudentAttemptAPIBaseView, View):
             )
         except ValueError as exc:
             return _json_error(str(exc))
+        except OperationalError as exc:
+            if not _is_lock_wait_operational_error(exc):
+                raise
+            # Do not block exam flow when DB is busy during concurrent submit/violation writes.
+            latest_status = _latest_attempt_status(attempt)
+            auto_submitted = latest_status in EXAM_ROOM_COMPLETED_STATUSES
+            response_payload = {
+                "success": True,
+                "message": "Sistem sedang sibuk memproses ujian. Silakan lanjutkan pengerjaan.",
+                "violations_count": 0,
+                "max_violations_allowed": int(attempt.exam.max_violations_allowed or 0),
+                "auto_submitted": auto_submitted,
+            }
+            if auto_submitted:
+                response_payload["redirect_url"] = reverse("exam_submit", kwargs={"attempt_id": attempt.id})
+            return JsonResponse(
+                response_payload
+            )
 
         response_payload = {
             "success": True,
@@ -412,13 +548,21 @@ class AttemptProctoringAPIView(StudentAttemptAPIBaseView, View):
         payload = _parse_payload(request)
         snapshot_label = payload.get("label") or "capture"
         screenshot_data_url = payload.get("screenshot_data_url") or ""
-        result = record_proctoring_capture(
-            exam=attempt.exam,
-            attempt=attempt,
-            snapshot_label=snapshot_label,
-            screenshot_data_url=screenshot_data_url,
-            request_base_url=request.build_absolute_uri("/"),
-        )
+        try:
+            result = record_proctoring_capture(
+                exam=attempt.exam,
+                attempt=attempt,
+                snapshot_label=snapshot_label,
+                screenshot_data_url=screenshot_data_url,
+                request_base_url=request.build_absolute_uri("/"),
+            )
+        except OperationalError as exc:
+            if not _is_lock_wait_operational_error(exc):
+                raise
+            result = {
+                "captured": False,
+                "message": "Sistem sedang memproses submit ujian. Snapshot proctoring dilewati sementara.",
+            }
         return JsonResponse(
             {
                 "success": bool(result.get("captured")),

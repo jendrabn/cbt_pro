@@ -1,0 +1,102 @@
+{% extends base_layout %}
+{% load cbt_extras %}
+
+{% block title %}Template Sertifikat{% endblock %}
+
+{% block topbar %}
+    {% if is_admin_mode %}
+        {% include topbar_partial with current_label="Template Sertifikat" %}
+    {% else %}
+        {% include topbar_partial with current_label="Template Sertifikat" %}
+    {% endif %}
+{% endblock %}
+
+{% block main_attrs %}class="container-fluid px-3 px-md-4 py-4"{% endblock %}
+
+{% block page_header %}
+<section class="cbt-page-header">
+    <div class="cbt-page-header-body">
+        {% include "partials/page_header.html" with eyebrow=header_eyebrow title=header_title subtitle="Kelola template sertifikat untuk ujian." %}
+        <div class="d-flex align-items-center gap-2 cbt-page-header-actions">
+            {% if create_url %}
+            <a href="{{ create_url }}" class="btn btn-primary">
+                <i class="ri-add-line me-1"></i>Template Baru
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block content %}
+{% if messages %}
+<div class="mb-3">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags|default:'info' }} py-2 mb-2">{{ message }}</div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<section class="card border-0 shadow-sm">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Nama Template</th>
+                        <th>Pembuat</th>
+                        <th>Preset</th>
+                        <th>Layout</th>
+                        <th>QR</th>
+                        <th>Status</th>
+                        <th class="text-end">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in templates %}
+                    <tr>
+                        <td class="fw-semibold">{{ row.template_name }}</td>
+                        <td>{{ row.created_by.get_full_name|default:row.created_by.username }}</td>
+                        <td>{{ row.get_layout_preset_display }}</td>
+                        <td>{{ row.layout_type|title }} / {{ row.paper_size }}</td>
+                        <td>{% if row.show_qr_code %}Aktif{% else %}Nonaktif{% endif %}</td>
+                        <td>
+                            {% if row.is_default %}
+                            {% soft_badge "Default Sistem" "success" %}
+                            {% else %}
+                            {% soft_badge "Custom" "secondary" %}
+                            {% endif %}
+                        </td>
+                        <td class="text-end">
+                            <div class="d-flex justify-content-end gap-1">
+                                <a href="{% url preview_url_name row.id %}" target="_blank" class="btn btn-sm btn-outline-info" title="Preview template">
+                                    <i class="ri-eye-line"></i>
+                                </a>
+                                {% if not is_admin_mode and row.created_by_id == request.user.id %}
+                                <a href="{% url 'teacher_certificate_template_detail' row.id %}" class="btn btn-sm btn-outline-primary" title="Edit template">
+                                    <i class="ri-edit-line"></i>
+                                </a>
+                                {% endif %}
+                                {% if is_admin_mode %}
+                                <form method="post" action="{% url 'admin_certificate_template_set_default' row.id %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-success" {% if row.is_default %}disabled{% endif %} title="Set template ini sebagai default sistem">
+                                        <i class="ri-check-line"></i>
+                                    </button>
+                                </form>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-4">Belum ada template sertifikat.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+{% endblock %}

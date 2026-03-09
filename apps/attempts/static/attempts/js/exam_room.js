@@ -44,6 +44,7 @@
             this.elements = {};
             this.submitModal = null;
             this.violationModal = null;
+            this.isReportingViolation = false;
         }
 
         init() {
@@ -644,10 +645,24 @@
             this.saveIndicator.syncing(this.elements.autoSaveLabel);
             try {
                 const response = await windowObj.axios.post(this.config.saveAnswerUrl, payload);
-                if (response.data && response.data.payload) {
-                    this.renderPayload(response.data.payload);
+                const data = response.data || {};
+                if (data.payload) {
+                    this.renderPayload(data.payload);
                 }
-                this.saveIndicator.success(this.elements.autoSaveLabel, "Tersimpan otomatis");
+                if (data.auto_submitted && data.redirect_url) {
+                    windowObj.location.href = data.redirect_url;
+                    return;
+                }
+                const hasSavedFlag = Object.prototype.hasOwnProperty.call(data, "saved");
+                const isSaved = hasSavedFlag ? Boolean(data.saved) : true;
+                if (isSaved) {
+                    this.saveIndicator.success(this.elements.autoSaveLabel, "Tersimpan otomatis");
+                    return;
+                }
+                this.saveIndicator.error(this.elements.autoSaveLabel, "Menunggu sinkronisasi");
+                if (data.message) {
+                    this.showAlert(data.message, "warning");
+                }
             } catch (error) {
                 const responseData = error && error.response ? error.response.data : null;
                 if (responseData && responseData.redirect_url) {
@@ -697,6 +712,10 @@
             if (!this.config.violationUrl) {
                 return;
             }
+            if (this.isSubmitting || this.isReportingViolation) {
+                return;
+            }
+            this.isReportingViolation = true;
             try {
                 const response = await windowObj.axios.post(this.config.violationUrl, {
                     type,
@@ -716,6 +735,8 @@
                 if (responseData && responseData.redirect_url) {
                     windowObj.location.href = responseData.redirect_url;
                 }
+            } finally {
+                this.isReportingViolation = false;
             }
         }
 

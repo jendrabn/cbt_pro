@@ -208,5 +208,27 @@ class NotificationSettingsForm(SettingsForm):
     notify_daily_summary = forms.BooleanField(label="Ringkasan harian via email", required=False)
 
 
+class CertificateSettingsForm(SettingsForm):
+    certificates_enabled = forms.BooleanField(label="Aktifkan fitur sertifikat", required=False)
+    certificate_number_prefix = forms.CharField(label="Prefix nomor sertifikat", max_length=12, required=False)
+    certificate_pdf_dpi = forms.IntegerField(label="Resolusi PDF (DPI)", min_value=72, max_value=600)
+    certificate_storage_path = forms.CharField(label="Path penyimpanan sertifikat", max_length=255, required=False)
+    certificate_email_enabled = forms.BooleanField(label="Kirim email saat sertifikat siap", required=False)
+    certificate_verify_public = forms.BooleanField(label="Verifikasi publik tanpa login", required=False)
+
+    def clean_certificate_number_prefix(self):
+        value = (self.cleaned_data.get("certificate_number_prefix") or "").strip().upper()
+        return value or "CERT"
+
+    def clean_certificate_storage_path(self):
+        value = (self.cleaned_data.get("certificate_storage_path") or "").strip()
+        if not value:
+            return "certificates/"
+        normalized = value.replace("\\", "/")
+        if not normalized.endswith("/"):
+            normalized += "/"
+        return normalized
+
+
 class BackupRestoreForm(SettingsForm):
     backup_file = forms.FileField(label="File Backup", required=False)

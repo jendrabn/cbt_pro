@@ -11,6 +11,7 @@ from django.utils import timezone
 
 from apps.accounts.models import User
 from apps.questions.models import Question, QuestionCategory
+from apps.results.models import CertificateTemplate
 from apps.subjects.models import Subject
 
 from .models import Class, Exam
@@ -111,6 +112,8 @@ class ExamWizardForm(forms.ModelForm):
             "retake_score_policy",
             "retake_cooldown_minutes",
             "retake_show_review",
+            "certificate_enabled",
+            "certificate_template",
             "override_question_navigation",
             "global_allow_previous",
             "global_allow_next",
@@ -139,6 +142,8 @@ class ExamWizardForm(forms.ModelForm):
             "retake_score_policy": "Kebijakan nilai retake",
             "retake_cooldown_minutes": "Jeda antar percobaan (menit)",
             "retake_show_review": "Izinkan review jawaban sebelum retake",
+            "certificate_enabled": "Aktifkan sertifikat kelulusan",
+            "certificate_template": "Template sertifikat",
             "override_question_navigation": "Gunakan aturan navigasi global ujian",
             "global_allow_previous": "Izinkan navigasi ke soal sebelumnya (global)",
             "global_allow_next": "Izinkan navigasi ke soal berikutnya (global)",
@@ -176,6 +181,7 @@ class ExamWizardForm(forms.ModelForm):
             "allow_review",
             "allow_retake",
             "retake_show_review",
+            "certificate_enabled",
             "override_question_navigation",
             "global_allow_previous",
             "global_allow_next",
@@ -192,8 +198,23 @@ class ExamWizardForm(forms.ModelForm):
         self.fields["max_violations_allowed"].initial = self.fields["max_violations_allowed"].initial or 3
         self.fields["max_retake_attempts"].initial = self.fields["max_retake_attempts"].initial or 1
         self.fields["retake_cooldown_minutes"].initial = self.fields["retake_cooldown_minutes"].initial or 0
+        self.fields["max_retake_attempts"].required = False
+        self.fields["retake_score_policy"].required = False
+        self.fields["retake_cooldown_minutes"].required = False
         self.fields["max_retake_attempts"].widget.attrs.update({"min": 1, "max": 10})
         self.fields["retake_cooldown_minutes"].widget.attrs.update({"min": 0})
+
+        if "certificate_template" in self.fields:
+            template_qs = CertificateTemplate.objects.filter(is_default=True)
+            if self.teacher:
+                template_qs = CertificateTemplate.objects.filter(
+                    Q(created_by=self.teacher) | Q(is_default=True)
+                )
+            if self.instance and self.instance.pk and self.instance.certificate_template_id:
+                template_qs = template_qs | CertificateTemplate.objects.filter(id=self.instance.certificate_template_id)
+            self.fields["certificate_template"].queryset = template_qs.distinct().order_by("template_name")
+            self.fields["certificate_template"].required = False
+            self.fields["certificate_template"].empty_label = "Gunakan template default sistem"
 
         self.available_questions = Question.objects.none()
         self.available_categories = QuestionCategory.objects.none()
@@ -334,6 +355,7 @@ class ExamWizardForm(forms.ModelForm):
         max_retake_attempts = cleaned_data.get("max_retake_attempts")
         retake_score_policy = (cleaned_data.get("retake_score_policy") or "").strip().lower()
         retake_cooldown_minutes = cleaned_data.get("retake_cooldown_minutes")
+        certificate_enabled = cleaned_data.get("certificate_enabled")
 
         if status_action not in {"draft", "publish"}:
             self.add_error("status_action", "Aksi status tidak valid.")
@@ -387,6 +409,9 @@ class ExamWizardForm(forms.ModelForm):
             cleaned_data["retake_score_policy"] = "highest"
             cleaned_data["retake_cooldown_minutes"] = 0
             cleaned_data["retake_show_review"] = False
+
+        if not certificate_enabled:
+            cleaned_data["certificate_template"] = None
 
         if override_question_navigation and global_force_sequential:
             cleaned_data["global_allow_previous"] = False

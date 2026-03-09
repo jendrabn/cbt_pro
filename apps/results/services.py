@@ -13,7 +13,12 @@ from django.utils.dateparse import parse_date
 
 from apps.attempts.models import ExamAttempt, ExamViolation, StudentAnswer
 from apps.exams.models import Class, ClassStudent, Exam
-from apps.results.models import Certificate, ExamResult
+from apps.results.certificate_services import (
+    certificate_state_label,
+    get_certificate_download_url as get_direct_certificate_download_url,
+    get_certificate_for_result,
+)
+from apps.results.models import ExamResult
 from apps.subjects.models import Subject
 
 
@@ -272,17 +277,16 @@ def get_student_results_queryset(student, filters: StudentResultsFilters):
 
 
 def _result_certificate(result):
-    try:
-        return result.certificate
-    except Certificate.DoesNotExist:
-        return None
+    return get_certificate_for_result(result)
 
 
 def get_certificate_download_url(result):
     certificate = _result_certificate(result)
-    if not certificate or not certificate.is_valid:
+    if not certificate:
         return ""
-    return (certificate.certificate_url or "").strip()
+    if certificate_state_label(certificate) != "active":
+        return ""
+    return get_direct_certificate_download_url(certificate)
 
 
 def build_student_results_rows(results_qs, status_filter=""):
@@ -313,11 +317,8 @@ def build_student_results_rows(results_qs, status_filter=""):
             continue
 
         certificate = _result_certificate(selected_result)
-        certificate_available = bool(
-            certificate
-            and certificate.is_valid
-            and (certificate.certificate_url or "").strip()
-        )
+        certificate_state = certificate_state_label(certificate)
+        certificate_available = certificate_state == "active"
 
         status_label = "Lulus" if metrics["passed"] else "Belum Lulus"
         status_tone = "success" if metrics["passed"] else "danger"
@@ -343,7 +344,9 @@ def build_student_results_rows(results_qs, status_filter=""):
                 "time_efficiency": _to_float(selected_result.time_efficiency) if selected_result.time_efficiency is not None else None,
                 "review_enabled": bool(exam.allow_review),
                 "certificate_available": certificate_available,
-                "certificate_number": certificate.certificate_number if certificate_available else "",
+                "certificate_state": certificate_state,
+                "certificate_id": str(certificate.id) if certificate else "",
+                "certificate_number": certificate.certificate_number if certificate else "",
                 "allow_retake": bool(exam.allow_retake),
                 "max_retake_attempts": int(exam.max_retake_attempts or 1),
                 "attempts_used": int(metrics["attempts_used"] or 1),
@@ -450,7 +453,13 @@ def build_student_result_detail_context(result):
     final_metrics = _resolve_final_result_metrics(exam, all_results)
     selected_result = final_metrics["selected_result"] or result
     review_context = build_answer_review_context(selected_result)
-    certificate_url = get_certificate_download_url(selected_result)
+    certificate = _result_certificate(selected_result)
+    certificate_state = certificate_state_label(certificate)
+    certificate_url = (
+        get_direct_certificate_download_url(certificate)
+        if certificate_state == "active"
+        else ""
+    )
 
     rows = review_context["rows"]
     score_max = sum(row["points_possible"] for row in rows)
@@ -491,7 +500,10 @@ def build_student_result_detail_context(result):
         "time_efficiency": round(_to_float(selected_result.time_efficiency), 2) if selected_result.time_efficiency is not None else 0.0,
         "review_enabled": bool(exam.allow_review),
         "certificate_url": certificate_url,
-        "certificate_available": bool(certificate_url),
+        "certificate_state": certificate_state,
+        "certificate_available": certificate_state == "active",
+        "certificate_id": str(certificate.id) if certificate else "",
+        "certificate_number": certificate.certificate_number if certificate else "",
         "answer_breakdown_chart": {
             "labels": ["Benar", "Salah", "Tidak Dijawab"],
             "values": [
@@ -697,6 +709,8 @@ def build_student_result_rows(results_qs, sort_by="rank", direction="asc"):
         selected_result = metrics["selected_result"] or reference_result
         student_name = selected_result.student.get_full_name().strip() or selected_result.student.username
         class_names = class_map.get(student_id, [])
+        certificate = _result_certificate(selected_result)
+        certificate_state = certificate_state_label(certificate)
         base_rows.append(
             {
                 "id": str(selected_result.id),
@@ -717,6 +731,9 @@ def build_student_result_rows(results_qs, sort_by="rank", direction="asc"):
                 "allow_retake": bool(exam.allow_retake),
                 "attempts_label": f"{int(metrics['attempts_used'] or 1)}/{int(exam.max_retake_attempts or 1)}",
                 "final_policy_label": metrics["policy_label"],
+                "certificate_state": certificate_state,
+                "certificate_id": str(certificate.id) if certificate else "",
+                "certificate_number": certificate.certificate_number if certificate else "",
             }
         )
 

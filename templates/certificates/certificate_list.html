@@ -1,0 +1,77 @@
+{% extends "layouts/base_student.html" %}
+{% load cbt_extras %}
+
+{% block title %}Sertifikat Saya{% endblock %}
+
+{% block topbar %}
+    {% include "partials/topbar_student.html" with current_label="Sertifikat Saya" %}
+{% endblock %}
+
+{% block main_attrs %}class="container-fluid px-3 px-md-4 py-4"{% endblock %}
+
+{% block page_header %}
+<section class="cbt-page-header">
+    <div class="cbt-page-header-body">
+        {% include "partials/page_header.html" with eyebrow="Panel Siswa" title="Sertifikat Saya" subtitle="Lihat status sertifikat dan unduh PDF resmi." %}
+        <div class="d-flex align-items-center gap-2 cbt-page-header-actions">
+            <a href="{% url 'student_results' %}" class="btn btn-outline-secondary">
+                <i class="ri-file-chart-line me-1"></i>Hasil Ujian
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block content %}
+<section class="card border-0 shadow-sm">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>No. Sertifikat</th>
+                        <th>Ujian</th>
+                        <th>Skor</th>
+                        <th>Tanggal Terbit</th>
+                        <th>Status</th>
+                        <th class="text-end">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cert in certificates %}
+                    <tr>
+                        <td class="fw-semibold">{{ cert.certificate_number }}</td>
+                        <td>{{ cert.exam.title }}</td>
+                        <td>{{ cert.final_score }} ({{ cert.final_percentage }}%)</td>
+                        <td>{{ cert.issued_at|date:"d M Y H:i" }}</td>
+                        <td>
+                            {% if cert.is_revoked %}
+                            {% soft_badge "Dicabut" "danger" %}
+                            {% elif cert.is_pdf_ready %}
+                            {% soft_badge "Siap Unduh" "success" %}
+                            {% else %}
+                            {% soft_badge "Diproses" "warning" %}
+                            {% endif %}
+                        </td>
+                        <td class="text-end">
+                            <a href="{% url 'student_certificate_detail' cert.id %}" class="btn btn-sm btn-outline-primary">
+                                <i class="ri-eye-line"></i>
+                            </a>
+                            {% if cert.is_pdf_ready and not cert.is_revoked %}
+                            <a href="{% url 'student_certificate_download_by_id' cert.id %}" class="btn btn-sm btn-outline-success">
+                                <i class="ri-download-2-line"></i>
+                            </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-4">Belum ada sertifikat untuk akun ini.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -270,6 +270,83 @@ def export_results_to_pdf(exam, rows, summary):
     return response
 
 
+def export_certificates_to_xlsx(certificates, teacher):
+    branding = _branding_payload()
+    workbook = Workbook()
+    worksheet = workbook.active
+    worksheet.title = "Sertifikat"
+
+    worksheet.append([branding["institution_name"]])
+    worksheet.append([f"{branding['institution_type']} | {branding['institution_address']}".strip(" |")])
+    worksheet.append(["Laporan Sertifikat Ujian"])
+    worksheet.append([f"Guru: {teacher.get_full_name().strip() or teacher.username}"])
+    worksheet.append([f"Dicetak: {timezone.localtime().strftime('%d %b %Y %H:%M:%S')}"])
+    worksheet.append([])
+
+    worksheet.append(
+        [
+            "Nomor Sertifikat",
+            "Nama Siswa",
+            "Username",
+            "Ujian",
+            "Skor Akhir",
+            "Persentase",
+            "Status",
+            "Terbit",
+            "Dicabut",
+        ]
+    )
+
+    for cert in certificates:
+        if cert.revoked_at or not cert.is_valid:
+            status = "Dicabut"
+        elif cert.pdf_generated_at:
+            status = "Siap"
+        else:
+            status = "Diproses"
+
+        worksheet.append(
+            [
+                cert.certificate_number,
+                cert.student.get_full_name().strip() or cert.student.username if cert.student_id else "-",
+                cert.student.username if cert.student_id else "-",
+                cert.exam.title if cert.exam_id else "-",
+                float(cert.final_score or 0),
+                float(cert.final_percentage or 0),
+                status,
+                timezone.localtime(cert.issued_at).strftime("%d-%m-%Y %H:%M:%S") if cert.issued_at else "-",
+                timezone.localtime(cert.revoked_at).strftime("%d-%m-%Y %H:%M:%S") if cert.revoked_at else "-",
+            ]
+        )
+
+    worksheet.merge_cells(start_row=1, start_column=1, end_row=1, end_column=9)
+    worksheet.merge_cells(start_row=2, start_column=1, end_row=2, end_column=9)
+    worksheet.merge_cells(start_row=3, start_column=1, end_row=3, end_column=9)
+    worksheet.merge_cells(start_row=4, start_column=1, end_row=4, end_column=9)
+    worksheet.merge_cells(start_row=5, start_column=1, end_row=5, end_column=9)
+
+    for column_index in range(1, worksheet.max_column + 1):
+        column_cells = worksheet.iter_cols(
+            min_col=column_index,
+            max_col=column_index,
+            min_row=1,
+            max_row=worksheet.max_row,
+        )
+        max_len = max(len(str(cell.value or "")) for cell in next(column_cells))
+        worksheet.column_dimensions[get_column_letter(column_index)].width = min(max_len + 2, 44)
+
+    buffer = BytesIO()
+    workbook.save(buffer)
+    response = HttpResponse(
+        buffer.getvalue(),
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+    response["Content-Disposition"] = (
+        f'attachment; filename="sertifikat_guru_{teacher.id}_{_filename_timestamp()}.xlsx"'
+    )
+    return response
+
+
 def get_certificate_branding_payload():
     branding = _branding_payload()
     return {

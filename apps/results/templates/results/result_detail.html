@@ -115,6 +115,7 @@
                                 <option value="">Pilih Aksi Bulk</option>
                                 <option value="export_csv">Ekspor CSV</option>
                                 <option value="export_excel">Ekspor Excel</option>
+                                <option value="issue_certificates">Issue Sertifikat Manual</option>
                             </select>
                             <button type="submit" class="btn btn-sm btn-outline-primary" title="Terapkan aksi bulk ke hasil siswa terpilih">
                                 <i class="ri-check-line me-1"></i>Terapkan
@@ -149,6 +150,7 @@
                                     <th>Skor</th>
                                     <th>Persentase</th>
                                     <th>Status</th>
+                                    <th>Sertifikat</th>
                                     <th>Waktu</th>
                                     <th>Attempts</th>
                                     <th>Pelanggaran</th>
@@ -174,6 +176,17 @@
                                         {% soft_badge row.status_label "success" %}
                                         {% else %}
                                         {% soft_badge row.status_label "danger" %}
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if row.certificate_state == "active" %}
+                                        <span class="text-success" title="Sertifikat terbit"><i class="ri-checkbox-circle-fill"></i></span>
+                                        {% elif row.certificate_state == "loading" %}
+                                        <span class="text-warning" title="Sertifikat diproses"><i class="ri-time-line"></i></span>
+                                        {% elif row.certificate_state == "revoked" %}
+                                        <span class="text-danger" title="Sertifikat dicabut"><i class="ri-close-circle-fill"></i></span>
+                                        {% else %}
+                                        <span class="text-muted" title="Sertifikat tidak tersedia"><i class="ri-subtract-line"></i></span>
                                         {% endif %}
                                     </td>
                                     <td>{{ row.time_taken_human }}</td>
@@ -212,11 +225,11 @@
                                         </div>
                                     </td>
                                 </tr>
-                                {% empty %}
-                                <tr>
-                                    <td colspan="11" class="text-center text-muted py-5">Belum ada hasil siswa untuk ujian ini.</td>
-                                </tr>
-                                {% endfor %}
+                            {% empty %}
+                            <tr>
+                                <td colspan="12" class="text-center text-muted py-5">Belum ada hasil siswa untuk ujian ini.</td>
+                            </tr>
+                            {% endfor %}
                             </tbody>
                         </table>
                     </div>

@@ -364,6 +364,8 @@ def duplicate_exam(exam, teacher):
         retake_score_policy=exam.retake_score_policy,
         retake_cooldown_minutes=exam.retake_cooldown_minutes,
         retake_show_review=exam.retake_show_review,
+        certificate_enabled=exam.certificate_enabled,
+        certificate_template=exam.certificate_template,
         override_question_navigation=exam.override_question_navigation,
         global_allow_previous=exam.global_allow_previous,
         global_allow_next=exam.global_allow_next,

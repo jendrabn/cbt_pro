@@ -18,6 +18,9 @@
                                 <a href="{% url 'student_exam_list' %}" class="btn btn-outline-secondary" title="Buka daftar ujian siswa">
                                     <i class="ri-file-list-line me-1"></i>Daftar Ujian
                                 </a>
+                                <a href="{% url 'student_certificate_list' %}" class="btn btn-outline-success" title="Buka daftar sertifikat">
+                                    <i class="ri-award-line me-1"></i>Sertifikat
+                                </a>
                             </div>
             </div>
         </div>
@@ -179,10 +182,18 @@
                                             <i class="ri-lock-line"></i>
                                         </button>
                                         {% endif %}
-                                        {% if row.certificate_available %}
-                                        <a href="{% url 'student_certificate_download' row.id %}" class="btn btn-sm btn-outline-success" title="Unduh sertifikat hasil ujian">
+                                        {% if row.certificate_state == "active" and row.certificate_id %}
+                                        <a href="{% url 'student_certificate_download_by_id' row.certificate_id %}" class="btn btn-sm btn-outline-success" title="Unduh sertifikat hasil ujian">
                                             <i class="ri-award-line"></i>
                                         </a>
+                                        {% elif row.certificate_state == "loading" %}
+                                        <button type="button" class="btn btn-sm btn-outline-warning" disabled title="Sertifikat sedang diproses">
+                                            <i class="ri-loader-4-line"></i>
+                                        </button>
+                                        {% elif row.certificate_state == "revoked" %}
+                                        <button type="button" class="btn btn-sm btn-outline-danger" disabled title="Sertifikat dicabut">
+                                            <i class="ri-close-circle-line"></i>
+                                        </button>
                                         {% else %}
                                         <button type="button" class="btn btn-sm btn-outline-secondary" disabled title="Sertifikat belum tersedia">
                                             <i class="ri-medal-line"></i>

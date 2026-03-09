@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <title>{{ certificate.certificate_number }}</title>
+    {% with preset=template.layout_preset|default:'classic_formal' %}
+    <style>
+        @page {
+            size: {% if template.paper_size == "letter" %}Letter{% else %}A4{% endif %} {% if template.layout_type == "portrait" %}portrait{% else %}landscape{% endif %};
+            margin: 1.2cm;
+        }
+        body {
+            margin: 0;
+            color: #17222f;
+            font-family: Arial, sans-serif;
+            background: #f7fafc;
+        }
+        .sheet {
+            min-height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+        .background-layer {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            background: url('{{ template.background_image_url }}') center center / cover no-repeat;
+            opacity: 0.14;
+        }
+        .content-layer {
+            position: relative;
+            z-index: 2;
+        }
+        .logo {
+            max-height: 58px;
+            margin: 0 auto 8px;
+        }
+        .body-text {
+            white-space: pre-line;
+            line-height: 1.55;
+        }
+        .verify {
+            font-size: 11px;
+            color: #4b5563;
+        }
+        .number {
+            font-weight: 700;
+            color: #111827;
+        }
+        .qr-box {
+            display: inline-block;
+            border: 1px dashed #9ca3af;
+            color: #6b7280;
+            font-size: 10px;
+            text-align: center;
+        }
+
+        {% if preset == "modern_minimal" %}
+        .sheet {
+            border: none;
+            background: linear-gradient(145deg, #ffffff 0%, #f8fbff 80%);
+            padding: 22px 28px 24px;
+        }
+        .accent-bar {
+            height: 12px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, {{ template.primary_color }}, {{ template.secondary_color }});
+            margin-top: 20px;
+        }
+        .hero {
+            text-align: center;
+            margin-bottom: 16px;
+        }
+        .hero h1 {
+            margin: 0;
+            font-size: 36px;
+            letter-spacing: 0.8px;
+            color: {{ template.primary_color }};
+            text-transform: uppercase;
+        }
+        .hero p {
+            margin: 4px 0 0;
+            color: #64748b;
+            font-size: 14px;
+        }
+        .student {
+            text-align: center;
+            margin: 18px 0 12px;
+        }
+        .student .name {
+            font-size: 32px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+        .student .meta {
+            color: #64748b;
+            font-size: 14px;
+        }
+        .body-text {
+            margin: 12px auto 18px;
+            max-width: 840px;
+            text-align: center;
+            font-size: 14px;
+        }
+        .score-grid {
+            width: 100%;
+            display: table;
+            margin-bottom: 12px;
+        }
+        .score-col {
+            display: table-cell;
+            width: 50%;
+            padding: 0 7px;
+            text-align: center;
+        }
+        .score-card {
+            border-radius: 12px;
+            border: 1px solid #dbe4f0;
+            background: #ffffff;
+            padding: 10px;
+        }
+        .score-card .label {
+            color: #64748b;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+        .score-card .value {
+            color: {{ template.secondary_color }};
+            font-weight: 700;
+            font-size: 24px;
+            margin-top: 4px;
+        }
+        .footer {
+            margin-top: 10px;
+            display: table;
+            width: 100%;
+            font-size: 12px;
+        }
+        .footer-left,
+        .footer-right {
+            display: table-cell;
+            width: 50%;
+            vertical-align: bottom;
+        }
+        .footer-right {
+            text-align: right;
+        }
+        .qr-box {
+            width: 62px;
+            height: 62px;
+            line-height: 62px;
+            border-radius: 8px;
+        }
+        {% elif preset == "portrait_achievement" %}
+        .sheet {
+            border: 8px double {{ template.primary_color }};
+            background: #ffffff;
+            padding: 26px 26px 24px;
+        }
+        .hero {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid {{ template.primary_color }};
+        }
+        .hero h1 {
+            margin: 0;
+            font-size: 30px;
+            color: {{ template.primary_color }};
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-family: "Times New Roman", serif;
+        }
+        .hero p {
+            margin: 5px 0 0;
+            font-size: 13px;
+            color: #4b5563;
+        }
+        .student {
+            text-align: center;
+            margin: 22px 0 16px;
+        }
+        .student .name {
+            font-size: 34px;
+            font-family: "Times New Roman", serif;
+            color: #0f172a;
+            font-weight: 700;
+        }
+        .student .meta {
+            color: #4b5563;
+            font-size: 14px;
+            margin-top: 2px;
+        }
+        .body-text {
+            margin: 14px auto 18px;
+            text-align: center;
+            font-size: 14px;
+        }
+        .score-grid {
+            display: table;
+            width: 100%;
+            margin-top: 12px;
+        }
+        .score-col {
+            display: table-cell;
+            width: 50%;
+            text-align: center;
+            padding: 0 6px;
+        }
+        .score-card {
+            border: 1px solid #d6d6d6;
+            border-radius: 10px;
+            padding: 10px;
+            background: #ffffff;
+        }
+        .score-card .label {
+            color: #6b7280;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+        .score-card .value {
+            color: {{ template.secondary_color }};
+            font-size: 24px;
+            font-weight: 700;
+            margin-top: 4px;
+        }
+        .footer {
+            margin-top: 18px;
+            display: table;
+            width: 100%;
+            font-size: 12px;
+        }
+        .footer-left,
+        .footer-right {
+            display: table-cell;
+            width: 50%;
+            vertical-align: bottom;
+        }
+        .footer-right {
+            text-align: right;
+        }
+        .qr-box {
+            width: 74px;
+            height: 74px;
+            line-height: 74px;
+            border-radius: 8px;
+            margin-top: 8px;
+        }
+        {% else %}
+        .sheet {
+            border: 6px solid {{ template.primary_color }};
+            border-radius: 14px;
+            background: #ffffff;
+            padding: 24px 32px 28px;
+        }
+        .hero {
+            text-align: center;
+            margin-bottom: 18px;
+        }
+        .hero h1 {
+            margin: 0;
+            letter-spacing: 1px;
+            color: {{ template.primary_color }};
+            font-size: 34px;
+            text-transform: uppercase;
+            font-family: "Times New Roman", serif;
+        }
+        .hero p {
+            margin: 6px 0 0;
+            font-size: 14px;
+            color: #4a5568;
+        }
+        .student {
+            text-align: center;
+            margin: 20px 0 14px;
+        }
+        .student .name {
+            font-size: 30px;
+            color: #111827;
+            font-weight: 700;
+            font-family: "Times New Roman", serif;
+        }
+        .student .meta {
+            font-size: 14px;
+            color: #4b5563;
+        }
+        .body-text {
+            margin: 20px auto;
+            max-width: 860px;
+            text-align: center;
+            font-size: 14px;
+        }
+        .score-grid {
+            display: table;
+            width: 100%;
+            margin-top: 14px;
+        }
+        .score-col {
+            display: table-cell;
+            text-align: center;
+            width: 50%;
+        }
+        .score-card {
+            border: 1px solid #d1d5db;
+            border-radius: 10px;
+            margin: 0 8px;
+            padding: 12px;
+        }
+        .score-card .label {
+            color: #6b7280;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+        .score-card .value {
+            font-size: 24px;
+            font-weight: 700;
+            color: {{ template.secondary_color }};
+        }
+        .footer {
+            margin-top: 26px;
+            display: table;
+            width: 100%;
+            font-size: 12px;
+        }
+        .footer-left,
+        .footer-right {
+            display: table-cell;
+            width: 50%;
+            vertical-align: bottom;
+        }
+        .footer-right {
+            text-align: right;
+        }
+        .qr-box {
+            width: 60px;
+            height: 60px;
+            line-height: 60px;
+            border-radius: 8px;
+            margin-top: 8px;
+        }
+        {% endif %}
+    </style>
+    {% endwith %}
+</head>
+<body>
+    {% with preset=template.layout_preset|default:'classic_formal' %}
+    <div class="sheet">
+        {% if template.background_image_url %}<div class="background-layer"></div>{% endif %}
+        <div class="content-layer">
+            <section class="hero">
+                {% if template.show_logo and branding.institution_logo_url %}
+                <img src="{{ branding.institution_logo_url }}" alt="Logo" class="logo">
+                {% endif %}
+                <h1>{{ template.header_text }}</h1>
+                <p>{{ branding.institution_name }}</p>
+            </section>
+
+            <section class="student">
+                <div class="name">{{ placeholders.student_full_name }}</div>
+                {% if placeholders.class_grade %}
+                <div class="meta">{{ placeholders.class_grade }}</div>
+                {% endif %}
+            </section>
+
+            <section class="body-text">{{ body_text }}</section>
+
+            {% if template.show_score or template.show_grade %}
+            <section class="score-grid">
+                {% if template.show_score %}
+                <div class="score-col">
+                    <div class="score-card">
+                        <div class="label">Nilai Akhir</div>
+                        <div class="value">{{ placeholders.final_score }}</div>
+                    </div>
+                </div>
+                {% endif %}
+                {% if template.show_grade %}
+                <div class="score-col">
+                    <div class="score-card">
+                        <div class="label">Grade</div>
+                        <div class="value">{{ placeholders.grade }}</div>
+                    </div>
+                </div>
+                {% endif %}
+            </section>
+            {% endif %}
+
+            <section class="footer">
+                <div class="footer-left">
+                    <div>Diterbitkan: {{ placeholders.issued_date }}</div>
+                    <div class="number">{{ placeholders.certificate_number }}</div>
+                    {% if template.show_qr_code %}
+                    <div class="qr-box">QR</div>
+                    {% endif %}
+                    <div class="verify">Verifikasi: {{ verification_url }}</div>
+                </div>
+                <div class="footer-right">
+                    {% if template.signatory_name %}<div>{{ template.signatory_name }}</div>{% endif %}
+                    {% if template.signatory_title %}<div>{{ template.signatory_title }}</div>{% endif %}
+                </div>
+            </section>
+
+            {% if preset == "modern_minimal" %}
+            <div class="accent-bar"></div>
+            {% endif %}
+        </div>
+    </div>
+    {% endwith %}
+</body>
+</html>

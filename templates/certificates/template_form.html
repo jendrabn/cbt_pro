@@ -1,0 +1,162 @@
+{% extends "layouts/base_teacher.html" %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block topbar %}
+    {% include "partials/topbar_teacher.html" with parent_label="Template Sertifikat" parent_url=back_url current_label=page_title %}
+{% endblock %}
+
+{% block main_attrs %}class="container-fluid px-3 px-md-4 py-4"{% endblock %}
+
+{% block page_header %}
+<section class="cbt-page-header">
+    <div class="cbt-page-header-body">
+        {% include "partials/page_header.html" with eyebrow="Panel Guru" title=page_title subtitle="Atur tampilan sertifikat yang akan dipakai pada ujian." %}
+        <div class="d-flex align-items-center gap-2 cbt-page-header-actions">
+            <a href="{{ back_url }}" class="btn btn-outline-primary">
+                <i class="ri-arrow-left-line me-1"></i>Kembali
+            </a>
+            {% if preview_url %}
+            <a href="{{ preview_url }}" target="_blank" class="btn btn-outline-info">
+                <i class="ri-eye-line me-1"></i>Preview
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block content %}
+{% if messages %}
+<div class="mb-3">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags|default:'info' }} py-2 mb-2">{{ message }}</div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<section class="card border-0 shadow-sm">
+    <div class="card-body">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">{{ form.template_name.label }}</label>
+                    {{ form.template_name }}
+                    {% for error in form.template_name.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">{{ form.layout_preset.label }}</label>
+                    {{ form.layout_preset }}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">{{ form.layout_type.label }}</label>
+                    {{ form.layout_type }}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">{{ form.paper_size.label }}</label>
+                    {{ form.paper_size }}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">{{ form.primary_color.label }}</label>
+                    {{ form.primary_color }}
+                    {% for error in form.primary_color.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">{{ form.secondary_color.label }}</label>
+                    {{ form.secondary_color }}
+                    {% for error in form.secondary_color.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">{{ form.qr_code_size.label }}</label>
+                    {{ form.qr_code_size }}
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">{{ form.header_text.label }}</label>
+                    {{ form.header_text }}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">{{ form.footer_text.label }}</label>
+                    {{ form.footer_text }}
+                </div>
+                <div class="col-12">
+                    <label class="form-label">{{ form.body_text_template.label }}</label>
+                    {{ form.body_text_template }}
+                    <div class="form-text">
+                        Placeholder:
+                        {% templatetag openvariable %} student_full_name {% templatetag closevariable %},
+                        {% templatetag openvariable %} class_grade {% templatetag closevariable %},
+                        {% templatetag openvariable %} exam_title {% templatetag closevariable %},
+                        {% templatetag openvariable %} subject_name {% templatetag closevariable %},
+                        {% templatetag openvariable %} final_score {% templatetag closevariable %},
+                        {% templatetag openvariable %} percentage {% templatetag closevariable %},
+                        {% templatetag openvariable %} grade {% templatetag closevariable %},
+                        {% templatetag openvariable %} certificate_number {% templatetag closevariable %},
+                        {% templatetag openvariable %} issued_date {% templatetag closevariable %}.
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">{{ form.signatory_name.label }}</label>
+                    {{ form.signatory_name }}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">{{ form.signatory_title.label }}</label>
+                    {{ form.signatory_title }}
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">{{ form.background_image.label }}</label>
+                    {{ form.background_image }}
+                    {% if is_edit and template_obj.background_image_url %}
+                    <div class="small text-muted mt-1">Saat ini: {{ template_obj.background_image_url }}</div>
+                    <div class="form-check mt-1">
+                        {{ form.remove_background_image }}
+                        <label class="form-check-label" for="{{ form.remove_background_image.id_for_label }}">Hapus background saat ini</label>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">{{ form.signatory_signature.label }}</label>
+                    {{ form.signatory_signature }}
+                    {% if is_edit and template_obj.signatory_signature_url %}
+                    <div class="small text-muted mt-1">Saat ini: {{ template_obj.signatory_signature_url }}</div>
+                    <div class="form-check mt-1">
+                        {{ form.remove_signatory_signature }}
+                        <label class="form-check-label" for="{{ form.remove_signatory_signature.id_for_label }}">Hapus tanda tangan saat ini</label>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="col-md-4">
+                    <div class="form-check">{{ form.show_logo }} <label class="form-check-label" for="{{ form.show_logo.id_for_label }}">{{ form.show_logo.label }}</label></div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-check">{{ form.show_score }} <label class="form-check-label" for="{{ form.show_score.id_for_label }}">{{ form.show_score.label }}</label></div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-check">{{ form.show_grade }} <label class="form-check-label" for="{{ form.show_grade.id_for_label }}">{{ form.show_grade.label }}</label></div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-check">{{ form.show_rank }} <label class="form-check-label" for="{{ form.show_rank.id_for_label }}">{{ form.show_rank.label }}</label></div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-check">{{ form.show_qr_code }} <label class="form-check-label" for="{{ form.show_qr_code.id_for_label }}">{{ form.show_qr_code.label }}</label></div>
+                </div>
+            </div>
+
+            <div class="d-flex flex-wrap gap-2 justify-content-end mt-4">
+                <button type="submit" class="btn btn-primary">
+                    <i class="ri-save-line me-1"></i>Simpan Template
+                </button>
+                {% if is_edit %}
+                <button type="submit" name="action" value="delete" class="btn btn-outline-danger" onclick="return confirm('Hapus template ini?')">
+                    <i class="ri-delete-bin-line me-1"></i>Hapus
+                </button>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}

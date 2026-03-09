@@ -53,6 +53,16 @@ class Exam(BaseModelSoftDelete):
     )
     retake_cooldown_minutes = models.IntegerField(default=0)
     retake_show_review = models.BooleanField(default=False)
+
+    # Certificate Settings
+    certificate_enabled = models.BooleanField(default=False)
+    certificate_template = models.ForeignKey(
+        "results.CertificateTemplate",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="configured_exams",
+    )
     
     # Navigation Override Settings
     override_question_navigation = models.BooleanField(default=False)

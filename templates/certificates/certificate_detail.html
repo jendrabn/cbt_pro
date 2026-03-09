@@ -1,0 +1,111 @@
+{% extends "layouts/base_student.html" %}
+{% load cbt_extras %}
+
+{% block title %}Detail Sertifikat{% endblock %}
+
+{% block topbar %}
+    {% include "partials/topbar_student.html" with parent_label="Sertifikat Saya" parent_url="/student/certificates/" current_label=certificate.certificate_number %}
+{% endblock %}
+
+{% block main_attrs %}class="container-fluid px-3 px-md-4 py-4"{% endblock %}
+
+{% block page_header %}
+<section class="cbt-page-header">
+    <div class="cbt-page-header-body">
+        {% include "partials/page_header.html" with eyebrow="Sertifikat" title=certificate.certificate_number subtitle=certificate.exam.title %}
+        <div class="d-flex align-items-center gap-2 cbt-page-header-actions">
+            <a href="{% url 'student_certificate_list' %}" class="btn btn-outline-primary">
+                <i class="ri-arrow-left-line me-1"></i>Kembali
+            </a>
+            <a id="certificateDownloadBtn"
+               href="{% if can_download %}{% url 'student_certificate_download_by_id' certificate.id %}{% endif %}"
+               class="btn {% if can_download %}btn-success{% elif is_revoked %}btn-danger disabled{% else %}btn-warning disabled{% endif %}">
+                <i class="ri-download-2-line me-1"></i>
+                <span id="certificateDownloadLabel">{% if can_download %}Unduh Sertifikat{% elif is_revoked %}Sertifikat Dicabut{% else %}Sertifikat Diproses...{% endif %}</span>
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block content %}
+<section class="row g-4">
+    <div class="col-lg-7">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <h3 class="h6 mb-3">Informasi Sertifikat</h3>
+                <div class="small vstack gap-2">
+                    <div><span class="text-muted">Nomor:</span> <strong>{{ certificate.certificate_number }}</strong></div>
+                    <div><span class="text-muted">Nama:</span> <strong>{{ certificate.student.get_full_name|default:certificate.student.username }}</strong></div>
+                    <div><span class="text-muted">Ujian:</span> <strong>{{ certificate.exam.title }}</strong></div>
+                    <div><span class="text-muted">Skor Final:</span> <strong>{{ certificate.final_score }} ({{ certificate.final_percentage }}%)</strong></div>
+                    <div><span class="text-muted">Tanggal Terbit:</span> <strong>{{ certificate.issued_at|date:"d M Y H:i" }}</strong></div>
+                    <div>
+                        <span class="text-muted">Status:</span>
+                        {% if is_revoked %}
+                        {% soft_badge "Dicabut" "danger" %}
+                        {% elif can_download %}
+                        {% soft_badge "Siap Unduh" "success" %}
+                        {% else %}
+                        {% soft_badge "Diproses" "warning" %}
+                        {% endif %}
+                    </div>
+                    {% if is_revoked and certificate.revoked_reason %}
+                    <div><span class="text-muted">Alasan Pencabutan:</span> <strong>{{ certificate.revoked_reason }}</strong></div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <h3 class="h6 mb-3">Verifikasi Publik</h3>
+                <p class="small text-muted mb-2">Bagikan tautan berikut untuk verifikasi keaslian sertifikat.</p>
+                <div class="p-2 rounded bg-light border small text-break">{{ verify_url }}</div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block vendor_js %}
+{% if not can_download and not is_revoked %}
+<script>
+    (function () {
+        var url = "{{ status_url }}";
+        var btn = document.getElementById("certificateDownloadBtn");
+        var label = document.getElementById("certificateDownloadLabel");
+        if (!url || !btn || !label) {
+            return;
+        }
+        function pollStatus() {
+            fetch(url, { headers: { "X-Requested-With": "XMLHttpRequest" } })
+                .then(function (res) { return res.json(); })
+                .then(function (payload) {
+                    if (payload.state === "active") {
+                        btn.classList.remove("btn-danger", "btn-warning");
+                        btn.classList.add("btn-success");
+                        btn.classList.remove("disabled");
+                        btn.setAttribute("href", payload.download_url || "#");
+                        label.textContent = "Unduh Sertifikat";
+                        return;
+                    }
+                    if (payload.state === "revoked") {
+                        btn.classList.remove("btn-success", "btn-warning");
+                        btn.classList.add("btn-danger", "disabled");
+                        btn.setAttribute("href", "#");
+                        label.textContent = "Sertifikat Dicabut";
+                        return;
+                    }
+                    window.setTimeout(pollStatus, 3000);
+                })
+                .catch(function () {
+                    window.setTimeout(pollStatus, 5000);
+                });
+        }
+        window.setTimeout(pollStatus, 1500);
+    })();
+</script>
+{% endif %}
+{% endblock %}

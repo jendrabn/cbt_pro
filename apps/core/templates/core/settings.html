@@ -53,6 +53,9 @@
                             <a href="?tab=notifications" class="nav-link {% if active_tab == 'notifications' %}active{% endif %}">
                                 <i class="ri-notification-3-line me-1"></i>Notifikasi
                             </a>
+                            <a href="?tab=certificates" class="nav-link {% if active_tab == 'certificates' %}active{% endif %}">
+                                <i class="ri-award-line me-1"></i>Sertifikat
+                            </a>
                             <a href="?tab=backup" class="nav-link {% if active_tab == 'backup' %}active{% endif %}">
                                 <i class="ri-database-2-line me-1"></i>Backup
                             </a>
@@ -491,6 +494,72 @@
                             </div>
                             <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
                                 <button type="submit" class="btn btn-primary" title="Simpan preferensi notifikasi">
+                                    <i class="ri-save-line me-1"></i>Simpan
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if active_tab == 'certificates' %}
+                <div class="card border-0 shadow-sm section-card">
+                    <div class="card-header bg-white border-0 pt-3">
+                        <h2 class="h6 mb-0">Pengaturan Sertifikat</h2>
+                    </div>
+                    <div class="card-body">
+                        <form method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="save_certificates">
+                            <div class="row g-3">
+                                <div class="col-md-6 d-flex align-items-end">
+                                    <div class="form-check mb-0">
+                                        {{ certificate_form.certificates_enabled }}
+                                        <label class="form-check-label" for="{{ certificate_form.certificates_enabled.id_for_label }}">
+                                            {{ certificate_form.certificates_enabled.label }}
+                                        </label>
+                                        {% for error in certificate_form.certificates_enabled.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">{{ certificate_form.certificate_number_prefix.label }}</label>
+                                    {{ certificate_form.certificate_number_prefix }}
+                                    {% for error in certificate_form.certificate_number_prefix.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">{{ certificate_form.certificate_pdf_dpi.label }}</label>
+                                    {{ certificate_form.certificate_pdf_dpi }}
+                                    {% for error in certificate_form.certificate_pdf_dpi.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                                </div>
+                                <div class="col-md-8">
+                                    <label class="form-label">{{ certificate_form.certificate_storage_path.label }}</label>
+                                    {{ certificate_form.certificate_storage_path }}
+                                    {% for error in certificate_form.certificate_storage_path.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                                </div>
+                                <div class="col-md-6 d-flex align-items-end">
+                                    <div class="form-check mb-0">
+                                        {{ certificate_form.certificate_email_enabled }}
+                                        <label class="form-check-label" for="{{ certificate_form.certificate_email_enabled.id_for_label }}">
+                                            {{ certificate_form.certificate_email_enabled.label }}
+                                        </label>
+                                        {% for error in certificate_form.certificate_email_enabled.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                                    </div>
+                                </div>
+                                <div class="col-md-6 d-flex align-items-end">
+                                    <div class="form-check mb-0">
+                                        {{ certificate_form.certificate_verify_public }}
+                                        <label class="form-check-label" for="{{ certificate_form.certificate_verify_public.id_for_label }}">
+                                            {{ certificate_form.certificate_verify_public.label }}
+                                        </label>
+                                        {% for error in certificate_form.certificate_verify_public.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                                <a href="{% url 'admin_certificate_template_list' %}" class="btn btn-outline-secondary" title="Kelola template default sistem">
+                                    <i class="ri-award-line me-1"></i>Kelola Template Default
+                                </a>
+                                <button type="submit" class="btn btn-primary" title="Simpan pengaturan sertifikat">
                                     <i class="ri-save-line me-1"></i>Simpan
                                 </button>
                             </div>

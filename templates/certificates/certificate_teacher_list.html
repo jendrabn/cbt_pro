@@ -1,0 +1,260 @@
+{% extends "layouts/base_teacher.html" %}
+{% load cbt_extras %}
+
+{% block title %}Manajemen Sertifikat{% endblock %}
+
+{% block topbar %}
+    {% include "partials/topbar_teacher.html" with current_label="Sertifikat" %}
+{% endblock %}
+
+{% block main_attrs %}class="container-fluid px-3 px-md-4 py-4"{% endblock %}
+
+{% block page_header %}
+<section class="cbt-page-header">
+    <div class="cbt-page-header-body">
+        {% include "partials/page_header.html" with eyebrow="Panel Guru" title="Sertifikat" subtitle="Pantau sertifikat yang diterbitkan dari ujian Anda." %}
+        <div class="d-flex align-items-center gap-2 cbt-page-header-actions">
+            <a href="{% url 'teacher_certificate_template_list' %}" class="btn btn-outline-primary">
+                <i class="ri-file-paper-2-line me-1"></i>Kelola Template
+            </a>
+            <a href="{{ export_xlsx_url }}" class="btn btn-outline-success">
+                <i class="ri-file-excel-2-line me-1"></i>Export Excel
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block content %}
+{% if messages %}
+<div class="mb-3">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags|default:'info' }} py-2 mb-2">{{ message }}</div>
+    {% endfor %}
+</div>
+{% endif %}
+<section class="card border-0 shadow-sm">
+    <div class="card-body">
+        <form method="get" class="cbt-inline-filter mb-3">
+            <div class="cbt-inline-filter-search">
+                <i class="ri-search-line"></i>
+                <input
+                    type="search"
+                    class="form-control"
+                    name="q"
+                    value="{{ filters.keyword }}"
+                    placeholder="Cari nomor sertifikat, siswa, atau ujian..."
+                >
+            </div>
+            <div class="cbt-inline-filter-select">
+                <select class="form-select" name="exam">
+                    <option value="">Semua Ujian</option>
+                    {% for exam in exam_options %}
+                    <option value="{{ exam.id }}" {% if filters.exam_id == exam.id|stringformat:"s" %}selected{% endif %}>
+                        {{ exam.title }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="cbt-inline-filter-select">
+                <select class="form-select" name="status">
+                    <option value="" {% if not filters.status %}selected{% endif %}>Semua Status</option>
+                    <option value="active" {% if filters.status == "active" %}selected{% endif %}>Siap</option>
+                    <option value="loading" {% if filters.status == "loading" %}selected{% endif %}>Diproses</option>
+                    <option value="revoked" {% if filters.status == "revoked" %}selected{% endif %}>Dicabut</option>
+                </select>
+            </div>
+            <div class="cbt-inline-filter-range">
+                <div class="cbt-inline-filter-date">
+                    <input type="date" class="form-control" name="date_from" value="{{ filters.date_from|date:'Y-m-d' }}">
+                </div>
+                <span class="cbt-inline-filter-range-sep">-</span>
+                <div class="cbt-inline-filter-date">
+                    <input type="date" class="form-control" name="date_to" value="{{ filters.date_to|date:'Y-m-d' }}">
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary" title="Terapkan filter">
+                <i class="ri-filter-3-line me-1"></i>Terapkan
+            </button>
+            <a href="{% url 'teacher_certificate_list' %}" class="btn btn-outline-secondary cbt-inline-filter-reset" title="Reset filter">
+                <i class="ri-refresh-line me-1"></i>Reset
+            </a>
+        </form>
+
+        <form method="post" id="bulkIssueForm" class="d-flex flex-wrap gap-2 align-items-center mb-3">
+            {% csrf_token %}
+            <div class="cbt-inline-filter-select">
+                <select class="form-select" id="bulkIssueUrlSelect" required>
+                    <option value="">Pilih Ujian untuk Issue Manual</option>
+                    {% for exam in bulk_issue_exam_options %}
+                    <option value="{% url 'teacher_certificate_bulk_issue' exam.id %}">{{ exam.title }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+            <button type="submit" class="btn btn-outline-warning" title="Terbitkan sertifikat yang belum terbit untuk ujian terpilih">
+                <i class="ri-award-line me-1"></i>Issue Manual per Ujian
+            </button>
+        </form>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Nomor</th>
+                        <th>Siswa</th>
+                        <th>Ujian</th>
+                        <th>Skor</th>
+                        <th>Terbit</th>
+                        <th>Status</th>
+                        <th class="text-end">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cert in certificates %}
+                    <tr>
+                        <td class="fw-semibold">{{ cert.certificate_number }}</td>
+                        <td>{{ cert.student.get_full_name|default:cert.student.username }}</td>
+                        <td>{{ cert.exam.title }}</td>
+                        <td>{{ cert.final_percentage }}%</td>
+                        <td>{{ cert.issued_at|date:"d M Y H:i" }}</td>
+                        <td>
+                            {% if cert.is_revoked %}
+                            {% soft_badge "Dicabut" "danger" %}
+                            {% if cert.revoked_reason %}
+                            <div class="small text-muted mt-1" title="{{ cert.revoked_reason }}">{{ cert.revoked_reason|truncatechars:54 }}</div>
+                            {% endif %}
+                            {% elif cert.is_pdf_ready %}
+                            {% soft_badge "Siap" "success" %}
+                            {% else %}
+                            {% soft_badge "Diproses" "warning" %}
+                            {% endif %}
+                        </td>
+                        <td class="text-end">
+                            <div class="d-flex justify-content-end gap-1">
+                                <a href="{% url 'certificate_verify_token' cert.verification_token %}" target="_blank" class="btn btn-sm btn-outline-info" title="Buka halaman verifikasi publik">
+                                    <i class="ri-shield-check-line"></i>
+                                </a>
+                                {% if not cert.is_revoked %}
+                                <button
+                                    type="button"
+                                    class="btn btn-sm btn-outline-danger cert-revoke-btn"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#revokeCertificateModal"
+                                    data-cert-number="{{ cert.certificate_number }}"
+                                    data-revoke-url="{% url 'teacher_certificate_revoke' cert.id %}"
+                                    data-next="{{ request.get_full_path }}"
+                                    title="Cabut sertifikat ini"
+                                >
+                                    <i class="ri-forbid-line"></i>
+                                </button>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-4">Belum ada sertifikat.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% if is_paginated %}
+    <div class="card-footer bg-white">
+        <nav aria-label="Paginasi sertifikat guru">
+            <ul class="pagination pagination-sm mb-0">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.previous_page_number }}">Sebelumnya</a>
+                </li>
+                {% else %}
+                <li class="page-item disabled"><span class="page-link">Sebelumnya</span></li>
+                {% endif %}
+
+                {% for num in paginator.page_range %}
+                    {% if num == page_obj.number %}
+                    <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                    {% elif num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
+                    <li class="page-item"><a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ num }}">{{ num }}</a></li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.next_page_number }}">Berikutnya</a>
+                </li>
+                {% else %}
+                <li class="page-item disabled"><span class="page-link">Berikutnya</span></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</section>
+
+<div class="modal fade" id="revokeCertificateModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" id="revokeCertificateForm">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h3 class="h6 mb-0">Cabut Sertifikat</h3>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-2">Anda akan mencabut sertifikat <strong id="revokeCertificateNumber">-</strong>.</p>
+                    <label for="revokeReasonInput" class="form-label">Alasan pencabutan</label>
+                    <textarea id="revokeReasonInput" name="reason" class="form-control" rows="3" required></textarea>
+                    <input type="hidden" name="next" id="revokeCertificateNext" value="{{ request.get_full_path }}">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="ri-forbid-line me-1"></i>Cabut Sertifikat
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block vendor_js %}
+<script>
+    (function () {
+        var modal = document.getElementById("revokeCertificateModal");
+        var form = document.getElementById("revokeCertificateForm");
+        var numberEl = document.getElementById("revokeCertificateNumber");
+        var nextEl = document.getElementById("revokeCertificateNext");
+        var reasonEl = document.getElementById("revokeReasonInput");
+        var bulkIssueForm = document.getElementById("bulkIssueForm");
+        var bulkIssueUrlSelect = document.getElementById("bulkIssueUrlSelect");
+        if (!modal || !form || !numberEl || !nextEl || !reasonEl) {
+            return;
+        }
+        modal.addEventListener("show.bs.modal", function (event) {
+            var trigger = event.relatedTarget;
+            if (!trigger) {
+                return;
+            }
+            form.setAttribute("action", trigger.getAttribute("data-revoke-url") || "");
+            numberEl.textContent = trigger.getAttribute("data-cert-number") || "-";
+            nextEl.value = trigger.getAttribute("data-next") || "{{ request.get_full_path }}";
+            reasonEl.value = "";
+        });
+        if (bulkIssueForm && bulkIssueUrlSelect) {
+            bulkIssueForm.addEventListener("submit", function (event) {
+                var actionUrl = bulkIssueUrlSelect.value || "";
+                if (!actionUrl) {
+                    event.preventDefault();
+                    bulkIssueUrlSelect.focus();
+                    return;
+                }
+                bulkIssueForm.setAttribute("action", actionUrl);
+            });
+        }
+    })();
+</script>
+{% endblock %}

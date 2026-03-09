@@ -159,3 +159,57 @@ def get_auth_feature_settings() -> dict[str, bool]:
 
 def invalidate_auth_feature_cache():
     cache.delete(AUTH_FEATURE_CACHE_KEY)
+
+
+CERTIFICATE_FEATURE_CACHE_KEY = "cbt_certificate_features"
+CERTIFICATE_FEATURE_CACHE_TTL_SECONDS = 300
+
+CERTIFICATE_FEATURE_DEFAULTS = {
+    "certificates_enabled": True,
+    "certificate_number_prefix": "CERT",
+    "certificate_pdf_dpi": 150,
+    "certificate_storage_path": "certificates/",
+    "certificate_email_enabled": False,
+    "certificate_verify_public": True,
+}
+
+
+def get_certificate_feature_settings() -> dict[str, Any]:
+    cached = cache.get(CERTIFICATE_FEATURE_CACHE_KEY)
+    if isinstance(cached, dict):
+        return cached
+
+    rows = {
+        row.setting_key: row
+        for row in SystemSetting.objects.filter(setting_key__in=CERTIFICATE_FEATURE_DEFAULTS.keys()).only(
+            "setting_key",
+            "setting_value",
+            "setting_type",
+        )
+    }
+
+    features: dict[str, Any] = {}
+    for key, default in CERTIFICATE_FEATURE_DEFAULTS.items():
+        row = rows.get(key)
+        raw_value = row.get_value() if row else default
+        if isinstance(default, bool):
+            features[key] = _normalize_boolean(raw_value, default)
+        elif isinstance(default, int):
+            try:
+                features[key] = int(raw_value)
+            except (TypeError, ValueError):
+                features[key] = int(default)
+        else:
+            features[key] = str(raw_value or default)
+
+    storage_path = str(features.get("certificate_storage_path") or "certificates/").replace("\\", "/")
+    if storage_path and not storage_path.endswith("/"):
+        storage_path += "/"
+    features["certificate_storage_path"] = storage_path or "certificates/"
+
+    cache.set(CERTIFICATE_FEATURE_CACHE_KEY, features, CERTIFICATE_FEATURE_CACHE_TTL_SECONDS)
+    return features
+
+
+def invalidate_certificate_feature_cache():
+    cache.delete(CERTIFICATE_FEATURE_CACHE_KEY)
