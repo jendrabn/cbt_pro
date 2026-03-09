@@ -41,7 +41,6 @@
 <link href="{% static 'css/main.css' %}" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@4.0.0/fonts/remixicon.css" rel="stylesheet">
 
-
 </head>
 
 <body class="bg-white">
@@ -52,13 +51,14 @@
     <div class="container py-3">
       <div class="d-flex align-items-center justify-content-between">
         <a href="/" class="brand" aria-label="{{ branding.institution_name|default:"CBT Pro" }}">
-          <img src="{% static 'images/logo-dark.png' %}" alt="{{ branding.institution_name|default:"CBT Pro" }}" style="height: 32px;">
+          {{ branding.institution_name|default:"CBT Pro" }}
         </a>
         <div class="d-none d-lg-flex align-items-center gap-1">
           <a href="#fitur"     class="nav-lnk">Fitur</a>
           <a href="#tentang"   class="nav-lnk">Tentang</a>
           <a href="#teknologi" class="nav-lnk">Teknologi</a>
           <a href="#harga"     class="nav-lnk">Harga</a>
+          <a href="#faq"       class="nav-lnk">FAQ</a>
         </div>
         <a href="{{ dashboard_url }}" class="btn-blue" aria-label="{{ dashboard_label }}">
           <i class="{{ dashboard_icon }} me-1" aria-hidden="true"></i>
@@ -166,18 +166,78 @@
       </p>
     </div>
 
-    <div class="row g-3 g-md-4">
-      {% for feature in features %}
-        <div class="col-sm-6 col-lg-4 sr {{ feature.delay_class }}">
-          <article class="feat-card">
-            <div class="feat-ic mb-3" aria-hidden="true">
-              <i class="{{ feature.icon }}"></i>
-            </div>
-            <h5 class="fw-bold mb-2" style="font-size:.9375rem">{{ feature.title }}</h5>
-            <p class="mb-0 small lh-lg" style="color:var(--c-ink-2)">{{ feature.description }}</p>
-          </article>
-        </div>
-      {% endfor %}
+    <div class="row g-3 g-md-4 justify-content-center">
+
+      <div class="col-sm-6 col-lg-4 sr d1">
+        <article class="feat-card">
+          <div class="feat-ic mb-3" aria-hidden="true">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          </div>
+          <h5 class="fw-bold mb-2" style="font-size:.9375rem">Bank Soal Terstruktur</h5>
+          <p class="mb-0 small lh-lg" style="color:var(--c-ink-2)">Kelola ribuan soal per mapel, tingkat kesulitan, dan tag kompetensi dalam satu panel yang mudah ditelusuri.</p>
+        </article>
+      </div>
+
+      <div class="col-sm-6 col-lg-4 sr d2">
+        <article class="feat-card">
+          <div class="feat-ic mb-3" aria-hidden="true">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/></svg>
+          </div>
+          <h5 class="fw-bold mb-2" style="font-size:.9375rem">Randomisasi Cerdas</h5>
+          <p class="mb-0 small lh-lg" style="color:var(--c-ink-2)">Acak soal dan opsi jawaban otomatis untuk tiap peserta, menjaga keadilan ujian tanpa konfigurasi rumit.</p>
+        </article>
+      </div>
+
+      <div class="col-sm-6 col-lg-4 sr d3">
+        <article class="feat-card">
+          <div class="feat-ic mb-3" aria-hidden="true">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </div>
+          <h5 class="fw-bold mb-2" style="font-size:.9375rem">Pengawasan Real-time</h5>
+          <p class="mb-0 small lh-lg" style="color:var(--c-ink-2)">Monitoring aktivitas dan sinyal pelanggaran secara langsung — pengawas bisa bertindak cepat saat ujian berlangsung.</p>
+        </article>
+      </div>
+
+      <div class="col-sm-6 col-lg-4 sr d1">
+        <article class="feat-card">
+          <div class="feat-ic mb-3" aria-hidden="true">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </div>
+          <h5 class="fw-bold mb-2" style="font-size:.9375rem">Penilaian Otomatis</h5>
+          <p class="mb-0 small lh-lg" style="color:var(--c-ink-2)">Skor dihitung instan setelah ujian selesai — guru langsung bisa analisis hasil tanpa proses manual.</p>
+        </article>
+      </div>
+
+      <div class="col-sm-6 col-lg-4 sr d2">
+        <article class="feat-card">
+          <div class="feat-ic mb-3" aria-hidden="true">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          </div>
+          <h5 class="fw-bold mb-2" style="font-size:.9375rem">Analitik Berbasis Data</h5>
+          <p class="mb-0 small lh-lg" style="color:var(--c-ink-2)">Lihat performa siswa, tingkat keberhasilan per soal, dan tren kelas untuk perbaikan pembelajaran berikutnya.</p>
+        </article>
+      </div>
+
+      <div class="col-sm-6 col-lg-4 sr d3">
+        <article class="feat-card">
+          <div class="feat-ic mb-3" aria-hidden="true">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <h5 class="fw-bold mb-2" style="font-size:.9375rem">Multi-Role Workflow</h5>
+          <p class="mb-0 small lh-lg" style="color:var(--c-ink-2)">Admin, guru, dan siswa mendapat dashboard sesuai peran masing-masing agar alur kerja tetap fokus dan efisien.</p>
+        </article>
+      </div>
+
+      <div class="col-sm-6 col-lg-4 sr d1">
+        <article class="feat-card">
+          <div class="feat-ic mb-3" aria-hidden="true">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
+          </div>
+          <h5 class="fw-bold mb-2" style="font-size:.9375rem">Sertifikat PDF Otomatis</h5>
+          <p class="mb-0 small lh-lg" style="color:var(--c-ink-2)">Guru bisa menerbitkan sertifikat kelulusan dalam format PDF langsung dari dashboard — satu klik untuk seluruh peserta ujian.</p>
+        </article>
+      </div>
+
     </div>
   </div>
 </section>
@@ -190,15 +250,30 @@
       <p class="mx-auto mb-0" style="font-size:.9375rem;color:var(--c-ink-4);max-width:400px">Angka di bawah ini berasal dari penggunaan nyata di lapangan.</p>
     </div>
     <div class="row g-0 stats-grid sr">
-      {% for stat in stats %}
-        {% cycle 'd1' 'd2' 'd3' 'd4' as stats_delay %}
-        <div class="col-6 col-lg sr {{ stats_delay }}">
-          <div class="stats-item text-center">
-            <p class="stat-n mb-1"><span class="cnt" data-to="{{ stat.value }}">0</span><span class="suf">{{ stat.suffix }}</span></p>
-            <p class="stats-label mb-0">{{ stat.label }}</p>
-          </div>
+      <div class="col-6 col-lg sr d1">
+        <div class="stats-item text-center">
+          <p class="stat-n mb-1"><span class="cnt" data-to="195">0</span><span class="suf">+</span></p>
+          <p class="stats-label mb-0">Pengguna Aktif</p>
         </div>
-      {% endfor %}
+      </div>
+      <div class="col-6 col-lg sr d2">
+        <div class="stats-item text-center">
+          <p class="stat-n mb-1"><span class="cnt" data-to="825">0</span><span class="suf">+</span></p>
+          <p class="stats-label mb-0">Bank Soal</p>
+        </div>
+      </div>
+      <div class="col-6 col-lg sr d3">
+        <div class="stats-item text-center">
+          <p class="stat-n mb-1"><span class="cnt" data-to="140">0</span><span class="suf">+</span></p>
+          <p class="stats-label mb-0">Sesi Ujian</p>
+        </div>
+      </div>
+      <div class="col-6 col-lg sr d4">
+        <div class="stats-item text-center">
+          <p class="stat-n mb-1"><span class="cnt" data-to="99">0</span><span class="suf">%</span></p>
+          <p class="stats-label mb-0">Rata-rata Uptime</p>
+        </div>
+      </div>
     </div>
   </div>
 </section>
@@ -258,7 +333,7 @@
 </section>
 
 <!-- ════════ TEKNOLOGI ════════ -->
-<section id="teknologi" class="py-5 border-top" style="background:var(--c-bg)" aria-labelledby="tech-h">
+<section id="teknologi" class="py-5 border-top bg-white" aria-labelledby="tech-h">
   <div class="container py-4">
 
     <div class="text-center mb-4 sr">
@@ -328,6 +403,79 @@
   </div>
 </section>
 
+<!-- ════════ SCREENSHOT ════════ -->
+<section class="py-5 border-top" style="background:var(--c-bg)" aria-labelledby="ss-h">
+  <div class="container py-4">
+
+    <div class="text-center mb-5 sr">
+      <span class="sec-chip mb-3 d-inline-block">Tampilan Sistem</span>
+      <h2 class="sec-title mb-3" id="ss-h">Dirancang Rapi,<br>Mudah Digunakan</h2>
+      <p class="mx-auto mb-0" style="font-size:.9375rem;line-height:1.7;color:var(--c-ink-2);max-width:460px">
+        Setiap halaman dibuat sesederhana mungkin — siswa bisa langsung ujian, guru bisa langsung membuat soal, tanpa perlu pelatihan panjang.
+      </p>
+    </div>
+
+    <div class="sr">
+      <div id="ssCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="4500">
+
+        <div class="position-relative px-0 px-md-5">
+          <div class="carousel-inner rounded-4 overflow-hidden border shadow-sm">
+
+            <div class="carousel-item active">
+              <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1400&h=700&fit=crop&q=80"
+                   alt="Dashboard Admin" class="d-block w-100" style="height:420px;object-fit:cover;object-position:top">
+              <div class="bg-white text-center py-3 border-top">
+                <span class="fw-semibold" style="color:var(--c-ink)">Dashboard Admin</span>
+              </div>
+            </div>
+
+            <div class="carousel-item">
+              <img src="https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=1400&h=700&fit=crop&q=80"
+                   alt="Halaman Pengerjaan Ujian" class="d-block w-100" style="height:420px;object-fit:cover;object-position:center">
+              <div class="bg-white text-center py-3 border-top">
+                <span class="fw-semibold" style="color:var(--c-ink)">Halaman Pengerjaan Ujian</span>
+              </div>
+            </div>
+
+            <div class="carousel-item">
+              <img src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=1400&h=700&fit=crop&q=80"
+                   alt="Manajemen Bank Soal" class="d-block w-100" style="height:420px;object-fit:cover;object-position:top">
+              <div class="bg-white text-center py-3 border-top">
+                <span class="fw-semibold" style="color:var(--c-ink)">Manajemen Bank Soal</span>
+              </div>
+            </div>
+
+            <div class="carousel-item">
+              <img src="https://images.unsplash.com/photo-1546410531-bb4caa6b424d?w=1400&h=700&fit=crop&q=80"
+                   alt="Penerbitan Sertifikat PDF" class="d-block w-100" style="height:420px;object-fit:cover;object-position:center">
+              <div class="bg-white text-center py-3 border-top">
+                <span class="fw-semibold" style="color:var(--c-ink)">Penerbitan Sertifikat PDF</span>
+              </div>
+            </div>
+
+          </div>
+
+          <button class="carousel-control-prev" type="button" data-bs-target="#ssCarousel" data-bs-slide="prev" aria-label="Sebelumnya">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          </button>
+          <button class="carousel-control-next" type="button" data-bs-target="#ssCarousel" data-bs-slide="next" aria-label="Berikutnya">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          </button>
+        </div>
+
+        <div class="carousel-indicators">
+          <button type="button" data-bs-target="#ssCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Dashboard Admin"></button>
+          <button type="button" data-bs-target="#ssCarousel" data-bs-slide-to="1" aria-label="Halaman Ujian"></button>
+          <button type="button" data-bs-target="#ssCarousel" data-bs-slide-to="2" aria-label="Bank Soal"></button>
+          <button type="button" data-bs-target="#ssCarousel" data-bs-slide-to="3" aria-label="Sertifikat"></button>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</section>
+
 <!-- ════════ HARGA ════════ -->
 <section id="harga" class="bg-white border-top py-5" aria-labelledby="harga-h">
   <div class="container py-4">
@@ -363,15 +511,23 @@
             <ul class="list-unstyled d-flex flex-column gap-2 mb-0">
               <li class="d-flex align-items-center gap-2 small" style="color:var(--c-ink-2)">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--c-green-2)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
-                Jasa pemasangan &amp; deployment
+                ZIP source code aplikasi
               </li>
               <li class="d-flex align-items-center gap-2 small" style="color:var(--c-ink-2)">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--c-green-2)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
-                Konfigurasi database &amp; environment
+                PDF panduan instalasi lokal (Laragon / XAMPP)
               </li>
               <li class="d-flex align-items-center gap-2 small" style="color:var(--c-ink-2)">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--c-green-2)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
-                Panduan &amp; onboarding admin
+                PDF panduan deployment di VPS Linux
+              </li>
+              <li class="d-flex align-items-center gap-2 small" style="color:var(--c-ink-2)">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--c-green-2)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                PDF panduan penggunaan sistem
+              </li>
+              <li class="d-flex align-items-center gap-2 small" style="color:var(--c-ink-2)">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--c-green-2)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                Jasa deployment ke VPS
               </li>
             </ul>
           </div>
@@ -380,11 +536,15 @@
             <ul class="list-unstyled d-flex flex-column gap-2 mb-0">
               <li class="d-flex align-items-center gap-2 small" style="color:var(--c-ink-3)">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink-4)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                Biaya VPS / server hosting
+                Server VPS
               </li>
               <li class="d-flex align-items-center gap-2 small" style="color:var(--c-ink-3)">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink-4)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                Biaya domain
+                Domain
+              </li>
+              <li class="d-flex align-items-center gap-2 small" style="color:var(--c-ink-3)">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink-4)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                Layanan email SMTP
               </li>
             </ul>
           </div>
@@ -397,7 +557,7 @@
              style="font-size:.9rem"
              aria-label="Pesan CBT Pro via WhatsApp">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.553 4.116 1.524 5.849L.057 23.7a.75.75 0 0 0 .938.938l5.86-1.488A11.95 11.95 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.907 0-3.695-.502-5.24-1.38l-.372-.212-3.849.977.998-3.829-.232-.383A9.952 9.952 0 0 1 2 12C2 6.486 6.486 2 12 2s10 4.486 10 10-4.486 10-10 10z"/></svg>
-             Pesan via WhatsApp
+            Pesan via WhatsApp
           </a>
         </div>
 
@@ -408,7 +568,7 @@
 </section>
 
 <!-- ════════ FAQ ════════ -->
-<section class="py-5 border-top" style="background:var(--c-bg)" aria-labelledby="faq-h">
+<section id="faq" class="py-5 border-top" style="background:var(--c-bg)" aria-labelledby="faq-h">
   <div class="container py-4">
 
     <div class="text-center mb-5 sr">
@@ -468,16 +628,16 @@
 </section>
 
 <!-- ════════ CTA ════════ -->
-<section class="py-5 border-top" style="background:var(--c-bg)" aria-labelledby="cta-h">
+<section class="py-5 border-top bg-white" aria-labelledby="cta-h">
   <div class="container py-4">
-    <div class="bg-white border rounded-4 p-4 p-md-5 sr">
+    <div class="rounded-4 p-4 p-md-5 sr" style="background:linear-gradient(135deg,var(--c-blue) 0%,var(--c-blue-dk) 100%)">
       <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-md-between gap-4">
         <div>
-          <h2 class="fw-bold mb-2" id="cta-h"
+          <h2 class="fw-bold mb-2 text-white" id="cta-h"
               style="font-size:clamp(1.35rem,2.5vw,1.75rem);letter-spacing:-.6px;line-height:1.25">
             Tertarik menggunakan CBT Pro<br>di sekolah Anda?
           </h2>
-          <p class="mb-0 small lh-lg" style="color:var(--c-ink-2);max-width:380px">
+          <p class="mb-0 small lh-lg" style="color:rgba(255,255,255,.7);max-width:380px">
             Hubungi kami lewat WhatsApp — kami bantu dari konsultasi hingga sistem siap digunakan.
           </p>
         </div>
@@ -488,7 +648,7 @@
              style="font-size:.9rem"
              aria-label="Hubungi CBT Pro via WhatsApp">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.553 4.116 1.524 5.849L.057 23.7a.75.75 0 0 0 .938.938l5.86-1.488A11.95 11.95 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.907 0-3.695-.502-5.24-1.38l-.372-.212-3.849.977.998-3.829-.232-.383A9.952 9.952 0 0 1 2 12C2 6.486 6.486 2 12 2s10 4.486 10 10-4.486 10-10 10z"/></svg>
-            Hubungi via WhatsApp
+            Hubungi Kami via WhatsApp
           </a>
         </div>
       </div>
@@ -502,7 +662,7 @@
 <footer class="bg-white border-top py-4" role="contentinfo">
   <div class="container">
     <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-3">
-      <small style="color:var(--c-ink-3)">© 2026 CBT Pro. Hak cipta dilindungi.</small>
+      <small style="color:var(--c-ink-3)">© 2026 {{ branding.institution_name|default:"CBT Pro" }}. Hak cipta dilindungi.</small>
       <nav class="d-flex align-items-center gap-3" aria-label="Media sosial">
         <a href="#" class="soc" aria-label="Instagram CBT Pro">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>

@@ -4,7 +4,8 @@ from urllib.parse import urlencode
 
 from django.conf import settings
 from django.contrib import messages
-from django.http import HttpResponse
+from django.core.exceptions import ValidationError
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
@@ -31,6 +32,7 @@ from .services import (
     generate_question_import_report,
     get_question_import_history,
     get_teacher_question_queryset,
+    save_question_richtext_media,
     save_question_from_form,
 )
 from apps.subjects.models import Subject
@@ -142,6 +144,9 @@ class QuestionCreateView(TeacherQuestionBaseView, CreateView):
                 "submit_label": "Simpan Soal",
                 "is_create": True,
                 "tinymce_api_key": settings.TINYMCE_API_KEY,
+                "question_editor_config": {
+                    "uploadUrl": reverse("question_richtext_upload"),
+                },
             }
         )
         return context
@@ -170,9 +175,27 @@ class QuestionUpdateView(TeacherQuestionBaseView, UpdateView):
                 "submit_label": "Simpan Perubahan",
                 "is_create": False,
                 "tinymce_api_key": settings.TINYMCE_API_KEY,
+                "question_editor_config": {
+                    "uploadUrl": reverse("question_richtext_upload"),
+                },
             }
         )
         return context
+
+
+class QuestionRichTextUploadView(TeacherQuestionBaseView, View):
+    def post(self, request, *args, **kwargs):
+        uploaded_file = request.FILES.get("file")
+        if not uploaded_file:
+            return JsonResponse({"error": "File media wajib diunggah."}, status=400)
+
+        try:
+            payload = save_question_richtext_media(uploaded_file)
+        except ValidationError as exc:
+            message = exc.messages[0] if getattr(exc, "messages", None) else str(exc)
+            return JsonResponse({"error": message}, status=400)
+
+        return JsonResponse(payload)
 
 
 class QuestionDeleteView(TeacherQuestionBaseView, View):

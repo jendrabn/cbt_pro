@@ -45,14 +45,22 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-change-this-in-production'
 
 CBT_SITE_NAME = os.getenv('CBT_SITE_NAME', 'Sistem CBT')
 WHATSAPP_NUMBER = os.getenv('WHATSAPP_NUMBER', '628xxxxxxxxxx')
+DEMO_MODE = _env_bool('DEMO', _env_bool('DEMO_MODE', False))
+DEMO_TEACHER_USERNAME = os.getenv('DEMO_TEACHER_USERNAME', 'guru.matematika').strip()
+DEMO_TEACHER_EMAIL = os.getenv('DEMO_TEACHER_EMAIL', 'guru.matematika@cbt.com').strip()
+DEMO_TEACHER_PASSWORD = os.getenv('DEMO_TEACHER_PASSWORD', 'guru123')
+DEMO_STUDENT_USERNAME = os.getenv('DEMO_STUDENT_USERNAME', 'siswa.andi').strip()
+DEMO_STUDENT_EMAIL = os.getenv('DEMO_STUDENT_EMAIL', 'siswa.andi@cbt.com').strip()
+DEMO_STUDENT_PASSWORD = os.getenv('DEMO_STUDENT_PASSWORD', 'siswa123')
 
 DEBUG = _env_bool('DEBUG', True)
+HTTPS_ENABLED = _env_bool('HTTPS_ENABLED', _env_bool('SECURE_SSL_REDIRECT', not DEBUG))
 
 ALLOWED_HOSTS = _env_list('ALLOWED_HOSTS', 'localhost,127.0.0.1')
 CSRF_TRUSTED_ORIGINS = _env_list('CSRF_TRUSTED_ORIGINS')
-USE_X_FORWARDED_HOST = _env_bool('USE_X_FORWARDED_HOST', not DEBUG)
+USE_X_FORWARDED_HOST = HTTPS_ENABLED and _env_bool('USE_X_FORWARDED_HOST', not DEBUG)
 
-if _env_bool('SECURE_PROXY_SSL_HEADER_ENABLED', not DEBUG):
+if HTTPS_ENABLED and _env_bool('SECURE_PROXY_SSL_HEADER_ENABLED', not DEBUG):
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 
@@ -111,6 +119,7 @@ TEMPLATES = [
                 "apps.core.context_processors.branding_context",
                 "apps.core.context_processors.asset_version_context",
                 "apps.core.context_processors.auth_feature_context",
+                "apps.core.context_processors.demo_context",
                 "apps.notifications.context_processors.topbar_notifications",
             ],
         },
@@ -233,19 +242,18 @@ CELERY_TASK_SYNC_FALLBACK = _env_bool("CELERY_TASK_SYNC_FALLBACK", True)
 
 
 # =============================================================================
-# SECURITY SETTINGS (Production)
+# SECURITY SETTINGS
 # =============================================================================
 
-if not DEBUG:
-    SECURE_SSL_REDIRECT = _env_bool('SECURE_SSL_REDIRECT', True)
-    SESSION_COOKIE_SECURE = _env_bool('SESSION_COOKIE_SECURE', True)
-    CSRF_COOKIE_SECURE = _env_bool('CSRF_COOKIE_SECURE', True)
-    SECURE_BROWSER_XSS_FILTER = _env_bool('SECURE_BROWSER_XSS_FILTER', True)
-    SECURE_CONTENT_TYPE_NOSNIFF = _env_bool('SECURE_CONTENT_TYPE_NOSNIFF', True)
-    SECURE_HSTS_SECONDS = int(os.getenv('SECURE_HSTS_SECONDS', '0'))
-    SECURE_HSTS_INCLUDE_SUBDOMAINS = _env_bool('SECURE_HSTS_INCLUDE_SUBDOMAINS', False)
-    SECURE_HSTS_PRELOAD = _env_bool('SECURE_HSTS_PRELOAD', False)
-    X_FRAME_OPTIONS = os.getenv('X_FRAME_OPTIONS', 'DENY')
+SECURE_SSL_REDIRECT = HTTPS_ENABLED and _env_bool('SECURE_SSL_REDIRECT', not DEBUG)
+SESSION_COOKIE_SECURE = HTTPS_ENABLED and _env_bool('SESSION_COOKIE_SECURE', HTTPS_ENABLED)
+CSRF_COOKIE_SECURE = HTTPS_ENABLED and _env_bool('CSRF_COOKIE_SECURE', HTTPS_ENABLED)
+SECURE_BROWSER_XSS_FILTER = _env_bool('SECURE_BROWSER_XSS_FILTER', True)
+SECURE_CONTENT_TYPE_NOSNIFF = _env_bool('SECURE_CONTENT_TYPE_NOSNIFF', True)
+SECURE_HSTS_SECONDS = int(os.getenv('SECURE_HSTS_SECONDS', '31536000' if HTTPS_ENABLED else '0')) if HTTPS_ENABLED else 0
+SECURE_HSTS_INCLUDE_SUBDOMAINS = HTTPS_ENABLED and _env_bool('SECURE_HSTS_INCLUDE_SUBDOMAINS', False)
+SECURE_HSTS_PRELOAD = HTTPS_ENABLED and _env_bool('SECURE_HSTS_PRELOAD', False)
+X_FRAME_OPTIONS = os.getenv('X_FRAME_OPTIONS', 'DENY')
 
 
 # =============================================================================

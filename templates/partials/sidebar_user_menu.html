@@ -16,6 +16,7 @@
         <i class="ri-arrow-down-s-line cbt-sidebar-user-caret" aria-hidden="true"></i>
     </button>
     <ul class="dropdown-menu cbt-sidebar-user-menu shadow-sm">
+        {% if not is_demo_restricted_user %}
         <li>
             <a class="dropdown-item" href="{% url 'profile' %}">
                 <i class="ri-account-circle-line me-2"></i>Profil
@@ -27,6 +28,7 @@
             </a>
         </li>
         <li><hr class="dropdown-divider"></li>
+        {% endif %}
         <li>
             <form method="post" action="{% url 'logout' %}">
                 {% csrf_token %}

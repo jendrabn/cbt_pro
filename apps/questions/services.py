@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.core.files.storage import FileSystemStorage
 from django.db import OperationalError, ProgrammingError, transaction
 from django.db.models import Q
@@ -22,6 +23,12 @@ from .models import (
 
 QUESTION_TYPE_LABELS = dict(Question.QuestionType.choices)
 DIFFICULTY_LABELS = dict(Question.Difficulty.choices)
+RICHTEXT_UPLOAD_DIRECTORY = "questions/richtext"
+RICHTEXT_IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".gif", ".webp"}
+RICHTEXT_VIDEO_EXTENSIONS = {".mp4", ".webm", ".ogg"}
+RICHTEXT_AUDIO_EXTENSIONS = {".mp3", ".wav", ".ogg", ".m4a", ".aac"}
+RICHTEXT_MAX_IMAGE_SIZE = 5 * 1024 * 1024
+RICHTEXT_MAX_MEDIA_SIZE = 25 * 1024 * 1024
 
 
 @dataclass
@@ -94,6 +101,45 @@ def _delete_local_image_if_exists(image_url):
     target_file = Path(settings.MEDIA_ROOT) / relative_path
     if target_file.exists() and target_file.is_file():
         target_file.unlink()
+
+
+def save_question_richtext_media(uploaded_file):
+    if not uploaded_file:
+        raise ValidationError("File media tidak ditemukan.")
+
+    extension = Path(uploaded_file.name).suffix.lower()
+    if extension in RICHTEXT_IMAGE_EXTENSIONS:
+        media_kind = "image"
+        max_size = RICHTEXT_MAX_IMAGE_SIZE
+    elif extension in RICHTEXT_VIDEO_EXTENSIONS:
+        media_kind = "video"
+        max_size = RICHTEXT_MAX_MEDIA_SIZE
+    elif extension in RICHTEXT_AUDIO_EXTENSIONS:
+        media_kind = "audio"
+        max_size = RICHTEXT_MAX_MEDIA_SIZE
+    else:
+        raise ValidationError("Format file tidak didukung. Gunakan gambar, audio, atau video yang valid.")
+
+    if uploaded_file.size > max_size:
+        if media_kind == "image":
+            raise ValidationError("Ukuran gambar maksimal 5MB.")
+        raise ValidationError("Ukuran file audio/video maksimal 25MB.")
+
+    folder = Path(settings.MEDIA_ROOT) / RICHTEXT_UPLOAD_DIRECTORY
+    folder.mkdir(parents=True, exist_ok=True)
+    storage = FileSystemStorage(
+        location=str(folder),
+        base_url=f"{settings.MEDIA_URL.rstrip('/')}/{RICHTEXT_UPLOAD_DIRECTORY}/",
+    )
+    filename = f"{uuid.uuid4().hex}{extension}"
+    stored_name = storage.save(filename, uploaded_file)
+    file_url = storage.url(stored_name)
+    return {
+        "url": file_url,
+        "location": file_url,
+        "kind": media_kind,
+        "name": Path(uploaded_file.name).name,
+    }
 
 
 def save_question_image(question, uploaded_file):

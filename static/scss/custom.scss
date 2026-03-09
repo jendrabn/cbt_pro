@@ -1043,6 +1043,22 @@ body.exam-room-body {
     box-shadow: inset 0 0 0 1px rgba(13, 110, 253, 0.2);
 }
 
+.answer-option-layout {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+
+.answer-option-label {
+    flex-shrink: 0;
+    margin-top: 0.15rem;
+}
+
+.answer-option-content {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
 .save-indicator-success {
     color: #198754;
 }
@@ -1199,6 +1215,69 @@ body.exam-room-body {
     background: #fff;
 }
 
+.exam-question-text,
+.question-preview-content,
+.option-preview-item,
+.review-answer-card .question-richtext,
+.answer-box-richtext,
+.richtext-content {
+    overflow-x: auto;
+}
+
+.exam-question-text img,
+.question-preview-content img,
+.option-preview-item img,
+.review-answer-card .question-richtext img,
+.answer-box-richtext img,
+.richtext-content img,
+.exam-question-text video,
+.question-preview-content video,
+.option-preview-item video,
+.review-answer-card .question-richtext video,
+.answer-box-richtext video,
+.richtext-content video,
+.exam-question-text audio,
+.question-preview-content audio,
+.option-preview-item audio,
+.review-answer-card .question-richtext audio,
+.answer-box-richtext audio,
+.richtext-content audio,
+.exam-question-text iframe,
+.question-preview-content iframe,
+.option-preview-item iframe,
+.review-answer-card .question-richtext iframe,
+.answer-box-richtext iframe,
+.richtext-content iframe {
+    max-width: 100%;
+}
+
+.exam-question-text table,
+.question-preview-content table,
+.option-preview-item table,
+.review-answer-card .question-richtext table,
+.answer-box-richtext table,
+.richtext-content table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.exam-question-text table td,
+.question-preview-content table td,
+.option-preview-item table td,
+.review-answer-card .question-richtext table td,
+.answer-box-richtext table td,
+.richtext-content table td,
+.exam-question-text table th,
+.question-preview-content table th,
+.option-preview-item table th,
+.review-answer-card .question-richtext table th,
+.answer-box-richtext table th,
+.richtext-content table th {
+    border: 1px solid #d7dee8;
+    padding: 0.45rem 0.55rem;
+    vertical-align: top;
+}
+
 .optional-option-row.d-none {
     display: none !important;
 }
@@ -1240,6 +1319,10 @@ body.exam-room-body {
     background: #f8f9fa;
     min-height: 52px;
     white-space: pre-wrap;
+}
+
+.answer-box-richtext {
+    white-space: normal;
 }
 
 .explanation-box {

@@ -38,6 +38,32 @@
         </div>
         {% endif %}
 
+        {% if demo_mode and demo_accounts %}
+        <div class="alert alert-warning border-0 py-3 mb-4" role="alert">
+            <div class="d-flex align-items-start gap-2">
+                <i class="ri-information-line fs-5 mt-1"></i>
+                <div class="w-100">
+                    <div class="fw-semibold mb-1">Akun Demo</div>
+                    <p class="small mb-3 text-muted">
+                        Gunakan akun guru atau siswa berikut untuk mencoba sistem. Halaman profil dan ubah password dinonaktifkan saat mode demo aktif.
+                    </p>
+                    <div class="small">
+                        <div class="mb-2">
+                            <strong>{{ demo_accounts.teacher.label }}</strong><br>
+                            <span>Email/Username: {{ demo_accounts.teacher.username }} / {{ demo_accounts.teacher.email }}</span><br>
+                            <span>Password: {{ demo_accounts.teacher.password }}</span>
+                        </div>
+                        <div>
+                            <strong>{{ demo_accounts.student.label }}</strong><br>
+                            <span>Email/Username: {{ demo_accounts.student.username }} / {{ demo_accounts.student.email }}</span><br>
+                            <span>Password: {{ demo_accounts.student.password }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
         <form method="post" action="{% url 'login' %}" novalidate>
             {% csrf_token %}
             {% if next %}

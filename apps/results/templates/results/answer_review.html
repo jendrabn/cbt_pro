@@ -80,11 +80,47 @@
                         <div class="row g-2 small">
                             <div class="col-md-6">
                                 <p class="mb-1"><span class="text-muted">Jawaban Siswa:</span></p>
+                                {% if row.question.question_type == "multiple_choice" %}
+                                <div class="answer-box answer-box-richtext richtext-content">
+                                    {% if row.selected_option %}
+                                    <div class="fw-semibold mb-2">{{ row.selected_option.option_letter }}.</div>
+                                    <div>{{ row.selected_option.option_text|safe }}</div>
+                                    {% if row.selected_option.option_image_url %}
+                                    <div class="mt-2">
+                                        <img src="{{ row.selected_option.option_image_url }}" alt="Media opsi {{ row.selected_option.option_letter }}" class="img-fluid rounded border">
+                                    </div>
+                                    {% endif %}
+                                    {% else %}
+                                    -
+                                    {% endif %}
+                                </div>
+                                {% else %}
                                 <div class="answer-box">{{ row.student_answer }}</div>
+                                {% endif %}
                             </div>
                             <div class="col-md-6">
                                 <p class="mb-1"><span class="text-muted">Kunci Jawaban:</span></p>
+                                {% if row.question.question_type == "multiple_choice" %}
+                                <div class="answer-box answer-box-richtext richtext-content">
+                                    {% if row.correct_options %}
+                                        {% for option in row.correct_options %}
+                                        <div class="{% if not forloop.last %}mb-3{% endif %}">
+                                            <div class="fw-semibold mb-2">{{ option.option_letter }}.</div>
+                                            <div>{{ option.option_text|safe }}</div>
+                                            {% if option.option_image_url %}
+                                            <div class="mt-2">
+                                                <img src="{{ option.option_image_url }}" alt="Media opsi {{ option.option_letter }}" class="img-fluid rounded border">
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                        {% endfor %}
+                                    {% else %}
+                                    -
+                                    {% endif %}
+                                </div>
+                                {% else %}
                                 <div class="answer-box">{{ row.correct_answer }}</div>
+                                {% endif %}
                             </div>
                         </div>
                         <div class="d-flex flex-wrap gap-3 mt-2 small text-muted">

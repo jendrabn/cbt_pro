@@ -9,6 +9,7 @@ from django.contrib.auth.views import (
     PasswordResetDoneView,
     PasswordResetView,
 )
+from django.core.exceptions import PermissionDenied
 from django.http import Http404
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
@@ -17,6 +18,7 @@ from django.views.generic import FormView, TemplateView
 
 from apps.core.services import get_auth_feature_settings, get_branding_settings
 
+from .demo import get_demo_accounts, is_demo_restricted_user
 from .forms import (
     AvatarUploadForm,
     CustomPasswordChangeForm,
@@ -40,6 +42,12 @@ class LoginView(DjangoLoginView):
     template_name = "accounts/login.html"
     authentication_form = LoginForm
     redirect_authenticated_user = True
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if settings.DEMO_MODE:
+            context["demo_accounts"] = get_demo_accounts()
+        return context
 
     def form_valid(self, form):
         response = super().form_valid(form)
@@ -66,6 +74,15 @@ class AuthFeatureToggleMixin:
             features = get_auth_feature_settings()
             if not features.get(self.feature_key, False):
                 raise Http404("Fitur autentikasi ini belum diaktifkan.")
+        return super().dispatch(request, *args, **kwargs)
+
+
+class DemoRestrictedAccountMixin:
+    permission_denied_message = "Akun demo tidak diizinkan membuka halaman ini."
+
+    def dispatch(self, request, *args, **kwargs):
+        if is_demo_restricted_user(request.user):
+            raise PermissionDenied(self.permission_denied_message)
         return super().dispatch(request, *args, **kwargs)
 
 
@@ -103,7 +120,7 @@ class LogoutView(LoginRequiredMixin, View):
         return redirect("login")
 
 
-class ProfileView(LoginRequiredMixin, TemplateView):
+class ProfileView(DemoRestrictedAccountMixin, LoginRequiredMixin, TemplateView):
     template_name = "accounts/profile.html"
 
     def get_context_data(self, **kwargs):
@@ -142,7 +159,7 @@ class ProfileView(LoginRequiredMixin, TemplateView):
         )
 
 
-class ChangePasswordView(LoginRequiredMixin, TemplateView):
+class ChangePasswordView(DemoRestrictedAccountMixin, LoginRequiredMixin, TemplateView):
     template_name = "accounts/change_password.html"
 
     def get_context_data(self, **kwargs):

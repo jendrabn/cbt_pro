@@ -10,6 +10,7 @@ from .views import (
     QuestionImportView,
     QuestionListView,
     QuestionPreviewView,
+    QuestionRichTextUploadView,
     QuestionUpdateView,
 )
 
@@ -20,6 +21,11 @@ urlpatterns = [
     path("teacher/question-bank/<uuid:pk>/delete/", QuestionDeleteView.as_view(), name="question_delete"),
     path("teacher/question-bank/<uuid:pk>/duplicate/", QuestionDuplicateView.as_view(), name="question_duplicate"),
     path("teacher/question-bank/<uuid:pk>/preview/", QuestionPreviewView.as_view(), name="question_preview"),
+    path(
+        "teacher/question-bank/editor/upload/",
+        QuestionRichTextUploadView.as_view(),
+        name="question_richtext_upload",
+    ),
     path("teacher/question-bank/import/", QuestionImportView.as_view(), name="question_import"),
     path(
         "teacher/question-bank/import/template/",

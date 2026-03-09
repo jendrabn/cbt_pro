@@ -1,9 +1,12 @@
+import shutil
+import tempfile
 from io import BytesIO
+from pathlib import Path
 from unittest.mock import patch
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import ProgrammingError
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 from openpyxl import Workbook
 
@@ -95,6 +98,59 @@ class QuestionBankViewTests(TestCase):
         self.assertEqual(created.question_type, "multiple_choice")
         self.assertEqual(created.options.count(), 2)
         self.assertTrue(created.options.filter(option_letter="B", is_correct=True).exists())
+
+    def test_teacher_can_create_multiple_choice_question_with_image_only_richtext(self):
+        self.client.force_login(self.teacher)
+        response = self.client.post(
+            reverse("question_create"),
+            data={
+                "subject": str(self.subject.id),
+                "category": str(self.category.id),
+                "question_type": "multiple_choice",
+                "question_text": '<p><img src="/media/questions/richtext/sample-question.png" width="280" height="140"></p>',
+                "points": "10",
+                "difficulty_level": "easy",
+                "explanation": "<table><tr><th>Petunjuk</th></tr><tr><td>Perhatikan gambar pada soal.</td></tr></table>",
+                "allow_previous": "on",
+                "allow_next": "on",
+                "is_active": "on",
+                "option_a": '<p><img src="/media/questions/richtext/sample-option-a.png" width="120" height="120"></p>',
+                "option_b": "<p>Gambar B</p>",
+                "option_c": "",
+                "option_d": "",
+                "option_e": "",
+                "correct_option": "B",
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        created = Question.objects.get(created_by=self.teacher, question_type="multiple_choice", points=10)
+        self.assertIn("<img", created.question_text)
+        self.assertTrue(created.options.filter(option_letter="A").exists())
+        self.assertIn("<img", created.options.get(option_letter="A").option_text)
+
+    def test_teacher_can_upload_richtext_image(self):
+        temp_media_root = tempfile.mkdtemp(prefix="cbt_question_media_")
+        self.addCleanup(lambda: shutil.rmtree(temp_media_root, ignore_errors=True))
+        self.client.force_login(self.teacher)
+        image_file = SimpleUploadedFile(
+            "diagram.png",
+            b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR",
+            content_type="image/png",
+        )
+
+        with override_settings(MEDIA_ROOT=temp_media_root):
+            response = self.client.post(
+                reverse("question_richtext_upload"),
+                data={"file": image_file},
+            )
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertIn("location", payload)
+        self.assertIn("/media/questions/richtext/", payload["location"])
+
+        relative_path = payload["location"].split("/media/", 1)[-1].lstrip("/")
+        self.assertTrue((Path(temp_media_root) / relative_path).exists())
 
     def test_teacher_can_duplicate_question(self):
         question = self._create_sample_question()

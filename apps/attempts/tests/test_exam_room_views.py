@@ -140,6 +140,20 @@ class StudentExamRoomViewTests(TestCase):
         self.assertEqual(payload["current_number"], 1)
         self.assertEqual(payload["question"]["question_type"], "multiple_choice")
 
+    def test_question_api_returns_rich_html_for_option_content(self):
+        self.option_a.option_text = '<p><img src="/media/questions/richtext/psychotest-a.png" width="120" height="120"></p>'
+        self.option_a.save(update_fields=["option_text"])
+
+        self.client.force_login(self.student)
+        response = self.client.get(
+            reverse("attempt_question_api", kwargs={"attempt_id": self.attempt.id, "number": 1}),
+            {"current_number": 1},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()["payload"]
+        self.assertIn("<img", payload["question"]["options"][0]["text"])
+
     def test_save_answer_api_saves_multiple_choice_answer(self):
         self.client.force_login(self.student)
         response = self.client.post(

@@ -53,6 +53,9 @@ class LandingView(TemplateView):
             }
             dashboard_label = role_labels.get(getattr(user, "role", ""), "Dashboard")
             dashboard_icon = "ri-dashboard-line"
+        elif settings.DEMO_MODE:
+            dashboard_label = "Demo"
+            dashboard_icon = "ri-play-circle-line"
 
         context["features"] = [
             {

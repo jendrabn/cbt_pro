@@ -46,7 +46,14 @@
                         {% for option in options %}
                         <div class="option-preview-item {% if option.is_correct %}option-preview-correct{% endif %}">
                             <div class="fw-semibold">{{ option.option_letter }}.</div>
-                            <div>{{ option.option_text|linebreaksbr }}</div>
+                            <div class="richtext-content">
+                                {{ option.option_text|safe }}
+                                {% if option.option_image_url %}
+                                <div class="mt-2">
+                                    <img src="{{ option.option_image_url }}" alt="Gambar opsi {{ option.option_letter }}" class="img-fluid rounded border">
+                                </div>
+                                {% endif %}
+                            </div>
                             {% if option.is_correct %}
                             {% soft_badge "Jawaban Benar" "success" "ms-auto" %}
                             {% endif %}

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from html import unescape
 
 from django import forms
@@ -13,6 +14,7 @@ from .models import Question, QuestionAnswer, QuestionCategory, QuestionOption, 
 
 
 OPTION_LETTERS = [choice.value for choice in QuestionOption.OptionLetter]
+RICH_TEXT_EMBED_TAG_RE = re.compile(r"<\s*(img|video|audio|iframe|table|embed|object)\b", re.IGNORECASE)
 
 
 def _bootstrap_widget(field):
@@ -27,7 +29,10 @@ def _bootstrap_widget(field):
 
 
 def _is_empty_rich_text(value):
-    plain_text = strip_tags(value or "")
+    raw_value = str(value or "")
+    if RICH_TEXT_EMBED_TAG_RE.search(raw_value):
+        return False
+    plain_text = strip_tags(raw_value)
     plain_text = unescape(plain_text).replace("\xa0", " ").strip()
     return not plain_text
 
@@ -64,7 +69,7 @@ class QuestionForm(forms.ModelForm):
     answer_text = forms.CharField(
         label="Kunci Jawaban / Rubrik",
         required=False,
-        widget=forms.Textarea(attrs={"rows": 4}),
+        widget=forms.Textarea(attrs={"rows": 3}),
     )
     keywords = forms.CharField(
         label="Kata Kunci",
@@ -112,8 +117,8 @@ class QuestionForm(forms.ModelForm):
             "is_active": "Status Aktif",
         }
         widgets = {
-            "question_text": forms.Textarea(attrs={"rows": 6}),
-            "explanation": forms.Textarea(attrs={"rows": 4}),
+            "question_text": forms.Textarea(attrs={"rows": 5}),
+            "explanation": forms.Textarea(attrs={"rows": 5}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -139,7 +144,13 @@ class QuestionForm(forms.ModelForm):
             _bootstrap_widget(field)
 
         for name in ["option_a", "option_b", "option_c", "option_d", "option_e"]:
-            self.fields[name].widget = forms.Textarea(attrs={"rows": 2, "class": "form-control option-input"})
+            self.fields[name].widget = forms.Textarea(
+                attrs={
+                    "rows": 3,
+                    "class": "form-control option-input",
+                    "placeholder": f"Tulis isi opsi {name[-1].upper()} atau sisipkan gambar/media...",
+                }
+            )
 
         # TinyMCE menyembunyikan textarea asli. Required native HTML5 pada elemen
         # tersembunyi bisa memicu "invalid form control is not focusable".
@@ -198,7 +209,13 @@ class QuestionForm(forms.ModelForm):
             "D": (cleaned_data.get("option_d") or "").strip(),
             "E": (cleaned_data.get("option_e") or "").strip(),
         }
-        active_options = {letter: text for letter, text in option_map.items() if text}
+        for letter, text in option_map.items():
+            cleaned_data[f"option_{letter.lower()}"] = "" if _is_empty_rich_text(text) else text
+        active_options = {
+            letter: cleaned_data[f"option_{letter.lower()}"]
+            for letter in OPTION_LETTERS
+            if cleaned_data.get(f"option_{letter.lower()}")
+        }
         correct_option = cleaned_data.get("correct_option")
         answer_text = (cleaned_data.get("answer_text") or "").strip()
         time_limit = cleaned_data.get("time_limit_seconds")

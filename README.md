@@ -238,6 +238,7 @@ TIME_ZONE=Asia/Jakarta
 LANGUAGE_CODE=id
 USE_TZ=True
 
+HTTPS_ENABLED=True
 USE_X_FORWARDED_HOST=True
 SECURE_PROXY_SSL_HEADER_ENABLED=True
 
@@ -305,6 +306,7 @@ python -c "from django.core.management.utils import get_random_secret_key; print
 ```
 
 - Jika SSL belum dipasang, set sementara `SECURE_SSL_REDIRECT=False`, lalu aktifkan kembali setelah Certbot/Nginx HTTPS selesai.
+- Jika aplikasi masih dijalankan langsung dengan `python manage.py runserver`, pakai `HTTPS_ENABLED=False` dan akses lewat `http://`, bukan `https://`.
 - Jika SMTP belum siap, Anda bisa memakai `EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend` sementara. Email tidak akan terkirim ke user; output-nya akan muncul di stdout proses Django, yang pada systemd biasanya terlihat lewat `journalctl`.
 
 ## 9. Migrasi, static files, dan user admin
@@ -501,6 +503,7 @@ sudo systemctl restart cbt_pro-gunicorn cbt_pro-celery
 - `DisallowedHost`: isi `ALLOWED_HOSTS` belum benar.
 - `CSRF verification failed`: cek `CSRF_TRUSTED_ORIGINS`, domain HTTPS, dan header `X-Forwarded-Proto` di Nginx.
 - Redirect loop HTTP/HTTPS: biasanya `SECURE_SSL_REDIRECT=True` tetapi SSL belum aktif atau header proxy belum benar.
+- Log `You're accessing the development server over HTTPS, but it only supports HTTP`: nonaktifkan `HTTPS_ENABLED` untuk `runserver`, hapus cache HSTS browser bila perlu, lalu buka URL `http://host:port`.
 - `mysqlclient` gagal install: paket `python3-dev`, `pkg-config`, dan `default-libmysqlclient-dev` belum lengkap.
 - `Unable to locate package python3.12` saat `apt install`: cek `cat /etc/os-release`. Jika server Ubuntu 24.04, aktifkan `universe` lalu `apt update`. Jika server Ubuntu 22.04, tambah `ppa:deadsnakes/ppa` lalu install ulang paket Python 3.12.
 - `Could not find a version that satisfies the requirement autobahn==25.12.2` atau pesan `Requires-Python >=3.11` / `>=3.12`: virtualenv dibuat dengan Python lama. Cek `python --version` di dalam venv. Jika masih `3.10.x` atau `3.11.x`, hapus `.venv`, lalu buat ulang dengan `python3.12 -m venv .venv`.

@@ -4,6 +4,7 @@ from pathlib import Path
 
 from django.conf import settings
 
+from apps.accounts.demo import is_demo_restricted_user
 from apps.core.services import get_auth_feature_settings, get_branding_settings
 
 
@@ -22,3 +23,10 @@ def asset_version_context(request):
 
 def auth_feature_context(request):
     return {"auth_features": get_auth_feature_settings()}
+
+
+def demo_context(request):
+    return {
+        "demo_mode": settings.DEMO_MODE,
+        "is_demo_restricted_user": is_demo_restricted_user(getattr(request, "user", None)),
+    }

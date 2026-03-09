@@ -1,4 +1,4 @@
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from apps.accounts.models import User
@@ -56,3 +56,56 @@ class AuthenticationFlowTests(TestCase):
         response = self.client.post(reverse("logout"))
         self.assertRedirects(response, reverse("login"))
         self.assertNotIn("_auth_user_id", self.client.session)
+
+    @override_settings(
+        DEMO_MODE=True,
+        DEMO_TEACHER_USERNAME="guru.demo",
+        DEMO_TEACHER_EMAIL="guru.demo@example.com",
+        DEMO_TEACHER_PASSWORD="guru-demo-123",
+        DEMO_STUDENT_USERNAME="siswa.demo",
+        DEMO_STUDENT_EMAIL="siswa.demo@example.com",
+        DEMO_STUDENT_PASSWORD="siswa-demo-123",
+    )
+    def test_login_page_shows_demo_credentials_when_enabled(self):
+        response = self.client.get(reverse("login"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Akun Demo")
+        self.assertContains(response, "guru.demo@example.com")
+        self.assertContains(response, "siswa.demo@example.com")
+        self.assertContains(response, "guru-demo-123")
+        self.assertContains(response, "siswa-demo-123")
+
+    @override_settings(
+        DEMO_MODE=True,
+        DEMO_TEACHER_USERNAME="guru.demo",
+        DEMO_TEACHER_EMAIL="guru.demo@example.com",
+        DEMO_STUDENT_USERNAME="siswa.demo",
+        DEMO_STUDENT_EMAIL="siswa.demo@example.com",
+    )
+    def test_demo_teacher_cannot_open_profile_or_change_password(self):
+        teacher = self.create_user("guru.demo", "guru.demo@example.com", "teacher")
+        self.client.force_login(teacher)
+
+        profile_response = self.client.get(reverse("profile"))
+        password_response = self.client.get(reverse("change_password"))
+
+        self.assertEqual(profile_response.status_code, 403)
+        self.assertEqual(password_response.status_code, 403)
+        self.assertContains(profile_response, "403 - Akses Ditolak", status_code=403)
+
+    @override_settings(
+        DEMO_MODE=True,
+        DEMO_TEACHER_USERNAME="guru.demo",
+        DEMO_TEACHER_EMAIL="guru.demo@example.com",
+        DEMO_STUDENT_USERNAME="siswa.demo",
+        DEMO_STUDENT_EMAIL="siswa.demo@example.com",
+    )
+    def test_demo_student_cannot_open_profile_or_change_password(self):
+        student = self.create_user("siswa.demo", "siswa.demo@example.com", "student")
+        self.client.force_login(student)
+
+        profile_response = self.client.get(reverse("profile"))
+        password_response = self.client.get(reverse("change_password"))
+
+        self.assertEqual(profile_response.status_code, 403)
+        self.assertEqual(password_response.status_code, 403)

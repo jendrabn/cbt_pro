@@ -997,6 +997,8 @@ def build_answer_review_context(result):
         answer = answers.get(question.id)
         student_answer = "-"
         correct_answer = "-"
+        selected_option = None
+        correct_options = []
         explanation = (question.explanation or "").strip()
         status_label = "Tidak Dijawab"
         status_type = "secondary"
@@ -1004,10 +1006,14 @@ def build_answer_review_context(result):
         points_possible = _to_float(exam_question.points_override or question.points)
 
         if question.question_type == "multiple_choice":
+            selected_option = answer.selected_option if answer and answer.selected_option else None
             if answer and answer.selected_option:
                 student_answer = f"{answer.selected_option.option_letter}. {answer.selected_option.option_text}"
-            correct_options = question.options.filter(is_correct=True).order_by("display_order")
-            if correct_options.exists():
+            correct_options = [
+                option for option in question.options.all() if option.is_correct
+            ]
+            correct_options.sort(key=lambda option: option.display_order)
+            if correct_options:
                 correct_answer = ", ".join(
                     [f"{option.option_letter}. {option.option_text}" for option in correct_options]
                 )
@@ -1036,6 +1042,8 @@ def build_answer_review_context(result):
                 "answer": answer,
                 "student_answer": student_answer,
                 "correct_answer": correct_answer,
+                "selected_option": selected_option,
+                "correct_options": correct_options,
                 "status_label": status_label,
                 "status_type": status_type,
                 "points_earned": round(points_earned, 2),

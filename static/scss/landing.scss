@@ -87,9 +87,17 @@ body { font-family: 'Inter', -apple-system, sans-serif; color: var(--c-ink); -we
 .feat-ic { width: 44px; height: 44px; flex-shrink: 0; background: var(--c-blue-lt); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--c-blue) }
 
 /* ── STATS ── */
-.stat-sep { width: 1px; height: 52px; flex-shrink: 0; background: rgba(255,255,255,.1) }
+.stats-grid { display: flex; align-items: center; flex-wrap: wrap }
+.stats-item { flex: 1 1 140px; text-align: center; padding: 1.5rem 1rem }
+.stat-sep { width: 1px; height: 52px; flex-shrink: 0; background: rgba(255,255,255,.12) }
 .stat-n { font-size: clamp(1.75rem, 4.5vw, 3.5rem); font-weight: 900; color: #fff; letter-spacing: -2px; line-height: 1 }
 .suf { color: #7A9DCF; font-size: 60%; vertical-align: super }
+
+@media (max-width: 575px) {
+  .stat-sep { display: none }
+  .stats-item { flex: 1 1 45%; border-bottom: 1px solid rgba(255,255,255,.08); padding: 1.25rem .5rem }
+  .stats-item:nth-child(n+5) { border-bottom: none }
+}
 
 /* ── ABOUT ICON ── */
 .about-ic { width: 36px; height: 36px; flex-shrink: 0; background: var(--c-blue-lt); border-radius: 9px; display: flex; align-items: center; justify-content: center; color: var(--c-blue) }
@@ -100,6 +108,7 @@ body { font-family: 'Inter', -apple-system, sans-serif; color: var(--c-ink); -we
 .bar-fill  { height: 100%; border-radius: 99px }
 
 /* ── PRICING ── */
+.price-card-wrap { display: flex }
 .price-left {
   flex-shrink: 0; width: 240px; background: var(--c-blue); padding: 2.5rem 2rem;
   display: flex; flex-direction: column; justify-content: center; gap: .5rem;
@@ -125,6 +134,15 @@ body { font-family: 'Inter', -apple-system, sans-serif; color: var(--c-ink); -we
 .sr.vis { opacity: 1; transform: none }
 .d1{transition-delay:.08s} .d2{transition-delay:.16s} .d3{transition-delay:.24s} .d4{transition-delay:.32s}
 
+/* ── SCREENSHOT CAROUSEL ── */
+.carousel-indicators { position: static; margin: .875rem 0 0; justify-content: center; gap: 5px }
+.carousel-indicators [data-bs-target] { background-color: var(--c-blue-br); width: 7px; height: 7px; border-radius: 50%; border: none; opacity: 1; flex-shrink: 0; margin: 0 }
+.carousel-indicators .active { background-color: var(--c-blue); width: 22px; border-radius: 99px; transition: width .3s }
+.carousel-control-prev, .carousel-control-next { width: 40px; height: 40px; background: #fff; border: 1px solid var(--c-border); border-radius: 50%; top: calc(50% - 22px); transform: translateY(-50%); opacity: 1; box-shadow: 0 2px 8px rgba(0,0,0,.1) }
+.carousel-control-prev { left: -20px }
+.carousel-control-next { right: -20px }
+.carousel-control-prev-icon, .carousel-control-next-icon { width: 14px; height: 14px; filter: brightness(0) saturate(100%) invert(19%) sepia(18%) saturate(800%) hue-rotate(190deg) }
+
 /* ── RESPONSIVE ── */
 @media (max-width: 991px) {
   .hero::before { display: none }
@@ -134,4 +152,6 @@ body { font-family: 'Inter', -apple-system, sans-serif; color: var(--c-ink); -we
   .price-left       { width: 100% !important; padding: 2rem }
   .price-card-wrap  { flex-direction: column }
   .feat-card:hover  { transform: none; box-shadow: none }
+  .carousel-control-prev { left: 6px }
+  .carousel-control-next { right: 6px }
 }

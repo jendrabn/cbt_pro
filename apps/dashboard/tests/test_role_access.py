@@ -56,3 +56,9 @@ class DashboardRoleAccessTests(TestCase):
         response = self.client.get(reverse("student_dashboard"))
         self.assertEqual(response.status_code, 302)
         self.assertIn("/login/", response.url)
+
+    @override_settings(DEMO_MODE=True)
+    def test_landing_uses_demo_label_when_demo_mode_enabled(self):
+        response = self.client.get(reverse("landing"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, ">Demo<", html=False)

@@ -278,6 +278,16 @@
             this.updateNavigationButtons();
         }
 
+        buildOptionContentHtml(option) {
+            var optionHtml = option && option.text ? option.text : "";
+            var legacyImageHtml = "";
+            if (option && option.image_url && optionHtml.toLowerCase().indexOf("<img") === -1) {
+                legacyImageHtml =
+                    '<div class="mt-2"><img src="' + option.image_url + '" alt="Media opsi ' + option.letter + '" class="img-fluid rounded border"></div>';
+            }
+            return optionHtml + legacyImageHtml;
+        }
+
         renderAnswerControl(question) {
             if (!this.elements.questionAnswerContainer) {
                 return;
@@ -295,8 +305,10 @@
                         btn.classList.add("selected");
                     }
                     btn.innerHTML = `
-                        <span class="badge bg-primary me-2">${option.letter}</span>
-                        <span>${option.text || ""}</span>
+                        <div class="answer-option-layout">
+                            <span class="badge bg-primary answer-option-label">${option.letter}</span>
+                            <div class="answer-option-content richtext-content">${this.buildOptionContentHtml(option)}</div>
+                        </div>
                     `;
                     btn.addEventListener("click", () => {
                         this.saveCurrentAnswer({
