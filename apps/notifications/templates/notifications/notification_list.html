@@ -1,0 +1,121 @@
+{% extends role_layout.base_layout %}
+{% load cbt_extras %}
+
+{% block title %}Notifikasi{% endblock %}
+
+{% block topbar %}
+    {% include role_layout.topbar_partial with current_label="Notifikasi" %}
+{% endblock %}
+
+{% block page_header %}
+<section class="cbt-page-header">
+    <div class="cbt-page-header-body">
+        {% include "partials/page_header.html" with eyebrow=role_layout.eyebrow title="Notifikasi" subtitle="Pantau pembaruan terbaru dari aktivitas ujian, sertifikat, dan sistem." %}
+        <div class="d-flex align-items-center gap-2 cbt-page-header-actions">
+            {% if unread_count > 0 %}
+            <form method="post" action="{% url 'notification_mark_all_read' %}">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                <button type="submit" class="btn btn-outline-primary">
+                    <i class="ri-mail-open-line me-1"></i>Tandai semua dibaca
+                </button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block content %}
+<section class="card border-0 shadow-sm">
+    <div class="card-body">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+            <div class="btn-group btn-group-sm" role="group" aria-label="Filter notifikasi">
+                <a
+                    href="{% url 'notification_list' %}"
+                    class="btn {% if active_filter == 'all' %}btn-primary{% else %}btn-outline-primary{% endif %}"
+                >
+                    Semua ({{ all_count }})
+                </a>
+                <a
+                    href="{% url 'notification_list' %}?status=unread"
+                    class="btn {% if active_filter == 'unread' %}btn-primary{% else %}btn-outline-primary{% endif %}"
+                >
+                    Belum dibaca ({{ unread_count }})
+                </a>
+            </div>
+            <div class="small text-muted">
+                Menampilkan {{ notifications|length }} dari {{ paginator.count }} notifikasi.
+            </div>
+        </div>
+
+        <div class="notification-list">
+            {% for notification in notifications %}
+            <article class="notification-item {% if not notification.is_read %}is-unread{% endif %}">
+                <div class="d-flex justify-content-between align-items-start gap-2">
+                    <div class="min-w-0">
+                        <h3 class="h6 mb-1">{{ notification.title }}</h3>
+                        <p class="mb-2 text-muted">{{ notification.message }}</p>
+                        <div class="d-flex flex-wrap align-items-center gap-2">
+                            {% enum_badge "notification_type" notification.notification_type %}
+                            <small class="text-muted">{{ notification.created_at|date:"d M Y H:i" }}</small>
+                            {% if notification.is_read and notification.read_at %}
+                            <small class="text-success">
+                                <i class="ri-check-line"></i> Dibaca {{ notification.read_at|date:"d M H:i" }}
+                            </small>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% if not notification.is_read %}
+                    <form method="post" action="{% url 'notification_mark_read' notification.id %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                        <button type="submit" class="btn btn-sm btn-outline-secondary">
+                            Tandai dibaca
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </article>
+            {% empty %}
+            <div class="text-center text-muted py-4">
+                Belum ada notifikasi.
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% if is_paginated %}
+    <div class="card-footer bg-white">
+        <nav aria-label="Paginasi notifikasi">
+            <ul class="pagination pagination-sm mb-0">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?{% if active_filter == 'unread' %}status=unread&{% endif %}page={{ page_obj.previous_page_number }}">Sebelumnya</a>
+                </li>
+                {% else %}
+                <li class="page-item disabled"><span class="page-link">Sebelumnya</span></li>
+                {% endif %}
+
+                {% for num in paginator.page_range %}
+                    {% if num == page_obj.number %}
+                    <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                    {% elif num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
+                    <li class="page-item">
+                        <a class="page-link" href="?{% if active_filter == 'unread' %}status=unread&{% endif %}page={{ num }}">{{ num }}</a>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?{% if active_filter == 'unread' %}status=unread&{% endif %}page={{ page_obj.next_page_number }}">Berikutnya</a>
+                </li>
+                {% else %}
+                <li class="page-item disabled"><span class="page-link">Berikutnya</span></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</section>
+{% endblock %}

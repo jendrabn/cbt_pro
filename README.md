@@ -14,6 +14,26 @@ CBT Pro adalah aplikasi Computer-Based Testing berbasis Django dengan modul utam
 - Build CSS wajib dijalankan di server. File hasil compile `static/css/main.css` dipakai oleh template, tetapi folder `static/css/` tidak disimpan di Git.
 - Sebagian asset frontend masih dimuat dari CDN publik saat runtime browser, termasuk Bootstrap JS, Remix Icon, Alpine.js, Axios, Chart.js, TinyMCE, dan Google Fonts. Untuk deployment intranet/offline, asset tersebut perlu divendor ke `static/` atau browser klien harus diizinkan mengakses CDN terkait.
 - Command bootstrap data tersedia di `apps/core/management/commands/seed.py`. Ini cocok untuk staging/demo, bukan production, karena membuat akun default dengan password yang harus segera diganti.
+- Fitur PDF sertifikat memakai WeasyPrint dan membutuhkan dependensi sistem (library OS), bukan hanya package Python.
+
+### Catatan penting fitur PDF sertifikat
+
+- Engine PDF: `weasyprint` (dipanggil dari `apps/results/certificate_generators.py`).
+- Jika dependensi OS belum ada, notifikasi user akan menampilkan error seperti: `WeasyPrint tidak siap` atau `cannot load library 'libgobject-2.0-0'`.
+
+Linux (Ubuntu/Debian) minimal:
+
+```bash
+sudo apt install -y libcairo2 libpango-1.0-0 libgdk-pixbuf-2.0-0 shared-mime-info
+```
+
+Windows (PowerShell) contoh:
+
+```powershell
+winget install --id tschoonj.GTKForWindows -e --accept-source-agreements --accept-package-agreements --silent
+```
+
+Setelah install runtime di Windows, pastikan folder GTK `bin` masuk `PATH` (contoh: `C:\Program Files\GTK3-Runtime Win64\bin`) lalu restart proses Django/Celery.
 
 ## Topologi deployment yang direkomendasikan
 

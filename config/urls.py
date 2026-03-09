@@ -32,6 +32,7 @@ urlpatterns = [
     path("", include("apps.monitoring.urls")),
     path("", include("apps.results.urls")),
     path("", include("apps.attempts.urls")),
+    path("", include("apps.notifications.urls")),
     path("admin/", admin.site.urls),
 ]
 

@@ -18,5 +18,54 @@
                 </ol>
             </nav>
         </div>
+        <div class="cbt-topbar-end">
+            <div class="dropdown">
+                <button
+                    class="btn btn-sm cbt-topbar-notification-btn position-relative"
+                    type="button"
+                    data-bs-toggle="dropdown"
+                    data-bs-auto-close="outside"
+                    aria-expanded="false"
+                    aria-label="Notifikasi"
+                >
+                    <i class="ri-notification-3-line"></i>
+                    {% if topbar_notification_unread_count > 0 %}
+                    <span class="cbt-topbar-notification-badge">
+                        {% if topbar_notification_unread_count > 99 %}99+{% else %}{{ topbar_notification_unread_count }}{% endif %}
+                    </span>
+                    {% endif %}
+                </button>
+                <div class="dropdown-menu dropdown-menu-end shadow-sm cbt-topbar-notification-menu">
+                    <div class="cbt-topbar-notification-menu-header">
+                        <strong>Notifikasi</strong>
+                        <a href="{% url 'notification_list' %}" class="small text-decoration-none">Lihat semua</a>
+                    </div>
+                    <div class="cbt-topbar-notification-menu-body">
+                        {% for notif in topbar_notifications %}
+                        <a href="{% url 'notification_list' %}" class="cbt-topbar-notification-item {% if not notif.is_read %}is-unread{% endif %}">
+                            <strong class="d-block text-truncate">{{ notif.title }}</strong>
+                            <span class="d-block text-muted small text-truncate">{{ notif.message }}</span>
+                            <small class="text-muted">{{ notif.created_at|date:"d M H:i" }}</small>
+                        </a>
+                        {% empty %}
+                        <div class="cbt-topbar-notification-empty">
+                            Belum ada notifikasi.
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% if topbar_notification_unread_count > 0 %}
+                    <div class="cbt-topbar-notification-menu-footer">
+                        <form method="post" action="{% url 'notification_mark_all_read' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                            <button type="submit" class="btn btn-sm btn-outline-primary w-100">
+                                Tandai semua dibaca
+                            </button>
+                        </form>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
     </div>
 </header>

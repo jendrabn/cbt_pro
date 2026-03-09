@@ -111,6 +111,7 @@ TEMPLATES = [
                 "apps.core.context_processors.branding_context",
                 "apps.core.context_processors.asset_version_context",
                 "apps.core.context_processors.auth_feature_context",
+                "apps.notifications.context_processors.topbar_notifications",
             ],
         },
     },
