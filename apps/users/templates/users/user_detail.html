@@ -129,9 +129,52 @@
                                     <i class="ri-delete-bin-line me-2"></i>Hapus Pengguna
                                 </button>
                             </form>
+                            {% if session_status.managed %}
+                            <form method="post" action="{% url 'user_reset_session' target_user.id %}" onsubmit="return confirm('Reset sesi login siswa ini?');">
+                                {% csrf_token %}
+                                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                <button type="submit" class="btn btn-outline-warning text-start w-100" title="Reset sesi login siswa ini">
+                                    <i class="ri-restart-line me-2"></i>Reset Sesi Login
+                                </button>
+                            </form>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
+
+                {% if session_status.managed %}
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white border-0 pt-3">
+                        <h2 class="h6 mb-0">Status Sesi Siswa</h2>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-2">
+                            <span class="text-muted">Status sesi:</span>
+                            <strong>{{ session_status.label }}</strong>
+                        </p>
+                        <p class="mb-2">
+                            <span class="text-muted">Login sejak:</span>
+                            <strong>{{ session_status.login_at|date:"d M Y H:i"|default:"-" }}</strong>
+                        </p>
+                        <p class="mb-2">
+                            <span class="text-muted">Aktivitas terakhir:</span>
+                            <strong>{{ session_status.last_seen_at|date:"d M Y H:i"|default:"-" }}</strong>
+                        </p>
+                        <p class="mb-2">
+                            <span class="text-muted">IP terakhir:</span>
+                            <strong>{{ session_status.ip_address|default:"-" }}</strong>
+                        </p>
+                        <p class="mb-2">
+                            <span class="text-muted">Reset terakhir:</span>
+                            <strong>{{ session_status.reset_at|date:"d M Y H:i"|default:"-" }}</strong>
+                        </p>
+                        <p class="mb-0">
+                            <span class="text-muted">Oleh:</span>
+                            <strong>{% if session_status.reset_by %}{{ session_status.reset_by.username }}{% else %}-{% endif %}</strong>
+                        </p>
+                    </div>
+                </div>
+                {% endif %}
 
                 <div class="card border-0 shadow-sm">
                     <div class="card-header bg-white border-0 pt-3">

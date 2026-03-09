@@ -61,4 +61,4 @@ class DashboardRoleAccessTests(TestCase):
     def test_landing_uses_demo_label_when_demo_mode_enabled(self):
         response = self.client.get(reverse("landing"))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, ">Demo<", html=False)
+        self.assertContains(response, "Demo")

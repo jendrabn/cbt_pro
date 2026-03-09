@@ -96,6 +96,42 @@ class UserActivityLog(BaseModel):
         return f"{self.user.username} - {self.action}"
 
 
+class StudentActiveSession(BaseModel):
+    """Single active session registry for student accounts."""
+
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name="active_student_session",
+        limit_choices_to={"role": User.Role.STUDENT},
+    )
+    session_key = models.CharField(max_length=40, blank=True, default="")
+    login_at = models.DateTimeField(null=True, blank=True)
+    last_seen_at = models.DateTimeField(null=True, blank=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    user_agent = models.TextField(null=True, blank=True)
+    reset_at = models.DateTimeField(null=True, blank=True)
+    reset_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="reset_student_sessions",
+    )
+    reset_reason = models.CharField(max_length=255, blank=True, default="")
+
+    class Meta:
+        db_table = "student_active_sessions"
+        indexes = [
+            models.Index(fields=["session_key"], name="idx_stud_active_session_key"),
+            models.Index(fields=["last_seen_at"], name="idx_stud_active_last_seen"),
+            models.Index(fields=["reset_at"], name="idx_stud_active_reset_at"),
+        ]
+
+    def __str__(self):
+        return f"Student session for {self.user.username}"
+
+
 class UserImportLog(models.Model):
     """Log for bulk user import from Excel"""
 

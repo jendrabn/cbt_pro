@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin
 
-from .models import User, UserActivityLog, UserImportLog, UserProfile
+from .models import StudentActiveSession, User, UserActivityLog, UserImportLog, UserProfile
 
 
 @admin.register(User)
@@ -41,6 +41,13 @@ class UserActivityLogAdmin(admin.ModelAdmin):
     search_fields = ("user__username", "action", "description")
     list_filter = ("action", "created_at")
     list_select_related = ("user",)
+
+
+@admin.register(StudentActiveSession)
+class StudentActiveSessionAdmin(admin.ModelAdmin):
+    list_display = ("user", "session_key", "login_at", "last_seen_at", "reset_at", "reset_by")
+    search_fields = ("user__username", "user__email", "session_key", "ip_address")
+    list_select_related = ("user", "reset_by")
 
 
 @admin.register(UserImportLog)

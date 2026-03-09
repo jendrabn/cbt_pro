@@ -27,6 +27,12 @@ from .forms import (
     RoleRegistrationForm,
 )
 from .models import User, UserProfile
+from .session_control import (
+    ActiveStudentSessionExists,
+    ensure_student_login_available,
+    register_student_session,
+    release_student_session,
+)
 
 
 def get_role_redirect_url(user):
@@ -50,6 +56,13 @@ class LoginView(DjangoLoginView):
         return context
 
     def form_valid(self, form):
+        user = form.get_user()
+        try:
+            ensure_student_login_available(user)
+        except ActiveStudentSessionExists as exc:
+            form.add_error(None, str(exc))
+            return self.form_invalid(form)
+
         response = super().form_valid(form)
         remember_me = form.cleaned_data.get("remember_me")
         if remember_me:
@@ -57,6 +70,12 @@ class LoginView(DjangoLoginView):
         else:
             self.request.session.set_expiry(0)
         self.request.session.modified = True
+        try:
+            register_student_session(user, self.request, log_event=True)
+        except ActiveStudentSessionExists as exc:
+            logout(self.request)
+            form.add_error(None, str(exc))
+            return self.form_invalid(form)
         return response
 
     def get_success_url(self):
@@ -112,6 +131,12 @@ class ResetPasswordCompleteView(AuthFeatureToggleMixin, PasswordResetCompleteVie
 
 class LogoutView(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
+        release_student_session(
+            request.user,
+            request.session.session_key or "",
+            request=request,
+            delete_session=False,
+        )
         logout(request)
         messages.success(request, "Anda telah logout dari sistem.")
         return redirect("login")

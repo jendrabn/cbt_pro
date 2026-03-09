@@ -17,6 +17,7 @@ from django.views import View
 from django.views.generic import DetailView, FormView, ListView, UpdateView
 from openpyxl import Workbook
 
+from apps.accounts.session_control import get_student_session_status, reset_student_session
 from apps.accounts.models import UserImportLog, UserProfile
 from apps.attempts.models import ExamAttempt, ExamViolation
 from apps.core.mixins import RoleRequiredMixin
@@ -625,6 +626,23 @@ class ToggleUserStatusView(AdminUserBaseView, View):
         return redirect(next_url)
 
 
+class ResetStudentSessionView(AdminUserBaseView, View):
+    def post(self, request, pk):
+        student = get_object_or_404(User, pk=pk, is_deleted=False, role=User.Role.STUDENT)
+        next_url = request.POST.get("next") or reverse("user_detail", kwargs={"pk": student.pk})
+        had_active_session = reset_student_session(
+            student,
+            actor=request.user,
+            request=request,
+            reason="reset_admin",
+        )
+        if had_active_session:
+            messages.success(request, f"Sesi login siswa {student.username} berhasil direset.")
+        else:
+            messages.info(request, f"Tidak ada sesi aktif pada akun {student.username}, tetapi penanda reset sudah diperbarui.")
+        return redirect(next_url)
+
+
 class UserDetailView(AdminUserBaseView, DetailView):
     model = User
     template_name = "users/user_detail.html"
@@ -655,6 +673,7 @@ class UserDetailView(AdminUserBaseView, DetailView):
             {
                 "activity_logs": user.activity_logs.order_by("-created_at")[:20],
                 "profile": profile,
+                "session_status": get_student_session_status(user),
                 "stats": {
                     "exam_created_count": exam_created_count,
                     "exam_attempt_count": exam_attempt_count,
@@ -817,6 +836,7 @@ class TeacherStudentDetailView(TeacherStudentBaseView, DetailView):
         context.update(
             {
                 "profile": profile,
+                "session_status": get_student_session_status(student_user),
                 "related_classes": related_classes,
                 "assigned_exams": assigned_exams,
                 "attempt_rows": attempt_rows,
@@ -842,6 +862,23 @@ class TeacherStudentDetailView(TeacherStudentBaseView, DetailView):
             }
         )
         return context
+
+
+class TeacherResetStudentSessionView(TeacherStudentBaseView, View):
+    def post(self, request, pk):
+        student = get_object_or_404(_teacher_student_queryset(request.user), pk=pk, role=User.Role.STUDENT)
+        next_url = request.POST.get("next") or reverse("teacher_student_detail", kwargs={"pk": student.pk})
+        had_active_session = reset_student_session(
+            student,
+            actor=request.user,
+            request=request,
+            reason="reset_teacher",
+        )
+        if had_active_session:
+            messages.success(request, f"Sesi login siswa {student.username} berhasil direset.")
+        else:
+            messages.info(request, f"Tidak ada sesi aktif pada akun {student.username}, tetapi penanda reset sudah diperbarui.")
+        return redirect(next_url)
 
 
 class UserExportView(AdminUserBaseView, View):

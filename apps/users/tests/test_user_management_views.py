@@ -1,7 +1,7 @@
 from io import BytesIO
 
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import TestCase
+from django.test import Client, TestCase
 from django.urls import reverse
 from django.utils import timezone
 from openpyxl import Workbook, load_workbook
@@ -146,6 +146,34 @@ class UserManagementViewTests(TestCase):
         user_b.refresh_from_db()
         self.assertFalse(user_a.is_active)
         self.assertFalse(user_b.is_active)
+
+    def test_admin_can_reset_student_session(self):
+        student = User.objects.create_user(
+            username="student_reset_admin",
+            email="student.reset.admin@cbt.com",
+            password="StudentReset123!",
+            first_name="Sesi",
+            last_name="Admin",
+            role="student",
+            is_active=True,
+        )
+        student_client = Client()
+        login_response = student_client.post(
+            reverse("login"),
+            {"username": student.username, "password": "StudentReset123!", "remember_me": "on"},
+        )
+        self.assertRedirects(login_response, reverse("student_dashboard"))
+
+        self.client.force_login(self.admin)
+        response = self.client.post(
+            reverse("user_reset_session", kwargs={"pk": student.pk}),
+            data={"next": reverse("user_detail", kwargs={"pk": student.pk})},
+        )
+        self.assertEqual(response.status_code, 302)
+
+        follow_up = student_client.get(reverse("student_dashboard"))
+        self.assertEqual(follow_up.status_code, 302)
+        self.assertTrue(follow_up.url.startswith(reverse("login")))
 
     def test_user_import_template_uses_machine_headers(self):
         self.client.force_login(self.admin)

@@ -1,4 +1,5 @@
-from django.test import TestCase, override_settings
+from django.contrib.sessions.models import Session
+from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
 from apps.accounts.models import User
@@ -49,6 +50,43 @@ class AuthenticationFlowTests(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Email/username atau password salah")
+
+    def test_student_second_login_requires_manual_reset(self):
+        user = self.create_user("single1", "single1@example.com", "student")
+        first_client = Client()
+        second_client = Client()
+
+        first_response = first_client.post(
+            reverse("login"),
+            {"username": user.username, "password": "Password123!", "remember_me": "on"},
+        )
+        self.assertRedirects(first_response, reverse("student_dashboard"))
+
+        second_response = second_client.post(
+            reverse("login"),
+            {"username": user.username, "password": "Password123!", "remember_me": "on"},
+        )
+        self.assertEqual(second_response.status_code, 200)
+        self.assertContains(second_response, "sedang aktif di perangkat lain")
+
+    def test_student_can_login_when_previous_session_record_is_stale(self):
+        user = self.create_user("single2", "single2@example.com", "student")
+        first_client = Client()
+        second_client = Client()
+
+        first_response = first_client.post(
+            reverse("login"),
+            {"username": user.username, "password": "Password123!", "remember_me": "on"},
+        )
+        self.assertRedirects(first_response, reverse("student_dashboard"))
+
+        Session.objects.filter(session_key=first_client.session.session_key).delete()
+
+        second_response = second_client.post(
+            reverse("login"),
+            {"username": user.username, "password": "Password123!", "remember_me": "on"},
+        )
+        self.assertRedirects(second_response, reverse("student_dashboard"))
 
     def test_logout_clears_session(self):
         user = self.create_user("logout1", "logout@example.com", "student")

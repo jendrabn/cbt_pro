@@ -89,6 +89,37 @@
             <div class="col-xl-4">
                 <div class="card border-0 shadow-sm mb-4">
                     <div class="card-header bg-white border-0 pt-3">
+                        <h2 class="h6 mb-0">Kontrol Sesi Login</h2>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-2">
+                            <span class="text-muted">Status sesi:</span>
+                            <strong>{{ session_status.label }}</strong>
+                        </p>
+                        <p class="mb-2">
+                            <span class="text-muted">Login sejak:</span>
+                            <strong>{{ session_status.login_at|date:"d M Y H:i"|default:"-" }}</strong>
+                        </p>
+                        <p class="mb-2">
+                            <span class="text-muted">Aktivitas terakhir:</span>
+                            <strong>{{ session_status.last_seen_at|date:"d M Y H:i"|default:"-" }}</strong>
+                        </p>
+                        <p class="mb-3">
+                            <span class="text-muted">IP terakhir:</span>
+                            <strong>{{ session_status.ip_address|default:"-" }}</strong>
+                        </p>
+                        <form method="post" action="{% url 'teacher_student_reset_session' student_user.id %}" onsubmit="return confirm('Reset sesi login siswa ini?');">
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                            <button type="submit" class="btn btn-outline-warning w-100" title="Reset sesi login siswa ini">
+                                <i class="ri-restart-line me-1"></i>Reset Sesi Login
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white border-0 pt-3">
                         <h2 class="h6 mb-0">Ringkasan Akademik</h2>
                     </div>
                     <div class="card-body">

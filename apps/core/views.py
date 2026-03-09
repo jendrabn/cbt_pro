@@ -14,6 +14,7 @@ from django.utils.text import get_valid_filename
 from django.views import View
 from django.views.generic import TemplateView
 
+from apps.accounts.session_control import invalidate_student_session_timeout_cache
 from apps.core.forms import (
     BackupRestoreForm,
     BrandingSettingsForm,
@@ -413,6 +414,7 @@ class SystemSettingsView(RoleRequiredMixin, TemplateView):
         self._upsert_setting("auth_enable_teacher_registration", cleaned["auth_enable_teacher_registration"])
         self._upsert_setting("auth_enable_student_registration", cleaned["auth_enable_student_registration"])
         invalidate_auth_feature_cache()
+        invalidate_student_session_timeout_cache()
 
     def _save_exam_defaults(self, form):
         cleaned = form.cleaned_data
@@ -500,6 +502,7 @@ class SystemSettingsView(RoleRequiredMixin, TemplateView):
         invalidate_branding_cache()
         invalidate_auth_feature_cache()
         invalidate_certificate_feature_cache()
+        invalidate_student_session_timeout_cache()
         return restored
 
     def _backup_history(self):

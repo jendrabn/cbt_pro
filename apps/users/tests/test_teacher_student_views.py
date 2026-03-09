@@ -1,6 +1,6 @@
 from datetime import timedelta
 
-from django.test import TestCase, override_settings
+from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
@@ -212,3 +212,29 @@ class TeacherStudentViewTests(TestCase):
         self.client.force_login(self.admin)
         response = self.client.get(reverse("teacher_student_list"))
         self.assertEqual(response.status_code, 403)
+
+    def test_teacher_can_reset_related_student_session(self):
+        student_client = Client()
+        login_response = student_client.post(
+            reverse("login"),
+            {"username": self.student_class.username, "password": "StudentPass123!", "remember_me": "on"},
+        )
+        self.assertRedirects(login_response, reverse("student_dashboard"))
+
+        self.client.force_login(self.teacher)
+        response = self.client.post(
+            reverse("teacher_student_reset_session", kwargs={"pk": self.student_class.pk}),
+            data={"next": reverse("teacher_student_detail", kwargs={"pk": self.student_class.pk})},
+        )
+        self.assertEqual(response.status_code, 302)
+
+        follow_up = student_client.get(reverse("student_dashboard"))
+        self.assertEqual(follow_up.status_code, 302)
+        self.assertTrue(follow_up.url.startswith(reverse("login")))
+
+    def test_teacher_cannot_reset_unrelated_student_session(self):
+        self.client.force_login(self.teacher)
+        response = self.client.post(
+            reverse("teacher_student_reset_session", kwargs={"pk": self.student_other.pk}),
+        )
+        self.assertEqual(response.status_code, 404)

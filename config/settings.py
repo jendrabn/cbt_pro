@@ -46,12 +46,12 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-change-this-in-production'
 CBT_SITE_NAME = os.getenv('CBT_SITE_NAME', 'Sistem CBT')
 WHATSAPP_NUMBER = os.getenv('WHATSAPP_NUMBER', '628xxxxxxxxxx')
 DEMO_MODE = _env_bool('DEMO', _env_bool('DEMO_MODE', False))
-DEMO_TEACHER_USERNAME = os.getenv('DEMO_TEACHER_USERNAME', 'guru.matematika').strip()
-DEMO_TEACHER_EMAIL = os.getenv('DEMO_TEACHER_EMAIL', 'guru.matematika@cbt.com').strip()
-DEMO_TEACHER_PASSWORD = os.getenv('DEMO_TEACHER_PASSWORD', 'guru123')
-DEMO_STUDENT_USERNAME = os.getenv('DEMO_STUDENT_USERNAME', 'siswa.andi').strip()
-DEMO_STUDENT_EMAIL = os.getenv('DEMO_STUDENT_EMAIL', 'siswa.andi@cbt.com').strip()
-DEMO_STUDENT_PASSWORD = os.getenv('DEMO_STUDENT_PASSWORD', 'siswa123')
+DEMO_TEACHER_USERNAME = os.getenv('DEMO_TEACHER_USERNAME', 'olivia.carter').strip()
+DEMO_TEACHER_EMAIL = os.getenv('DEMO_TEACHER_EMAIL', 'olivia.carter@mail.com').strip()
+DEMO_TEACHER_PASSWORD = os.getenv('DEMO_TEACHER_PASSWORD', 'teacher123')
+DEMO_STUDENT_USERNAME = os.getenv('DEMO_STUDENT_USERNAME', 'ethan.walker').strip()
+DEMO_STUDENT_EMAIL = os.getenv('DEMO_STUDENT_EMAIL', 'ethan.walker@mail.com').strip()
+DEMO_STUDENT_PASSWORD = os.getenv('DEMO_STUDENT_PASSWORD', 'student123')
 
 DEBUG = _env_bool('DEBUG', True)
 HTTPS_ENABLED = _env_bool('HTTPS_ENABLED', _env_bool('SECURE_SSL_REDIRECT', not DEBUG))
@@ -99,6 +99,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "apps.accounts.middleware.StudentSingleSessionMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
