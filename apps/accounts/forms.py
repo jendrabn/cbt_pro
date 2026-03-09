@@ -9,7 +9,39 @@ from .models import UserProfile
 User = get_user_model()
 
 
-class LoginForm(AuthenticationForm):
+def _append_css_class(attrs, class_name):
+    classes = [token for token in str(attrs.get("class", "")).split() if token]
+    if class_name not in classes:
+        classes.append(class_name)
+    attrs["class"] = " ".join(classes)
+
+
+class BootstrapInvalidStateMixin:
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._apply_bootstrap_invalid_state()
+
+    def _apply_bootstrap_invalid_state(self):
+        for field_name in self.errors:
+            field = self.fields.get(field_name)
+            if field is None:
+                continue
+            _append_css_class(field.widget.attrs, "is-invalid")
+            field.widget.attrs["aria-invalid"] = "true"
+            bound_field = self[field_name]
+            if bound_field.auto_id:
+                feedback_id = f"{bound_field.auto_id}_feedback"
+                described_by = [
+                    token
+                    for token in str(field.widget.attrs.get("aria-describedby", "")).split()
+                    if token
+                ]
+                if feedback_id not in described_by:
+                    described_by.append(feedback_id)
+                field.widget.attrs["aria-describedby"] = " ".join(described_by)
+
+
+class LoginForm(BootstrapInvalidStateMixin, AuthenticationForm):
     username = forms.CharField(
         label="Email/Username",
         widget=forms.TextInput(
@@ -54,7 +86,7 @@ class LoginForm(AuthenticationForm):
             )
 
 
-class ProfileUpdateForm(forms.ModelForm):
+class ProfileUpdateForm(BootstrapInvalidStateMixin, forms.ModelForm):
     first_name = forms.CharField(
         label="Nama Depan",
         max_length=150,
@@ -117,7 +149,7 @@ class ProfileUpdateForm(forms.ModelForm):
         return profile
 
 
-class AvatarUploadForm(forms.ModelForm):
+class AvatarUploadForm(BootstrapInvalidStateMixin, forms.ModelForm):
     profile_picture = forms.ImageField(
         label="Foto Profil",
         required=False,
@@ -139,7 +171,7 @@ class AvatarUploadForm(forms.ModelForm):
         return image
 
 
-class CustomPasswordChangeForm(PasswordChangeForm):
+class CustomPasswordChangeForm(BootstrapInvalidStateMixin, PasswordChangeForm):
     old_password = forms.CharField(
         label="Password Lama",
         strip=False,
@@ -161,10 +193,21 @@ class CustomPasswordChangeForm(PasswordChangeForm):
                 "autocomplete": "new-password",
             }
         ),
-        )
+    )
+    new_password2 = forms.CharField(
+        label="Konfirmasi Password Baru",
+        strip=False,
+        widget=forms.PasswordInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Konfirmasi password baru",
+                "autocomplete": "new-password",
+            }
+        ),
+    )
 
 
-class RoleRegistrationForm(UserCreationForm):
+class RoleRegistrationForm(BootstrapInvalidStateMixin, UserCreationForm):
     username = forms.CharField(
         label="Username",
         max_length=150,
@@ -232,14 +275,3 @@ class RoleRegistrationForm(UserCreationForm):
         if User.objects.filter(email__iexact=email).exists():
             raise ValidationError("Email sudah terdaftar.")
         return email
-    new_password2 = forms.CharField(
-        label="Konfirmasi Password Baru",
-        strip=False,
-        widget=forms.PasswordInput(
-            attrs={
-                "class": "form-control",
-                "placeholder": "Konfirmasi password baru",
-                "autocomplete": "new-password",
-            }
-        ),
-    )

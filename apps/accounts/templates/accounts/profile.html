@@ -66,27 +66,27 @@
                             <div class="col-sm-6">
                                 <label class="form-label required">{{ profile_form.first_name.label }}</label>
                                 {{ profile_form.first_name }}
-                                {% for error in profile_form.first_name.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                                {% if profile_form.first_name.errors %}<div id="{{ profile_form.first_name.id_for_label }}_feedback" class="invalid-feedback d-block">{{ profile_form.first_name.errors.0 }}</div>{% endif %}
                             </div>
                             <div class="col-sm-6">
                                 <label class="form-label">{{ profile_form.last_name.label }}</label>
                                 {{ profile_form.last_name }}
-                                {% for error in profile_form.last_name.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                                {% if profile_form.last_name.errors %}<div id="{{ profile_form.last_name.id_for_label }}_feedback" class="invalid-feedback d-block">{{ profile_form.last_name.errors.0 }}</div>{% endif %}
                             </div>
                             <div class="col-12">
                                 <label class="form-label required">{{ profile_form.email.label }}</label>
                                 {{ profile_form.email }}
-                                {% for error in profile_form.email.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                                {% if profile_form.email.errors %}<div id="{{ profile_form.email.id_for_label }}_feedback" class="invalid-feedback d-block">{{ profile_form.email.errors.0 }}</div>{% endif %}
                             </div>
                             <div class="col-sm-6">
                                 <label class="form-label">{{ profile_form.phone_number.label }}</label>
                                 {{ profile_form.phone_number }}
-                                {% for error in profile_form.phone_number.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                                {% if profile_form.phone_number.errors %}<div id="{{ profile_form.phone_number.id_for_label }}_feedback" class="invalid-feedback d-block">{{ profile_form.phone_number.errors.0 }}</div>{% endif %}
                             </div>
                             <div class="col-sm-6">
                                 <label class="form-label">{{ profile_form.bio.label }}</label>
                                 {{ profile_form.bio }}
-                                {% for error in profile_form.bio.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                                {% if profile_form.bio.errors %}<div id="{{ profile_form.bio.id_for_label }}_feedback" class="invalid-feedback d-block">{{ profile_form.bio.errors.0 }}</div>{% endif %}
                             </div>
                         </div>
 

@@ -3,23 +3,101 @@
 
 {% block title %}Login - {{ branding.institution_name|default:"Sistem CBT" }}{% endblock %}
 
+{% block extra_css %}
+<style>
+    .login-hero-header {
+        text-align: center;
+        margin-bottom: 1.7rem;
+    }
+
+    .login-hero-logo-wrap {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .login-hero-logo {
+        display: block;
+        height: 40px;
+        width: auto;
+        max-width: min(100%, 220px);
+        object-fit: contain;
+    }
+
+    .login-hero-title {
+        margin: 0 0 0.45rem;
+        color: #14213d;
+        font-size: clamp(1.45rem, 1.3rem + 0.45vw, 1.9rem);
+        font-weight: 800;
+        letter-spacing: -0.045em;
+        line-height: 1.14;
+    }
+
+    .login-hero-subtitle {
+        margin: 0 auto 1rem;
+        max-width: 20rem;
+        color: #94a3b8;
+        font-size: 0.95rem;
+        font-weight: 600;
+        line-height: 1.45;
+    }
+
+    .login-campus-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.55rem;
+        padding: 0.72rem 1.15rem;
+        border-radius: 999px;
+        border: 1px solid #d7e1ec;
+        background: #f7f9fc;
+        color: #5d6b83;
+        font-size: 0.98rem;
+        font-weight: 700;
+        line-height: 1;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85);
+    }
+
+    .login-campus-pill i {
+        color: #8593aa;
+        font-size: 1rem;
+    }
+
+    @media (max-width: 575.98px) {
+        .login-hero-header {
+            margin-bottom: 1.35rem;
+        }
+
+        .login-hero-subtitle {
+            font-size: 0.9rem;
+        }
+
+        .login-campus-pill {
+            padding: 0.65rem 1rem;
+            font-size: 0.92rem;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <main class="login-shell d-flex align-items-center justify-content-center p-3 p-md-4">
     <section class="login-card p-4 p-md-5" aria-label="Login form">
-        <header class="text-center mb-4">
-            <div class="brand-mark brand-mark-logo" aria-hidden="true">
+        <header class="login-hero-header">
+            <div class="login-hero-logo-wrap" aria-hidden="true">
                 <img
                     src="{{ branding.institution_logo_url|default:'/static/images/logo-dark.png' }}"
                     alt="{{ branding.institution_name|default:'Logo Institusi' }}"
-                    class="brand-logo-full"
+                    class="login-hero-logo"
                     onerror="this.onerror=null;this.src='{% static 'images/logo-dark.png' %}';"
                 >
             </div>
-            <h1 class="h4 fw-bold mb-1">{{ branding.login_page_headline|default:"Selamat Datang" }}</h1>
-            {% if branding.login_page_subheadline %}
-            <p class="text-muted mb-1">{{ branding.login_page_subheadline }}</p>
-            {% endif %}
-            <p class="text-muted mb-0">{{ branding.institution_name|default:"Sistem CBT" }}</p>
+            <h1 class="login-hero-title">{{ branding.login_page_headline|default:"Selamat Datang Kembali" }}</h1>
+            <p class="login-hero-subtitle">{{ branding.login_page_subheadline|default:"Kelola ujian, bank soal, dan sesi siswa." }}</p>
+            <div class="login-campus-pill">
+                <i class="ri-school-line" aria-hidden="true"></i>
+                <span>{{ branding.institution_name|default:"Sistem CBT" }}</span>
+            </div>
         </header>
 
         {% if messages %}
@@ -45,17 +123,17 @@
                 <div class="w-100">
                     <div class="fw-semibold mb-1">Akun Demo</div>
                     <p class="small mb-3 text-muted">
-                        Gunakan akun guru atau siswa berikut untuk mencoba sistem. Halaman profil dan ubah password dinonaktifkan saat mode demo aktif.
+                        Gunakan akun guru atau siswa berikut untuk mencoba sistem.
                     </p>
                     <div class="small">
                         <div class="mb-2">
                             <strong>{{ demo_accounts.teacher.label }}</strong><br>
-                            <span>Email/Username: {{ demo_accounts.teacher.username }} / {{ demo_accounts.teacher.email }}</span><br>
+                            <span>Username: {{ demo_accounts.teacher.username }}</span><br>
                             <span>Password: {{ demo_accounts.teacher.password }}</span>
                         </div>
                         <div>
                             <strong>{{ demo_accounts.student.label }}</strong><br>
-                            <span>Email/Username: {{ demo_accounts.student.username }} / {{ demo_accounts.student.email }}</span><br>
+                            <span>Username: {{ demo_accounts.student.username }}</span><br>
                             <span>Password: {{ demo_accounts.student.password }}</span>
                         </div>
                     </div>
@@ -72,9 +150,9 @@
 
             <div class="mb-3">
                 <label for="id_username" class="form-label fw-semibold required">Email/Username</label>
-                <div class="input-group">
+                <div class="input-group has-validation{% if form.username.errors %} is-invalid-group{% endif %}">
                     <span class="input-group-text">
-                        <i class="ri-user-line text-muted"></i>
+                        <i class="ri-user-line"></i>
                     </span>
                     <input
                         type="text"
@@ -84,20 +162,21 @@
                         value="{{ form.username.value|default:'' }}"
                         placeholder="Masukkan email atau username"
                         autocomplete="username"
+                        {% if form.username.errors %}aria-invalid="true" aria-describedby="id_username_feedback"{% endif %}
                         required
                         autofocus
                     >
                     {% if form.username.errors %}
-                    <div class="invalid-feedback">{{ form.username.errors.0 }}</div>
+                    <div id="id_username_feedback" class="invalid-feedback">{{ form.username.errors.0 }}</div>
                     {% endif %}
                 </div>
             </div>
 
             <div class="mb-2">
                 <label for="id_password" class="form-label fw-semibold required">Password</label>
-                <div class="input-group" x-data="{ show: false }">
+                <div class="input-group has-validation{% if form.password.errors %} is-invalid-group{% endif %}" x-data="{ show: false }">
                     <span class="input-group-text">
-                        <i class="ri-lock-line text-muted"></i>
+                        <i class="ri-lock-line"></i>
                     </span>
                     <input
                         :type="show ? 'text' : 'password'"
@@ -106,6 +185,7 @@
                         class="form-control {% if form.password.errors %}is-invalid{% endif %}"
                         placeholder="Masukkan password"
                         autocomplete="current-password"
+                        {% if form.password.errors %}aria-invalid="true" aria-describedby="id_password_feedback"{% endif %}
                         required
                     >
                     <button
@@ -117,7 +197,7 @@
                         <i :class="show ? 'ri-eye-off-line' : 'ri-eye-line'"></i>
                     </button>
                     {% if form.password.errors %}
-                    <div class="invalid-feedback">{{ form.password.errors.0 }}</div>
+                    <div id="id_password_feedback" class="invalid-feedback">{{ form.password.errors.0 }}</div>
                     {% endif %}
                 </div>
             </div>
@@ -134,7 +214,7 @@
                     <label class="form-check-label" for="id_remember_me">Ingat Saya</label>
                 </div>
                 {% if auth_features.auth_enable_forgot_password %}
-                <a href="{% url 'password_reset' %}" class="small text-decoration-none">Lupa password?</a>
+                <a href="{% url 'password_reset' %}" class="text-decoration-none">Lupa password?</a>
                 {% endif %}
             </div>
 

@@ -238,13 +238,46 @@ body.dashboard-body .modal {
 }
 
 .login-page .form-control,
-.login-page .input-group-text {
+.login-page .form-select,
+.login-page .input-group-text,
+.login-page .input-group .btn {
   border-color: var(--login-border);
 }
 
-.login-page .form-control:focus {
+.login-page .form-control:focus,
+.login-page .form-select:focus {
   border-color: $login-focus-border-color;
   box-shadow: 0 0 0 .2rem $login-focus-shadow-color;
+}
+
+.login-page .form-control.is-invalid,
+.login-page .was-validated .form-control:invalid,
+.login-page .form-select.is-invalid,
+.login-page .was-validated .form-select:invalid {
+  border-color: var(--bs-form-invalid-border-color);
+}
+
+.login-page .form-control.is-invalid:focus,
+.login-page .was-validated .form-control:invalid:focus,
+.login-page .form-select.is-invalid:focus,
+.login-page .was-validated .form-select:invalid:focus {
+  border-color: var(--bs-form-invalid-border-color);
+  box-shadow: 0 0 0 .2rem rgba($danger, .18);
+}
+
+.login-page .input-group.has-validation.is-invalid-group > .input-group-text,
+.login-page .input-group.has-validation.is-invalid-group > .btn {
+  border-color: var(--bs-form-invalid-border-color);
+  color: var(--bs-form-invalid-color);
+}
+
+.login-page .input-group.has-validation.is-invalid-group > .input-group-text {
+  background-color: rgba($danger, .04);
+}
+
+.login-page .input-group.has-validation.is-invalid-group > .input-group-text i,
+.login-page .input-group.has-validation.is-invalid-group > .btn i {
+  color: inherit !important;
 }
 
 @media (max-width: 991.98px) {

@@ -51,6 +51,21 @@ class AuthenticationFlowTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Email/username atau password salah")
 
+    def test_empty_login_submission_marks_input_groups_invalid(self):
+        response = self.client.post(reverse("login"), {"username": "", "password": ""})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "has-validation is-invalid-group", count=2)
+        self.assertContains(response, 'aria-describedby="id_username_feedback"', html=False)
+        self.assertContains(response, 'aria-describedby="id_password_feedback"', html=False)
+
+    def test_forgot_password_invalid_submission_marks_input_group_invalid(self):
+        response = self.client.post(reverse("password_reset"), {"email": ""})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "has-validation is-invalid-group")
+        self.assertContains(response, 'aria-describedby="id_email_feedback"', html=False)
+
     def test_student_second_login_requires_manual_reset(self):
         user = self.create_user("single1", "single1@example.com", "student")
         first_client = Client()
@@ -95,6 +110,41 @@ class AuthenticationFlowTests(TestCase):
         self.assertRedirects(response, reverse("login"))
         self.assertNotIn("_auth_user_id", self.client.session)
 
+    def test_profile_invalid_submission_marks_rendered_fields_invalid(self):
+        user = self.create_user("profile1", "profile1@example.com", "teacher")
+        self.client.force_login(user)
+
+        response = self.client.post(
+            reverse("profile"),
+            {
+                "first_name": "",
+                "last_name": "User",
+                "email": "not-an-email",
+                "phone_number": "",
+                "bio": "",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'id="id_first_name_feedback"', html=False)
+        self.assertContains(response, 'id="id_email_feedback"', html=False)
+        self.assertContains(response, "form-control is-invalid", count=2)
+
+    def test_change_password_invalid_submission_marks_rendered_fields_invalid(self):
+        user = self.create_user("changepass1", "changepass1@example.com", "teacher")
+        self.client.force_login(user)
+
+        response = self.client.post(
+            reverse("change_password"),
+            {"old_password": "", "new_password1": "", "new_password2": ""},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'id="id_old_password_feedback"', html=False)
+        self.assertContains(response, 'id="id_new_password1_feedback"', html=False)
+        self.assertContains(response, 'id="id_new_password2_feedback"', html=False)
+        self.assertContains(response, "form-control is-invalid", count=3)
+
     @override_settings(
         DEMO_MODE=True,
         DEMO_TEACHER_USERNAME="guru.demo",
@@ -108,8 +158,8 @@ class AuthenticationFlowTests(TestCase):
         response = self.client.get(reverse("login"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Akun Demo")
-        self.assertContains(response, "guru.demo@example.com")
-        self.assertContains(response, "siswa.demo@example.com")
+        self.assertContains(response, "Username: guru.demo")
+        self.assertContains(response, "Username: siswa.demo")
         self.assertContains(response, "guru-demo-123")
         self.assertContains(response, "siswa-demo-123")
 
