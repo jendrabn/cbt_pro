@@ -1,105 +1,50 @@
 # CBT Pro
 
-CBT Pro adalah aplikasi Computer-Based Testing berbasis Django dengan modul utama untuk autentikasi multi-role, bank soal, manajemen ujian, attempt siswa, monitoring anti-cheat, hasil ujian, analitik, impor user/soal, dan branding sistem.
+README ini khusus untuk deployment production `CBT Pro` di VPS `Ubuntu Server 22.04`.
 
-## Hasil analisis proyek
+## Asumsi deployment
 
-- Stack utama: Django 6, MySQL, Redis, Celery, Nginx, Gunicorn, SCSS via `sass` + `npm`.
-- Domain app yang aktif: `accounts`, `users`, `subjects`, `questions`, `exams`, `attempts`, `monitoring`, `results`, `proctoring`, `notifications`, `analytics`, `dashboard`, `core`.
-- Database runtime mengikuti `config/settings.py` dan `.env.example`, yaitu `django.db.backends.mysql`. Beberapa dokumen di folder `docs/` masih memuat catatan historis seperti PostgreSQL, jadi untuk deployment ikuti konfigurasi kode, bukan dokumen lama tersebut.
-- Background job yang benar-benar dipakai saat ini adalah task Celery untuk pengiriman kredensial email hasil import user di `apps/users/tasks.py`. Jika Redis/Celery tidak tersedia, aplikasi masih punya fallback sinkron melalui `apps/core/tasking.py`, tetapi worker tetap direkomendasikan untuk production.
-- `celery beat` belum diperlukan saat ini. `django-celery-beat` ada di `requirements.txt`, tetapi belum dipakai pada `INSTALLED_APPS` dan tidak ada periodic task aktif.
-- Monitoring real-time saat ini memakai endpoint HTTP polling. Consumer Channels memang ada di `apps/monitoring/consumers.py`, tetapi wiring ASGI/Channels belum lengkap, jadi deployment production saat ini cukup memakai WSGI (`gunicorn`) dan tidak butuh Daphne/Uvicorn/WebSocket gateway.
-- File media dipakai untuk branding, import/export, dan screenshot proctoring. Direktori `media/`, `logs/`, dan `staticfiles/` harus writable oleh user service.
-- Build CSS wajib dijalankan di server. File hasil compile `static/css/main.css` dipakai oleh template, tetapi folder `static/css/` tidak disimpan di Git.
-- Sebagian asset frontend masih dimuat dari CDN publik saat runtime browser, termasuk Bootstrap JS, Remix Icon, Alpine.js, Axios, Chart.js, TinyMCE, dan Google Fonts. Untuk deployment intranet/offline, asset tersebut perlu divendor ke `static/` atau browser klien harus diizinkan mengakses CDN terkait.
-- Command bootstrap data tersedia di `apps/core/management/commands/seed.py`. Ini cocok untuk staging/demo, bukan production, karena membuat akun default dengan password yang harus segera diganti.
-- Fitur PDF sertifikat memakai WeasyPrint dan membutuhkan dependensi sistem (library OS), bukan hanya package Python.
+- OS server: `Ubuntu Server 22.04 LTS`
+- Direktori aplikasi: `/var/www/cbt_pro`
+- User deploy: `deploy`
+- Domain: `cbt.example.com`
+- Reverse proxy: `Nginx`
+- App server: `Gunicorn`
+- Database: `MySQL`
+- Queue broker: `Redis`
 
-### Catatan penting fitur PDF sertifikat
+Sesuaikan seluruh placeholder di bawah dengan lingkungan server target.
 
-- Engine PDF: `weasyprint` (dipanggil dari `apps/results/certificate_generators.py`).
-- Jika dependensi OS belum ada, notifikasi user akan menampilkan error seperti: `WeasyPrint tidak siap` atau `cannot load library 'libgobject-2.0-0'`.
+## 1. Install paket sistem
 
-Linux (Ubuntu/Debian) minimal:
-
-```bash
-sudo apt install -y libcairo2 libpango-1.0-0 libgdk-pixbuf-2.0-0 shared-mime-info
-```
-
-Windows (PowerShell) contoh:
-
-```powershell
-winget install --id tschoonj.GTKForWindows -e --accept-source-agreements --accept-package-agreements --silent
-```
-
-Setelah install runtime di Windows, pastikan folder GTK `bin` masuk `PATH` (contoh: `C:\Program Files\GTK3-Runtime Win64\bin`) lalu restart proses Django/Celery.
-
-## Topologi deployment yang direkomendasikan
-
-- OS: Ubuntu 24.04 LTS direkomendasikan.
-- Python: 3.12+.
-- Lokasi project: `/var/www/cbt_pro`.
-- Reverse proxy: Nginx.
-- App server: Gunicorn di `127.0.0.1:8000`.
-- Database: MySQL atau MariaDB kompatibel MySQL.
-- Queue broker/result backend: Redis.
-- Service manager: systemd.
-
-Contoh di bawah mengasumsikan:
-
-- domain: `cbt.example.com`
-- user deploy: `deploy`
-- repo: `<URL_REPO_ANDA>`
-
-Ganti semua placeholder tersebut sesuai server Anda.
-
-## 1. Persiapan server
-
-Jika server masih baru, siapkan paket dasar berikut:
+Ubuntu 22.04 masih memakai Python bawaan `3.10`, jadi install `Python 3.12` dari `deadsnakes` terlebih dahulu.
 
 ```bash
 sudo apt update && sudo apt upgrade -y
+sudo apt install -y software-properties-common
+sudo add-apt-repository ppa:deadsnakes/ppa -y
+sudo apt update
+
 sudo apt install -y \
   git curl nginx redis-server mysql-server \
-  software-properties-common \
+  certbot python3-certbot-nginx \
   build-essential pkg-config default-libmysqlclient-dev \
-  libffi-dev libmagic1 libcairo2 libpango-1.0-0 \
+  libffi-dev libmagic1 libcairo2 libpango-1.0-0 libpangocairo-1.0-0 \
+  libpangoft2-1.0-0 libharfbuzz-subset0 \
   libgdk-pixbuf-2.0-0 shared-mime-info \
-  nodejs npm
+  python3.12 python3.12-venv python3.12-dev
 ```
 
-Lalu siapkan runtime Python 3.12+ sesuai versi Ubuntu:
+Install Node.js LTS dari NodeSource agar kompatibel dengan `sass` yang dipakai project:
 
 ```bash
-cat /etc/os-release
-python3 --version
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+sudo apt install -y nodejs
+node --version
+npm --version
 ```
 
-Untuk Ubuntu 24.04 LTS (`VERSION_ID="24.04"`), pastikan repo `universe` aktif lalu install Python 3.12:
-
-```bash
-sudo add-apt-repository universe
-sudo apt update
-sudo apt install -y python3.12 python3.12-venv python3.12-dev
-```
-
-Untuk Ubuntu 22.04 LTS (`VERSION_ID="22.04"`), paket `python3` bawaan masih 3.10, jadi tambah PPA `deadsnakes` terlebih dahulu:
-
-```bash
-sudo add-apt-repository ppa:deadsnakes/ppa
-sudo apt update
-sudo apt install -y python3.12 python3.12-venv python3.12-dev
-```
-
-Catatan:
-
-- Pada Ubuntu 22.04, paket `python3` default biasanya masih `3.10`, jadi jangan membuat virtualenv dari binary tersebut.
-- Jika `apt` menampilkan `Unable to locate package python3.12`, cek lagi `cat /etc/os-release`. Pada Ubuntu 24.04 biasanya `universe` belum aktif, sedangkan pada Ubuntu 22.04 Anda perlu `ppa:deadsnakes/ppa`.
-- Jangan membuat virtualenv dengan interpreter yang masih `Python 3.10` atau `Python 3.11`. Dependency seperti `Django 6` dan `autobahn 25.12.2` akan gagal diinstall pada versi tersebut.
-- Jika Anda memakai database/Redis managed service, bagian instalasi `mysql-server` dan `redis-server` boleh dilewati.
-
-Opsional, aktifkan firewall dasar:
+Opsional firewall dasar:
 
 ```bash
 sudo ufw allow OpenSSH
@@ -107,22 +52,15 @@ sudo ufw allow 'Nginx Full'
 sudo ufw enable
 ```
 
-## 2. Clone repo ke `/var/www/cbt_pro`
-
-Jika user `deploy` belum ada, buat dulu. Jika sudah ada, lewati langkah ini.
+## 2. Buat user deploy dan clone repository
 
 ```bash
 sudo adduser deploy
 sudo usermod -aG sudo deploy
-```
-
-Siapkan direktori aplikasi:
-
-```bash
 sudo install -d -o deploy -g deploy /var/www/cbt_pro
 ```
 
-Login sebagai user deploy, lalu clone repo:
+Clone repo:
 
 ```bash
 sudo -iu deploy
@@ -130,34 +68,26 @@ git clone <URL_REPO_ANDA> /var/www/cbt_pro
 cd /var/www/cbt_pro
 ```
 
-## 3. Python virtualenv dan dependency aplikasi
+## 3. Buat virtualenv dan install dependency Python
 
 ```bash
 cd /var/www/cbt_pro
-python3 --version
-# output wajib 3.12.x atau lebih baru
-# jika python3 masih 3.10/3.11, kembali ke langkah persiapan server lalu install Python 3.12+
-PYTHON_BIN=python3.12
-$PYTHON_BIN --version
-$PYTHON_BIN -m venv .venv
+python3.12 -m venv .venv
 source .venv/bin/activate
 python --version
 pip install --upgrade pip wheel
 pip install -r requirements.txt
 ```
 
-Jika sebelumnya Anda sudah terlanjur membuat `.venv` dengan Python yang salah, hapus dulu virtualenv lama sebelum menjalankan perintah di atas:
+Jika sebelumnya `.venv` terbuat dari Python yang salah, hapus lalu buat ulang:
 
 ```bash
-cd /var/www/cbt_pro
-rm -rf .venv
+rm -rf /var/www/cbt_pro/.venv
 ```
-
-`gunicorn` sudah ada di `requirements.txt`, jadi tidak perlu install terpisah.
 
 ## 4. Build asset frontend
 
-Karena `static/css/main.css` tidak ikut tersimpan di Git, build CSS harus dijalankan minimal sekali di server:
+File `static/css/main.css` tidak disimpan di Git, jadi CSS wajib dibuild di server.
 
 ```bash
 cd /var/www/cbt_pro
@@ -165,16 +95,14 @@ npm ci
 npm run build:css
 ```
 
-Jika build gagal, pastikan `nodejs` dan `npm` sudah terpasang serta file `package-lock.json` ikut ter-clone.
+Catatan:
 
-Catatan runtime frontend:
+- Sebagian asset frontend masih dimuat dari CDN publik saat runtime browser, termasuk Bootstrap JS, Alpine.js, Remix Icon, Axios, Chart.js, TinyMCE, dan Google Fonts.
+- Untuk deployment intranet atau jaringan tanpa akses internet publik, asset tersebut perlu divendor ke `static/`.
 
-- Halaman login, dashboard, exam room, monitoring, analytics, dan editor soal masih memakai beberapa asset dari CDN publik.
-- Jika deployment berada di jaringan intranet/offline, vendor asset tersebut ke `static/` dan ubah template yang masih mengarah ke CDN.
+## 5. Siapkan MySQL
 
-## 5. Database MySQL
-
-Amankan instalasi MySQL jika perlu:
+Amankan instalasi MySQL:
 
 ```bash
 sudo mysql_secure_installation
@@ -194,18 +122,14 @@ FLUSH PRIVILEGES;
 EXIT;
 ```
 
-Jika ingin memakai `localhost` atau host lain, sesuaikan `CREATE USER` dan `.env`.
-
-## 6. Redis
-
-Aktifkan Redis:
+## 6. Aktifkan Redis
 
 ```bash
 sudo systemctl enable redis-server --now
 redis-cli ping
 ```
 
-Jika output-nya `PONG`, Redis sudah aktif.
+Output yang benar adalah `PONG`.
 
 ## 7. Siapkan direktori writable
 
@@ -215,22 +139,20 @@ mkdir -p logs media staticfiles
 chmod 755 logs media staticfiles
 ```
 
-Jika nanti user service berbeda dari user deploy, pastikan owner direktori tersebut ikut disesuaikan.
+## 8. Buat file environment production
 
-## 8. Buat file `.env` production
-
-Salin dari template:
+Salin template:
 
 ```bash
 cd /var/www/cbt_pro
 cp .env.example .env
 ```
 
-Lalu edit `.env` menjadi seperti contoh berikut:
+Isi `.env` minimal seperti berikut:
 
 ```dotenv
 CBT_SITE_NAME="CBT Sekolah"
-SECRET_KEY=isi-dengan-secret-key-random-yang-panjang
+SECRET_KEY=ganti-dengan-secret-key-random
 DEBUG=False
 ALLOWED_HOSTS=cbt.example.com,www.cbt.example.com
 CSRF_TRUSTED_ORIGINS=https://cbt.example.com,https://www.cbt.example.com
@@ -257,7 +179,7 @@ EMAIL_HOST=smtp.gmail.com
 EMAIL_PORT=587
 EMAIL_USE_TLS=True
 EMAIL_HOST_USER=akun-smtp@domainanda.com
-EMAIL_HOST_PASSWORD=app-password-atau-smtp-password
+EMAIL_HOST_PASSWORD=password-smtp-anda
 DEFAULT_FROM_EMAIL="CBT Sekolah <noreply@cbt.example.com>"
 
 REDIS_URL=redis://127.0.0.1:6379/0
@@ -295,9 +217,7 @@ SCREENSHOT_INTERVAL_SECONDS=300
 MAX_VIOLATIONS_ALLOWED=3
 ```
 
-Catatan penting:
-
-- Generate `SECRET_KEY` dengan:
+Generate `SECRET_KEY`:
 
 ```bash
 cd /var/www/cbt_pro
@@ -305,11 +225,21 @@ source .venv/bin/activate
 python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
 ```
 
-- Jika SSL belum dipasang, set sementara `SECURE_SSL_REDIRECT=False`, lalu aktifkan kembali setelah Certbot/Nginx HTTPS selesai.
-- Jika aplikasi masih dijalankan langsung dengan `python manage.py runserver`, pakai `HTTPS_ENABLED=False` dan akses lewat `http://`, bukan `https://`.
-- Jika SMTP belum siap, Anda bisa memakai `EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend` sementara. Email tidak akan terkirim ke user; output-nya akan muncul di stdout proses Django, yang pada systemd biasanya terlihat lewat `journalctl`.
+Jika HTTPS belum aktif, set sementara:
 
-## 9. Migrasi, static files, dan user admin
+```dotenv
+HTTPS_ENABLED=False
+USE_X_FORWARDED_HOST=False
+SECURE_PROXY_SSL_HEADER_ENABLED=False
+SECURE_SSL_REDIRECT=False
+SESSION_COOKIE_SECURE=False
+CSRF_COOKIE_SECURE=False
+SECURE_HSTS_SECONDS=0
+```
+
+Setelah HTTPS aktif, ubah lagi ke mode production aman.
+
+## 9. Jalankan migrasi dan collectstatic
 
 ```bash
 cd /var/www/cbt_pro
@@ -326,9 +256,9 @@ Opsional untuk staging/demo:
 python manage.py seed
 ```
 
-Jangan jalankan `seed` di production tanpa review, karena command ini membuat akun dan data contoh. Jika terpakai, ganti seluruh password default segera.
+Jangan jalankan `seed` di production tanpa review karena command ini membuat akun default dan data contoh.
 
-## 10. Service systemd untuk Gunicorn
+## 10. Buat service Gunicorn
 
 Buat file `/etc/systemd/system/cbt_pro-gunicorn.service`:
 
@@ -350,7 +280,7 @@ RestartSec=5
 WantedBy=multi-user.target
 ```
 
-## 11. Service systemd untuk Celery worker
+## 11. Buat service Celery worker
 
 Buat file `/etc/systemd/system/cbt_pro-celery.service`:
 
@@ -372,7 +302,7 @@ RestartSec=5
 WantedBy=multi-user.target
 ```
 
-Aktifkan kedua service:
+Aktifkan service:
 
 ```bash
 sudo systemctl daemon-reload
@@ -381,11 +311,6 @@ sudo systemctl enable cbt_pro-celery --now
 sudo systemctl status cbt_pro-gunicorn
 sudo systemctl status cbt_pro-celery
 ```
-
-Catatan operasional:
-
-- `celery beat` belum perlu dijalankan untuk codebase saat ini.
-- Jika Redis mati, beberapa task masih fallback ke mode sinkron, tetapi worker tetap disarankan agar import user + email tidak membebani request web.
 
 ## 12. Konfigurasi Nginx
 
@@ -415,6 +340,7 @@ server {
         proxy_pass http://127.0.0.1:8000;
         proxy_http_version 1.1;
         proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
@@ -429,23 +355,21 @@ Aktifkan site:
 ```bash
 sudo ln -sfn /etc/nginx/sites-available/cbt_pro /etc/nginx/sites-enabled/cbt_pro
 sudo nginx -t
-sudo systemctl reload nginx
+sudo systemctl enable nginx --now
+sudo systemctl restart nginx
 ```
 
-## 13. HTTPS dengan Let's Encrypt
-
-Install Certbot:
+## 13. Aktifkan HTTPS dengan Let's Encrypt
 
 ```bash
-sudo apt install -y certbot python3-certbot-nginx
 sudo certbot --nginx -d cbt.example.com -d www.cbt.example.com
 ```
 
-Setelah HTTPS aktif:
+Sesudah sertifikat aktif:
 
-- pastikan `.env` berisi `CSRF_TRUSTED_ORIGINS=https://cbt.example.com,https://www.cbt.example.com`
-- pastikan `SECURE_SSL_REDIRECT=True`
-- restart service:
+- pastikan `.env` memakai `https://` di `CSRF_TRUSTED_ORIGINS`
+- aktifkan kembali semua flag keamanan HTTPS di `.env`
+- restart service
 
 ```bash
 sudo systemctl restart cbt_pro-gunicorn cbt_pro-celery nginx
@@ -453,16 +377,22 @@ sudo systemctl restart cbt_pro-gunicorn cbt_pro-celery nginx
 
 ## 14. Verifikasi pasca deploy
 
-Jalankan pemeriksaan berikut:
-
 ```bash
-curl -I -H "Host: cbt.example.com" -H "X-Forwarded-Proto: https" http://127.0.0.1:8000
 curl -I -H "Host: cbt.example.com" http://127.0.0.1
 curl -I https://cbt.example.com
-sudo systemctl status nginx cbt_pro-gunicorn cbt_pro-celery redis-server
+sudo systemctl status nginx cbt_pro-gunicorn cbt_pro-celery redis-server mysql
 ```
 
-Cek log jika ada masalah:
+Yang perlu berhasil:
+
+- halaman login terbuka
+- CSS termuat normal
+- `admin/` bisa diakses
+- upload media berjalan
+- import user berjalan
+- email keluar bila SMTP sudah diisi
+
+Lihat log jika ada masalah:
 
 ```bash
 sudo journalctl -u cbt_pro-gunicorn -f
@@ -470,18 +400,9 @@ sudo journalctl -u cbt_pro-celery -f
 tail -f /var/www/cbt_pro/logs/django.log
 ```
 
-Hal yang perlu berhasil:
-
-- halaman login bisa dibuka
-- `admin/` bisa diakses
-- file CSS termuat
-- upload/import file berjalan
-- screenshot proctoring bisa menulis ke `media/` jika fitur diaktifkan
-- email test bisa dikirim bila SMTP diisi
-
 ## 15. Update deploy berikutnya
 
-Setiap ada update kode:
+Setiap kali repository production menerima update baru, server juga harus ikut diperbarui. Jangan cukup `git pull` saja; jalankan seluruh langkah berikut agar dependency, migration, static file, dan service tetap sinkron dengan kode terbaru.
 
 ```bash
 sudo -iu deploy
@@ -498,16 +419,17 @@ exit
 sudo systemctl restart cbt_pro-gunicorn cbt_pro-celery
 ```
 
+Jika update hanya mengubah file Python atau template, langkah di atas tetap aman dipakai. Jika update membawa perubahan dependency, asset frontend, atau migration database, langkah ini menjadi wajib.
+
 ## 16. Troubleshooting singkat
 
-- `DisallowedHost`: isi `ALLOWED_HOSTS` belum benar.
-- `CSRF verification failed`: cek `CSRF_TRUSTED_ORIGINS`, domain HTTPS, dan header `X-Forwarded-Proto` di Nginx.
-- Redirect loop HTTP/HTTPS: biasanya `SECURE_SSL_REDIRECT=True` tetapi SSL belum aktif atau header proxy belum benar.
-- Log `You're accessing the development server over HTTPS, but it only supports HTTP`: nonaktifkan `HTTPS_ENABLED` untuk `runserver`, hapus cache HSTS browser bila perlu, lalu buka URL `http://host:port`.
-- `mysqlclient` gagal install: paket `python3-dev`, `pkg-config`, dan `default-libmysqlclient-dev` belum lengkap.
-- `Unable to locate package python3.12` saat `apt install`: cek `cat /etc/os-release`. Jika server Ubuntu 24.04, aktifkan `universe` lalu `apt update`. Jika server Ubuntu 22.04, tambah `ppa:deadsnakes/ppa` lalu install ulang paket Python 3.12.
-- `Could not find a version that satisfies the requirement autobahn==25.12.2` atau pesan `Requires-Python >=3.11` / `>=3.12`: virtualenv dibuat dengan Python lama. Cek `python --version` di dalam venv. Jika masih `3.10.x` atau `3.11.x`, hapus `.venv`, lalu buat ulang dengan `python3.12 -m venv .venv`.
+- `Unable to locate package python3.12`: pastikan server benar `Ubuntu 22.04` dan repo `ppa:deadsnakes/ppa` sudah ditambahkan.
+- `Could not find a version that satisfies the requirement autobahn==25.12.2`: virtualenv dibuat dari Python lama. Hapus `.venv`, lalu buat ulang dengan `python3.12 -m venv .venv`.
+- `mysqlclient` gagal install: pastikan `build-essential`, `pkg-config`, `default-libmysqlclient-dev`, dan `python3.12-dev` sudah terpasang.
+- `npm ci` gagal karena versi Node.js terlalu tua: pastikan Node.js dipasang dari NodeSource, bukan paket bawaan `Ubuntu 22.04`.
 - CSS tidak muncul: jalankan `npm ci`, `npm run build:css`, lalu `python manage.py collectstatic --noinput`.
-- Halaman login/monitoring/exam room/analytics terlihat rusak atau tombol interaktif tidak bekerja di jaringan intranet: browser klien kemungkinan tidak bisa memuat asset CDN seperti Bootstrap JS, Axios, Chart.js, Alpine.js, Remix Icon, TinyMCE, atau Google Fonts. Vendor asset tersebut ke `static/` atau buka akses ke CDN yang dipakai.
-- Import user terasa lambat: pastikan Redis dan service `cbt_pro-celery` aktif.
-- Media/proctoring gagal disimpan: cek permission `media/` dan user systemd yang menjalankan aplikasi.
+- UI terlihat rusak atau beberapa fitur frontend tidak berjalan di jaringan tertutup: browser klien kemungkinan tidak bisa memuat asset CDN yang masih dipakai aplikasi.
+- `DisallowedHost`: isi `ALLOWED_HOSTS` belum sesuai domain.
+- `CSRF verification failed`: cek `CSRF_TRUSTED_ORIGINS`, HTTPS, dan header `X-Forwarded-Proto` di Nginx.
+- Redirect loop HTTP/HTTPS: biasanya flag `SECURE_SSL_REDIRECT=True` aktif saat HTTPS atau proxy belum siap.
+- PDF sertifikat gagal dibuat: cek library sistem `libcairo2`, `libpango-1.0-0`, `libpangocairo-1.0-0`, `libpangoft2-1.0-0`, `libharfbuzz-subset0`, `libgdk-pixbuf-2.0-0`, dan `shared-mime-info`.
