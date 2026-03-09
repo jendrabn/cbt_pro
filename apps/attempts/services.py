@@ -397,6 +397,8 @@ def _navigation_rules(exam):
 def _anti_cheat_rules(exam):
     labels = []
     labels.append("Wajib mode fullscreen" if exam.require_fullscreen else "Fullscreen tidak wajib")
+    labels.append("Izin kamera wajib" if exam.require_camera else "Kamera tidak wajib")
+    labels.append("Izin mikrofon wajib" if exam.require_microphone else "Mikrofon tidak wajib")
     labels.append("Perpindahan tab dipantau" if exam.detect_tab_switch else "Perpindahan tab tidak dipantau")
     if exam.enable_screenshot_proctoring:
         labels.append(f"Screenshot berkala setiap {exam.screenshot_interval_seconds} detik")
@@ -893,6 +895,8 @@ def build_exam_room_payload(
             },
             "anti_cheat": {
                 "require_fullscreen": bool(exam.require_fullscreen),
+                "require_camera": bool(exam.require_camera),
+                "require_microphone": bool(exam.require_microphone),
                 "detect_tab_switch": bool(exam.detect_tab_switch),
                 "enable_screenshot_proctoring": bool(exam.enable_screenshot_proctoring),
                 "screenshot_interval_seconds": int(exam.screenshot_interval_seconds or 300),
@@ -965,6 +969,8 @@ def build_exam_room_payload(
         },
         "anti_cheat": {
             "require_fullscreen": bool(exam.require_fullscreen),
+            "require_camera": bool(exam.require_camera),
+            "require_microphone": bool(exam.require_microphone),
             "detect_tab_switch": bool(exam.detect_tab_switch),
             "enable_screenshot_proctoring": bool(exam.enable_screenshot_proctoring),
             "screenshot_interval_seconds": int(exam.screenshot_interval_seconds or 300),

@@ -1,9 +1,13 @@
 from django.test import TestCase
+from django.utils import timezone
+from datetime import timedelta
 
 from apps.accounts.models import UserProfile
 from apps.accounts.models import User
 from apps.exams.forms import ExamWizardForm
 from apps.exams.models import Class, ClassStudent
+from apps.subjects.models import Subject
+from apps.questions.models import Question
 
 
 class ExamWizardFormTests(TestCase):
@@ -69,3 +73,45 @@ class ExamWizardFormTests(TestCase):
         self.assertEqual(class_names_by_student["student_form_exam_1"], "XII IPA 1")
         self.assertEqual(class_names_by_student["student_form_exam_2"], "XII IPA 1")
         self.assertEqual(class_names_by_student["student_form_exam_3"], "XI IPS 2")
+
+    def test_form_requires_camera_when_screenshot_proctoring_enabled(self):
+        subject = Subject.objects.create(name="Biologi", code="BIO", is_active=True)
+        question = Question.objects.create(
+            created_by=self.teacher,
+            subject=subject,
+            question_type="multiple_choice",
+            question_text="Contoh soal biologi",
+            points=10,
+            is_active=True,
+        )
+        now = timezone.localtime(timezone.now())
+        form = ExamWizardForm(
+            data={
+                "title": "Ujian Biologi",
+                "subject": str(subject.id),
+                "description": "Tes",
+                "instructions": "Kerjakan",
+                "start_time": (now + timedelta(days=1)).strftime("%Y-%m-%dT%H:%M"),
+                "end_time": (now + timedelta(days=1, hours=2)).strftime("%Y-%m-%dT%H:%M"),
+                "duration_minutes": 60,
+                "passing_score": 70,
+                "allow_review": "on",
+                "global_allow_previous": "on",
+                "global_allow_next": "on",
+                "require_fullscreen": "on",
+                "require_microphone": "on",
+                "enable_screenshot_proctoring": "on",
+                "screenshot_interval_seconds": 300,
+                "max_violations_allowed": 3,
+                "selected_questions_payload": (
+                    '[{"question_id":"%s","display_order":1,"points_override":10,"override_navigation":false}]'
+                    % question.id
+                ),
+                "assignment_payload": '[]',
+                "status_action": "draft",
+            },
+            teacher=self.teacher,
+        )
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("require_camera", form.errors)

@@ -72,6 +72,8 @@ class Exam(BaseModelSoftDelete):
     
     # Anti-cheat Settings
     require_fullscreen = models.BooleanField(default=True)
+    require_camera = models.BooleanField(default=True)
+    require_microphone = models.BooleanField(default=True)
     detect_tab_switch = models.BooleanField(default=True)
     enable_screenshot_proctoring = models.BooleanField(default=False)
     screenshot_interval_seconds = models.IntegerField(default=300)

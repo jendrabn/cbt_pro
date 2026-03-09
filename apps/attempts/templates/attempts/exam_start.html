@@ -62,11 +62,28 @@
                     <h3 class="h6">Aturan Anti-Cheat</h3>
                     <ul class="small mb-0">
                         <li>Fullscreen: {% if exam.require_fullscreen %}Wajib{% else %}Tidak Wajib{% endif %}</li>
+                        <li>Kamera: {% if exam.require_camera %}Wajib{% else %}Tidak Wajib{% endif %}</li>
+                        <li>Mikrofon: {% if exam.require_microphone %}Wajib{% else %}Tidak Wajib{% endif %}</li>
                         <li>Monitoring tab: {% if exam.detect_tab_switch %}Aktif{% else %}Nonaktif{% endif %}</li>
                         <li>Screenshot berkala: {% if exam.enable_screenshot_proctoring %}Aktif{% else %}Nonaktif{% endif %}</li>
                         <li>Batas pelanggaran: {{ exam.max_violations_allowed }}</li>
                     </ul>
                 </div>
+
+                {% if exam.require_camera or exam.require_microphone or exam.require_fullscreen %}
+                <div class="alert alert-warning py-2">
+                    {% if exam.require_camera and exam.require_microphone %}
+                    Kamera dan mikrofon wajib diizinkan sebelum ujian dimulai.
+                    {% elif exam.require_camera %}
+                    Kamera wajib diizinkan sebelum ujian dimulai.
+                    {% elif exam.require_microphone %}
+                    Mikrofon wajib diizinkan sebelum ujian dimulai.
+                    {% elif exam.require_fullscreen %}
+                    Persiapan fullscreen wajib dipenuhi sebelum ujian dimulai.
+                    {% endif %}
+                    {% if exam.require_fullscreen %}Mode fullscreen juga harus aktif sebelum lanjut.{% endif %}
+                </div>
+                {% endif %}
 
                 {% if latest_attempt %}
                 <div class="alert alert-info py-2">
@@ -75,11 +92,22 @@
                 {% endif %}
 
                 {% if can_start_now %}
-                <form method="post" onsubmit="return window.confirm('Mulai ujian sekarang? Waktu akan langsung berjalan.');">
+                <form method="post" id="examStartForm" data-require-fullscreen="{% if exam.require_fullscreen %}true{% else %}false{% endif %}" data-require-camera="{% if exam.require_camera %}true{% else %}false{% endif %}" data-require-microphone="{% if exam.require_microphone %}true{% else %}false{% endif %}" data-require-preflight="{% if exam.require_camera or exam.require_microphone or exam.require_fullscreen %}true{% else %}false{% endif %}">
                     {% csrf_token %}
+                    {% if exam.require_camera or exam.require_microphone or exam.require_fullscreen %}
+                    <button type="button" class="btn btn-success" id="openPermissionPreflightBtn" title="Periksa izin perangkat sebelum mulai ujian">
+                        <i class="ri-shield-check-line me-1"></i>Cek Izin & Mulai Ujian
+                    </button>
+                    {% else %}
                     <button type="submit" class="btn btn-success" title="Mulai ujian sekarang">
                         <i class="ri-play-circle-line me-1"></i>Mulai Ujian
                     </button>
+                    {% endif %}
+                    <noscript>
+                        <button type="submit" class="btn btn-success" title="Mulai ujian sekarang">
+                            <i class="ri-play-circle-line me-1"></i>Mulai Ujian
+                        </button>
+                    </noscript>
                 </form>
                 {% else %}
                 <div class="alert alert-warning py-2 mb-0">
@@ -88,5 +116,92 @@
                 {% endif %}
             </div>
         </div>
+{% endblock %}
+
+{% block after_main %}
+    {% if can_start_now and exam.require_camera or can_start_now and exam.require_microphone or can_start_now and exam.require_fullscreen %}
+    <div class="modal fade" id="permissionPreflightModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="h5 mb-0">Pemeriksaan Perangkat Sebelum Ujian</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted mb-3">
+                        Sebelum ujian dimulai,
+                        {% if exam.require_camera and exam.require_microphone %}
+                        browser harus mengizinkan kamera dan mikrofon.
+                        {% elif exam.require_camera %}
+                        browser harus mengizinkan kamera.
+                        {% elif exam.require_microphone %}
+                        browser harus mengizinkan mikrofon.
+                        {% else %}
+                        persiapan perangkat harus memenuhi aturan ujian.
+                        {% endif %}
+                        {% if exam.require_fullscreen %} Fullscreen juga wajib aktif.{% endif %}
+                    </p>
+                    <div class="list-group small mb-3">
+                        {% if exam.require_camera %}
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>Kamera</span>
+                            <span class="badge text-bg-secondary" id="cameraPermissionStatus">Belum dicek</span>
+                        </div>
+                        {% endif %}
+                        {% if exam.require_microphone %}
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>Mikrofon</span>
+                            <span class="badge text-bg-secondary" id="microphonePermissionStatus">Belum dicek</span>
+                        </div>
+                        {% endif %}
+                        {% if exam.require_fullscreen %}
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>Fullscreen</span>
+                            <span class="badge text-bg-secondary" id="fullscreenPermissionStatus">Belum aktif</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="alert alert-warning py-2 small d-none" id="permissionFeedback"></div>
+                    <div class="small text-muted">
+                        <p class="fw-semibold mb-2">Jika izin sempat ditolak:</p>
+                        <ul class="mb-0 ps-3">
+                            <li>Chrome: klik ikon kunci, kamera, atau mikrofon di address bar, buka izin situs, ubah izin yang dibutuhkan ke Izinkan, lalu muat ulang halaman.</li>
+                            <li>Firefox: klik ikon izin di address bar. Jika pernah diblokir, buka ikon kunci lalu izinkan perangkat yang dibutuhkan, kemudian muat ulang halaman.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="modal-footer flex-wrap">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Nanti Saja</button>
+                    {% if exam.require_camera or exam.require_microphone %}
+                    <button type="button" class="btn btn-outline-primary" id="checkMediaPermissionBtn">
+                        <i class="ri-camera-line me-1"></i>
+                        {% if exam.require_camera and exam.require_microphone %}
+                        Izinkan Kamera & Mikrofon
+                        {% elif exam.require_camera %}
+                        Izinkan Kamera
+                        {% else %}
+                        Izinkan Mikrofon
+                        {% endif %}
+                    </button>
+                    {% endif %}
+                    {% if exam.require_fullscreen %}
+                    <button type="button" class="btn btn-outline-primary" id="requestFullscreenPermissionBtn">
+                        <i class="ri-fullscreen-line me-1"></i>Aktifkan Fullscreen
+                    </button>
+                    {% endif %}
+                    <button type="button" class="btn btn-success" id="submitExamAfterChecksBtn" disabled>
+                        <i class="ri-play-circle-line me-1"></i>Mulai Ujian Sekarang
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+{% endblock %}
+
+{% block extra_js %}
+    {% if can_start_now %}
+    <script src="{% static 'attempts/js/exam_start.js' %}"></script>
+    {% endif %}
 {% endblock %}
 

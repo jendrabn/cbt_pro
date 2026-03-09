@@ -179,6 +179,36 @@ class StudentExamListViewTests(TestCase):
             ExamAttempt.objects.filter(exam=self.ongoing_exam, student=self.student, status="in_progress").exists()
         )
 
+    def test_exam_start_page_includes_permission_preflight(self):
+        self.client.force_login(self.student)
+        response = self.client.get(reverse("exam_start", kwargs={"exam_id": self.ongoing_exam.id}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Kamera dan mikrofon wajib diizinkan sebelum ujian dimulai")
+        self.assertContains(response, "permissionPreflightModal")
+
+    def test_exam_start_page_skips_permission_preflight_when_exam_does_not_require_it(self):
+        self.ongoing_exam.require_fullscreen = False
+        self.ongoing_exam.require_camera = False
+        self.ongoing_exam.require_microphone = False
+        self.ongoing_exam.enable_screenshot_proctoring = False
+        self.ongoing_exam.save(
+            update_fields=[
+                "require_fullscreen",
+                "require_camera",
+                "require_microphone",
+                "enable_screenshot_proctoring",
+                "updated_at",
+            ]
+        )
+        self.client.force_login(self.student)
+
+        response = self.client.get(reverse("exam_start", kwargs={"exam_id": self.ongoing_exam.id}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "permissionPreflightModal")
+        self.assertContains(response, "Mulai Ujian")
+
     def test_student_cannot_start_upcoming_exam(self):
         self.client.force_login(self.student)
         response = self.client.post(reverse("exam_start", kwargs={"exam_id": self.upcoming_exam.id}))

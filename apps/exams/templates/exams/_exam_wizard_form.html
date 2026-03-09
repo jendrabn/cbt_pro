@@ -388,6 +388,20 @@
                 </div>
                 <div class="col-md-6">
                     <div class="form-check form-switch">
+                        {{ form.require_camera }}
+                        <label class="form-check-label" for="{{ form.require_camera.id_for_label }}">{{ form.require_camera.label }}</label>
+                    </div>
+                    {% if form.require_camera.errors %}<div class="text-danger small mt-1">{{ form.require_camera.errors|join:", " }}</div>{% endif %}
+                </div>
+                <div class="col-md-6">
+                    <div class="form-check form-switch">
+                        {{ form.require_microphone }}
+                        <label class="form-check-label" for="{{ form.require_microphone.id_for_label }}">{{ form.require_microphone.label }}</label>
+                    </div>
+                    {% if form.require_microphone.errors %}<div class="text-danger small mt-1">{{ form.require_microphone.errors|join:", " }}</div>{% endif %}
+                </div>
+                <div class="col-md-6">
+                    <div class="form-check form-switch">
                         {{ form.detect_tab_switch }}
                         <label class="form-check-label" for="{{ form.detect_tab_switch.id_for_label }}">{{ form.detect_tab_switch.label }}</label>
                     </div>
@@ -397,6 +411,7 @@
                         {{ form.enable_screenshot_proctoring }}
                         <label class="form-check-label" for="{{ form.enable_screenshot_proctoring.id_for_label }}">{{ form.enable_screenshot_proctoring.label }}</label>
                     </div>
+                    {% if form.enable_screenshot_proctoring.errors %}<div class="text-danger small mt-1">{{ form.enable_screenshot_proctoring.errors|join:", " }}</div>{% endif %}
                 </div>
             </div>
             <div class="row g-3">

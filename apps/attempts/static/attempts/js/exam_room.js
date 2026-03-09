@@ -34,6 +34,8 @@
             this.proctoringStream = null;
             this.proctoringVideo = null;
             this.proctoringWarningShown = false;
+            this.requiredMediaReady = false;
+            this.mediaViolationLogged = false;
             this.guard = null;
             this.saveIndicator = (windowObj.ExamRoomAutoSave && windowObj.ExamRoomAutoSave.buildSaveIndicator())
                 || {
@@ -53,7 +55,7 @@
             this.bindEvents();
             this.renderPayload(this.payload);
             this.setupAntiCheat();
-            this.setupProctoring();
+            this.setupRequiredMedia().then(() => this.setupProctoring());
             windowObj.addEventListener("beforeunload", () => this.destroy());
         }
 
@@ -65,18 +67,7 @@
                 windowObj.clearInterval(this.proctoringIntervalId);
                 this.proctoringIntervalId = null;
             }
-            if (this.proctoringStream && typeof this.proctoringStream.getTracks === "function") {
-                this.proctoringStream.getTracks().forEach((track) => {
-                    if (track && typeof track.stop === "function") {
-                        track.stop();
-                    }
-                });
-            }
-            this.proctoringStream = null;
-            if (this.proctoringVideo) {
-                this.proctoringVideo.srcObject = null;
-                this.proctoringVideo = null;
-            }
+            this.stopProctoringStream();
             if (this.guard && typeof this.guard.destroy === "function") {
                 this.guard.destroy();
             }
@@ -109,9 +100,17 @@
                 summaryUnanswered: byId("summaryUnanswered"),
                 summaryMarked: byId("summaryMarked"),
                 antiCheatFullscreenRule: byId("antiCheatFullscreenRule"),
+                antiCheatMediaRule: byId("antiCheatMediaRule"),
                 antiCheatTabRule: byId("antiCheatTabRule"),
                 antiCheatScreenshotRule: byId("antiCheatScreenshotRule"),
                 antiCheatLimitRule: byId("antiCheatLimitRule"),
+                permissionOverlay: byId("permissionOverlay"),
+                permissionOverlayCameraStatus: byId("permissionOverlayCameraStatus"),
+                permissionOverlayMicrophoneStatus: byId("permissionOverlayMicrophoneStatus"),
+                permissionOverlayFullscreenStatus: byId("permissionOverlayFullscreenStatus"),
+                permissionOverlayMessage: byId("permissionOverlayMessage"),
+                requestMediaAccessBtn: byId("requestMediaAccessBtn"),
+                requestPermissionFullscreenBtn: byId("requestPermissionFullscreenBtn"),
                 fullscreenOverlay: byId("fullscreenOverlay"),
                 returnFullscreenBtn: byId("returnFullscreenBtn"),
                 openSubmitModalBtn: byId("openSubmitModalBtn"),
@@ -167,6 +166,14 @@
             if (this.elements.returnFullscreenBtn) {
                 this.elements.returnFullscreenBtn.addEventListener("click", () => this.requestFullscreenMode());
             }
+            if (this.elements.requestMediaAccessBtn) {
+                this.elements.requestMediaAccessBtn.addEventListener("click", () => {
+                    this.requestRequiredMediaPermissions();
+                });
+            }
+            if (this.elements.requestPermissionFullscreenBtn) {
+                this.elements.requestPermissionFullscreenBtn.addEventListener("click", () => this.requestFullscreenMode());
+            }
             if (this.elements.closeViolationModalBtn) {
                 this.elements.closeViolationModalBtn.addEventListener("click", () => {
                     if (this.payload && this.payload.anti_cheat && this.payload.anti_cheat.require_fullscreen) {
@@ -188,6 +195,10 @@
                 return 0;
             }
             return parseInt(this.payload.total_questions || 0, 10);
+        }
+
+        getAntiCheatConfig() {
+            return this.payload && this.payload.anti_cheat ? this.payload.anti_cheat : {};
         }
 
         renderPayload(payload) {
@@ -501,7 +512,18 @@
         }
 
         renderAntiCheatRules() {
-            const antiCheat = this.payload && this.payload.anti_cheat ? this.payload.anti_cheat : {};
+            const antiCheat = this.getAntiCheatConfig();
+            if (this.elements.antiCheatMediaRule) {
+                if (antiCheat.require_camera && antiCheat.require_microphone) {
+                    this.elements.antiCheatMediaRule.textContent = "Perangkat pengawasan: Kamera dan mikrofon wajib";
+                } else if (antiCheat.require_camera) {
+                    this.elements.antiCheatMediaRule.textContent = "Perangkat pengawasan: Kamera wajib";
+                } else if (antiCheat.require_microphone) {
+                    this.elements.antiCheatMediaRule.textContent = "Perangkat pengawasan: Mikrofon wajib";
+                } else {
+                    this.elements.antiCheatMediaRule.textContent = "Perangkat pengawasan: Tidak wajib";
+                }
+            }
             if (this.elements.antiCheatFullscreenRule) {
                 this.elements.antiCheatFullscreenRule.textContent = `Mode fullscreen: ${antiCheat.require_fullscreen ? "Wajib" : "Tidak wajib"}`;
             }
@@ -783,6 +805,7 @@
 
         onFullscreenStateChange(active) {
             if (!this.elements.fullscreenOverlay) {
+                this.renderPermissionOverlayState();
                 return;
             }
             if (active) {
@@ -790,6 +813,7 @@
             } else {
                 this.elements.fullscreenOverlay.classList.remove("d-none");
             }
+            this.renderPermissionOverlayState();
         }
 
         requestFullscreenMode() {
@@ -801,33 +825,34 @@
             });
         }
 
-        async setupProctoring() {
-            const anti = this.payload && this.payload.anti_cheat ? this.payload.anti_cheat : {};
-            if (!anti.enable_screenshot_proctoring || !this.config.proctoringUrl) {
-                return;
+        stopProctoringStream() {
+            if (this.proctoringStream && typeof this.proctoringStream.getTracks === "function") {
+                this.proctoringStream.getTracks().forEach((track) => {
+                    if (track && typeof track.stop === "function") {
+                        track.stop();
+                    }
+                });
             }
-            await this.prepareProctoringSource();
-            const intervalSeconds = Math.max(parseInt(anti.screenshot_interval_seconds || 300, 10), 30);
-            this.captureAndSendProctoring("startup");
-            this.proctoringIntervalId = windowObj.setInterval(() => {
-                this.captureAndSendProctoring("interval");
-            }, intervalSeconds * 1000);
+            this.proctoringStream = null;
+            if (this.proctoringVideo) {
+                this.proctoringVideo.srcObject = null;
+                this.proctoringVideo = null;
+            }
         }
 
-        async prepareProctoringSource() {
-            if (!windowObj.navigator || !windowObj.navigator.mediaDevices || typeof windowObj.navigator.mediaDevices.getUserMedia !== "function") {
+        setProctoringStream(stream) {
+            this.stopProctoringStream();
+            this.proctoringStream = stream;
+            if (!stream) {
+                this.requiredMediaReady = false;
+                this.renderPermissionOverlayState();
                 return;
             }
-            try {
-                const stream = await windowObj.navigator.mediaDevices.getUserMedia({
-                    video: {
-                        facingMode: "user",
-                        width: { ideal: 640 },
-                        height: { ideal: 360 },
-                    },
-                    audio: false,
-                });
-                this.proctoringStream = stream;
+
+            this.requiredMediaReady = true;
+            this.mediaViolationLogged = false;
+            this.renderPermissionOverlayState();
+            if (typeof stream.getVideoTracks === "function" && stream.getVideoTracks().length > 0) {
                 const video = documentObj.createElement("video");
                 video.autoplay = true;
                 video.muted = true;
@@ -835,14 +860,168 @@
                 video.srcObject = stream;
                 this.proctoringVideo = video;
                 if (typeof video.play === "function") {
-                    await video.play().catch(() => {});
-                }
-            } catch (error) {
-                if (!this.proctoringWarningShown) {
-                    this.proctoringWarningShown = true;
-                    this.showAlert("Akses kamera tidak tersedia. Sistem memakai snapshot fallback.", "warning");
+                    video.play().catch(() => {});
                 }
             }
+
+            stream.getTracks().forEach((track) => {
+                if (track && typeof track.addEventListener === "function") {
+                    track.addEventListener("ended", () => {
+                        const anti = this.getAntiCheatConfig();
+                        let message = "Akses perangkat pengawasan terputus di tengah ujian.";
+                        if (anti.require_camera && anti.require_microphone) {
+                            message = "Akses kamera atau mikrofon terputus di tengah ujian.";
+                        } else if (anti.require_camera) {
+                            message = "Akses kamera terputus di tengah ujian.";
+                        } else if (anti.require_microphone) {
+                            message = "Akses mikrofon terputus di tengah ujian.";
+                        }
+                        this.handleRequiredMediaLoss(message);
+                    });
+                }
+            });
+        }
+
+        handleRequiredMediaLoss(message) {
+            if (this.proctoringIntervalId) {
+                windowObj.clearInterval(this.proctoringIntervalId);
+                this.proctoringIntervalId = null;
+            }
+            this.requiredMediaReady = false;
+            this.showPermissionOverlay(`${message} Izinkan kembali untuk melanjutkan ujian.`);
+            if (!this.mediaViolationLogged) {
+                this.mediaViolationLogged = true;
+                this.reportViolation(
+                    "suspicious_activity",
+                    message || "Akses perangkat pengawasan dicabut atau terputus saat ujian berlangsung."
+                );
+            }
+        }
+
+        setPermissionOverlayMessage(message, tone = "warning") {
+            if (!this.elements.permissionOverlayMessage) {
+                return;
+            }
+            this.elements.permissionOverlayMessage.className = `alert alert-${tone} py-2 small`;
+            this.elements.permissionOverlayMessage.textContent = message;
+            this.elements.permissionOverlayMessage.classList.remove("d-none");
+        }
+
+        clearPermissionOverlayMessage() {
+            if (!this.elements.permissionOverlayMessage) {
+                return;
+            }
+            this.elements.permissionOverlayMessage.textContent = "";
+            this.elements.permissionOverlayMessage.classList.add("d-none");
+        }
+
+        renderPermissionOverlayState() {
+            const anti = this.getAntiCheatConfig();
+            const fullscreenRequired = Boolean(anti.require_fullscreen);
+            if (this.elements.permissionOverlayCameraStatus) {
+                this.elements.permissionOverlayCameraStatus.textContent = this.requiredMediaReady ? "Diizinkan" : "Belum diizinkan";
+            }
+            if (this.elements.permissionOverlayMicrophoneStatus) {
+                this.elements.permissionOverlayMicrophoneStatus.textContent = this.requiredMediaReady ? "Diizinkan" : "Belum diizinkan";
+            }
+            if (this.elements.permissionOverlayFullscreenStatus) {
+                this.elements.permissionOverlayFullscreenStatus.textContent = fullscreenRequired
+                    ? (windowObj.ExamRoomAntiCheat && windowObj.ExamRoomAntiCheat.isFullscreen() ? "Aktif" : "Belum aktif")
+                    : "Tidak wajib";
+            }
+        }
+
+        showPermissionOverlay(message) {
+            this.renderPermissionOverlayState();
+            if (message) {
+                this.setPermissionOverlayMessage(message, "warning");
+            }
+            if (this.elements.permissionOverlay) {
+                this.elements.permissionOverlay.classList.remove("d-none");
+            }
+        }
+
+        hidePermissionOverlay() {
+            this.clearPermissionOverlayMessage();
+            if (this.elements.permissionOverlay) {
+                this.elements.permissionOverlay.classList.add("d-none");
+            }
+        }
+
+        async setupRequiredMedia() {
+            const anti = this.getAntiCheatConfig();
+            if (!anti.require_camera && !anti.require_microphone) {
+                this.requiredMediaReady = true;
+                this.hidePermissionOverlay();
+                return true;
+            }
+            const granted = await this.requestRequiredMediaPermissions();
+            if (!granted) {
+                if (anti.require_camera && anti.require_microphone) {
+                    this.showPermissionOverlay("Kamera dan mikrofon wajib diizinkan sebelum ujian dapat dilanjutkan.");
+                } else if (anti.require_camera) {
+                    this.showPermissionOverlay("Kamera wajib diizinkan sebelum ujian dapat dilanjutkan.");
+                } else {
+                    this.showPermissionOverlay("Mikrofon wajib diizinkan sebelum ujian dapat dilanjutkan.");
+                }
+                return false;
+            }
+            this.hidePermissionOverlay();
+            return true;
+        }
+
+        async requestRequiredMediaPermissions() {
+            const anti = this.getAntiCheatConfig();
+            const requireCamera = Boolean(anti.require_camera);
+            const requireMicrophone = Boolean(anti.require_microphone);
+            if (!requireCamera && !requireMicrophone) {
+                this.requiredMediaReady = true;
+                return true;
+            }
+            if (!windowObj.navigator || !windowObj.navigator.mediaDevices || typeof windowObj.navigator.mediaDevices.getUserMedia !== "function") {
+                this.requiredMediaReady = false;
+                this.showPermissionOverlay("Browser ini tidak mendukung akses perangkat yang diwajibkan ujian.");
+                return false;
+            }
+            try {
+                const stream = await windowObj.navigator.mediaDevices.getUserMedia({
+                    video: requireCamera ? {
+                        facingMode: "user",
+                        width: { ideal: 640 },
+                        height: { ideal: 360 },
+                    } : false,
+                    audio: requireMicrophone,
+                });
+                this.setProctoringStream(stream);
+                this.hidePermissionOverlay();
+                this.setupProctoring();
+                return true;
+            } catch (error) {
+                this.requiredMediaReady = false;
+                if (requireCamera && requireMicrophone) {
+                    this.showPermissionOverlay("Izin kamera dan mikrofon ditolak. Silakan izinkan dulu untuk melanjutkan ujian.");
+                } else if (requireCamera) {
+                    this.showPermissionOverlay("Izin kamera ditolak. Silakan izinkan dulu untuk melanjutkan ujian.");
+                } else {
+                    this.showPermissionOverlay("Izin mikrofon ditolak. Silakan izinkan dulu untuk melanjutkan ujian.");
+                }
+                return false;
+            }
+        }
+
+        async setupProctoring() {
+            const anti = this.payload && this.payload.anti_cheat ? this.payload.anti_cheat : {};
+            if (!anti.enable_screenshot_proctoring || !this.config.proctoringUrl || !this.requiredMediaReady) {
+                return;
+            }
+            if (this.proctoringIntervalId) {
+                return;
+            }
+            const intervalSeconds = Math.max(parseInt(anti.screenshot_interval_seconds || 300, 10), 30);
+            this.captureAndSendProctoring("startup");
+            this.proctoringIntervalId = windowObj.setInterval(() => {
+                this.captureAndSendProctoring("interval");
+            }, intervalSeconds * 1000);
         }
 
         buildProctoringFrame(label) {

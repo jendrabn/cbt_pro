@@ -129,6 +129,7 @@
                     <div class="card-body">
                         <h3 class="h6 mb-2">Pengawasan Ujian</h3>
                         <ul class="small text-muted mb-0 ps-3">
+                            <li id="antiCheatMediaRule">Perangkat pengawasan: -</li>
                             <li id="antiCheatFullscreenRule">Mode fullscreen: -</li>
                             <li id="antiCheatTabRule">Deteksi perpindahan tab: -</li>
                             <li id="antiCheatScreenshotRule">Screenshot berkala: -</li>
@@ -141,6 +142,65 @@
 {% endblock %}
 
 {% block after_main %}
+{% if exam.require_camera or exam.require_microphone or exam.require_fullscreen %}
+<div id="permissionOverlay" class="fullscreen-overlay d-none">
+        <div class="overlay-card">
+            <h2 class="h6 mb-2">Persyaratan Perangkat Ujian</h2>
+            <p class="small text-muted mb-3">
+                Ujian tidak bisa dilanjutkan sebelum
+                {% if exam.require_camera and exam.require_microphone %}
+                browser mengizinkan kamera dan mikrofon.
+                {% elif exam.require_camera %}
+                browser mengizinkan kamera.
+                {% elif exam.require_microphone %}
+                browser mengizinkan mikrofon.
+                {% else %}
+                persyaratan perangkat ujian terpenuhi.
+                {% endif %}
+                {% if exam.require_fullscreen %} Fullscreen juga wajib aktif.{% endif %}
+            </p>
+            <ul class="small ps-3 mb-3">
+                {% if exam.require_camera %}
+                <li>Kamera: <strong id="permissionOverlayCameraStatus">Belum dicek</strong></li>
+                {% endif %}
+                {% if exam.require_microphone %}
+                <li>Mikrofon: <strong id="permissionOverlayMicrophoneStatus">Belum dicek</strong></li>
+                {% endif %}
+                {% if exam.require_fullscreen %}
+                <li>Fullscreen: <strong id="permissionOverlayFullscreenStatus">Belum aktif</strong></li>
+                {% endif %}
+            </ul>
+            <div id="permissionOverlayMessage" class="alert alert-warning py-2 small d-none"></div>
+            <div class="d-flex flex-column gap-2">
+                {% if exam.require_camera or exam.require_microphone %}
+                <button type="button" class="btn btn-primary btn-sm" id="requestMediaAccessBtn" title="Izinkan kamera dan mikrofon">
+                    <i class="ri-camera-line me-1"></i>
+                    {% if exam.require_camera and exam.require_microphone %}
+                    Izinkan Kamera & Mikrofon
+                    {% elif exam.require_camera %}
+                    Izinkan Kamera
+                    {% else %}
+                    Izinkan Mikrofon
+                    {% endif %}
+                </button>
+                {% endif %}
+                {% if exam.require_fullscreen %}
+                <button type="button" class="btn btn-outline-primary btn-sm" id="requestPermissionFullscreenBtn" title="Aktifkan fullscreen">
+                    <i class="ri-fullscreen-line me-1"></i>Aktifkan Fullscreen
+                </button>
+                {% endif %}
+            </div>
+            <div class="small text-muted mt-3">
+                <p class="fw-semibold mb-2">Jika izin sempat ditolak:</p>
+                <ul class="mb-0 ps-3">
+                    <li>Chrome: klik ikon kunci, kamera, atau mikrofon di address bar, izinkan perangkat yang dibutuhkan, lalu muat ulang bila perlu.</li>
+                    <li>Firefox: klik ikon izin atau ikon kunci di address bar, izinkan perangkat yang dibutuhkan, lalu muat ulang bila perlu.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+{% endif %}
+
 <div id="fullscreenOverlay" class="fullscreen-overlay d-none">
         <div class="overlay-card">
             <h2 class="h6 mb-2">Mode Layar Penuh Wajib Aktif</h2>

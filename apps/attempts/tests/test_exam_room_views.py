@@ -123,6 +123,8 @@ class StudentExamRoomViewTests(TestCase):
         response = self.client.get(reverse("exam_room", kwargs={"exam_id": self.exam.id}))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Ruang Ujian Siswa")
+        self.assertContains(response, "Persyaratan Perangkat Ujian")
+        self.assertContains(response, "antiCheatMediaRule")
 
     def test_non_student_cannot_open_exam_room(self):
         self.client.force_login(self.other_teacher)
@@ -351,6 +353,26 @@ class StudentExamRoomViewTests(TestCase):
         self.assertTrue(ExamResult.objects.filter(attempt=self.attempt).exists())
         self.assertTrue(response.json().get("auto_submitted"))
         self.assertTrue(response.json().get("redirect_url"))
+
+    def test_violation_api_accepts_suspicious_activity_for_media_loss(self):
+        self.client.force_login(self.student)
+
+        response = self.client.post(
+            reverse("attempt_violation_api", kwargs={"attempt_id": self.attempt.id}),
+            data=json.dumps(
+                {
+                    "type": "suspicious_activity",
+                    "description": "Akses kamera atau mikrofon dicabut atau terputus saat ujian berlangsung.",
+                }
+            ),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertTrue(payload.get("success"))
+        self.assertEqual(payload.get("violations_count"), 1)
+        self.assertFalse(payload.get("auto_submitted"))
 
     @patch("apps.attempts.views.record_exam_violation")
     def test_violation_api_handles_lock_timeout_gracefully(self, record_mock):

@@ -119,6 +119,8 @@ class ExamWizardForm(forms.ModelForm):
             "global_allow_next",
             "global_force_sequential",
             "require_fullscreen",
+            "require_camera",
+            "require_microphone",
             "detect_tab_switch",
             "enable_screenshot_proctoring",
             "screenshot_interval_seconds",
@@ -149,6 +151,8 @@ class ExamWizardForm(forms.ModelForm):
             "global_allow_next": "Izinkan navigasi ke soal berikutnya (global)",
             "global_force_sequential": "Paksa pengerjaan berurutan (global)",
             "require_fullscreen": "Wajib fullscreen",
+            "require_camera": "Wajib izinkan kamera",
+            "require_microphone": "Wajib izinkan mikrofon",
             "detect_tab_switch": "Deteksi perpindahan tab",
             "enable_screenshot_proctoring": "Aktifkan screenshot proctoring",
             "screenshot_interval_seconds": "Interval screenshot (detik)",
@@ -187,6 +191,8 @@ class ExamWizardForm(forms.ModelForm):
             "global_allow_next",
             "global_force_sequential",
             "require_fullscreen",
+            "require_camera",
+            "require_microphone",
             "detect_tab_switch",
             "enable_screenshot_proctoring",
         ]
@@ -346,6 +352,8 @@ class ExamWizardForm(forms.ModelForm):
         duration_minutes = cleaned_data.get("duration_minutes")
         passing_score = cleaned_data.get("passing_score")
         enable_screenshot = cleaned_data.get("enable_screenshot_proctoring")
+        require_camera = cleaned_data.get("require_camera")
+        require_microphone = cleaned_data.get("require_microphone")
         screenshot_interval = cleaned_data.get("screenshot_interval_seconds")
         max_violations = cleaned_data.get("max_violations_allowed")
         status_action = (cleaned_data.get("status_action") or "draft").strip().lower()
@@ -385,9 +393,18 @@ class ExamWizardForm(forms.ModelForm):
             self.add_error("passing_score", "Nilai kelulusan harus berada pada rentang 0-100.")
 
         if enable_screenshot:
+            if not require_camera:
+                self.add_error(
+                    "require_camera",
+                    "Kamera wajib diizinkan jika screenshot proctoring diaktifkan.",
+                )
             if screenshot_interval is None or screenshot_interval <= 0:
                 self.add_error("screenshot_interval_seconds", "Interval screenshot harus lebih dari 0.")
         else:
+            cleaned_data["screenshot_interval_seconds"] = 300
+
+        if not require_camera and not require_microphone:
+            cleaned_data["enable_screenshot_proctoring"] = False
             cleaned_data["screenshot_interval_seconds"] = 300
 
         if max_violations is None or max_violations <= 0:

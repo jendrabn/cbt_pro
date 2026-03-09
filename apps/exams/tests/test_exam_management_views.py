@@ -137,6 +137,8 @@ class ExamManagementViewTests(TestCase):
                 "global_allow_next": "on",
                 "global_force_sequential": "on",
                 "require_fullscreen": "on",
+                "require_camera": "on",
+                "require_microphone": "on",
                 "detect_tab_switch": "on",
                 "enable_screenshot_proctoring": "on",
                 "screenshot_interval_seconds": 300,
@@ -153,6 +155,8 @@ class ExamManagementViewTests(TestCase):
         self.assertEqual(exam.exam_questions.count(), 1)
         self.assertEqual(exam.assignments.count(), 1)
         self.assertEqual(float(exam.total_points), 12.0)
+        self.assertTrue(exam.require_camera)
+        self.assertTrue(exam.require_microphone)
 
     def test_teacher_can_publish_and_unpublish_exam(self):
         exam = self._create_exam(status="draft")
