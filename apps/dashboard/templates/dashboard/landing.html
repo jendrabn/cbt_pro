@@ -1,34 +1,34 @@
-{% load static %}
+﻿{% load static %}
 <!DOCTYPE html>
 <html lang="id" prefix="og: https://ogp.me/ns#">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<title>{{ branding.institution_name|default:"CBT Pro" }} — Platform Ujian CBT Online untuk Sekolah &amp; Lembaga Pendidikan</title>
-<meta name="description" content="{{ branding.institution_name|default:"CBT Pro" }} adalah platform ujian digital yang cepat, aman, dan rapi. Harga Rp499.000 sudah termasuk pemasangan dan konfigurasi awal.">
+<title>CBT Pro - Platform Ujian CBT Online untuk Sekolah &amp; Lembaga Pendidikan</title>
+<meta name="description" content="CBT Pro adalah platform ujian berbasis komputer untuk sekolah dan lembaga pendidikan. Harga Rp499.000 sudah termasuk pemasangan.">
 <meta name="keywords" content="CBT online, platform ujian sekolah, computer based test, ujian digital, software CBT, aplikasi ujian online, CBT Pro">
-<meta name="author" content="{{ branding.institution_name|default:"CBT Pro" }}">
+<meta name="author" content="CBT Pro">
 <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
 <meta name="theme-color" content="#1B3A6B">
-<link rel="canonical" href="{{ request.build_absolute_uri }}">
+<link rel="canonical" href="https://cbtpro.web.id/">
 <meta property="og:type" content="website">
-<meta property="og:url" content="{{ request.build_absolute_uri }}">
-<meta property="og:title" content="{{ branding.institution_name|default:"CBT Pro" }} — Platform Ujian CBT Online untuk Sekolah">
+<meta property="og:url" content="https://cbtpro.web.id/">
+<meta property="og:title" content="CBT Pro - Platform Ujian CBT Online untuk Sekolah">
 <meta property="og:description" content="Ujian digital yang cepat, aman, dan rapi. Dari pembuatan soal hingga rekap nilai dalam satu platform. Mulai Rp499.000 sudah termasuk pemasangan.">
-<meta property="og:image" content="https://cbtpro.id/og-image.jpg">
+<meta property="og:image" content="https://cbtpro.web.id/og-image.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="id_ID">
-<meta property="og:site_name" content="{{ branding.institution_name|default:"CBT Pro" }}">
+<meta property="og:site_name" content="CBT Pro">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="{{ branding.institution_name|default:"CBT Pro" }} — Platform Ujian CBT Online untuk Sekolah">
+<meta name="twitter:title" content="CBT Pro - Platform Ujian CBT Online untuk Sekolah">
 <meta name="twitter:description" content="Ujian digital yang cepat, aman, dan rapi. Dari pembuatan soal hingga rekap nilai dalam satu platform.">
-<meta name="twitter:image" content="https://cbtpro.id/og-image.jpg">
+<meta name="twitter:image" content="https://cbtpro.web.id/og-image.jpg">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@graph":[
-  {"@type":"SoftwareApplication","name":"{{ branding.institution_name|default:"CBT Pro" }}","applicationCategory":"EducationalApplication","operatingSystem":"Web","url":"{{ request.build_absolute_uri }}","offers":{"@type":"Offer","price":"499000","priceCurrency":"IDR","availability":"https://schema.org/InStock"}},
-  {"@type":"Organization","name":"{{ branding.institution_name|default:"CBT Pro" }}","url":"{{ request.build_absolute_uri }}"},
+  {"@type":"SoftwareApplication","name":"CBT Pro","applicationCategory":"EducationalApplication","operatingSystem":"Web","url":"https://cbtpro.web.id","offers":{"@type":"Offer","price":"499000","priceCurrency":"IDR","availability":"https://schema.org/InStock"}},
+  {"@type":"Organization","name":"CBT Pro","url":"https://cbtpro.web.id"},
   {"@type":"FAQPage","mainEntity":[
     {"@type":"Question","name":"Apa yang termasuk dalam harga Rp499.000?","acceptedAnswer":{"@type":"Answer","text":"Lisensi software dan jasa pemasangan. Biaya VPS dan domain ditanggung sekolah."}},
     {"@type":"Question","name":"Apakah CBT Pro bisa diakses dari HP?","acceptedAnswer":{"@type":"Answer","text":"Ya, sepenuhnya responsif — smartphone, tablet, maupun laptop, tanpa instalasi."}}
@@ -38,21 +38,20 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link href="{% static 'css/main.css' %}" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="{% static 'css/marketing.css' %}" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@4.0.0/fonts/remixicon.css" rel="stylesheet">
 
 </head>
 
 <body class="bg-white">
 
-<!-- ════════ NAVBAR ════════ -->
+<!-- â•â•â•â•â•â•â•â• NAVBAR â•â•â•â•â•â•â•â• -->
 <header>
   <nav id="navbar" aria-label="Menu utama">
     <div class="container py-3">
       <div class="d-flex align-items-center justify-content-between">
-        <a href="/" class="brand" aria-label="{{ branding.institution_name|default:"CBT Pro" }}">
-          {{ branding.institution_name|default:"CBT Pro" }}
-        </a>
+        <a href="/" class="brand brand-logo" aria-label="CBT Pro"><img src="{% static 'images/logo-dark.png' %}" alt="CBT Pro Logo"></a>
         <div class="d-none d-lg-flex align-items-center gap-1">
           <a href="#fitur"     class="nav-lnk">Fitur</a>
           <a href="#tentang"   class="nav-lnk">Tentang</a>
@@ -71,7 +70,7 @@
 
 <main>
 
-<!-- ════════ HERO ════════ -->
+<!-- â•â•â•â•â•â•â•â• HERO â•â•â•â•â•â•â•â• -->
 <section class="hero py-5 py-lg-0" aria-labelledby="hero-h">
   <div class="container py-lg-5">
     <div class="row align-items-center g-4 g-xl-5 py-lg-4">
@@ -82,7 +81,7 @@
           <span class="accent">Hasil Lebih Akurat</span>
         </h1>
         <p class="mb-4 lh-lg" style="font-size:1rem;color:var(--c-ink-2);max-width:460px">
-          Dari pembuatan soal hingga rekap nilai — semua tersedia dalam satu platform. {{ branding.institution_name|default:"CBT Pro" }} menjaga guru tetap fokus mengajar, bukan mengurus administrasi ujian.
+          Dari pembuatan soal hingga rekap nilai — semua tersedia dalam satu platform. Guru bisa fokus mengajar, bukan mengurus administrasi ujian.
         </p>
         <div class="d-flex flex-wrap gap-2">
           <a href="{{ whatsapp_url }}?text=Halo%2C%20saya%20tertarik%20dengan%20CBT%20Pro.%20Boleh%20minta%20info%3F"
@@ -154,7 +153,7 @@
   </div>
 </section>
 
-<!-- ════════ FITUR ════════ -->
+<!-- â•â•â•â•â•â•â•â• FITUR â•â•â•â•â•â•â•â• -->
 <section id="fitur" class="py-5" style="background:var(--c-bg)" aria-labelledby="fitur-h">
   <div class="container py-4">
 
@@ -242,7 +241,7 @@
   </div>
 </section>
 
-<!-- ════════ STATS ════════ -->
+<!-- â•â•â•â•â•â•â•â• STATS â•â•â•â•â•â•â•â• -->
 <section class="py-5" style="background:var(--c-ink)" aria-labelledby="stats-h">
   <div class="container py-4">
     <div class="text-center mb-5 sr">
@@ -278,7 +277,7 @@
   </div>
 </section>
 
-<!-- ════════ TENTANG ════════ -->
+<!-- â•â•â•â•â•â•â•â• TENTANG â•â•â•â•â•â•â•â• -->
 <section id="tentang" class="bg-white py-5" aria-labelledby="tentang-h">
   <div class="container py-4">
 
@@ -332,7 +331,7 @@
   </div>
 </section>
 
-<!-- ════════ TEKNOLOGI ════════ -->
+<!-- â•â•â•â•â•â•â•â• TEKNOLOGI â•â•â•â•â•â•â•â• -->
 <section id="teknologi" class="py-5 border-top bg-white" aria-labelledby="tech-h">
   <div class="container py-4">
 
@@ -403,7 +402,7 @@
   </div>
 </section>
 
-<!-- ════════ SCREENSHOT ════════ -->
+<!-- â•â•â•â•â•â•â•â• SCREENSHOT â•â•â•â•â•â•â•â• -->
 <section class="py-5 border-top" style="background:var(--c-bg)" aria-labelledby="ss-h">
   <div class="container py-4">
 
@@ -476,7 +475,7 @@
   </div>
 </section>
 
-<!-- ════════ HARGA ════════ -->
+<!-- â•â•â•â•â•â•â•â• HARGA â•â•â•â•â•â•â•â• -->
 <section id="harga" class="bg-white border-top py-5" aria-labelledby="harga-h">
   <div class="container py-4">
 
@@ -567,7 +566,7 @@
   </div>
 </section>
 
-<!-- ════════ FAQ ════════ -->
+<!-- â•â•â•â•â•â•â•â• FAQ â•â•â•â•â•â•â•â• -->
 <section id="faq" class="py-5 border-top" style="background:var(--c-bg)" aria-labelledby="faq-h">
   <div class="container py-4">
 
@@ -627,7 +626,7 @@
   </div>
 </section>
 
-<!-- ════════ CTA ════════ -->
+<!-- â•â•â•â•â•â•â•â• CTA â•â•â•â•â•â•â•â• -->
 <section class="py-5 border-top bg-white" aria-labelledby="cta-h">
   <div class="container py-4">
     <div class="rounded-4 p-4 p-md-5 sr" style="background:linear-gradient(135deg,var(--c-blue) 0%,var(--c-blue-dk) 100%)">
@@ -658,11 +657,11 @@
 
 </main>
 
-<!-- ════════ FOOTER ════════ -->
+<!-- â•â•â•â•â•â•â•â• FOOTER â•â•â•â•â•â•â•â• -->
 <footer class="bg-white border-top py-4" role="contentinfo">
   <div class="container">
     <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-3">
-      <small style="color:var(--c-ink-3)">© 2026 {{ branding.institution_name|default:"CBT Pro" }}. Hak cipta dilindungi.</small>
+      <small style="color:var(--c-ink-3)">© {{ current_year }} CBT Pro. Hak cipta dilindungi. Dibangun dengan Django 6 &amp; Python 3.13.</small>
       <nav class="d-flex align-items-center gap-3" aria-label="Media sosial">
         <a href="#" class="soc" aria-label="Instagram CBT Pro">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
@@ -725,3 +724,5 @@ document.querySelectorAll('.faq-q').forEach(btn => {
 </script>
 </body>
 </html>
+
+
