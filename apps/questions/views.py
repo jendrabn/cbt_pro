@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from urllib.parse import urlencode
 
-from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.http import HttpResponse, JsonResponse
@@ -148,7 +147,6 @@ class QuestionCreateView(TeacherQuestionBaseView, CreateView):
                 "page_title": "Tambah Soal Baru",
                 "submit_label": "Simpan Soal",
                 "is_create": True,
-                "tinymce_api_key": settings.TINYMCE_API_KEY,
                 "question_editor_config": {
                     "uploadUrl": reverse("question_richtext_upload"),
                     "browserUrl": reverse("question_richtext_browser"),
@@ -180,7 +178,6 @@ class QuestionUpdateView(TeacherQuestionBaseView, UpdateView):
                 "page_title": "Edit Soal",
                 "submit_label": "Simpan Perubahan",
                 "is_create": False,
-                "tinymce_api_key": settings.TINYMCE_API_KEY,
                 "question_editor_config": {
                     "uploadUrl": reverse("question_richtext_upload"),
                     "browserUrl": reverse("question_richtext_browser"),

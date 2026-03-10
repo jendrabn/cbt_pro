@@ -4,6 +4,8 @@ from collections import defaultdict
 from dataclasses import dataclass
 from datetime import date, datetime, time, timedelta
 from decimal import Decimal
+from html import escape
+import re
 from statistics import median, pstdev
 from typing import Iterable
 
@@ -68,6 +70,8 @@ RETAKE_POLICY_LABELS = {
     "average": "Nilai Rata-rata",
 }
 
+FILL_BLANK_PLACEHOLDER_RE = re.compile(r"\{\{\s*(\d+)\s*\}\}")
+
 
 @dataclass(frozen=True)
 class TeacherResultsFilters:
@@ -118,6 +122,48 @@ def _normalize_blank_answer_map(value):
             continue
         normalized[blank_key] = str(item_value or "")
     return normalized
+
+
+def _normalize_fill_blank_text(value, case_sensitive=False):
+    normalized = " ".join(str(value or "").strip().split())
+    return normalized if case_sensitive else normalized.casefold()
+
+
+def _build_fill_blank_review_html(question_text, blank_rows, mode="student"):
+    row_map = {str(item["blank_number"]): item for item in blank_rows}
+    source_html = str(question_text or "").strip()
+    if not source_html:
+        return ""
+
+    def replace_placeholder(match):
+        blank_key = str(int(match.group(1)))
+        row = row_map.get(blank_key, {})
+        if mode == "correct":
+            accepted_answers = row.get("accepted_answers") or []
+            answer_label = ", ".join(accepted_answers) if accepted_answers else "-"
+            title_value = f"Blank {blank_key}"
+            return (
+                f'<span class="fill-blank-chip is-answer-key" title="{escape(title_value)}">'
+                f"{escape(answer_label)}</span>"
+            )
+
+        value = str(row.get("value") or "").strip()
+        accepted_answers = row.get("accepted_answers") or []
+        if row.get("has_answer"):
+            state_class = "is-correct" if row.get("is_correct") else "is-incorrect"
+            display_value = value
+        else:
+            state_class = "is-empty"
+            display_value = "Kosong"
+        title_value = f"Blank {blank_key}"
+        if accepted_answers:
+            title_value += f" | Jawaban diterima: {', '.join(accepted_answers)}"
+        return (
+            f'<span class="fill-blank-chip {state_class}" title="{escape(title_value)}">'
+            f"{escape(display_value)}</span>"
+        )
+
+    return FILL_BLANK_PLACEHOLDER_RE.sub(replace_placeholder, source_html)
 
 
 def _blank_answer_map_has_values(value):
@@ -1044,6 +1090,8 @@ def build_answer_review_context(result):
         correct_matching_pairs = []
         selected_blank_answers = []
         correct_blank_answers = []
+        student_fill_blank_html = ""
+        correct_fill_blank_html = ""
         explanation = (question.explanation or "").strip()
         status_label = "Tidak Dijawab"
         status_type = "secondary"
@@ -1125,11 +1173,19 @@ def build_answer_review_context(result):
                 blank_key = str(blank_def.blank_number)
                 accepted_answers = [str(item).strip() for item in (blank_def.accepted_answers or []) if str(item).strip()]
                 selected_value = str(student_map.get(blank_key, "") or "")
+                normalized_value = _normalize_fill_blank_text(selected_value, case_sensitive=blank_def.is_case_sensitive)
+                normalized_answers = {
+                    _normalize_fill_blank_text(item, case_sensitive=blank_def.is_case_sensitive)
+                    for item in accepted_answers
+                }
+                is_correct = bool(selected_value.strip()) and normalized_value in normalized_answers
                 selected_blank_answers.append(
                     {
                         "blank_number": blank_def.blank_number,
                         "value": selected_value,
                         "has_answer": bool(selected_value.strip()),
+                        "is_correct": is_correct,
+                        "accepted_answers": accepted_answers,
                     }
                 )
                 correct_blank_answers.append(
@@ -1152,6 +1208,16 @@ def build_answer_review_context(result):
                         for item in correct_blank_answers
                     ]
                 )
+            student_fill_blank_html = _build_fill_blank_review_html(
+                question.question_text,
+                selected_blank_answers,
+                mode="student",
+            )
+            correct_fill_blank_html = _build_fill_blank_review_html(
+                question.question_text,
+                correct_blank_answers,
+                mode="correct",
+            )
         else:
             if answer and answer.answer_text:
                 student_answer = answer.answer_text
@@ -1186,6 +1252,8 @@ def build_answer_review_context(result):
                 "correct_matching_pairs": correct_matching_pairs,
                 "selected_blank_answers": selected_blank_answers,
                 "correct_blank_answers": correct_blank_answers,
+                "student_fill_blank_html": student_fill_blank_html,
+                "correct_fill_blank_html": correct_fill_blank_html,
                 "status_label": status_label,
                 "status_type": status_type,
                 "points_earned": round(points_earned, 2),

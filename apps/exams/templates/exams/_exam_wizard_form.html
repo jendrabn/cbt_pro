@@ -127,9 +127,9 @@
                                 <div class="col-6 col-lg-2">
                                     <select class="form-select form-select-sm" id="questionFilterType" aria-label="Filter tipe soal">
                                         <option value="">Semua tipe</option>
-                                        <option value="multiple_choice">Pilihan Ganda</option>
-                                        <option value="essay">Esai</option>
-                                        <option value="short_answer">Jawaban Singkat</option>
+                                        {% for value, label in form.available_question_type_choices %}
+                                        <option value="{{ value }}">{{ label }}</option>
+                                        {% endfor %}
                                     </select>
                                 </div>
                                 <div class="col-9 col-lg-2">

@@ -6,6 +6,64 @@
 {% block shell_class %}{% endblock %}
 {% block body_classes %} exam-room-body{% endblock %}
 
+{% block extra_css %}
+<style>
+    .ordering-list-surface {
+        min-height: 1.5rem;
+    }
+
+    .ordering-draggable-card {
+        cursor: grab;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+    }
+
+    .ordering-draggable-card.is-dragging,
+    .matching-choice-card.is-dragging {
+        opacity: 0.55;
+    }
+
+    .ordering-draggable-card.ordering-drop-target,
+    .ordering-list-surface.ordering-drop-target,
+    .matching-dropzone.is-active,
+    .matching-board-bank.is-active {
+        border-color: rgba(var(--bs-primary-rgb), 0.75) !important;
+        box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.12);
+    }
+
+    .matching-board-bank {
+        min-height: 4rem;
+        padding: 0.25rem;
+        border: 2px dashed rgba(var(--bs-secondary-rgb), 0.2);
+        border-radius: 1rem;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .matching-choice-card {
+        cursor: grab;
+        transition: transform 0.2s ease, opacity 0.2s ease;
+    }
+
+    .matching-dropzone {
+        min-height: 6rem;
+        padding: 0.85rem;
+        border: 2px dashed rgba(var(--bs-secondary-rgb), 0.25);
+        border-radius: 1rem;
+        background: var(--bs-body-bg);
+        transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+    }
+
+    .matching-dropzone.is-filled {
+        border-style: solid;
+        background: rgba(var(--bs-success-rgb), 0.05);
+    }
+
+    .matching-dropzone-empty {
+        color: var(--bs-secondary-color);
+        font-size: 0.875rem;
+    }
+</style>
+{% endblock %}
+
 {% block topbar %}
 <header class="dashboard-topbar border-bottom exam-room-topbar">
         <div class="container-fluid px-3 px-md-4 py-3 d-flex flex-wrap gap-3 align-items-center justify-content-between">

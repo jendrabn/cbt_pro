@@ -472,10 +472,6 @@
 
 {% block vendor_js %}
     {{ question_editor_config|json_script:"question-editor-config" }}
-{% if tinymce_api_key %}
-    <script src="https://cdn.tiny.cloud/1/{{ tinymce_api_key }}/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
-    {% else %}
-    <script src="https://cdn.jsdelivr.net/npm/tinymce@6/tinymce.min.js" referrerpolicy="origin"></script>
-    {% endif %}
-    <script src="{% static 'questions/js/question_form.js' %}?v={{ asset_version }}-qf-richtext-2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.10.9/tinymce.min.js" referrerpolicy="origin"></script>
+    <script src="{% static 'questions/js/question_form.js' %}?v={{ asset_version }}-qf-richtext-3"></script>
 {% endblock %}

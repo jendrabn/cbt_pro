@@ -350,6 +350,25 @@ class QuestionBankViewTests(TestCase):
             self.assertLessEqual(stored_image.width, 1920)
             self.assertEqual(stored_image.width, 1920)
 
+    def test_teacher_cannot_upload_richtext_file_with_fake_image_extension(self):
+        temp_media_root = tempfile.mkdtemp(prefix="cbt_question_media_invalid_")
+        self.addCleanup(lambda: shutil.rmtree(temp_media_root, ignore_errors=True))
+        self.client.force_login(self.teacher)
+        fake_image = SimpleUploadedFile(
+            "fake-diagram.png",
+            b"this is not a real png payload",
+            content_type="image/png",
+        )
+
+        with override_settings(MEDIA_ROOT=temp_media_root):
+            response = self.client.post(
+                reverse("question_richtext_upload"),
+                data={"file": fake_image},
+            )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()["error"], "Tipe file media tidak dapat dikenali.")
+
     def test_teacher_can_browse_uploaded_richtext_media(self):
         temp_media_root = tempfile.mkdtemp(prefix="cbt_question_browser_")
         self.addCleanup(lambda: shutil.rmtree(temp_media_root, ignore_errors=True))

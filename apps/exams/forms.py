@@ -225,6 +225,7 @@ class ExamWizardForm(forms.ModelForm):
         self.available_questions = Question.objects.none()
         self.available_categories = QuestionCategory.objects.none()
         self.available_question_subjects = Subject.objects.none()
+        self.available_question_type_choices = list(Question.QuestionType.choices)
         self.available_classes = Class.objects.none()
         self.available_students = User.objects.none()
 

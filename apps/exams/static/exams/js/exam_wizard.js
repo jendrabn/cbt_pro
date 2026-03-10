@@ -210,13 +210,16 @@
         }
 
         function questionTypeLabel(value) {
-            if (value === "multiple_choice") {
-                return "Pilihan Ganda";
-            }
-            if (value === "essay") {
-                return "Esai";
-            }
-            return "Jawaban Singkat";
+            var labels = {
+                multiple_choice: "Pilihan Ganda",
+                checkbox: "Checkbox",
+                ordering: "Ordering",
+                matching: "Matching",
+                fill_in_blank: "Fill In Blank",
+                essay: "Esai",
+                short_answer: "Jawaban Singkat"
+            };
+            return labels[value] || value || "-";
         }
 
         function buildQuestionQueryParams(page, extraFilters) {

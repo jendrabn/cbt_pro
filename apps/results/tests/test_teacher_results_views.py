@@ -351,7 +351,9 @@ class TeacherResultsViewTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Klorofil terdapat pada")
-        self.assertContains(response, "Blank 1")
+        self.assertContains(response, "fill-blank-chip is-incorrect", html=False)
+        self.assertContains(response, ">daun<", html=False)
+        self.assertContains(response, "fill-blank-chip is-answer-key", html=False)
         self.assertContains(response, "kloroplas")
 
     def test_teacher_can_access_results_analytics_dashboard(self):

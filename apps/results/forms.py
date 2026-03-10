@@ -126,3 +126,19 @@ class CertificateTemplateForm(forms.ModelForm):
         if int(getattr(file_obj, "size", 0) or 0) > max_size:
             raise forms.ValidationError("Ukuran file melebihi batas yang diizinkan.")
         return file_obj
+
+
+class EssayManualGradingForm(forms.Form):
+    action = forms.CharField()
+    answer_id = forms.UUIDField()
+    points_awarded = forms.DecimalField(min_value=0, max_digits=5, decimal_places=2)
+    feedback = forms.CharField(required=False, widget=forms.Textarea(attrs={"rows": 3}))
+
+    def clean_action(self):
+        value = (self.cleaned_data.get("action") or "").strip()
+        if value != "grade_essay":
+            raise forms.ValidationError("Aksi grading tidak valid.")
+        return value
+
+    def clean_feedback(self):
+        return (self.cleaned_data.get("feedback") or "").strip()

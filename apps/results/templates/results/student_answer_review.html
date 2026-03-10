@@ -3,6 +3,49 @@
 
 {% block title %}Review Jawaban - Siswa{% endblock %}
 
+{% block extra_css %}
+<style>
+    .fill-blank-review {
+        line-height: 1.9;
+    }
+
+    .fill-blank-chip {
+        display: inline-flex;
+        align-items: center;
+        min-height: 2rem;
+        padding: 0.2rem 0.6rem;
+        border-radius: 999px;
+        border: 1px solid transparent;
+        font-weight: 600;
+        white-space: normal;
+    }
+
+    .fill-blank-chip.is-correct {
+        background: rgba(var(--bs-success-rgb), 0.14);
+        border-color: rgba(var(--bs-success-rgb), 0.35);
+        color: var(--bs-success-text-emphasis);
+    }
+
+    .fill-blank-chip.is-incorrect {
+        background: rgba(var(--bs-danger-rgb), 0.14);
+        border-color: rgba(var(--bs-danger-rgb), 0.35);
+        color: var(--bs-danger-text-emphasis);
+    }
+
+    .fill-blank-chip.is-empty {
+        background: rgba(var(--bs-secondary-rgb), 0.12);
+        border-color: rgba(var(--bs-secondary-rgb), 0.2);
+        color: var(--bs-secondary-color);
+    }
+
+    .fill-blank-chip.is-answer-key {
+        background: rgba(var(--bs-primary-rgb), 0.12);
+        border-color: rgba(var(--bs-primary-rgb), 0.25);
+        color: var(--bs-primary-text-emphasis);
+    }
+</style>
+{% endblock %}
+
 {% block topbar %}
     {% include "partials/topbar_student.html" with parent_label="Hasil Ujian" parent_url="/student/results/" current_label=exam.title %}
 {% endblock %}
@@ -149,16 +192,9 @@
                                     {% endif %}
                                 </div>
                                 {% elif row.question.question_type == "fill_in_blank" %}
-                                <div class="answer-box">
-                                    {% if row.selected_blank_answers %}
-                                    <ul class="mb-0 ps-3">
-                                        {% for blank in row.selected_blank_answers %}
-                                        <li class="{% if not forloop.last %}mb-1{% endif %}">
-                                            <strong>Blank {{ blank.blank_number }}:</strong>
-                                            {% if blank.has_answer %}{{ blank.value }}{% else %}-{% endif %}
-                                        </li>
-                                        {% endfor %}
-                                    </ul>
+                                <div class="answer-box answer-box-richtext fill-blank-review richtext-content">
+                                    {% if row.student_fill_blank_html %}
+                                    {{ row.student_fill_blank_html|sanitize_richtext }}
                                     {% else %}
                                     -
                                     {% endif %}
@@ -217,16 +253,9 @@
                                     {% endif %}
                                 </div>
                                 {% elif row.question.question_type == "fill_in_blank" %}
-                                <div class="answer-box">
-                                    {% if row.correct_blank_answers %}
-                                    <ul class="mb-0 ps-3">
-                                        {% for blank in row.correct_blank_answers %}
-                                        <li class="{% if not forloop.last %}mb-1{% endif %}">
-                                            <strong>Blank {{ blank.blank_number }}:</strong>
-                                            {{ blank.accepted_answers|join:", " }}
-                                        </li>
-                                        {% endfor %}
-                                    </ul>
+                                <div class="answer-box answer-box-richtext fill-blank-review richtext-content">
+                                    {% if row.correct_fill_blank_html %}
+                                    {{ row.correct_fill_blank_html|sanitize_richtext }}
                                     {% else %}
                                     -
                                     {% endif %}

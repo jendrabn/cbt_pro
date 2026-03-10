@@ -158,6 +158,19 @@ class ExamManagementViewTests(TestCase):
         self.assertTrue(exam.require_camera)
         self.assertTrue(exam.require_microphone)
 
+    def test_exam_create_form_shows_all_question_type_filters(self):
+        self.client.force_login(self.teacher)
+        response = self.client.get(reverse("exam_create"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, '<option value="multiple_choice">Pilihan Ganda</option>', html=True)
+        self.assertContains(response, '<option value="checkbox">Checkbox</option>', html=True)
+        self.assertContains(response, '<option value="ordering">Ordering</option>', html=True)
+        self.assertContains(response, '<option value="matching">Matching</option>', html=True)
+        self.assertContains(response, '<option value="fill_in_blank">Fill In Blank</option>', html=True)
+        self.assertContains(response, '<option value="essay">Esai</option>', html=True)
+        self.assertContains(response, '<option value="short_answer">Jawaban Singkat</option>', html=True)
+
     def test_teacher_can_publish_and_unpublish_exam(self):
         exam = self._create_exam(status="draft")
         self.client.force_login(self.teacher)
@@ -208,3 +221,29 @@ class ExamManagementViewTests(TestCase):
         ids = {item["id"] for item in response.json().get("items", [])}
         self.assertIn(str(self.question.id), ids)
         self.assertNotIn(str(self.other_question.id), ids)
+
+    def test_question_picker_can_filter_checkbox_questions(self):
+        checkbox_question = Question.objects.create(
+            created_by=self.teacher,
+            subject=self.subject,
+            question_type="checkbox",
+            question_text="Pilih semua contoh gaya sentuh.",
+            points=8,
+            difficulty_level="easy",
+            allow_previous=True,
+            allow_next=True,
+            force_sequential=False,
+            is_active=True,
+        )
+
+        self.client.force_login(self.teacher)
+        response = self.client.get(
+            reverse("exam_question_picker"),
+            {"question_type": "checkbox", "page": 1, "page_size": 50},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        ids = {item["id"] for item in payload.get("items", [])}
+        self.assertIn(str(checkbox_question.id), ids)
+        self.assertNotIn(str(self.question.id), ids)

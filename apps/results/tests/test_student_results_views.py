@@ -359,7 +359,9 @@ class StudentResultsViewTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Simbol kimia emas adalah")
-        self.assertContains(response, "Blank 1")
+        self.assertContains(response, "fill-blank-chip is-incorrect", html=False)
+        self.assertContains(response, ">Ag<", html=False)
+        self.assertContains(response, "fill-blank-chip is-answer-key", html=False)
         self.assertContains(response, "Au")
 
     def test_student_review_forbidden_if_exam_disables_review(self):

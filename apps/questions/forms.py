@@ -191,8 +191,8 @@ class QuestionForm(forms.ModelForm):
             "is_active": "Status Aktif",
         }
         widgets = {
-            "question_text": forms.Textarea(attrs={"rows": 5}),
-            "explanation": forms.Textarea(attrs={"rows": 5}),
+            "question_text": forms.Textarea(attrs={"rows": 5, "data-tinymce": "true"}),
+            "explanation": forms.Textarea(attrs={"rows": 5, "data-tinymce": "true"}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -262,6 +262,7 @@ class QuestionForm(forms.ModelForm):
                 attrs={
                     "rows": 3,
                     "class": "form-control option-input",
+                    "data-tinymce": "true",
                     "placeholder": f"Tulis isi opsi {letter} atau sisipkan gambar/media...",
                 }
             )
@@ -272,6 +273,7 @@ class QuestionForm(forms.ModelForm):
                 attrs={
                     "rows": 3,
                     "class": "form-control ordering-item-input",
+                    "data-tinymce": "true",
                     "placeholder": f"Tulis item urutan {index} sesuai posisi jawaban benar...",
                 }
             )
@@ -283,6 +285,7 @@ class QuestionForm(forms.ModelForm):
                 attrs={
                     "rows": 3,
                     "class": "form-control matching-prompt-input",
+                    "data-tinymce": "true",
                     "placeholder": f"Tulis prompt pasangan {index}...",
                 }
             )
@@ -290,6 +293,7 @@ class QuestionForm(forms.ModelForm):
                 attrs={
                     "rows": 3,
                     "class": "form-control matching-answer-input",
+                    "data-tinymce": "true",
                     "placeholder": f"Tulis jawaban pasangan {index}...",
                 }
             )

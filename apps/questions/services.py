@@ -4,6 +4,7 @@ import uuid
 from dataclasses import dataclass
 from pathlib import Path
 
+import puremagic
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.files.base import File
@@ -32,6 +33,20 @@ RICHTEXT_UPLOAD_DIRECTORY = "questions/richtext"
 RICHTEXT_IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".gif", ".webp"}
 RICHTEXT_VIDEO_EXTENSIONS = {".mp4", ".webm", ".ogg"}
 RICHTEXT_AUDIO_EXTENSIONS = {".mp3", ".wav", ".ogg", ".m4a", ".aac"}
+RICHTEXT_IMAGE_MIME_TYPES = {"image/png", "image/jpeg", "image/gif", "image/webp"}
+RICHTEXT_VIDEO_MIME_TYPES = {"video/mp4", "video/webm", "video/ogg"}
+RICHTEXT_AUDIO_MIME_TYPES = {
+    "audio/mpeg",
+    "audio/mp3",
+    "audio/wave",
+    "audio/wav",
+    "audio/x-wav",
+    "audio/ogg",
+    "audio/mp4",
+    "audio/x-m4a",
+    "audio/aac",
+    "audio/aacp",
+}
 RICHTEXT_MAX_IMAGE_SIZE = 5 * 1024 * 1024
 RICHTEXT_MAX_MEDIA_SIZE = 25 * 1024 * 1024
 
@@ -115,22 +130,54 @@ def _delete_local_image_if_exists(image_url):
         target_file.unlink()
 
 
+def _detect_richtext_media_kind(uploaded_file):
+    extension = Path(getattr(uploaded_file, "name", "")).suffix.lower()
+    try:
+        uploaded_file.seek(0)
+    except Exception:
+        pass
+
+    raw_bytes = b""
+    try:
+        raw_bytes = uploaded_file.read(8192)
+    finally:
+        try:
+            uploaded_file.seek(0)
+        except Exception:
+            pass
+
+    if not raw_bytes:
+        raise ValidationError("File media kosong atau tidak dapat dibaca.")
+
+    try:
+        mime_type = puremagic.from_string(raw_bytes, mime=True)
+    except (puremagic.PureError, ValueError) as exc:
+        raise ValidationError("Tipe file media tidak dapat dikenali.") from exc
+
+    if mime_type in RICHTEXT_IMAGE_MIME_TYPES or mime_type.startswith("image/"):
+        if extension in RICHTEXT_IMAGE_EXTENSIONS:
+            return "image", extension
+        raise ValidationError("Ekstensi file gambar tidak didukung.")
+
+    if mime_type in RICHTEXT_VIDEO_MIME_TYPES or (mime_type == "application/ogg" and extension in RICHTEXT_VIDEO_EXTENSIONS):
+        if extension in RICHTEXT_VIDEO_EXTENSIONS:
+            return "video", extension
+        raise ValidationError("Ekstensi file video tidak didukung.")
+
+    if mime_type in RICHTEXT_AUDIO_MIME_TYPES or (mime_type == "application/ogg" and extension in RICHTEXT_AUDIO_EXTENSIONS):
+        if extension in RICHTEXT_AUDIO_EXTENSIONS:
+            return "audio", extension
+        raise ValidationError("Ekstensi file audio tidak didukung.")
+
+    raise ValidationError("Format file tidak didukung. Gunakan gambar, audio, atau video yang valid.")
+
+
 def save_question_richtext_media(uploaded_file):
     if not uploaded_file:
         raise ValidationError("File media tidak ditemukan.")
 
-    extension = Path(uploaded_file.name).suffix.lower()
-    if extension in RICHTEXT_IMAGE_EXTENSIONS:
-        media_kind = "image"
-        max_size = RICHTEXT_MAX_IMAGE_SIZE
-    elif extension in RICHTEXT_VIDEO_EXTENSIONS:
-        media_kind = "video"
-        max_size = RICHTEXT_MAX_MEDIA_SIZE
-    elif extension in RICHTEXT_AUDIO_EXTENSIONS:
-        media_kind = "audio"
-        max_size = RICHTEXT_MAX_MEDIA_SIZE
-    else:
-        raise ValidationError("Format file tidak didukung. Gunakan gambar, audio, atau video yang valid.")
+    media_kind, extension = _detect_richtext_media_kind(uploaded_file)
+    max_size = RICHTEXT_MAX_IMAGE_SIZE if media_kind == "image" else RICHTEXT_MAX_MEDIA_SIZE
 
     if uploaded_file.size > max_size:
         if media_kind == "image":

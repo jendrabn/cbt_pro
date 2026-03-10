@@ -506,10 +506,29 @@
                 "table td, table th { border: 1px solid #cbd5e1; padding: 6px 8px; vertical-align: top; }"
             ].join(" "),
             autoresize_bottom_margin: 18,
-            images_upload_handler: function (blobInfo, progress) {
-                return uploadRichTextFile(blobInfo.blob(), progress, editorConfig).then(function (payload) {
+            images_upload_handler: function (blobInfo, successOrProgress, failure, progressCallback) {
+                var isTinyMceFiveCallbackMode = typeof failure === "function";
+                var progress = isTinyMceFiveCallbackMode ? progressCallback : successOrProgress;
+
+                var uploadPromise = uploadRichTextFile(blobInfo.blob(), progress, editorConfig).then(function (payload) {
                     return payload.location || payload.url;
                 });
+
+                if (isTinyMceFiveCallbackMode) {
+                    uploadPromise
+                        .then(function (location) {
+                            successOrProgress(location);
+                        })
+                        .catch(function (error) {
+                            var message = typeof error === "string"
+                                ? error
+                                : (error && error.message) || "Upload gambar gagal.";
+                            failure(message);
+                        });
+                    return;
+                }
+
+                return uploadPromise;
             },
             file_picker_callback: function (callback, value, meta) {
                 if (editorConfig.browserUrl) {
