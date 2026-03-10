@@ -437,6 +437,14 @@ def build_student_detail_payload(exam: Exam, student_id):
                 answer_value = f"Opsi {answer.selected_option.option_letter}"
             else:
                 answer_value = "Belum memilih opsi"
+        elif answer.answer_type == "checkbox":
+            answer_value = f"{len(answer.selected_option_ids or [])} opsi dipilih"
+        elif answer.answer_type == "ordering":
+            answer_value = f"{len(answer.answer_order_json or [])} item diurutkan"
+        elif answer.answer_type == "matching":
+            answer_value = f"{len((answer.answer_matching_json or {}).keys())} pasangan diisi"
+        elif answer.answer_type == "fill_in_blank":
+            answer_value = f"{sum(1 for item in (answer.answer_blanks_json or {}).values() if str(item or '').strip())} blank diisi"
         else:
             answer_value = (answer.answer_text or "").strip() or "Belum diisi"
         answers.append(

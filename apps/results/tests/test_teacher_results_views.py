@@ -259,6 +259,101 @@ class TeacherResultsViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Lembar Jawaban Lengkap")
 
+    def test_teacher_answer_review_renders_ordering_question(self):
+        question_ordering = Question.objects.create(
+            created_by=self.teacher,
+            subject=self.subject,
+            question_type="ordering",
+            question_text="Urutkan tingkatan organisasi kehidupan.",
+            points=10,
+            difficulty_level="easy",
+            is_active=True,
+        )
+        item_1 = question_ordering.ordering_items.create(item_text="Sel", correct_order=1)
+        question_ordering.ordering_items.create(item_text="Jaringan", correct_order=2)
+        item_3 = question_ordering.ordering_items.create(item_text="Organ", correct_order=3)
+        ExamQuestion.objects.create(exam=self.exam, question=question_ordering, display_order=3, points_override=10)
+        StudentAnswer.objects.create(
+            attempt=self.attempt_one,
+            question=question_ordering,
+            answer_type="ordering",
+            answer_order_json=[str(item_3.id), str(item_1.id)],
+            is_correct=False,
+            points_earned=3,
+            points_possible=10,
+            time_spent_seconds=150,
+        )
+
+        self.client.force_login(self.teacher)
+        response = self.client.get(reverse("answer_review", kwargs={"result_id": self.result_one.id}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Urutkan tingkatan organisasi kehidupan")
+        self.assertContains(response, "Jaringan")
+
+    def test_teacher_answer_review_renders_matching_question(self):
+        question_matching = Question.objects.create(
+            created_by=self.teacher,
+            subject=self.subject,
+            question_type="matching",
+            question_text="Pasangkan organel dengan fungsinya.",
+            points=10,
+            difficulty_level="easy",
+            is_active=True,
+        )
+        pair_1 = question_matching.matching_pairs.create(prompt_text="Mitokondria", answer_text="Respirasi sel", pair_order=1)
+        pair_2 = question_matching.matching_pairs.create(prompt_text="Ribosom", answer_text="Sintesis protein", pair_order=2)
+        ExamQuestion.objects.create(exam=self.exam, question=question_matching, display_order=3, points_override=10)
+        StudentAnswer.objects.create(
+            attempt=self.attempt_one,
+            question=question_matching,
+            answer_type="matching",
+            answer_matching_json={str(pair_1.id): str(pair_1.id), str(pair_2.id): str(pair_1.id)},
+            is_correct=False,
+            points_earned=5,
+            points_possible=10,
+            time_spent_seconds=140,
+        )
+
+        self.client.force_login(self.teacher)
+        response = self.client.get(reverse("answer_review", kwargs={"result_id": self.result_one.id}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Pasangkan organel dengan fungsinya")
+        self.assertContains(response, "Mitokondria")
+        self.assertContains(response, "Sintesis protein")
+
+    def test_teacher_answer_review_renders_fill_in_blank_question(self):
+        question_fill_blank = Question.objects.create(
+            created_by=self.teacher,
+            subject=self.subject,
+            question_type="fill_in_blank",
+            question_text="Klorofil terdapat pada {{1}}.",
+            points=10,
+            difficulty_level="easy",
+            is_active=True,
+        )
+        question_fill_blank.blank_answers.create(blank_number=1, accepted_answers=["kloroplas"], blank_points=10)
+        ExamQuestion.objects.create(exam=self.exam, question=question_fill_blank, display_order=3, points_override=10)
+        StudentAnswer.objects.create(
+            attempt=self.attempt_one,
+            question=question_fill_blank,
+            answer_type="fill_in_blank",
+            answer_blanks_json={"1": "daun"},
+            is_correct=False,
+            points_earned=0,
+            points_possible=10,
+            time_spent_seconds=120,
+        )
+
+        self.client.force_login(self.teacher)
+        response = self.client.get(reverse("answer_review", kwargs={"result_id": self.result_one.id}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Klorofil terdapat pada")
+        self.assertContains(response, "Blank 1")
+        self.assertContains(response, "kloroplas")
+
     def test_teacher_can_access_results_analytics_dashboard(self):
         self.client.force_login(self.teacher)
         response = self.client.get(reverse("teacher_results_analytics"))

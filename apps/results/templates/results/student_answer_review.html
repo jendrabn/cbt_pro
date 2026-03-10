@@ -92,21 +92,73 @@
                             {% soft_badge row.status_label row.status_type %}
                         </div>
 
-                        <div class="mb-3 question-richtext">{{ row.question.question_text|safe }}</div>
+                        <div class="mb-3 question-richtext">{{ row.question.question_text|sanitize_richtext }}</div>
 
                         <div class="row g-2 small">
                             <div class="col-lg-6">
                                 <p class="mb-1 text-muted">Jawaban Anda</p>
-                                {% if row.question.question_type == "multiple_choice" %}
+                                {% if row.question.question_type == "multiple_choice" or row.question.question_type == "checkbox" %}
                                 <div class="answer-box answer-box-richtext richtext-content">
-                                    {% if row.selected_option %}
-                                    <div class="fw-semibold mb-2">{{ row.selected_option.option_letter }}.</div>
-                                    <div>{{ row.selected_option.option_text|safe }}</div>
-                                    {% if row.selected_option.option_image_url %}
-                                    <div class="mt-2">
-                                        <img src="{{ row.selected_option.option_image_url }}" alt="Media opsi {{ row.selected_option.option_letter }}" class="img-fluid rounded border">
-                                    </div>
+                                    {% if row.selected_options %}
+                                        {% for option in row.selected_options %}
+                                        <div class="{% if not forloop.last %}mb-3{% endif %}">
+                                            <div class="fw-semibold mb-2">{{ option.option_letter }}.</div>
+                                            <div>{{ option.option_text|sanitize_richtext }}</div>
+                                            {% if option.option_image_url %}
+                                            <div class="mt-2">
+                                                <img src="{{ option.option_image_url }}" alt="Media opsi {{ option.option_letter }}" class="img-fluid rounded border">
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                        {% endfor %}
+                                    {% else %}
+                                    -
                                     {% endif %}
+                                </div>
+                                {% elif row.question.question_type == "ordering" %}
+                                <div class="answer-box answer-box-richtext richtext-content">
+                                    {% if row.selected_ordering_items %}
+                                    <ol class="ps-3 mb-0">
+                                        {% for item in row.selected_ordering_items %}
+                                        <li class="{% if not forloop.last %}mb-2{% endif %}">{{ item.item_text|sanitize_richtext }}</li>
+                                        {% endfor %}
+                                    </ol>
+                                    {% else %}
+                                    -
+                                    {% endif %}
+                                </div>
+                                {% elif row.question.question_type == "matching" %}
+                                <div class="answer-box answer-box-richtext">
+                                    {% if row.selected_matching_pairs %}
+                                    <div class="vstack gap-2">
+                                        {% for pair in row.selected_matching_pairs %}
+                                        <div class="border rounded p-2">
+                                            <div class="small text-muted mb-1">Prompt</div>
+                                            <div class="richtext-content mb-2">{{ pair.prompt_text|sanitize_richtext }}</div>
+                                            <div class="small text-muted mb-1">Jawaban Anda</div>
+                                            {% if pair.has_answer %}
+                                            <div class="richtext-content">{{ pair.answer_text|sanitize_richtext }}</div>
+                                            {% else %}
+                                            <div class="text-muted">-</div>
+                                            {% endif %}
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                    {% else %}
+                                    -
+                                    {% endif %}
+                                </div>
+                                {% elif row.question.question_type == "fill_in_blank" %}
+                                <div class="answer-box">
+                                    {% if row.selected_blank_answers %}
+                                    <ul class="mb-0 ps-3">
+                                        {% for blank in row.selected_blank_answers %}
+                                        <li class="{% if not forloop.last %}mb-1{% endif %}">
+                                            <strong>Blank {{ blank.blank_number }}:</strong>
+                                            {% if blank.has_answer %}{{ blank.value }}{% else %}-{% endif %}
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
                                     {% else %}
                                     -
                                     {% endif %}
@@ -117,13 +169,13 @@
                             </div>
                             <div class="col-lg-6">
                                 <p class="mb-1 text-muted">Jawaban Benar</p>
-                                {% if row.question.question_type == "multiple_choice" %}
+                                {% if row.question.question_type == "multiple_choice" or row.question.question_type == "checkbox" %}
                                 <div class="answer-box answer-box-richtext richtext-content">
                                     {% if row.correct_options %}
                                         {% for option in row.correct_options %}
                                         <div class="{% if not forloop.last %}mb-3{% endif %}">
                                             <div class="fw-semibold mb-2">{{ option.option_letter }}.</div>
-                                            <div>{{ option.option_text|safe }}</div>
+                                            <div>{{ option.option_text|sanitize_richtext }}</div>
                                             {% if option.option_image_url %}
                                             <div class="mt-2">
                                                 <img src="{{ option.option_image_url }}" alt="Media opsi {{ option.option_letter }}" class="img-fluid rounded border">
@@ -131,6 +183,50 @@
                                             {% endif %}
                                         </div>
                                         {% endfor %}
+                                    {% else %}
+                                    -
+                                    {% endif %}
+                                </div>
+                                {% elif row.question.question_type == "ordering" %}
+                                <div class="answer-box answer-box-richtext richtext-content">
+                                    {% if row.correct_ordering_items %}
+                                    <ol class="ps-3 mb-0">
+                                        {% for item in row.correct_ordering_items %}
+                                        <li class="{% if not forloop.last %}mb-2{% endif %}">{{ item.item_text|sanitize_richtext }}</li>
+                                        {% endfor %}
+                                    </ol>
+                                    {% else %}
+                                    -
+                                    {% endif %}
+                                </div>
+                                {% elif row.question.question_type == "matching" %}
+                                <div class="answer-box answer-box-richtext">
+                                    {% if row.correct_matching_pairs %}
+                                    <div class="vstack gap-2">
+                                        {% for pair in row.correct_matching_pairs %}
+                                        <div class="border rounded p-2">
+                                            <div class="small text-muted mb-1">Prompt</div>
+                                            <div class="richtext-content mb-2">{{ pair.prompt_text|sanitize_richtext }}</div>
+                                            <div class="small text-muted mb-1">Jawaban Benar</div>
+                                            <div class="richtext-content">{{ pair.answer_text|sanitize_richtext }}</div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                    {% else %}
+                                    -
+                                    {% endif %}
+                                </div>
+                                {% elif row.question.question_type == "fill_in_blank" %}
+                                <div class="answer-box">
+                                    {% if row.correct_blank_answers %}
+                                    <ul class="mb-0 ps-3">
+                                        {% for blank in row.correct_blank_answers %}
+                                        <li class="{% if not forloop.last %}mb-1{% endif %}">
+                                            <strong>Blank {{ blank.blank_number }}:</strong>
+                                            {{ blank.accepted_answers|join:", " }}
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
                                     {% else %}
                                     -
                                     {% endif %}
@@ -144,7 +240,7 @@
                         <div class="mt-3">
                             <p class="mb-1 small text-muted">Pembahasan / Penjelasan</p>
                             {% if row.has_explanation %}
-                            <div class="answer-box explanation-box">{{ row.explanation|safe }}</div>
+                            <div class="answer-box explanation-box">{{ row.explanation|sanitize_richtext }}</div>
                             {% else %}
                             <div class="answer-box text-muted">Penjelasan soal belum tersedia.</div>
                             {% endif %}

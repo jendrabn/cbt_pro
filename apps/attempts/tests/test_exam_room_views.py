@@ -132,6 +132,10 @@ class StudentExamRoomViewTests(TestCase):
         self.assertEqual(response.status_code, 403)
 
     def test_question_api_returns_question_payload(self):
+        self.question_mc.audio_play_limit = 2
+        self.question_mc.video_play_limit = 1
+        self.question_mc.save(update_fields=["audio_play_limit", "video_play_limit"])
+
         self.client.force_login(self.student)
         response = self.client.get(
             reverse("attempt_question_api", kwargs={"attempt_id": self.attempt.id, "number": 1}),
@@ -141,6 +145,8 @@ class StudentExamRoomViewTests(TestCase):
         payload = response.json()["payload"]
         self.assertEqual(payload["current_number"], 1)
         self.assertEqual(payload["question"]["question_type"], "multiple_choice")
+        self.assertEqual(payload["question"]["audio_play_limit"], 2)
+        self.assertEqual(payload["question"]["video_play_limit"], 1)
 
     def test_question_api_returns_rich_html_for_option_content(self):
         self.option_a.option_text = '<p><img src="/media/questions/richtext/psychotest-a.png" width="120" height="120"></p>'
@@ -155,6 +161,28 @@ class StudentExamRoomViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         payload = response.json()["payload"]
         self.assertIn("<img", payload["question"]["options"][0]["text"])
+
+    def test_question_api_sanitizes_legacy_rich_html(self):
+        self.question_mc.question_text = '<p>Soal aman</p><script>alert("x")</script><img src="https://example.com/q.png" onerror="alert(1)">'
+        self.question_mc.save(update_fields=["question_text"])
+        self.option_a.option_text = '<p>Opsi aman</p><img src="https://example.com/a.png" onerror="alert(1)"><script>alert("x")</script>'
+        self.option_a.save(update_fields=["option_text"])
+
+        self.client.force_login(self.student)
+        response = self.client.get(
+            reverse("attempt_question_api", kwargs={"attempt_id": self.attempt.id, "number": 1}),
+            {"current_number": 1},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()["payload"]
+        self.assertIn("Soal aman", payload["question"]["question_text"])
+        self.assertIn("<img", payload["question"]["question_text"])
+        self.assertNotIn("<script", payload["question"]["question_text"].lower())
+        self.assertNotIn("onerror", payload["question"]["question_text"].lower())
+        self.assertIn("Opsi aman", payload["question"]["options"][0]["text"])
+        self.assertNotIn("<script", payload["question"]["options"][0]["text"].lower())
+        self.assertNotIn("onerror", payload["question"]["options"][0]["text"].lower())
 
     def test_save_answer_api_saves_multiple_choice_answer(self):
         self.client.force_login(self.student)
@@ -172,6 +200,379 @@ class StudentExamRoomViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         answer = StudentAnswer.objects.get(attempt=self.attempt, question=self.question_mc)
         self.assertEqual(answer.selected_option_id, self.option_a.id)
+
+    def test_save_answer_api_saves_checkbox_answer(self):
+        question_checkbox = Question.objects.create(
+            created_by=self.teacher,
+            subject=self.subject,
+            question_type="checkbox",
+            question_text="Pilih semua gaya yang termasuk gaya kontak.",
+            points=8,
+            checkbox_scoring="partial_no_penalty",
+            is_active=True,
+        )
+        option_a = question_checkbox.options.create(option_letter="A", option_text="Gaya gesek", is_correct=True, display_order=1)
+        option_b = question_checkbox.options.create(option_letter="B", option_text="Gaya gravitasi", is_correct=False, display_order=2)
+        option_c = question_checkbox.options.create(option_letter="C", option_text="Gaya normal", is_correct=True, display_order=3)
+        ExamQuestion.objects.create(exam=self.exam, question=question_checkbox, display_order=3, points_override=8)
+
+        self.client.force_login(self.student)
+        response = self.client.post(
+            reverse("attempt_save_answer_api", kwargs={"attempt_id": self.attempt.id}),
+            data=json.dumps(
+                {
+                    "question_number": 3,
+                    "selected_option_ids": [str(option_a.id), str(option_c.id)],
+                    "is_marked_for_review": False,
+                }
+            ),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        answer = StudentAnswer.objects.get(attempt=self.attempt, question=question_checkbox)
+        self.assertEqual(answer.selected_option_ids, [str(option_a.id), str(option_c.id)])
+        self.assertIsNone(answer.selected_option_id)
+
+    def test_question_api_returns_ordering_payload(self):
+        question_ordering = Question.objects.create(
+            created_by=self.teacher,
+            subject=self.subject,
+            question_type="ordering",
+            question_text="Urutkan tahap eksperimen.",
+            points=6,
+            is_active=True,
+        )
+        item_1 = question_ordering.ordering_items.create(item_text="Menyiapkan alat", correct_order=1)
+        item_2 = question_ordering.ordering_items.create(item_text="Melakukan pengukuran", correct_order=2)
+        item_3 = question_ordering.ordering_items.create(item_text="Mencatat hasil", correct_order=3)
+        ExamQuestion.objects.create(exam=self.exam, question=question_ordering, display_order=3, points_override=6)
+
+        self.client.force_login(self.student)
+        response = self.client.get(
+            reverse("attempt_question_api", kwargs={"attempt_id": self.attempt.id, "number": 3}),
+            {"current_number": 3},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()["payload"]
+        ordering_items = payload["question"]["ordering_items"]
+        self.assertEqual(payload["question"]["question_type"], "ordering")
+        self.assertEqual({item["id"] for item in ordering_items}, {str(item_1.id), str(item_2.id), str(item_3.id)})
+        self.assertEqual(payload["question"]["answer"]["answer_order_json"], [])
+
+    def test_save_answer_api_saves_ordering_answer(self):
+        question_ordering = Question.objects.create(
+            created_by=self.teacher,
+            subject=self.subject,
+            question_type="ordering",
+            question_text="Urutkan tahap metode ilmiah.",
+            points=8,
+            is_active=True,
+        )
+        item_1 = question_ordering.ordering_items.create(item_text="Observasi", correct_order=1)
+        item_2 = question_ordering.ordering_items.create(item_text="Hipotesis", correct_order=2)
+        item_3 = question_ordering.ordering_items.create(item_text="Eksperimen", correct_order=3)
+        ExamQuestion.objects.create(exam=self.exam, question=question_ordering, display_order=3, points_override=8)
+
+        self.client.force_login(self.student)
+        response = self.client.post(
+            reverse("attempt_save_answer_api", kwargs={"attempt_id": self.attempt.id}),
+            data=json.dumps(
+                {
+                    "question_number": 3,
+                    "answer_order_json": [str(item_2.id), str(item_1.id), str(item_3.id)],
+                    "is_marked_for_review": False,
+                }
+            ),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        answer = StudentAnswer.objects.get(attempt=self.attempt, question=question_ordering)
+        self.assertEqual(answer.answer_order_json, [str(item_2.id), str(item_1.id), str(item_3.id)])
+        self.assertIsNone(answer.selected_option_id)
+        self.assertEqual(answer.selected_option_ids, [])
+
+    def test_question_api_returns_matching_payload(self):
+        question_matching = Question.objects.create(
+            created_by=self.teacher,
+            subject=self.subject,
+            question_type="matching",
+            question_text="Pasangkan besaran dengan satuannya.",
+            points=6,
+            is_active=True,
+        )
+        pair_1 = question_matching.matching_pairs.create(prompt_text="Panjang", answer_text="Meter", pair_order=1)
+        pair_2 = question_matching.matching_pairs.create(prompt_text="Massa", answer_text="Kilogram", pair_order=2)
+        ExamQuestion.objects.create(exam=self.exam, question=question_matching, display_order=3, points_override=6)
+
+        self.client.force_login(self.student)
+        response = self.client.get(
+            reverse("attempt_question_api", kwargs={"attempt_id": self.attempt.id, "number": 3}),
+            {"current_number": 3},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()["payload"]
+        self.assertEqual(payload["question"]["question_type"], "matching")
+        self.assertEqual({item["id"] for item in payload["question"]["matching_pairs"]}, {str(pair_1.id), str(pair_2.id)})
+        self.assertEqual(
+            {item["id"] for item in payload["question"]["matching_answer_choices"]},
+            {str(pair_1.id), str(pair_2.id)},
+        )
+        self.assertEqual(payload["question"]["answer"]["answer_matching_json"], {})
+
+    def test_save_answer_api_saves_matching_answer(self):
+        question_matching = Question.objects.create(
+            created_by=self.teacher,
+            subject=self.subject,
+            question_type="matching",
+            question_text="Pasangkan alat dengan fungsinya.",
+            points=6,
+            is_active=True,
+        )
+        pair_1 = question_matching.matching_pairs.create(prompt_text="Termometer", answer_text="Mengukur suhu", pair_order=1)
+        pair_2 = question_matching.matching_pairs.create(prompt_text="Neraca", answer_text="Mengukur massa", pair_order=2)
+        ExamQuestion.objects.create(exam=self.exam, question=question_matching, display_order=3, points_override=6)
+
+        self.client.force_login(self.student)
+        response = self.client.post(
+            reverse("attempt_save_answer_api", kwargs={"attempt_id": self.attempt.id}),
+            data=json.dumps(
+                {
+                    "question_number": 3,
+                    "answer_matching_json": {
+                        str(pair_1.id): str(pair_1.id),
+                        str(pair_2.id): str(pair_1.id),
+                    },
+                    "is_marked_for_review": False,
+                }
+            ),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        answer = StudentAnswer.objects.get(attempt=self.attempt, question=question_matching)
+        self.assertEqual(
+            answer.answer_matching_json,
+            {str(pair_1.id): str(pair_1.id), str(pair_2.id): str(pair_1.id)},
+        )
+
+    def test_question_api_returns_fill_in_blank_payload(self):
+        question_fill_blank = Question.objects.create(
+            created_by=self.teacher,
+            subject=self.subject,
+            question_type="fill_in_blank",
+            question_text="Satuan gaya adalah {{1}} dan satuan massa adalah {{2}}.",
+            points=8,
+            is_active=True,
+        )
+        question_fill_blank.blank_answers.create(blank_number=1, accepted_answers=["Newton"], blank_points=4)
+        question_fill_blank.blank_answers.create(blank_number=2, accepted_answers=["Kilogram"], blank_points=4)
+        ExamQuestion.objects.create(exam=self.exam, question=question_fill_blank, display_order=3, points_override=8)
+
+        self.client.force_login(self.student)
+        response = self.client.get(
+            reverse("attempt_question_api", kwargs={"attempt_id": self.attempt.id, "number": 3}),
+            {"current_number": 3},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()["payload"]
+        self.assertEqual(payload["question"]["question_type"], "fill_in_blank")
+        self.assertEqual(payload["question"]["blank_numbers"], [1, 2])
+        self.assertEqual(payload["question"]["answer"]["answer_blanks_json"], {})
+
+    def test_save_answer_api_saves_fill_in_blank_answer(self):
+        question_fill_blank = Question.objects.create(
+            created_by=self.teacher,
+            subject=self.subject,
+            question_type="fill_in_blank",
+            question_text="Planet terbesar adalah {{1}}.",
+            points=5,
+            is_active=True,
+        )
+        question_fill_blank.blank_answers.create(blank_number=1, accepted_answers=["Jupiter"], blank_points=5)
+        ExamQuestion.objects.create(exam=self.exam, question=question_fill_blank, display_order=3, points_override=5)
+
+        self.client.force_login(self.student)
+        response = self.client.post(
+            reverse("attempt_save_answer_api", kwargs={"attempt_id": self.attempt.id}),
+            data=json.dumps(
+                {
+                    "question_number": 3,
+                    "answer_blanks_json": {"1": "Jupiter"},
+                    "is_marked_for_review": False,
+                }
+            ),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        answer = StudentAnswer.objects.get(attempt=self.attempt, question=question_fill_blank)
+        self.assertEqual(answer.answer_blanks_json, {"1": "Jupiter"})
+
+    def test_submit_attempt_grades_checkbox_partial_score(self):
+        question_checkbox = Question.objects.create(
+            created_by=self.teacher,
+            subject=self.subject,
+            question_type="checkbox",
+            question_text="Pilih semua bilangan prima.",
+            points=8,
+            checkbox_scoring="partial_no_penalty",
+            is_active=True,
+        )
+        option_a = question_checkbox.options.create(option_letter="A", option_text="2", is_correct=True, display_order=1)
+        question_checkbox.options.create(option_letter="B", option_text="4", is_correct=False, display_order=2)
+        option_c = question_checkbox.options.create(option_letter="C", option_text="3", is_correct=True, display_order=3)
+        ExamQuestion.objects.create(exam=self.exam, question=question_checkbox, display_order=3, points_override=8)
+
+        self.client.force_login(self.student)
+        save_response = self.client.post(
+            reverse("attempt_save_answer_api", kwargs={"attempt_id": self.attempt.id}),
+            data=json.dumps(
+                {
+                    "question_number": 3,
+                    "selected_option_ids": [str(option_a.id)],
+                    "is_marked_for_review": False,
+                }
+            ),
+            content_type="application/json",
+        )
+        self.assertEqual(save_response.status_code, 200)
+
+        submit_response = self.client.post(
+            reverse("attempt_submit_api", kwargs={"attempt_id": self.attempt.id}),
+            data=json.dumps({}),
+            content_type="application/json",
+        )
+
+        self.assertEqual(submit_response.status_code, 200)
+        answer = StudentAnswer.objects.get(attempt=self.attempt, question=question_checkbox)
+        self.assertEqual(float(answer.points_earned), 4.0)
+        self.assertFalse(answer.is_correct)
+
+    def test_submit_attempt_grades_ordering_partial_score(self):
+        question_ordering = Question.objects.create(
+            created_by=self.teacher,
+            subject=self.subject,
+            question_type="ordering",
+            question_text="Urutkan perkembangan teori atom.",
+            points=8,
+            is_active=True,
+        )
+        item_1 = question_ordering.ordering_items.create(item_text="Dalton", correct_order=1)
+        item_2 = question_ordering.ordering_items.create(item_text="Thomson", correct_order=2)
+        item_3 = question_ordering.ordering_items.create(item_text="Rutherford", correct_order=3)
+        item_4 = question_ordering.ordering_items.create(item_text="Bohr", correct_order=4)
+        ExamQuestion.objects.create(exam=self.exam, question=question_ordering, display_order=3, points_override=8)
+
+        self.client.force_login(self.student)
+        save_response = self.client.post(
+            reverse("attempt_save_answer_api", kwargs={"attempt_id": self.attempt.id}),
+            data=json.dumps(
+                {
+                    "question_number": 3,
+                    "answer_order_json": [str(item_2.id), str(item_1.id), str(item_3.id), str(item_4.id)],
+                    "is_marked_for_review": False,
+                }
+            ),
+            content_type="application/json",
+        )
+        self.assertEqual(save_response.status_code, 200)
+
+        submit_response = self.client.post(
+            reverse("attempt_submit_api", kwargs={"attempt_id": self.attempt.id}),
+            data=json.dumps({}),
+            content_type="application/json",
+        )
+
+        self.assertEqual(submit_response.status_code, 200)
+        answer = StudentAnswer.objects.get(attempt=self.attempt, question=question_ordering)
+        self.assertEqual(float(answer.points_earned), 6.0)
+        self.assertFalse(answer.is_correct)
+
+    def test_submit_attempt_grades_matching_partial_score(self):
+        question_matching = Question.objects.create(
+            created_by=self.teacher,
+            subject=self.subject,
+            question_type="matching",
+            question_text="Pasangkan besaran dengan satuan SI.",
+            points=8,
+            is_active=True,
+        )
+        pair_1 = question_matching.matching_pairs.create(prompt_text="Panjang", answer_text="Meter", pair_order=1)
+        pair_2 = question_matching.matching_pairs.create(prompt_text="Waktu", answer_text="Sekon", pair_order=2)
+        pair_3 = question_matching.matching_pairs.create(prompt_text="Massa", answer_text="Kilogram", pair_order=3)
+        ExamQuestion.objects.create(exam=self.exam, question=question_matching, display_order=3, points_override=8)
+
+        self.client.force_login(self.student)
+        save_response = self.client.post(
+            reverse("attempt_save_answer_api", kwargs={"attempt_id": self.attempt.id}),
+            data=json.dumps(
+                {
+                    "question_number": 3,
+                    "answer_matching_json": {
+                        str(pair_1.id): str(pair_1.id),
+                        str(pair_2.id): str(pair_1.id),
+                        str(pair_3.id): str(pair_3.id),
+                    },
+                    "is_marked_for_review": False,
+                }
+            ),
+            content_type="application/json",
+        )
+        self.assertEqual(save_response.status_code, 200)
+
+        submit_response = self.client.post(
+            reverse("attempt_submit_api", kwargs={"attempt_id": self.attempt.id}),
+            data=json.dumps({}),
+            content_type="application/json",
+        )
+
+        self.assertEqual(submit_response.status_code, 200)
+        answer = StudentAnswer.objects.get(attempt=self.attempt, question=question_matching)
+        self.assertAlmostEqual(float(answer.points_earned), 5.33, places=2)
+        self.assertFalse(answer.is_correct)
+
+    def test_submit_attempt_grades_fill_in_blank_partial_score(self):
+        question_fill_blank = Question.objects.create(
+            created_by=self.teacher,
+            subject=self.subject,
+            question_type="fill_in_blank",
+            question_text="Ibu kota Indonesia adalah {{1}} dan ibu kota Jepang adalah {{2}}.",
+            points=8,
+            is_active=True,
+        )
+        question_fill_blank.blank_answers.create(blank_number=1, accepted_answers=["Jakarta"], blank_points=5)
+        question_fill_blank.blank_answers.create(blank_number=2, accepted_answers=["Tokyo", "Tokio"], blank_points=3)
+        ExamQuestion.objects.create(exam=self.exam, question=question_fill_blank, display_order=3, points_override=8)
+
+        self.client.force_login(self.student)
+        save_response = self.client.post(
+            reverse("attempt_save_answer_api", kwargs={"attempt_id": self.attempt.id}),
+            data=json.dumps(
+                {
+                    "question_number": 3,
+                    "answer_blanks_json": {"1": "Jakarta", "2": "Osaka"},
+                    "is_marked_for_review": False,
+                }
+            ),
+            content_type="application/json",
+        )
+        self.assertEqual(save_response.status_code, 200)
+
+        submit_response = self.client.post(
+            reverse("attempt_submit_api", kwargs={"attempt_id": self.attempt.id}),
+            data=json.dumps({}),
+            content_type="application/json",
+        )
+
+        self.assertEqual(submit_response.status_code, 200)
+        answer = StudentAnswer.objects.get(attempt=self.attempt, question=question_fill_blank)
+        self.assertEqual(float(answer.points_earned), 5.0)
+        self.assertFalse(answer.is_correct)
 
     @patch("apps.attempts.views.save_attempt_answer")
     def test_save_answer_api_handles_lock_timeout_gracefully(self, save_mock):

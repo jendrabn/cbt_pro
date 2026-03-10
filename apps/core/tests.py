@@ -4,6 +4,7 @@ from pathlib import Path
 from uuid import uuid4
 
 from django.conf import settings
+from django.core.management import call_command
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.template import Context, Template
 from django.test import TestCase, override_settings
@@ -192,3 +193,25 @@ class EnumBadgeHelpersTests(TestCase):
         self.assertIn("Dibatalkan", rendered)
         self.assertIn("cbt-status-badge is-success", rendered)
         self.assertIn("Aktif", rendered)
+
+
+class SeedCommandTests(TestCase):
+    def test_seed_creates_at_least_three_questions_for_each_question_type(self):
+        call_command("seed")
+
+        expected_types = [
+            Question.QuestionType.MULTIPLE_CHOICE,
+            Question.QuestionType.CHECKBOX,
+            Question.QuestionType.ORDERING,
+            Question.QuestionType.MATCHING,
+            Question.QuestionType.FILL_IN_BLANK,
+            Question.QuestionType.ESSAY,
+            Question.QuestionType.SHORT_ANSWER,
+        ]
+
+        for question_type in expected_types:
+            with self.subTest(question_type=question_type):
+                self.assertGreaterEqual(
+                    Question.objects.filter(question_type=question_type, is_deleted=False).count(),
+                    3,
+                )

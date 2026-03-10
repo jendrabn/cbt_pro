@@ -109,25 +109,35 @@
                         <ul class="mb-3">
                             <li><code>subject</code>, <code>question_type</code>, <code>question_text</code></li>
                             <li>Untuk <code>multiple_choice</code>: isi minimal dua opsi dan <code>correct_option</code>.</li>
+                            <li>Untuk <code>checkbox</code>: isi minimal dua opsi, <code>correct_option</code> atau <code>correct_options</code> dengan format <code>A,C</code>, dan opsional <code>checkbox_scoring</code>.</li>
+                            <li>Untuk <code>ordering</code>: isi <code>ordering_items</code> dalam format JSON array, minimal dua item.</li>
+                            <li>Untuk <code>matching</code>: isi <code>matching_pairs</code> dalam format JSON array, minimal dua pasangan.</li>
+                            <li>Untuk <code>fill_in_blank</code>: gunakan placeholder <code>{{1}}</code>, <code>{{2}}</code>, dst di <code>question_text</code>, lalu isi <code>blank_answers</code>.</li>
                             <li>Untuk <code>essay</code> dan <code>short_answer</code>: isi <code>answer_text</code>.</li>
                         </ul>
 
                         <p class="mb-2">Field tambahan yang didukung:</p>
                         <div class="small border rounded p-2 bg-light mb-3">
                             <code>
-                                category, difficulty_level, points, explanation, question_image_url, allow_previous,<br>
-                                allow_next, force_sequential, time_limit_seconds, option_a, option_b, option_c,<br>
-                                option_d, option_e, correct_option, answer_text, keywords, is_case_sensitive,<br>
-                                max_word_count, tags, is_active
+                                category, difficulty_level, points, explanation, question_image_url, audio_play_limit,<br>
+                                video_play_limit, allow_previous, allow_next, force_sequential, time_limit_seconds,<br>
+                                option_a, option_b, option_c,<br>
+                                option_d, option_e, option_f, option_g, option_h, option_i, option_j,<br>
+                                correct_option, correct_options, checkbox_scoring, ordering_items, matching_pairs,<br>
+                                blank_answers, answer_text, keywords, is_case_sensitive, max_word_count, tags, is_active
                             </code>
                         </div>
 
                         <h3 class="h6">Aturan Nilai (Enum/Boolean)</h3>
                         <ul class="small mb-3">
                             <li><code>difficulty_level</code>: <code>easy</code>, <code>medium</code>, <code>hard</code>.</li>
-                            <li><code>question_type</code>: <code>multiple_choice</code>, <code>essay</code>, <code>short_answer</code>.</li>
+                            <li><code>question_type</code>: <code>multiple_choice</code>, <code>checkbox</code>, <code>ordering</code>, <code>matching</code>, <code>fill_in_blank</code>, <code>essay</code>, <code>short_answer</code>.</li>
+                            <li><code>audio_play_limit</code>, <code>video_play_limit</code>: angka bulat lebih dari <code>0</code>, kosongkan jika tanpa batas.</li>
                             <li><code>allow_next</code>, <code>allow_previous</code>, <code>force_sequential</code>, <code>is_case_sensitive</code>, <code>is_active</code>: isi <code>TRUE</code> atau <code>FALSE</code>.</li>
-                            <li><code>correct_option</code>: isi huruf kapital <code>A</code> sampai <code>E</code> untuk soal pilihan ganda.</li>
+                            <li><code>correct_option</code>: isi huruf kapital <code>A</code> sampai <code>J</code> untuk soal pilihan ganda.</li>
+                            <li><code>ordering_items</code>: contoh <code>[{"text":"Langkah 1","order":1},{"text":"Langkah 2","order":2}]</code>.</li>
+                            <li><code>matching_pairs</code>: contoh <code>[{"prompt":"Indonesia","answer":"Jakarta","order":1},{"prompt":"Jepang","answer":"Tokyo","order":2}]</code>.</li>
+                            <li><code>blank_answers</code>: contoh <code>{"1":["Air"],"2":{"accepted_answers":["H2O"],"blank_points":2}}</code>.</li>
                             <li><code>subject</code>: gunakan nama atau kode subject aktif yang ada di sistem.</li>
                         </ul>
 

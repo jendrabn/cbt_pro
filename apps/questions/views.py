@@ -32,6 +32,7 @@ from .services import (
     generate_question_import_report,
     get_question_import_history,
     get_teacher_question_queryset,
+    list_question_richtext_media,
     save_question_richtext_media,
     save_question_from_form,
 )
@@ -111,6 +112,10 @@ class QuestionListView(TeacherQuestionBaseView, ListView):
                     "total": self.get_base_queryset().count(),
                     "filtered": self.object_list.count(),
                     "multiple_choice": self.get_base_queryset().filter(question_type=Question.QuestionType.MULTIPLE_CHOICE).count(),
+                    "checkbox": self.get_base_queryset().filter(question_type=Question.QuestionType.CHECKBOX).count(),
+                    "ordering": self.get_base_queryset().filter(question_type=Question.QuestionType.ORDERING).count(),
+                    "matching": self.get_base_queryset().filter(question_type=Question.QuestionType.MATCHING).count(),
+                    "fill_in_blank": self.get_base_queryset().filter(question_type=Question.QuestionType.FILL_IN_BLANK).count(),
                     "essay": self.get_base_queryset().filter(question_type=Question.QuestionType.ESSAY).count(),
                     "short_answer": self.get_base_queryset().filter(question_type=Question.QuestionType.SHORT_ANSWER).count(),
                 },
@@ -146,6 +151,7 @@ class QuestionCreateView(TeacherQuestionBaseView, CreateView):
                 "tinymce_api_key": settings.TINYMCE_API_KEY,
                 "question_editor_config": {
                     "uploadUrl": reverse("question_richtext_upload"),
+                    "browserUrl": reverse("question_richtext_browser"),
                 },
             }
         )
@@ -177,6 +183,7 @@ class QuestionUpdateView(TeacherQuestionBaseView, UpdateView):
                 "tinymce_api_key": settings.TINYMCE_API_KEY,
                 "question_editor_config": {
                     "uploadUrl": reverse("question_richtext_upload"),
+                    "browserUrl": reverse("question_richtext_browser"),
                 },
             }
         )
@@ -198,6 +205,15 @@ class QuestionRichTextUploadView(TeacherQuestionBaseView, View):
         return JsonResponse(payload)
 
 
+class QuestionRichTextBrowserView(TeacherQuestionBaseView, View):
+    def get(self, request, *args, **kwargs):
+        items = list_question_richtext_media(
+            media_kind=(request.GET.get("kind") or "all"),
+            limit=120,
+        )
+        return JsonResponse({"items": items})
+
+
 class QuestionDeleteView(TeacherQuestionBaseView, View):
     def post(self, request, pk):
         question = get_object_or_404(
@@ -215,7 +231,7 @@ class QuestionDuplicateView(TeacherQuestionBaseView, View):
     def post(self, request, pk):
         source = get_object_or_404(
             Question.objects.filter(created_by=request.user, is_deleted=False)
-            .prefetch_related("options", "questiontagrelation_set__tag"),
+            .prefetch_related("options", "ordering_items", "matching_pairs", "blank_answers", "questiontagrelation_set__tag"),
             pk=pk,
         )
         duplicated = duplicate_question(source, request.user)
@@ -234,13 +250,23 @@ class QuestionPreviewView(TeacherQuestionBaseView, DetailView):
         return (
             Question.objects.filter(created_by=self.request.user, is_deleted=False)
             .select_related("subject", "category")
-            .prefetch_related("options", "questiontagrelation_set__tag", "correct_answer")
+            .prefetch_related(
+                "options",
+                "ordering_items",
+                "matching_pairs",
+                "blank_answers",
+                "questiontagrelation_set__tag",
+                "correct_answer",
+            )
         )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["answer"] = getattr(self.object, "correct_answer", None)
         context["options"] = self.object.options.order_by("display_order")
+        context["ordering_items"] = self.object.ordering_items.order_by("correct_order")
+        context["matching_pairs"] = self.object.matching_pairs.order_by("pair_order")
+        context["blank_answers"] = self.object.blank_answers.order_by("blank_number")
         return context
 
 

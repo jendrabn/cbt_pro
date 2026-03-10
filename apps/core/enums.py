@@ -90,6 +90,10 @@ ENUM_BADGE_REGISTRY: dict[str, EnumBadgeDefinition] = {
         enum_cls=StudentAnswer.AnswerType,
         tones={
             StudentAnswer.AnswerType.MULTIPLE_CHOICE: "primary",
+            StudentAnswer.AnswerType.CHECKBOX: "info",
+            StudentAnswer.AnswerType.ORDERING: "warning",
+            StudentAnswer.AnswerType.MATCHING: "primary",
+            StudentAnswer.AnswerType.FILL_IN_BLANK: "secondary",
             StudentAnswer.AnswerType.ESSAY: "info",
             StudentAnswer.AnswerType.SHORT_ANSWER: "secondary",
         },
@@ -118,6 +122,10 @@ ENUM_BADGE_REGISTRY: dict[str, EnumBadgeDefinition] = {
         enum_cls=Question.QuestionType,
         tones={
             Question.QuestionType.MULTIPLE_CHOICE: "primary",
+            Question.QuestionType.CHECKBOX: "info",
+            Question.QuestionType.ORDERING: "warning",
+            Question.QuestionType.MATCHING: "primary",
+            Question.QuestionType.FILL_IN_BLANK: "secondary",
             Question.QuestionType.ESSAY: "info",
             Question.QuestionType.SHORT_ANSWER: "secondary",
         },

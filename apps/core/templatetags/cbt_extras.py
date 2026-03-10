@@ -3,9 +3,11 @@ from __future__ import annotations
 from django import template
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.html import format_html
+from django.utils.safestring import mark_safe
 from urllib.parse import quote_plus
 
 from apps.core.enums import get_enum_badge
+from apps.questions.richtext import sanitize_richtext_html
 
 register = template.Library()
 
@@ -38,6 +40,11 @@ def max_words(value: str, limit: int = 2) -> str:
     if not parts:
         return "User"
     return " ".join(parts[:max_limit])
+
+
+@register.filter(name="sanitize_richtext")
+def sanitize_richtext(value: str) -> str:
+    return mark_safe(sanitize_richtext_html(value))
 
 
 @register.simple_tag(name="user_avatar_url")

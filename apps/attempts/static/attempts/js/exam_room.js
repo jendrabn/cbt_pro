@@ -88,6 +88,7 @@
                 questionText: byId("questionText"),
                 questionImageWrap: byId("questionImageWrap"),
                 questionImage: byId("questionImage"),
+                questionMediaLimitNotice: byId("questionMediaLimitNotice"),
                 questionAnswerContainer: byId("questionAnswerContainer"),
                 markReviewCheckbox: byId("markReviewCheckbox"),
                 prevQuestionBtn: byId("prevQuestionBtn"),
@@ -264,6 +265,10 @@
                 if (this.elements.questionAnswerContainer) {
                     this.elements.questionAnswerContainer.innerHTML = "";
                 }
+                if (this.elements.questionMediaLimitNotice) {
+                    this.elements.questionMediaLimitNotice.textContent = "";
+                    this.elements.questionMediaLimitNotice.classList.add("d-none");
+                }
                 return;
             }
 
@@ -286,6 +291,7 @@
             }
 
             this.renderAnswerControl(question);
+            this.applyMediaPlayLimits(question);
             this.updateNavigationButtons();
         }
 
@@ -299,6 +305,422 @@
             return optionHtml + legacyImageHtml;
         }
 
+        stripRichTextToPlainText(html, fallbackLabel) {
+            const wrap = documentObj.createElement("div");
+            wrap.innerHTML = html || "";
+            const textValue = (wrap.textContent || wrap.innerText || "").replace(/\s+/g, " ").trim();
+            return textValue || fallbackLabel || "";
+        }
+
+        escapeHtml(value) {
+            return String(value || "")
+                .replace(/&/g, "&amp;")
+                .replace(/"/g, "&quot;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;");
+        }
+
+        normalizePlayLimit(value) {
+            const parsed = parseInt(value || 0, 10);
+            return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
+        }
+
+        getMediaPlayStorageKey(questionId, mediaType) {
+            const attemptId = this.payload && this.payload.attempt_id ? this.payload.attempt_id : "attempt";
+            return `play_${attemptId}_${questionId}_${mediaType}`;
+        }
+
+        getMediaPlayCount(questionId, mediaType) {
+            if (!questionId || !windowObj.sessionStorage) {
+                return 0;
+            }
+            try {
+                const rawValue = windowObj.sessionStorage.getItem(this.getMediaPlayStorageKey(questionId, mediaType));
+                const parsed = parseInt(rawValue || "0", 10);
+                return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
+            } catch (error) {
+                return 0;
+            }
+        }
+
+        setMediaPlayCount(questionId, mediaType, nextCount) {
+            if (!questionId || !windowObj.sessionStorage) {
+                return;
+            }
+            try {
+                const normalizedCount = parseInt(nextCount || 0, 10);
+                windowObj.sessionStorage.setItem(
+                    this.getMediaPlayStorageKey(questionId, mediaType),
+                    String(Number.isFinite(normalizedCount) && normalizedCount > 0 ? normalizedCount : 0)
+                );
+            } catch (error) {
+                return;
+            }
+        }
+
+        getQuestionMediaElements(mediaType) {
+            const containers = [this.elements.questionText, this.elements.questionAnswerContainer].filter(Boolean);
+            return containers.reduce((accumulator, container) => {
+                return accumulator.concat(Array.from(container.querySelectorAll(mediaType)));
+            }, []);
+        }
+
+        setMediaBlockedState(mediaElement, blocked) {
+            if (!mediaElement) {
+                return;
+            }
+            mediaElement.dataset.playLimitBlocked = blocked ? "1" : "0";
+            if (blocked) {
+                mediaElement.setAttribute("title", "Batas pemutaran tercapai");
+            } else {
+                mediaElement.removeAttribute("title");
+            }
+        }
+
+        pauseMediaElement(mediaElement) {
+            if (!mediaElement) {
+                return;
+            }
+            if (typeof mediaElement.pause === "function") {
+                mediaElement.pause();
+            }
+            try {
+                mediaElement.currentTime = 0;
+            } catch (error) {
+                return;
+            }
+        }
+
+        updateMediaLimitNotice(question) {
+            if (!this.elements.questionMediaLimitNotice || !question) {
+                return;
+            }
+            const questionId = question.question_id || "";
+            const audioLimit = this.normalizePlayLimit(question.audio_play_limit);
+            const videoLimit = this.normalizePlayLimit(question.video_play_limit);
+            const messages = [];
+
+            if (audioLimit) {
+                const usedAudio = this.getMediaPlayCount(questionId, "audio");
+                messages.push(`Audio tersisa ${Math.max(audioLimit - usedAudio, 0)} dari ${audioLimit} kali`);
+            }
+            if (videoLimit) {
+                const usedVideo = this.getMediaPlayCount(questionId, "video");
+                messages.push(`Video tersisa ${Math.max(videoLimit - usedVideo, 0)} dari ${videoLimit} kali`);
+            }
+
+            if (!messages.length) {
+                this.elements.questionMediaLimitNotice.textContent = "";
+                this.elements.questionMediaLimitNotice.classList.add("d-none");
+                return;
+            }
+
+            this.elements.questionMediaLimitNotice.textContent = messages.join(" | ");
+            this.elements.questionMediaLimitNotice.classList.remove("d-none");
+        }
+
+        enforceMediaPlayLimit(question, mediaType) {
+            if (!question || !question.question_id) {
+                return;
+            }
+            const limit = this.normalizePlayLimit(question[`${mediaType}_play_limit`]);
+            const mediaElements = this.getQuestionMediaElements(mediaType);
+            if (!limit || !mediaElements.length) {
+                mediaElements.forEach((mediaElement) => this.setMediaBlockedState(mediaElement, false));
+                return;
+            }
+
+            const syncBlockedState = () => {
+                const isBlocked = this.getMediaPlayCount(question.question_id, mediaType) >= limit;
+                mediaElements.forEach((mediaElement) => this.setMediaBlockedState(mediaElement, isBlocked));
+            };
+
+            syncBlockedState();
+            mediaElements.forEach((mediaElement) => {
+                mediaElement.addEventListener("play", () => {
+                    const usedCount = this.getMediaPlayCount(question.question_id, mediaType);
+                    if (usedCount >= limit) {
+                        this.pauseMediaElement(mediaElement);
+                        this.updateMediaLimitNotice(question);
+                        syncBlockedState();
+                        this.showAlert(
+                            `Batas pemutaran ${mediaType === "audio" ? "audio" : "video"} untuk soal ini sudah tercapai.`,
+                            "warning",
+                            2800
+                        );
+                        return;
+                    }
+
+                    this.setMediaPlayCount(question.question_id, mediaType, usedCount + 1);
+                    this.updateMediaLimitNotice(question);
+                    syncBlockedState();
+                });
+            });
+        }
+
+        applyMediaPlayLimits(question) {
+            this.updateMediaLimitNotice(question);
+            this.enforceMediaPlayLimit(question, "audio");
+            this.enforceMediaPlayLimit(question, "video");
+        }
+
+        renderOrderingControl(question, currentNumber) {
+            const helper = documentObj.createElement("div");
+            helper.className = "small text-muted mb-2";
+            helper.textContent = "Susun item ke urutan yang benar menggunakan tombol naik/turun.";
+            this.elements.questionAnswerContainer.appendChild(helper);
+
+            const orderingItems = Array.isArray(question.ordering_items)
+                ? question.ordering_items.map((item) => ({
+                    id: item.id,
+                    text: item.text || "",
+                }))
+                : [];
+
+            if (!orderingItems.length) {
+                const emptyState = documentObj.createElement("div");
+                emptyState.className = "alert alert-warning py-2 mb-0";
+                emptyState.textContent = "Item ordering untuk soal ini tidak tersedia.";
+                this.elements.questionAnswerContainer.appendChild(emptyState);
+                return;
+            }
+
+            const listWrap = documentObj.createElement("div");
+            listWrap.className = "d-grid gap-2";
+            this.elements.questionAnswerContainer.appendChild(listWrap);
+
+            const persistOrder = () => {
+                this.saveCurrentAnswer({
+                    question_number: currentNumber,
+                    answer_order_json: orderingItems.map((item) => item.id),
+                    is_marked_for_review: this.elements.markReviewCheckbox
+                        ? Boolean(this.elements.markReviewCheckbox.checked)
+                        : false,
+                });
+            };
+
+            const moveItem = (fromIndex, toIndex) => {
+                if (toIndex < 0 || toIndex >= orderingItems.length || fromIndex === toIndex) {
+                    return;
+                }
+                const movedItem = orderingItems.splice(fromIndex, 1)[0];
+                orderingItems.splice(toIndex, 0, movedItem);
+                renderItems();
+                persistOrder();
+            };
+
+            const renderItems = () => {
+                listWrap.innerHTML = "";
+                orderingItems.forEach((item, index) => {
+                    const card = documentObj.createElement("div");
+                    card.className = "border rounded-3 p-3 bg-white";
+                    card.innerHTML = `
+                        <div class="d-flex align-items-start gap-3">
+                            <div class="rounded-circle bg-warning-subtle text-warning-emphasis fw-semibold d-flex align-items-center justify-content-center flex-shrink-0" style="width: 36px; height: 36px;">
+                                ${index + 1}
+                            </div>
+                            <div class="flex-grow-1 richtext-content">${item.text}</div>
+                            <div class="d-flex flex-column gap-2">
+                                <button type="button" class="btn btn-sm btn-outline-secondary ordering-up-btn" ${index === 0 ? "disabled" : ""} title="Naikkan item ini">
+                                    <i class="ri-arrow-up-line"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary ordering-down-btn" ${index === orderingItems.length - 1 ? "disabled" : ""} title="Turunkan item ini">
+                                    <i class="ri-arrow-down-line"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    const upBtn = card.querySelector(".ordering-up-btn");
+                    const downBtn = card.querySelector(".ordering-down-btn");
+                    if (upBtn) {
+                        upBtn.addEventListener("click", () => moveItem(index, index - 1));
+                    }
+                    if (downBtn) {
+                        downBtn.addEventListener("click", () => moveItem(index, index + 1));
+                    }
+                    listWrap.appendChild(card);
+                });
+            };
+
+            renderItems();
+        }
+
+        renderMatchingControl(question, currentNumber) {
+            const helper = documentObj.createElement("div");
+            helper.className = "small text-muted mb-2";
+            helper.textContent = "Pasangkan setiap prompt dengan jawaban yang paling sesuai.";
+            this.elements.questionAnswerContainer.appendChild(helper);
+
+            const matchingPairs = Array.isArray(question.matching_pairs) ? question.matching_pairs.slice() : [];
+            const answerChoices = Array.isArray(question.matching_answer_choices)
+                ? question.matching_answer_choices.slice()
+                : [];
+            const workingMap = Object.assign({}, (question.answer && question.answer.answer_matching_json) || {});
+
+            if (!matchingPairs.length || !answerChoices.length) {
+                const emptyState = documentObj.createElement("div");
+                emptyState.className = "alert alert-warning py-2 mb-0";
+                emptyState.textContent = "Data matching untuk soal ini belum lengkap.";
+                this.elements.questionAnswerContainer.appendChild(emptyState);
+                return;
+            }
+
+            const answerBankWrap = documentObj.createElement("div");
+            answerBankWrap.className = "mb-3";
+            answerBankWrap.innerHTML = '<div class="small fw-semibold text-muted mb-2">Bank Jawaban</div>';
+            const answerBankGrid = documentObj.createElement("div");
+            answerBankGrid.className = "d-grid gap-2";
+            answerChoices.forEach((choice, index) => {
+                const card = documentObj.createElement("div");
+                card.className = "border rounded-3 p-2 bg-light-subtle";
+                card.innerHTML = `
+                    <div class="small text-muted mb-1">Pilihan ${index + 1}</div>
+                    <div class="richtext-content">${choice.answer_text || ""}</div>
+                `;
+                answerBankGrid.appendChild(card);
+            });
+            answerBankWrap.appendChild(answerBankGrid);
+            this.elements.questionAnswerContainer.appendChild(answerBankWrap);
+
+            const pairsWrap = documentObj.createElement("div");
+            pairsWrap.className = "vstack gap-3";
+            this.elements.questionAnswerContainer.appendChild(pairsWrap);
+
+            const persistMap = () => {
+                this.saveCurrentAnswer({
+                    question_number: currentNumber,
+                    answer_matching_json: workingMap,
+                    is_marked_for_review: this.elements.markReviewCheckbox
+                        ? Boolean(this.elements.markReviewCheckbox.checked)
+                        : false,
+                });
+            };
+
+            matchingPairs.forEach((pair, pairIndex) => {
+                const card = documentObj.createElement("div");
+                card.className = "border rounded-3 p-3 bg-white";
+
+                const currentAnswerId = workingMap[pair.id] || "";
+                const selectedChoice = answerChoices.find((choice) => choice.id === currentAnswerId) || null;
+                const choiceOptionsHtml = answerChoices.map((choice, choiceIndex) => {
+                    const label = this.escapeHtml(
+                        this.stripRichTextToPlainText(choice.answer_text, `Pilihan ${choiceIndex + 1}`)
+                    );
+                    const selectedAttr = choice.id === currentAnswerId ? " selected" : "";
+                    return `<option value="${choice.id}"${selectedAttr}>${label}</option>`;
+                }).join("");
+
+                card.innerHTML = `
+                    <div class="small text-muted mb-1">Prompt ${pairIndex + 1}</div>
+                    <div class="richtext-content mb-3">${pair.prompt_text || ""}</div>
+                    <label class="form-label small text-muted">Pilih jawaban</label>
+                    <select class="form-select matching-answer-select mb-3" data-pair-id="${pair.id}">
+                        <option value="">Pilih pasangan jawaban...</option>
+                        ${choiceOptionsHtml}
+                    </select>
+                    <div class="small text-muted mb-1">Preview jawaban terpilih</div>
+                    <div class="border rounded-2 p-2 bg-light-subtle richtext-content matching-answer-preview">
+                        ${selectedChoice ? selectedChoice.answer_text : '<span class="text-muted">Belum dipilih.</span>'}
+                    </div>
+                `;
+
+                const selectEl = card.querySelector(".matching-answer-select");
+                const previewEl = card.querySelector(".matching-answer-preview");
+                if (selectEl) {
+                    selectEl.addEventListener("change", (event) => {
+                        const nextAnswerId = event.target.value || "";
+                        if (nextAnswerId) {
+                            workingMap[pair.id] = nextAnswerId;
+                        } else {
+                            delete workingMap[pair.id];
+                        }
+
+                        const nextChoice = answerChoices.find((choice) => choice.id === nextAnswerId) || null;
+                        if (previewEl) {
+                            previewEl.innerHTML = nextChoice
+                                ? (nextChoice.answer_text || "")
+                                : '<span class="text-muted">Belum dipilih.</span>';
+                        }
+                        persistMap();
+                    });
+                }
+
+                pairsWrap.appendChild(card);
+            });
+        }
+
+        renderFillInBlankControl(question, currentNumber) {
+            const helper = documentObj.createElement("div");
+            helper.className = "small text-muted mb-2";
+            helper.textContent = "Isi setiap blank langsung pada teks soal. Jawaban tersimpan otomatis.";
+            this.elements.questionAnswerContainer.appendChild(helper);
+
+            const workingAnswers = Object.assign({}, (question.answer && question.answer.answer_blanks_json) || {});
+            const placeholderPattern = /\{\{\s*(\d+)\s*\}\}/g;
+            const questionHtml = question.question_text || "";
+            const renderedHtml = questionHtml.replace(placeholderPattern, (matchValue, rawNumber) => {
+                const blankNumber = String(parseInt(rawNumber, 10));
+                const currentValue = Object.prototype.hasOwnProperty.call(workingAnswers, blankNumber)
+                    ? workingAnswers[blankNumber]
+                    : "";
+                return (
+                    '<span class="d-inline-flex align-items-center mx-1 my-1">' +
+                    '<input type="text" class="form-control form-control-sm fill-blank-input" ' +
+                    `data-blank-number="${blankNumber}" ` +
+                    `value="${this.escapeHtml(currentValue)}" ` +
+                    `placeholder="Blank ${blankNumber}" style="min-width: 160px; width: 12rem;">` +
+                    "</span>"
+                );
+            });
+
+            if (this.elements.questionText) {
+                this.elements.questionText.innerHTML = renderedHtml;
+            }
+
+            const blankInputs = this.elements.questionText
+                ? Array.from(this.elements.questionText.querySelectorAll(".fill-blank-input"))
+                : [];
+
+            if (!blankInputs.length) {
+                const emptyState = documentObj.createElement("div");
+                emptyState.className = "alert alert-warning py-2 mb-0";
+                emptyState.textContent = "Placeholder blank tidak ditemukan pada teks soal.";
+                this.elements.questionAnswerContainer.appendChild(emptyState);
+                return;
+            }
+
+            const debouncedSave = (windowObj.ExamRoomAutoSave && windowObj.ExamRoomAutoSave.debounce)
+                ? windowObj.ExamRoomAutoSave.debounce((payloadValue) => {
+                    this.saveCurrentAnswer({
+                        question_number: currentNumber,
+                        answer_blanks_json: payloadValue,
+                        is_marked_for_review: this.elements.markReviewCheckbox
+                            ? Boolean(this.elements.markReviewCheckbox.checked)
+                            : false,
+                    });
+                }, 600)
+                : ((payloadValue) => {
+                    this.saveCurrentAnswer({
+                        question_number: currentNumber,
+                        answer_blanks_json: payloadValue,
+                        is_marked_for_review: this.elements.markReviewCheckbox
+                            ? Boolean(this.elements.markReviewCheckbox.checked)
+                            : false,
+                    });
+                });
+
+            blankInputs.forEach((inputEl) => {
+                inputEl.addEventListener("input", (event) => {
+                    const blankNumber = event.target.dataset.blankNumber || "";
+                    if (!blankNumber) {
+                        return;
+                    }
+                    workingAnswers[blankNumber] = event.target.value || "";
+                    debouncedSave(Object.assign({}, workingAnswers));
+                });
+            });
+        }
+
         renderAnswerControl(question) {
             if (!this.elements.questionAnswerContainer) {
                 return;
@@ -306,13 +728,27 @@
             this.elements.questionAnswerContainer.innerHTML = "";
 
             const currentNumber = this.getCurrentNumber();
-            if (question.question_type === "multiple_choice") {
+            if (question.question_type === "multiple_choice" || question.question_type === "checkbox") {
                 const selectedOptionId = (question.answer && question.answer.selected_option_id) || "";
+                const selectedOptionIds = Array.isArray(question.answer && question.answer.selected_option_ids)
+                    ? question.answer.selected_option_ids
+                    : [];
+
+                if (question.question_type === "checkbox") {
+                    const helper = documentObj.createElement("div");
+                    helper.className = "small text-muted mb-2";
+                    helper.textContent = `Pilih semua jawaban yang benar. Terpilih: ${selectedOptionIds.length}`;
+                    this.elements.questionAnswerContainer.appendChild(helper);
+                }
+
                 (question.options || []).forEach((option) => {
                     const btn = documentObj.createElement("button");
                     btn.type = "button";
                     btn.className = "answer-option-item w-100 text-start";
-                    if (selectedOptionId && selectedOptionId === option.id) {
+                    const isSelected = question.question_type === "multiple_choice"
+                        ? (selectedOptionId && selectedOptionId === option.id)
+                        : selectedOptionIds.indexOf(option.id) >= 0;
+                    if (isSelected) {
                         btn.classList.add("selected");
                     }
                     btn.innerHTML = `
@@ -322,6 +758,23 @@
                         </div>
                     `;
                     btn.addEventListener("click", () => {
+                        if (question.question_type === "checkbox") {
+                            const nextSelectedIds = selectedOptionIds.slice();
+                            const selectedIndex = nextSelectedIds.indexOf(option.id);
+                            if (selectedIndex >= 0) {
+                                nextSelectedIds.splice(selectedIndex, 1);
+                            } else {
+                                nextSelectedIds.push(option.id);
+                            }
+                            this.saveCurrentAnswer({
+                                question_number: currentNumber,
+                                selected_option_ids: nextSelectedIds,
+                                is_marked_for_review: this.elements.markReviewCheckbox
+                                    ? Boolean(this.elements.markReviewCheckbox.checked)
+                                    : false,
+                            });
+                            return;
+                        }
                         this.saveCurrentAnswer({
                             question_number: currentNumber,
                             selected_option_id: option.id,
@@ -332,6 +785,21 @@
                     });
                     this.elements.questionAnswerContainer.appendChild(btn);
                 });
+                return;
+            }
+
+            if (question.question_type === "ordering") {
+                this.renderOrderingControl(question, currentNumber);
+                return;
+            }
+
+            if (question.question_type === "matching") {
+                this.renderMatchingControl(question, currentNumber);
+                return;
+            }
+
+            if (question.question_type === "fill_in_blank") {
+                this.renderFillInBlankControl(question, currentNumber);
                 return;
             }
 

@@ -394,6 +394,10 @@ class ExamCreateWizard(TeacherExamBaseView, CreateView):
 class ExamQuestionPickerView(TeacherExamBaseView, View):
     VALID_TYPES = {
         Question.QuestionType.MULTIPLE_CHOICE,
+        Question.QuestionType.CHECKBOX,
+        Question.QuestionType.ORDERING,
+        Question.QuestionType.MATCHING,
+        Question.QuestionType.FILL_IN_BLANK,
         Question.QuestionType.ESSAY,
         Question.QuestionType.SHORT_ANSWER,
     }

@@ -49,6 +49,14 @@
                                 <td>
                                     {% if answer.selected_option %}
                                     {{ answer.selected_option.option_letter }}. {{ answer.selected_option.option_text|truncatechars:60 }}
+                                    {% elif answer.selected_option_ids %}
+                                    {{ answer.selected_option_ids|length }} opsi dipilih
+                                    {% elif answer.answer_order_json %}
+                                    {{ answer.answer_order_json|length }} item disusun
+                                    {% elif answer.answer_matching_json %}
+                                    {{ answer.answer_matching_json|length }} pasangan diisi
+                                    {% elif answer.answer_blanks_json %}
+                                    {{ answer.answer_blanks_json|length }} blank terisi
                                     {% elif answer.answer_text %}
                                     {{ answer.answer_text|truncatechars:80 }}
                                     {% else %}

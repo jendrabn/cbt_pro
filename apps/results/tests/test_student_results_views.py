@@ -267,6 +267,101 @@ class StudentResultsViewTests(TestCase):
         self.assertContains(response, "Review Soal per Nomor")
         self.assertContains(response, "Na adalah natrium")
 
+    def test_student_answer_review_renders_ordering_question(self):
+        question_ordering = Question.objects.create(
+            created_by=self.teacher,
+            subject=self.subject,
+            question_type="ordering",
+            question_text="Urutkan proses pembentukan ikatan.",
+            points=10,
+            explanation="Elektron valensi berinteraksi sebelum terbentuk ikatan stabil.",
+            is_active=True,
+        )
+        item_1 = question_ordering.ordering_items.create(item_text="Atom saling mendekat", correct_order=1)
+        question_ordering.ordering_items.create(item_text="Elektron valensi berinteraksi", correct_order=2)
+        item_3 = question_ordering.ordering_items.create(item_text="Terbentuk ikatan stabil", correct_order=3)
+        ExamQuestion.objects.create(exam=self.exam_review_on, question=question_ordering, display_order=3, points_override=10)
+        StudentAnswer.objects.create(
+            attempt=self.attempt_review_on,
+            question=question_ordering,
+            answer_type="ordering",
+            answer_order_json=[str(item_3.id), str(item_1.id)],
+            is_correct=False,
+            points_earned=3,
+            points_possible=10,
+            time_spent_seconds=180,
+        )
+
+        self.client.force_login(self.student)
+        response = self.client.get(reverse("student_answer_review", kwargs={"result_id": self.result_review_on.id}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Urutkan proses pembentukan ikatan")
+        self.assertContains(response, "Terbentuk ikatan stabil")
+
+    def test_student_answer_review_renders_matching_question(self):
+        question_matching = Question.objects.create(
+            created_by=self.teacher,
+            subject=self.subject,
+            question_type="matching",
+            question_text="Pasangkan unsur dengan lambangnya.",
+            points=10,
+            explanation="Gunakan simbol unsur yang benar.",
+            is_active=True,
+        )
+        pair_1 = question_matching.matching_pairs.create(prompt_text="Natrium", answer_text="Na", pair_order=1)
+        pair_2 = question_matching.matching_pairs.create(prompt_text="Kalium", answer_text="K", pair_order=2)
+        ExamQuestion.objects.create(exam=self.exam_review_on, question=question_matching, display_order=3, points_override=10)
+        StudentAnswer.objects.create(
+            attempt=self.attempt_review_on,
+            question=question_matching,
+            answer_type="matching",
+            answer_matching_json={str(pair_1.id): str(pair_1.id), str(pair_2.id): str(pair_1.id)},
+            is_correct=False,
+            points_earned=5,
+            points_possible=10,
+            time_spent_seconds=160,
+        )
+
+        self.client.force_login(self.student)
+        response = self.client.get(reverse("student_answer_review", kwargs={"result_id": self.result_review_on.id}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Pasangkan unsur dengan lambangnya")
+        self.assertContains(response, "Natrium")
+        self.assertContains(response, "Kalium")
+
+    def test_student_answer_review_renders_fill_in_blank_question(self):
+        question_fill_blank = Question.objects.create(
+            created_by=self.teacher,
+            subject=self.subject,
+            question_type="fill_in_blank",
+            question_text="Simbol kimia emas adalah {{1}}.",
+            points=10,
+            explanation="Emas memiliki simbol Au.",
+            is_active=True,
+        )
+        question_fill_blank.blank_answers.create(blank_number=1, accepted_answers=["Au"], blank_points=10)
+        ExamQuestion.objects.create(exam=self.exam_review_on, question=question_fill_blank, display_order=3, points_override=10)
+        StudentAnswer.objects.create(
+            attempt=self.attempt_review_on,
+            question=question_fill_blank,
+            answer_type="fill_in_blank",
+            answer_blanks_json={"1": "Ag"},
+            is_correct=False,
+            points_earned=0,
+            points_possible=10,
+            time_spent_seconds=110,
+        )
+
+        self.client.force_login(self.student)
+        response = self.client.get(reverse("student_answer_review", kwargs={"result_id": self.result_review_on.id}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Simbol kimia emas adalah")
+        self.assertContains(response, "Blank 1")
+        self.assertContains(response, "Au")
+
     def test_student_review_forbidden_if_exam_disables_review(self):
         self.client.force_login(self.student)
         response = self.client.get(reverse("student_answer_review", kwargs={"result_id": self.result_review_off.id}))

@@ -62,6 +62,10 @@ class StudentAnswer(BaseModel):
 
     class AnswerType(models.TextChoices):
         MULTIPLE_CHOICE = "multiple_choice", "Pilihan Ganda"
+        CHECKBOX = "checkbox", "Checkbox"
+        ORDERING = "ordering", "Ordering"
+        MATCHING = "matching", "Matching"
+        FILL_IN_BLANK = "fill_in_blank", "Fill In Blank"
         ESSAY = "essay", "Esai"
         SHORT_ANSWER = "short_answer", "Jawaban Singkat"
 
@@ -73,6 +77,10 @@ class StudentAnswer(BaseModel):
     # Answer Data
     answer_type = models.CharField(max_length=20, choices=ANSWER_TYPE_CHOICES)
     selected_option = models.ForeignKey(QuestionOption, on_delete=models.SET_NULL, null=True, blank=True, related_name='student_answers')
+    selected_option_ids = models.JSONField(default=list, blank=True)
+    answer_order_json = models.JSONField(default=list, blank=True)
+    answer_matching_json = models.JSONField(default=dict, blank=True)
+    answer_blanks_json = models.JSONField(default=dict, blank=True)
     answer_text = models.TextField(null=True, blank=True)
     
     # Scoring

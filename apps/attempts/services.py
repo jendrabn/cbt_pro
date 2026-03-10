@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import base64
+import bisect
 import binascii
 import hashlib
 import logging
@@ -20,7 +21,14 @@ from django.utils.dateparse import parse_date
 from apps.core.enums import choice_label
 from apps.exams.models import ClassStudent, Exam
 from apps.exams.services import resolve_effective_navigation
-from apps.questions.models import Question, QuestionOption
+from apps.questions.models import (
+    Question,
+    QuestionBlankAnswer,
+    QuestionMatchingPair,
+    QuestionOption,
+    QuestionOrderingItem,
+)
+from apps.questions.richtext import sanitize_richtext_html
 from apps.results.models import ExamResult
 
 from .models import ExamAttempt, ExamViolation, ProctoringScreenshot, StudentAnswer
@@ -579,11 +587,69 @@ def _coerce_int(value, default=0):
         return default
 
 
+def _normalize_option_id_list(value):
+    if value in (None, ""):
+        return []
+    if isinstance(value, (list, tuple, set)):
+        raw_values = value
+    else:
+        raw_values = [value]
+
+    normalized = []
+    seen = set()
+    for item in raw_values:
+        text = str(item or "").strip()
+        if not text or text in seen:
+            continue
+        seen.add(text)
+        normalized.append(text)
+    return normalized
+
+
+def _normalize_matching_answer_map(value):
+    if not isinstance(value, dict):
+        return {}
+
+    normalized = {}
+    for key, item_value in value.items():
+        prompt_id = str(key or "").strip()
+        answer_id = str(item_value or "").strip()
+        if not prompt_id or not answer_id:
+            continue
+        normalized[prompt_id] = answer_id
+    return normalized
+
+
+def _normalize_blank_answer_map(value):
+    if not isinstance(value, dict):
+        return {}
+
+    normalized = {}
+    for key, item_value in value.items():
+        blank_key = str(key or "").strip()
+        if not blank_key:
+            continue
+        normalized[blank_key] = str(item_value or "")
+    return normalized
+
+
+def _blank_answer_map_has_values(value):
+    return any(str(item or "").strip() for item in _normalize_blank_answer_map(value).values())
+
+
 def _answer_is_filled(answer):
     if not answer:
         return False
     if answer.answer_type == StudentAnswer.AnswerType.MULTIPLE_CHOICE:
         return bool(answer.selected_option_id)
+    if answer.answer_type == StudentAnswer.AnswerType.CHECKBOX:
+        return bool(answer.selected_option_ids or [])
+    if answer.answer_type == StudentAnswer.AnswerType.ORDERING:
+        return bool(answer.answer_order_json or [])
+    if answer.answer_type == StudentAnswer.AnswerType.MATCHING:
+        return bool(_normalize_matching_answer_map(answer.answer_matching_json))
+    if answer.answer_type == StudentAnswer.AnswerType.FILL_IN_BLANK:
+        return _blank_answer_map_has_values(answer.answer_blanks_json)
     return bool((answer.answer_text or "").strip())
 
 
@@ -633,6 +699,18 @@ def _build_exam_question_sequence(exam, attempt):
             Prefetch(
                 "question__options",
                 queryset=QuestionOption.objects.order_by("display_order", "option_letter"),
+            ),
+            Prefetch(
+                "question__ordering_items",
+                queryset=QuestionOrderingItem.objects.order_by("correct_order"),
+            ),
+            Prefetch(
+                "question__matching_pairs",
+                queryset=QuestionMatchingPair.objects.order_by("pair_order"),
+            ),
+            Prefetch(
+                "question__blank_answers",
+                queryset=QuestionBlankAnswer.objects.order_by("blank_number"),
             )
         )
         .order_by("display_order")
@@ -642,8 +720,21 @@ def _build_exam_question_sequence(exam, attempt):
     for exam_question in exam_question_rows:
         question = exam_question.question
         options = list(question.options.all())
+        ordering_items = list(question.ordering_items.all())
+        ordering_items_shuffled = list(ordering_items)
+        matching_pairs = list(question.matching_pairs.all())
+        matching_answer_choices = list(matching_pairs)
+        blank_answers = list(question.blank_answers.all())
         if exam.randomize_options:
             options.sort(key=lambda item: _deterministic_rank(f"{attempt.id}:{question.id}:{item.id}:option"))
+        if question.question_type == Question.QuestionType.ORDERING:
+            ordering_items_shuffled.sort(
+                key=lambda item: _deterministic_rank(f"{attempt.id}:{question.id}:{item.id}:ordering")
+            )
+        if question.question_type == Question.QuestionType.MATCHING:
+            matching_answer_choices.sort(
+                key=lambda item: _deterministic_rank(f"{attempt.id}:{question.id}:{item.id}:matching-answer")
+            )
 
         points_possible = exam_question.points_override if exam_question.points_override is not None else question.points
         rows.append(
@@ -651,6 +742,11 @@ def _build_exam_question_sequence(exam, attempt):
                 "exam_question": exam_question,
                 "question": question,
                 "options": options,
+                "ordering_items": ordering_items,
+                "ordering_items_shuffled": ordering_items_shuffled,
+                "matching_pairs": matching_pairs,
+                "matching_answer_choices": matching_answer_choices,
+                "blank_answers": blank_answers,
                 "rules": resolve_effective_navigation(exam, exam_question),
                 "points_possible": points_possible,
             }
@@ -817,6 +913,10 @@ def _build_navigation_meta(question_rows, answer_map, current_number):
 def _serialize_question_payload(row, answer):
     question = row["question"]
     selected_option_id = str(answer.selected_option_id) if answer and answer.selected_option_id else ""
+    selected_option_ids = _normalize_option_id_list(answer.selected_option_ids if answer else [])
+    answer_order_json = _normalize_option_id_list(answer.answer_order_json if answer else [])
+    answer_matching_json = _normalize_matching_answer_map(answer.answer_matching_json if answer else {})
+    answer_blanks_json = _normalize_blank_answer_map(answer.answer_blanks_json if answer else {})
     answer_text = ""
     if answer and answer.answer_text:
         answer_text = answer.answer_text
@@ -827,21 +927,88 @@ def _serialize_question_payload(row, answer):
             {
                 "id": str(option.id),
                 "letter": option.option_letter,
-                "text": option.option_text,
+                "text": sanitize_richtext_html(option.option_text),
                 "image_url": option.option_image_url or "",
             }
         )
+
+    ordering_item_map = {str(item.id): item for item in row.get("ordering_items", [])}
+    ordering_items = []
+    if question.question_type == Question.QuestionType.ORDERING:
+        if answer_order_json:
+            seen_item_ids = set()
+            for item_id in answer_order_json:
+                item = ordering_item_map.get(item_id)
+                if not item:
+                    continue
+                seen_item_ids.add(item_id)
+                ordering_items.append(
+                    {
+                        "id": str(item.id),
+                        "text": sanitize_richtext_html(item.item_text),
+                    }
+                )
+            for item in row.get("ordering_items_shuffled", []):
+                item_id = str(item.id)
+                if item_id in seen_item_ids:
+                    continue
+                ordering_items.append(
+                    {
+                        "id": item_id,
+                        "text": sanitize_richtext_html(item.item_text),
+                    }
+                )
+        else:
+            for item in row.get("ordering_items_shuffled", []):
+                ordering_items.append(
+                    {
+                        "id": str(item.id),
+                        "text": sanitize_richtext_html(item.item_text),
+                    }
+                )
+
+    matching_pairs = []
+    matching_answer_choices = []
+    if question.question_type == Question.QuestionType.MATCHING:
+        for pair in row.get("matching_pairs", []):
+            matching_pairs.append(
+                {
+                    "id": str(pair.id),
+                    "prompt_text": sanitize_richtext_html(pair.prompt_text),
+                }
+            )
+        for pair in row.get("matching_answer_choices", []):
+            matching_answer_choices.append(
+                {
+                    "id": str(pair.id),
+                    "answer_text": sanitize_richtext_html(pair.answer_text),
+                }
+            )
+
+    blank_numbers = []
+    if question.question_type == Question.QuestionType.FILL_IN_BLANK:
+        blank_numbers = [int(item.blank_number) for item in row.get("blank_answers", [])]
 
     return {
         "number": row["number"],
         "question_id": str(question.id),
         "question_type": question.question_type,
-        "question_text": question.question_text,
+        "question_text": sanitize_richtext_html(question.question_text),
         "question_image_url": question.question_image_url or "",
+        "audio_play_limit": int(question.audio_play_limit or 0),
+        "video_play_limit": int(question.video_play_limit or 0),
         "points": float(_resolve_points_possible(row)),
         "options": options,
+        "ordering_items": ordering_items,
+        "matching_pairs": matching_pairs,
+        "matching_answer_choices": matching_answer_choices,
+        "blank_numbers": blank_numbers,
         "answer": {
             "selected_option_id": selected_option_id,
+            "selected_option_ids": selected_option_ids,
+            "answer_order_json": answer_order_json,
+            "answer_matching_json": answer_matching_json,
+            "answer_blanks_json": answer_blanks_json,
             "answer_text": answer_text,
             "marked_for_review": bool(answer and answer.is_marked_for_review),
             "is_answered": _answer_is_filled(answer),
@@ -1058,6 +1225,113 @@ def _evaluate_short_answer(question, answer_text):
     return False
 
 
+def _evaluate_checkbox_answer(question, answer, points_possible):
+    correct_ids = {
+        str(option.id)
+        for option in question.options.filter(is_correct=True)
+    }
+    selected_ids = set(_normalize_option_id_list(getattr(answer, "selected_option_ids", [])))
+
+    if not correct_ids:
+        return False, Decimal("0.00")
+
+    is_correct = selected_ids == correct_ids
+    scoring = (question.checkbox_scoring or Question.CheckboxScoring.ALL_OR_NOTHING).strip().lower()
+    total_correct = len(correct_ids)
+
+    if scoring == Question.CheckboxScoring.PARTIAL:
+        true_positive = len(selected_ids & correct_ids)
+        false_positive = len(selected_ids - correct_ids)
+        fraction = Decimal(str((true_positive - false_positive) / total_correct))
+        points = max(Decimal("0.00"), _rounded_decimal(fraction * points_possible))
+        return is_correct, points
+
+    if scoring == Question.CheckboxScoring.PARTIAL_NO_PENALTY:
+        true_positive = len(selected_ids & correct_ids)
+        fraction = Decimal(str(true_positive / total_correct))
+        points = _rounded_decimal(fraction * points_possible)
+        return is_correct, points
+
+    return is_correct, (points_possible if is_correct else Decimal("0.00"))
+
+
+def _lis_length(student, correct):
+    index_map = {value: index for index, value in enumerate(correct)}
+    sequence = [index_map[item] for item in student if item in index_map]
+    tails = []
+    for value in sequence:
+        position = bisect.bisect_left(tails, value)
+        if position == len(tails):
+            tails.append(value)
+        else:
+            tails[position] = value
+    return len(tails)
+
+
+def _evaluate_ordering_answer(question, answer, points_possible):
+    correct = [str(item.id) for item in question.ordering_items.all().order_by("correct_order")]
+    student = _normalize_option_id_list(getattr(answer, "answer_order_json", []))
+
+    if not correct:
+        return False, Decimal("0.00")
+
+    is_correct = student == correct
+    if is_correct:
+        return True, points_possible
+
+    lis = _lis_length(student, correct)
+    points = _rounded_decimal(Decimal(str(lis / len(correct))) * points_possible)
+    return False, points
+
+
+def _evaluate_matching_answer(question, answer, points_possible):
+    student_map = _normalize_matching_answer_map(getattr(answer, "answer_matching_json", {}))
+    correct_map = {str(pair.id): str(pair.id) for pair in question.matching_pairs.all()}
+    total = len(correct_map)
+    if total <= 0:
+        return False, Decimal("0.00")
+
+    correct_count = sum(1 for pair_id, answer_id in student_map.items() if correct_map.get(pair_id) == answer_id)
+    points = _rounded_decimal(Decimal(str(correct_count / total)) * points_possible)
+    return correct_count == total, points
+
+
+def _evaluate_fill_in_blank_answer(question, answer, points_possible):
+    student_blanks = _normalize_blank_answer_map(getattr(answer, "answer_blanks_json", {}))
+    blank_defs = list(question.blank_answers.all().order_by("blank_number"))
+    if not blank_defs:
+        return False, Decimal("0.00")
+
+    auto_points = points_possible / Decimal(str(len(blank_defs)))
+    total_points = Decimal("0.00")
+    correct_count = 0
+
+    for blank_def in blank_defs:
+        raw_value = str(student_blanks.get(str(blank_def.blank_number), "")).strip()
+        if not raw_value:
+            continue
+
+        accepted_answers = [str(item).strip() for item in (blank_def.accepted_answers or []) if str(item).strip()]
+        if not accepted_answers:
+            continue
+
+        normalized_value = _normalize_text(raw_value, case_sensitive=blank_def.is_case_sensitive)
+        matched = normalized_value in {
+            _normalize_text(item, case_sensitive=blank_def.is_case_sensitive)
+            for item in accepted_answers
+        }
+
+        if not matched:
+            continue
+
+        correct_count += 1
+        awarded = blank_def.blank_points if blank_def.blank_points is not None else auto_points
+        total_points += _decimal_value(awarded, default=Decimal("0.00"))
+
+    points = min(_rounded_decimal(total_points), points_possible)
+    return correct_count == len(blank_defs), points
+
+
 def _grade_letter_from_percentage(percentage_value):
     percentage = _decimal_value(percentage_value)
     if percentage >= Decimal("85"):
@@ -1172,7 +1446,9 @@ def _schedule_post_submit_housekeeping(attempt_id, exam_id):
 @transaction.atomic
 def upsert_exam_result_for_attempt(*, exam, attempt):
     exam_rows = list(
-        exam.exam_questions.select_related("question", "question__correct_answer").order_by("display_order")
+        exam.exam_questions.select_related("question", "question__correct_answer")
+        .prefetch_related("question__options", "question__ordering_items", "question__matching_pairs", "question__blank_answers")
+        .order_by("display_order")
     )
     answer_map = {
         answer.question_id: answer
@@ -1198,6 +1474,10 @@ def upsert_exam_result_for_attempt(*, exam, attempt):
         answer = answer_map.get(question.id)
         is_answered = bool(answer and (
             answer.selected_option_id
+            or (answer.selected_option_ids)
+            or (answer.answer_order_json)
+            or (answer.answer_matching_json)
+            or _blank_answer_map_has_values(answer.answer_blanks_json)
             or (answer.answer_text and answer.answer_text.strip())
         ))
         if not is_answered:
@@ -1210,6 +1490,14 @@ def upsert_exam_result_for_attempt(*, exam, attempt):
         if question.question_type == Question.QuestionType.MULTIPLE_CHOICE:
             evaluated_correct = bool(answer.selected_option and answer.selected_option.is_correct)
             points_earned = points_possible if evaluated_correct else Decimal("0.00")
+        elif question.question_type == Question.QuestionType.CHECKBOX:
+            evaluated_correct, points_earned = _evaluate_checkbox_answer(question, answer, points_possible)
+        elif question.question_type == Question.QuestionType.ORDERING:
+            evaluated_correct, points_earned = _evaluate_ordering_answer(question, answer, points_possible)
+        elif question.question_type == Question.QuestionType.MATCHING:
+            evaluated_correct, points_earned = _evaluate_matching_answer(question, answer, points_possible)
+        elif question.question_type == Question.QuestionType.FILL_IN_BLANK:
+            evaluated_correct, points_earned = _evaluate_fill_in_blank_answer(question, answer, points_possible)
         elif question.question_type == Question.QuestionType.SHORT_ANSWER:
             short_result = _evaluate_short_answer(question, answer.answer_text)
             if short_result is not None:
@@ -1490,6 +1778,10 @@ def save_attempt_answer(*, exam, attempt, question_number, payload):
         is_marked_for_review = bool(answer and answer.is_marked_for_review)
 
     selected_option = answer.selected_option if answer else None
+    selected_option_ids = _normalize_option_id_list(answer.selected_option_ids if answer else [])
+    answer_order_json = _normalize_option_id_list(answer.answer_order_json if answer else [])
+    answer_matching_json = _normalize_matching_answer_map(answer.answer_matching_json if answer else {})
+    answer_blanks_json = _normalize_blank_answer_map(answer.answer_blanks_json if answer else {})
     answer_text = (answer.answer_text or "") if answer else ""
 
     if question.question_type == Question.QuestionType.MULTIPLE_CHOICE:
@@ -1508,6 +1800,77 @@ def save_attempt_answer(*, exam, attempt, question_number, payload):
                 raise ValueError("Opsi jawaban tidak valid untuk soal ini.")
         else:
             selected_option = None
+        selected_option_ids = []
+        answer_text = ""
+    elif question.question_type == Question.QuestionType.CHECKBOX:
+        if clear_answer:
+            selected_option_ids = []
+        elif "selected_option_ids" in payload:
+            selected_option_ids = _normalize_option_id_list(payload.get("selected_option_ids"))
+        elif answer:
+            selected_option_ids = _normalize_option_id_list(answer.selected_option_ids)
+
+        option_map = {str(item.id): item for item in current_row["options"]}
+        invalid_option_ids = [item for item in selected_option_ids if item not in option_map]
+        if invalid_option_ids:
+            raise ValueError("Opsi jawaban checkbox tidak valid untuk soal ini.")
+        selected_option = None
+        answer_order_json = []
+        answer_text = ""
+    elif question.question_type == Question.QuestionType.ORDERING:
+        if clear_answer:
+            answer_order_json = []
+        elif "answer_order_json" in payload:
+            answer_order_json = _normalize_option_id_list(payload.get("answer_order_json"))
+        elif answer:
+            answer_order_json = _normalize_option_id_list(answer.answer_order_json)
+
+        ordering_item_ids = {str(item.id) for item in current_row["ordering_items"]}
+        invalid_order_ids = [item_id for item_id in answer_order_json if item_id not in ordering_item_ids]
+        if invalid_order_ids:
+            raise ValueError("Item ordering tidak valid untuk soal ini.")
+        if answer_order_json and set(answer_order_json) != ordering_item_ids:
+            raise ValueError("Urutan jawaban ordering harus memuat seluruh item soal.")
+        selected_option = None
+        selected_option_ids = []
+        answer_matching_json = {}
+        answer_blanks_json = {}
+        answer_text = ""
+    elif question.question_type == Question.QuestionType.MATCHING:
+        if clear_answer:
+            answer_matching_json = {}
+        elif "answer_matching_json" in payload:
+            answer_matching_json = _normalize_matching_answer_map(payload.get("answer_matching_json"))
+        elif answer:
+            answer_matching_json = _normalize_matching_answer_map(answer.answer_matching_json)
+
+        pair_ids = {str(item.id) for item in current_row["matching_pairs"]}
+        answer_choice_ids = {str(item.id) for item in current_row["matching_answer_choices"]}
+        invalid_prompt_ids = [item_id for item_id in answer_matching_json.keys() if item_id not in pair_ids]
+        invalid_answer_ids = [item_id for item_id in answer_matching_json.values() if item_id not in answer_choice_ids]
+        if invalid_prompt_ids or invalid_answer_ids:
+            raise ValueError("Pasangan jawaban matching tidak valid untuk soal ini.")
+        selected_option = None
+        selected_option_ids = []
+        answer_order_json = []
+        answer_blanks_json = {}
+        answer_text = ""
+    elif question.question_type == Question.QuestionType.FILL_IN_BLANK:
+        if clear_answer:
+            answer_blanks_json = {}
+        elif "answer_blanks_json" in payload:
+            answer_blanks_json = _normalize_blank_answer_map(payload.get("answer_blanks_json"))
+        elif answer:
+            answer_blanks_json = _normalize_blank_answer_map(answer.answer_blanks_json)
+
+        valid_blank_numbers = {str(item.blank_number) for item in current_row["blank_answers"]}
+        invalid_blank_numbers = [item_key for item_key in answer_blanks_json.keys() if item_key not in valid_blank_numbers]
+        if invalid_blank_numbers:
+            raise ValueError("Blank jawaban tidak valid untuk soal ini.")
+        selected_option = None
+        selected_option_ids = []
+        answer_order_json = []
+        answer_matching_json = {}
         answer_text = ""
     else:
         if clear_answer:
@@ -1517,8 +1880,23 @@ def save_attempt_answer(*, exam, attempt, question_number, payload):
         elif answer:
             answer_text = answer.answer_text or ""
         selected_option = None
+        selected_option_ids = []
+        answer_order_json = []
+        answer_matching_json = {}
+        answer_blanks_json = {}
 
-    has_answer = bool(selected_option) if question.question_type == Question.QuestionType.MULTIPLE_CHOICE else bool(answer_text.strip())
+    if question.question_type == Question.QuestionType.MULTIPLE_CHOICE:
+        has_answer = bool(selected_option)
+    elif question.question_type == Question.QuestionType.CHECKBOX:
+        has_answer = bool(selected_option_ids)
+    elif question.question_type == Question.QuestionType.ORDERING:
+        has_answer = bool(answer_order_json)
+    elif question.question_type == Question.QuestionType.MATCHING:
+        has_answer = bool(answer_matching_json)
+    elif question.question_type == Question.QuestionType.FILL_IN_BLANK:
+        has_answer = _blank_answer_map_has_values(answer_blanks_json)
+    else:
+        has_answer = bool(answer_text.strip())
     points_possible = _resolve_points_possible(current_row)
 
     if answer is None and (has_answer or is_marked_for_review):
@@ -1537,9 +1915,45 @@ def save_attempt_answer(*, exam, attempt, question_number, payload):
         answer.is_marked_for_review = is_marked_for_review
         if question.question_type == Question.QuestionType.MULTIPLE_CHOICE:
             answer.selected_option = selected_option
+            answer.selected_option_ids = []
+            answer.answer_order_json = []
+            answer.answer_matching_json = {}
+            answer.answer_blanks_json = {}
+            answer.answer_text = None
+        elif question.question_type == Question.QuestionType.CHECKBOX:
+            answer.selected_option = None
+            answer.selected_option_ids = selected_option_ids
+            answer.answer_order_json = []
+            answer.answer_matching_json = {}
+            answer.answer_blanks_json = {}
+            answer.answer_text = None
+        elif question.question_type == Question.QuestionType.ORDERING:
+            answer.selected_option = None
+            answer.selected_option_ids = []
+            answer.answer_order_json = answer_order_json
+            answer.answer_matching_json = {}
+            answer.answer_blanks_json = {}
+            answer.answer_text = None
+        elif question.question_type == Question.QuestionType.MATCHING:
+            answer.selected_option = None
+            answer.selected_option_ids = []
+            answer.answer_order_json = []
+            answer.answer_matching_json = answer_matching_json
+            answer.answer_blanks_json = {}
+            answer.answer_text = None
+        elif question.question_type == Question.QuestionType.FILL_IN_BLANK:
+            answer.selected_option = None
+            answer.selected_option_ids = []
+            answer.answer_order_json = []
+            answer.answer_matching_json = {}
+            answer.answer_blanks_json = answer_blanks_json
             answer.answer_text = None
         else:
             answer.selected_option = None
+            answer.selected_option_ids = []
+            answer.answer_order_json = []
+            answer.answer_matching_json = {}
+            answer.answer_blanks_json = {}
             answer.answer_text = answer_text
 
         if has_answer or is_marked_for_review:

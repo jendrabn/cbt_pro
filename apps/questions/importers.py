@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from decimal import Decimal, InvalidOperation
+import json
 import re
 import uuid
 
@@ -16,13 +17,25 @@ from apps.subjects.models import Subject
 from .models import (
     Question,
     QuestionAnswer,
+    QuestionBlankAnswer,
     QuestionCategory,
     QuestionImportLog,
+    QuestionMatchingPair,
     QuestionOption,
+    QuestionOrderingItem,
     QuestionTag,
     QuestionTagRelation,
 )
-from .services import parse_tags, sync_question_answer, sync_question_options, sync_question_tags
+from .richtext import sanitize_optional_richtext_html, sanitize_richtext_html
+from .services import (
+    parse_tags,
+    sync_question_answer,
+    sync_question_blank_answers,
+    sync_question_matching_pairs,
+    sync_question_options,
+    sync_question_ordering_items,
+    sync_question_tags,
+)
 
 
 HEADER_ALIASES = {
@@ -32,8 +45,12 @@ HEADER_ALIASES = {
     "tingkat_kesulitan": "difficulty_level",
     "pembahasan": "explanation",
     "gambar_soal": "question_image_url",
+    "batas_putar_audio": "audio_play_limit",
+    "batas_putar_video": "video_play_limit",
     "batas_waktu_soal": "time_limit_seconds",
 }
+OPTION_LETTERS = [choice.value for choice in QuestionOption.OptionLetter]
+BLANK_PLACEHOLDER_RE = re.compile(r"\{\{\s*(\d+)\s*\}\}")
 
 
 @dataclass
@@ -59,13 +76,19 @@ class PreparedQuestionRow:
     difficulty_level: str | None
     points: Decimal
     explanation: str | None
+    checkbox_scoring: str
     question_image_url: str | None
+    audio_play_limit: int | None
+    video_play_limit: int | None
     allow_previous: bool
     allow_next: bool
     force_sequential: bool
     time_limit_seconds: int | None
     is_active: bool
     options: list[dict] = field(default_factory=list)
+    ordering_items: list[dict] = field(default_factory=list)
+    matching_pairs: list[dict] = field(default_factory=list)
+    blank_answers: list[dict] = field(default_factory=list)
     answer_payload: dict | None = None
     tag_names: list[str] = field(default_factory=list)
 
@@ -83,6 +106,11 @@ def _normalize_question_type(value):
         "multiple_choice": "multiple_choice",
         "pilihan_ganda": "multiple_choice",
         "pilihan ganda": "multiple_choice",
+        "checkbox": "checkbox",
+        "ordering": "ordering",
+        "matching": "matching",
+        "fill_in_blank": "fill_in_blank",
+        "fill in blank": "fill_in_blank",
         "essay": "essay",
         "esai": "essay",
         "short_answer": "short_answer",
@@ -158,49 +186,247 @@ def _resolve_subject(subject_value, subject_by_code, subject_by_name):
     return subject
 
 
+def _parse_ordering_items(value):
+    if value in (None, ""):
+        return []
+
+    parsed_value = value
+    if isinstance(value, str):
+        raw_value = value.strip()
+        if not raw_value:
+            return []
+        try:
+            parsed_value = json.loads(raw_value)
+        except json.JSONDecodeError as exc:
+            raise ValueError("ordering_items harus berupa JSON array.") from exc
+
+    if not isinstance(parsed_value, (list, tuple)):
+        raise ValueError("ordering_items harus berupa JSON array.")
+
+    normalized_items = []
+    for index, item in enumerate(parsed_value, start=1):
+        text_value = item
+        sort_order = index
+        if isinstance(item, dict):
+            text_value = item.get("text") or item.get("item_text") or item.get("label") or ""
+            sort_order = item.get("order") or item.get("correct_order") or index
+
+        item_text = sanitize_richtext_html(text_value)
+        if not item_text:
+            continue
+
+        try:
+            normalized_order = int(sort_order)
+        except (TypeError, ValueError):
+            normalized_order = index
+        normalized_items.append((normalized_order, item_text))
+
+    normalized_items.sort(key=lambda item: item[0])
+    return [item_text for _, item_text in normalized_items]
+
+
+def _parse_matching_pairs(value):
+    if value in (None, ""):
+        return []
+
+    parsed_value = value
+    if isinstance(value, str):
+        raw_value = value.strip()
+        if not raw_value:
+            return []
+        try:
+            parsed_value = json.loads(raw_value)
+        except json.JSONDecodeError as exc:
+            raise ValueError("matching_pairs harus berupa JSON array.") from exc
+
+    if not isinstance(parsed_value, (list, tuple)):
+        raise ValueError("matching_pairs harus berupa JSON array.")
+
+    normalized_pairs = []
+    for index, item in enumerate(parsed_value, start=1):
+        if not isinstance(item, dict):
+            raise ValueError("Setiap elemen matching_pairs harus berupa objek prompt/answer.")
+        prompt_text = sanitize_richtext_html(item.get("prompt") or item.get("prompt_text"))
+        answer_text = sanitize_richtext_html(item.get("answer") or item.get("answer_text"))
+        if not prompt_text or not answer_text:
+            continue
+        pair_order = item.get("order") or item.get("pair_order") or index
+        try:
+            normalized_order = int(pair_order)
+        except (TypeError, ValueError):
+            normalized_order = index
+        normalized_pairs.append(
+            {
+                "prompt_text": prompt_text,
+                "answer_text": answer_text,
+                "pair_order": normalized_order,
+            }
+        )
+
+    normalized_pairs.sort(key=lambda item: item["pair_order"])
+    return normalized_pairs
+
+
+def _parse_blank_answers(value):
+    if value in (None, ""):
+        return []
+
+    parsed_value = value
+    if isinstance(value, str):
+        raw_value = value.strip()
+        if not raw_value:
+            return []
+        try:
+            parsed_value = json.loads(raw_value)
+        except json.JSONDecodeError as exc:
+            raise ValueError("blank_answers harus berupa JSON object.") from exc
+
+    if not isinstance(parsed_value, dict):
+        raise ValueError("blank_answers harus berupa JSON object.")
+
+    normalized_answers = []
+    for raw_blank_number, payload in parsed_value.items():
+        try:
+            blank_number = int(raw_blank_number)
+        except (TypeError, ValueError) as exc:
+            raise ValueError("Kunci blank_answers harus berupa angka.") from exc
+
+        accepted_answers = payload
+        is_case_sensitive = False
+        blank_points = None
+        if isinstance(payload, dict):
+            accepted_answers = payload.get("accepted_answers") or payload.get("answers") or []
+            is_case_sensitive = bool(payload.get("is_case_sensitive"))
+            blank_points = payload.get("blank_points")
+
+        if not isinstance(accepted_answers, (list, tuple)):
+            raise ValueError(f"blank_answers untuk {{{{{blank_number}}}}} harus berupa list jawaban.")
+
+        normalized_list = [str(item).strip() for item in accepted_answers if str(item).strip()]
+        if not normalized_list:
+            continue
+
+        normalized_answer = {
+            "blank_number": blank_number,
+            "accepted_answers": normalized_list,
+            "is_case_sensitive": is_case_sensitive,
+            "blank_points": None,
+        }
+        if blank_points not in (None, ""):
+            normalized_answer["blank_points"] = _parse_decimal(blank_points, default=Decimal("0.00"))
+        normalized_answers.append(normalized_answer)
+
+    normalized_answers.sort(key=lambda item: item["blank_number"])
+    return normalized_answers
+
+
 def _extract_cleaned_payload(payload, question_type):
     option_values = {
-        "A": (payload.get("option_a") or "").strip(),
-        "B": (payload.get("option_b") or "").strip(),
-        "C": (payload.get("option_c") or "").strip(),
-        "D": (payload.get("option_d") or "").strip(),
-        "E": (payload.get("option_e") or "").strip(),
+        letter: (payload.get(f"option_{letter.lower()}") or "").strip()
+        for letter in OPTION_LETTERS
     }
     active_options = {letter: text for letter, text in option_values.items() if text}
     correct_option = (payload.get("correct_option") or "").strip().upper()
+    correct_options = []
+    seen_correct_options = set()
+    for item in str(payload.get("correct_options") or payload.get("correct_option") or "").split(","):
+        normalized_item = item.strip().upper()
+        if not normalized_item or normalized_item in seen_correct_options:
+            continue
+        seen_correct_options.add(normalized_item)
+        correct_options.append(normalized_item)
+    checkbox_scoring = (payload.get("checkbox_scoring") or "").strip().lower() or Question.CheckboxScoring.ALL_OR_NOTHING
+    ordering_items = _parse_ordering_items(payload.get("ordering_items"))
+    matching_pairs = _parse_matching_pairs(payload.get("matching_pairs"))
+    blank_answers = _parse_blank_answers(payload.get("blank_answers"))
+    blank_numbers = {item["blank_number"] for item in blank_answers}
+    question_text_raw = str(payload.get("question_text") or "")
 
-    if question_type == "multiple_choice":
+    if question_type == Question.QuestionType.MULTIPLE_CHOICE:
         if len(active_options) < 2:
             raise ValueError("Soal pilihan ganda wajib memiliki minimal 2 opsi.")
         if correct_option not in active_options:
             raise ValueError("Jawaban benar harus salah satu dari opsi yang terisi.")
+        correct_options = []
+        checkbox_scoring = Question.CheckboxScoring.ALL_OR_NOTHING
+    elif question_type == Question.QuestionType.CHECKBOX:
+        if len(active_options) < 2:
+            raise ValueError("Soal checkbox wajib memiliki minimal 2 opsi.")
+        valid_scoring = {choice[0] for choice in Question.CheckboxScoring.choices}
+        if checkbox_scoring not in valid_scoring:
+            raise ValueError("Metode penilaian checkbox tidak valid.")
+        if len(correct_options) < 2:
+            raise ValueError("Soal checkbox wajib memiliki minimal 2 jawaban benar.")
+        invalid_correct = [letter for letter in correct_options if letter not in active_options]
+        if invalid_correct:
+            raise ValueError("Jawaban benar checkbox harus berasal dari opsi yang terisi.")
+        correct_option = ""
+        ordering_items = []
+    elif question_type == Question.QuestionType.ORDERING:
+        if len(ordering_items) < 2:
+            raise ValueError("Soal ordering wajib memiliki minimal 2 item.")
+        correct_option = ""
+        correct_options = []
+        checkbox_scoring = Question.CheckboxScoring.ALL_OR_NOTHING
+        matching_pairs = []
+        blank_answers = []
+    elif question_type == Question.QuestionType.MATCHING:
+        if len(matching_pairs) < 2:
+            raise ValueError("Soal matching wajib memiliki minimal 2 pasangan.")
+        correct_option = ""
+        correct_options = []
+        checkbox_scoring = Question.CheckboxScoring.ALL_OR_NOTHING
+        ordering_items = []
+        blank_answers = []
+    elif question_type == Question.QuestionType.FILL_IN_BLANK:
+        if not BLANK_PLACEHOLDER_RE.search(question_text_raw):
+            raise ValueError("Soal fill in blank harus mengandung placeholder seperti {{1}}.")
+        if not blank_answers:
+            raise ValueError("Soal fill in blank wajib memiliki definisi blank_answers.")
+        question_blank_numbers = {int(number) for number in BLANK_PLACEHOLDER_RE.findall(question_text_raw)}
+        if question_blank_numbers != blank_numbers:
+            raise ValueError("Definisi blank_answers harus cocok dengan placeholder {{n}} pada question_text.")
+        correct_option = ""
+        correct_options = []
+        checkbox_scoring = Question.CheckboxScoring.ALL_OR_NOTHING
+        ordering_items = []
+        matching_pairs = []
     else:
         if not (payload.get("answer_text") or "").strip():
             raise ValueError("Kunci jawaban/rubrik wajib diisi untuk tipe soal non-PG.")
         correct_option = ""
+        correct_options = []
+        checkbox_scoring = Question.CheckboxScoring.ALL_OR_NOTHING
+        ordering_items = []
+        matching_pairs = []
+        blank_answers = []
 
-    return {
+    cleaned_payload = {
         "question_type": question_type,
-        "option_a": option_values["A"],
-        "option_b": option_values["B"],
-        "option_c": option_values["C"],
-        "option_d": option_values["D"],
-        "option_e": option_values["E"],
         "correct_option": correct_option,
+        "correct_options": correct_options,
+        "checkbox_scoring": checkbox_scoring,
+        "ordering_items": ordering_items,
+        "matching_pairs": matching_pairs,
+        "blank_answers": blank_answers,
         "answer_text": (payload.get("answer_text") or "").strip(),
         "keywords": (payload.get("keywords") or "").strip(),
         "is_case_sensitive": _parse_bool(payload.get("is_case_sensitive"), default=False),
         "max_word_count": _parse_int(payload.get("max_word_count"), "Batas kata"),
         "tags": (payload.get("tags") or "").strip(),
     }
+    for letter in OPTION_LETTERS:
+        cleaned_payload[f"option_{letter.lower()}"] = option_values[letter]
+    return cleaned_payload
 
 
 @transaction.atomic
 def _create_question_from_payload(payload, teacher):
     question_type = _normalize_question_type(payload.get("question_type"))
-    question_text = (payload.get("question_text") or "").strip()
+    question_text = sanitize_richtext_html(payload.get("question_text"))
     if not question_text:
         raise ValueError("Teks soal wajib diisi.")
+    cleaned_data = _extract_cleaned_payload(payload, question_type)
 
     subject_by_code, subject_by_name = _build_subject_maps()
     subject = _resolve_subject(payload.get("subject"), subject_by_code, subject_by_name)
@@ -223,9 +449,12 @@ def _create_question_from_payload(payload, teacher):
         question_type=question_type,
         question_text=question_text,
         question_image_url=(payload.get("question_image_url") or "").strip() or None,
+        audio_play_limit=_parse_int(payload.get("audio_play_limit"), "Batas putar audio"),
+        video_play_limit=_parse_int(payload.get("video_play_limit"), "Batas putar video"),
         points=points,
         difficulty_level=difficulty_level,
-        explanation=(payload.get("explanation") or "").strip() or None,
+        explanation=sanitize_optional_richtext_html(payload.get("explanation")),
+        checkbox_scoring=cleaned_data.get("checkbox_scoring") or Question.CheckboxScoring.ALL_OR_NOTHING,
         allow_previous=allow_previous,
         allow_next=allow_next,
         force_sequential=force_sequential,
@@ -233,8 +462,10 @@ def _create_question_from_payload(payload, teacher):
         is_active=_parse_bool(payload.get("is_active"), default=True),
     )
 
-    cleaned_data = _extract_cleaned_payload(payload, question_type)
     sync_question_options(question, cleaned_data)
+    sync_question_ordering_items(question, cleaned_data)
+    sync_question_matching_pairs(question, cleaned_data)
+    sync_question_blank_answers(question, cleaned_data)
     sync_question_answer(question, cleaned_data)
     sync_question_tags(question, cleaned_data)
     return question
@@ -319,7 +550,7 @@ def _prepare_question_row(row_index, row_values, headers, subject_by_code, subje
             normalized[numeric_key] = row[numeric_key]
 
     question_type = _normalize_question_type(normalized.get("question_type"))
-    question_text = (normalized.get("question_text") or "").strip()
+    question_text = sanitize_richtext_html(normalized.get("question_text"))
     if not question_text:
         raise ValueError("Teks soal wajib diisi.")
 
@@ -334,24 +565,49 @@ def _prepare_question_row(row_index, row_values, headers, subject_by_code, subje
 
     cleaned_data = _extract_cleaned_payload(normalized, question_type)
     options = []
-    if question_type == "multiple_choice":
+    ordering_items = []
+    matching_pairs = []
+    blank_answers = []
+    if question_type in {Question.QuestionType.MULTIPLE_CHOICE, Question.QuestionType.CHECKBOX}:
         display_order = 1
-        for letter in ("A", "B", "C", "D", "E"):
-            text = cleaned_data.get(f"option_{letter.lower()}") or ""
+        for letter in OPTION_LETTERS:
+            text = sanitize_richtext_html(cleaned_data.get(f"option_{letter.lower()}"))
             if not text:
                 continue
             options.append(
                 {
                     "option_letter": letter,
                     "option_text": text,
-                    "is_correct": cleaned_data.get("correct_option") == letter,
+                    "is_correct": (
+                        cleaned_data.get("correct_option") == letter
+                        if question_type == Question.QuestionType.MULTIPLE_CHOICE
+                        else letter in set(cleaned_data.get("correct_options") or [])
+                    ),
                     "display_order": display_order,
                 }
             )
             display_order += 1
+    elif question_type == Question.QuestionType.ORDERING:
+        ordering_items = [
+            {
+                "item_text": item_text,
+                "correct_order": index,
+            }
+            for index, item_text in enumerate(cleaned_data.get("ordering_items") or [], start=1)
+        ]
+    elif question_type == Question.QuestionType.MATCHING:
+        matching_pairs = list(cleaned_data.get("matching_pairs") or [])
+    elif question_type == Question.QuestionType.FILL_IN_BLANK:
+        blank_answers = list(cleaned_data.get("blank_answers") or [])
 
     answer_payload = None
-    if question_type != "multiple_choice":
+    if question_type not in {
+        Question.QuestionType.MULTIPLE_CHOICE,
+        Question.QuestionType.CHECKBOX,
+        Question.QuestionType.ORDERING,
+        Question.QuestionType.MATCHING,
+        Question.QuestionType.FILL_IN_BLANK,
+    }:
         answer_payload = {
             "answer_text": cleaned_data.get("answer_text", ""),
             "keywords": parse_tags(cleaned_data.get("keywords")),
@@ -369,14 +625,20 @@ def _prepare_question_row(row_index, row_values, headers, subject_by_code, subje
         question_text=question_text,
         difficulty_level=difficulty_level,
         points=points,
-        explanation=(normalized.get("explanation") or "").strip() or None,
+        explanation=sanitize_optional_richtext_html(normalized.get("explanation")),
+        checkbox_scoring=cleaned_data.get("checkbox_scoring") or Question.CheckboxScoring.ALL_OR_NOTHING,
         question_image_url=(normalized.get("question_image_url") or "").strip() or None,
+        audio_play_limit=_parse_int(normalized.get("audio_play_limit"), "Batas putar audio"),
+        video_play_limit=_parse_int(normalized.get("video_play_limit"), "Batas putar video"),
         allow_previous=allow_previous,
         allow_next=allow_next,
         force_sequential=force_sequential,
         time_limit_seconds=_parse_int(normalized.get("time_limit_seconds"), "Batas waktu soal"),
         is_active=_parse_bool(normalized.get("is_active"), default=True),
         options=options,
+        ordering_items=ordering_items,
+        matching_pairs=matching_pairs,
+        blank_answers=blank_answers,
         answer_payload=answer_payload,
         tag_names=parse_tags(cleaned_data.get("tags")),
     )
@@ -399,6 +661,9 @@ def _process_question_chunk(
 
             question_objects = []
             option_objects = []
+            ordering_item_objects = []
+            matching_pair_objects = []
+            blank_answer_objects = []
             answer_objects = []
             relation_objects = []
 
@@ -413,9 +678,12 @@ def _process_question_chunk(
                         question_type=row.question_type,
                         question_text=row.question_text,
                         question_image_url=row.question_image_url,
+                        audio_play_limit=row.audio_play_limit,
+                        video_play_limit=row.video_play_limit,
                         points=row.points,
                         difficulty_level=row.difficulty_level,
                         explanation=row.explanation,
+                        checkbox_scoring=row.checkbox_scoring,
                         allow_previous=row.allow_previous,
                         allow_next=row.allow_next,
                         force_sequential=row.force_sequential,
@@ -431,6 +699,33 @@ def _process_question_chunk(
                             option_text=option["option_text"],
                             is_correct=option["is_correct"],
                             display_order=option["display_order"],
+                        )
+                    )
+                for ordering_item in row.ordering_items:
+                    ordering_item_objects.append(
+                        QuestionOrderingItem(
+                            question_id=row.question_id,
+                            item_text=ordering_item["item_text"],
+                            correct_order=ordering_item["correct_order"],
+                        )
+                    )
+                for matching_pair in row.matching_pairs:
+                    matching_pair_objects.append(
+                        QuestionMatchingPair(
+                            question_id=row.question_id,
+                            prompt_text=matching_pair["prompt_text"],
+                            answer_text=matching_pair["answer_text"],
+                            pair_order=matching_pair["pair_order"],
+                        )
+                    )
+                for blank_answer in row.blank_answers:
+                    blank_answer_objects.append(
+                        QuestionBlankAnswer(
+                            question_id=row.question_id,
+                            blank_number=blank_answer["blank_number"],
+                            accepted_answers=blank_answer["accepted_answers"],
+                            is_case_sensitive=blank_answer.get("is_case_sensitive", False),
+                            blank_points=blank_answer.get("blank_points"),
                         )
                     )
                 if row.answer_payload:
@@ -458,6 +753,21 @@ def _process_question_chunk(
             if option_objects:
                 QuestionOption.objects.bulk_create(
                     option_objects,
+                    batch_size=getattr(settings, "QUESTION_IMPORT_CHUNK_SIZE", 200),
+                )
+            if ordering_item_objects:
+                QuestionOrderingItem.objects.bulk_create(
+                    ordering_item_objects,
+                    batch_size=getattr(settings, "QUESTION_IMPORT_CHUNK_SIZE", 200),
+                )
+            if matching_pair_objects:
+                QuestionMatchingPair.objects.bulk_create(
+                    matching_pair_objects,
+                    batch_size=getattr(settings, "QUESTION_IMPORT_CHUNK_SIZE", 200),
+                )
+            if blank_answer_objects:
+                QuestionBlankAnswer.objects.bulk_create(
+                    blank_answer_objects,
                     batch_size=getattr(settings, "QUESTION_IMPORT_CHUNK_SIZE", 200),
                 )
             if answer_objects:
@@ -638,16 +948,19 @@ def export_template_headers():
         "points",
         "explanation",
         "question_image_url",
+        "audio_play_limit",
+        "video_play_limit",
         "allow_previous",
         "allow_next",
         "force_sequential",
         "time_limit_seconds",
-        "option_a",
-        "option_b",
-        "option_c",
-        "option_d",
-        "option_e",
+        *[f"option_{letter.lower()}" for letter in OPTION_LETTERS],
         "correct_option",
+        "correct_options",
+        "checkbox_scoring",
+        "ordering_items",
+        "matching_pairs",
+        "blank_answers",
         "answer_text",
         "keywords",
         "is_case_sensitive",

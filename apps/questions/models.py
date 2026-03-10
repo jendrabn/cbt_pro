@@ -28,8 +28,17 @@ class Question(BaseModelSoftDelete):
 
     class QuestionType(models.TextChoices):
         MULTIPLE_CHOICE = "multiple_choice", "Pilihan Ganda"
+        CHECKBOX = "checkbox", "Checkbox"
+        ORDERING = "ordering", "Ordering"
+        MATCHING = "matching", "Matching"
+        FILL_IN_BLANK = "fill_in_blank", "Fill In Blank"
         ESSAY = "essay", "Esai"
         SHORT_ANSWER = "short_answer", "Jawaban Singkat"
+
+    class CheckboxScoring(models.TextChoices):
+        ALL_OR_NOTHING = "all_or_nothing", "Semua atau Nol"
+        PARTIAL = "partial", "Parsial dengan Penalti"
+        PARTIAL_NO_PENALTY = "partial_no_penalty", "Parsial tanpa Penalti"
 
     class Difficulty(models.TextChoices):
         EASY = "easy", "Mudah"
@@ -45,9 +54,16 @@ class Question(BaseModelSoftDelete):
     question_type = models.CharField(max_length=20, choices=QUESTION_TYPE_CHOICES)
     question_text = models.TextField()
     question_image_url = models.URLField(max_length=500, null=True, blank=True)
+    audio_play_limit = models.PositiveIntegerField(null=True, blank=True)
+    video_play_limit = models.PositiveIntegerField(null=True, blank=True)
     points = models.DecimalField(max_digits=5, decimal_places=2, default=1.00)
     difficulty_level = models.CharField(max_length=20, choices=DIFFICULTY_CHOICES, null=True, blank=True)
     explanation = models.TextField(null=True, blank=True)
+    checkbox_scoring = models.CharField(
+        max_length=32,
+        choices=CheckboxScoring.choices,
+        default=CheckboxScoring.ALL_OR_NOTHING,
+    )
     
     # Navigation Settings
     allow_previous = models.BooleanField(default=True)
@@ -82,6 +98,11 @@ class QuestionOption(BaseModel):
         C = "C", "C"
         D = "D", "D"
         E = "E", "E"
+        F = "F", "F"
+        G = "G", "G"
+        H = "H", "H"
+        I = "I", "I"
+        J = "J", "J"
 
     OPTION_LETTERS = OptionLetter.choices
     
@@ -120,6 +141,66 @@ class QuestionAnswer(BaseModel):
     
     def __str__(self):
         return f"Answer for {self.question.id}"
+
+
+class QuestionOrderingItem(BaseModel):
+    """Ordered items for ordering questions"""
+
+    question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name="ordering_items")
+    item_text = models.TextField()
+    correct_order = models.PositiveIntegerField()
+
+    class Meta:
+        db_table = "question_ordering_items"
+        unique_together = [("question", "correct_order")]
+        indexes = [
+            models.Index(fields=["question"], name="idx_qord_question_id"),
+            models.Index(fields=["question", "correct_order"], name="idx_qord_order"),
+        ]
+
+    def __str__(self):
+        return f"{self.question.id} - Ordering item {self.correct_order}"
+
+
+class QuestionMatchingPair(BaseModel):
+    """Prompt/answer pairs for matching questions"""
+
+    question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name="matching_pairs")
+    prompt_text = models.TextField()
+    answer_text = models.TextField()
+    pair_order = models.PositiveIntegerField()
+
+    class Meta:
+        db_table = "question_matching_pairs"
+        unique_together = [("question", "pair_order")]
+        indexes = [
+            models.Index(fields=["question"], name="idx_qmatch_question_id"),
+            models.Index(fields=["question", "pair_order"], name="idx_qmatch_order"),
+        ]
+
+    def __str__(self):
+        return f"{self.question.id} - Matching pair {self.pair_order}"
+
+
+class QuestionBlankAnswer(BaseModel):
+    """Accepted answers for fill in blank questions"""
+
+    question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name="blank_answers")
+    blank_number = models.PositiveIntegerField()
+    accepted_answers = models.JSONField(default=list, blank=True)
+    is_case_sensitive = models.BooleanField(default=False)
+    blank_points = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+
+    class Meta:
+        db_table = "question_blank_answers"
+        unique_together = [("question", "blank_number")]
+        indexes = [
+            models.Index(fields=["question"], name="idx_qblank_question_id"),
+            models.Index(fields=["question", "blank_number"], name="idx_qblank_number"),
+        ]
+
+    def __str__(self):
+        return f"{self.question.id} - Blank {self.blank_number}"
 
 
 class QuestionTag(BaseModel):

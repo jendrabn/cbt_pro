@@ -449,6 +449,15 @@
                 var safeCategoryName = escapeHTML(item.category_name || "");
                 var safeDefaultPoints = escapeHTML(item.default_points || "");
                 var safePointsOverride = escapeHTML(item.points_override || "");
+                var questionTypeLabels = {
+                    multiple_choice: "Pilihan Ganda",
+                    checkbox: "Checkbox",
+                    ordering: "Ordering",
+                    matching: "Matching",
+                    fill_in_blank: "Fill In Blank",
+                    essay: "Esai",
+                    short_answer: "Jawaban Singkat"
+                };
                 var overrideNavId = buildSafeDomId("selected-question-override-nav-", item.question_id);
                 var bulkCheckId = buildSafeDomId("selected-question-bulk-", item.question_id);
                 var titleId = buildSafeDomId("selected-question-title-", item.question_id);
@@ -459,7 +468,7 @@
                             '<input type="checkbox" class="form-check-input selected-question-bulk-check m-0" id="' + bulkCheckId + '" title="Pilih untuk bulk action" aria-label="Pilih soal untuk aksi massal: ' + safeQuestionText + '">' +
                             '<div class="flex-grow-1">' +
                                 '<p class="mb-1 fw-semibold" id="' + titleId + '">' + safeQuestionText + '</p>' +
-                                '<p class="small text-muted mb-0">' + safeSubjectName + ' &bull; ' + safeCategoryName + ' &bull; ' + (item.question_type === "multiple_choice" ? "Pilihan Ganda" : (item.question_type === "essay" ? "Esai" : "Jawaban Singkat")) + '</p>' +
+                                '<p class="small text-muted mb-0">' + safeSubjectName + ' &bull; ' + safeCategoryName + ' &bull; ' + (questionTypeLabels[item.question_type] || item.question_type || "-") + '</p>' +
                                 '<div class="d-flex flex-wrap align-items-center gap-2 mt-2">' +
                                     '<input type="number" min="0.01" step="0.01" class="form-control form-control-sm selected-question-points" value="' + safePointsOverride + '" placeholder="Poin (' + safeDefaultPoints + ')" style="width: 140px;" aria-label="Timpa poin untuk soal ini">' +
                                     '<div class="form-check mb-0 small">' +

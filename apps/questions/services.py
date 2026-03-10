@@ -6,6 +6,7 @@ from pathlib import Path
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.core.files.base import File
 from django.core.files.storage import FileSystemStorage
 from django.db import OperationalError, ProgrammingError, transaction
 from django.db.models import Q
@@ -15,10 +16,14 @@ from .models import (
     Question,
     QuestionAnswer,
     QuestionImportLog,
+    QuestionBlankAnswer,
+    QuestionMatchingPair,
     QuestionOption,
+    QuestionOrderingItem,
     QuestionTag,
     QuestionTagRelation,
 )
+from .richtext import optimize_uploaded_image, sanitize_optional_richtext_html, sanitize_richtext_html
 
 
 QUESTION_TYPE_LABELS = dict(Question.QuestionType.choices)
@@ -44,7 +49,14 @@ def get_teacher_question_queryset(teacher):
     return (
         Question.objects.filter(created_by=teacher, is_deleted=False)
         .select_related("subject", "category")
-        .prefetch_related("options", "correct_answer", "questiontagrelation_set__tag")
+        .prefetch_related(
+            "options",
+            "ordering_items",
+            "matching_pairs",
+            "blank_answers",
+            "correct_answer",
+            "questiontagrelation_set__tag",
+        )
         .order_by("-updated_at")
     )
 
@@ -132,7 +144,10 @@ def save_question_richtext_media(uploaded_file):
         base_url=f"{settings.MEDIA_URL.rstrip('/')}/{RICHTEXT_UPLOAD_DIRECTORY}/",
     )
     filename = f"{uuid.uuid4().hex}{extension}"
-    stored_name = storage.save(filename, uploaded_file)
+    stored_file = optimize_uploaded_image(uploaded_file) if media_kind == "image" else uploaded_file
+    if isinstance(stored_file, File):
+        stored_file.name = filename
+    stored_name = storage.save(filename, stored_file)
     file_url = storage.url(stored_name)
     return {
         "url": file_url,
@@ -140,6 +155,56 @@ def save_question_richtext_media(uploaded_file):
         "kind": media_kind,
         "name": Path(uploaded_file.name).name,
     }
+
+
+def _resolve_richtext_media_kind(path_obj: Path):
+    extension = path_obj.suffix.lower()
+    if extension in RICHTEXT_IMAGE_EXTENSIONS:
+        return "image"
+    if extension in RICHTEXT_VIDEO_EXTENSIONS:
+        return "video"
+    if extension in RICHTEXT_AUDIO_EXTENSIONS:
+        return "audio"
+    return ""
+
+
+def list_question_richtext_media(media_kind="all", limit=120):
+    folder = Path(settings.MEDIA_ROOT) / RICHTEXT_UPLOAD_DIRECTORY
+    if not folder.exists():
+        return []
+
+    normalized_kind = (media_kind or "all").strip().lower()
+    allowed_kinds = {
+        "all": {"image", "audio", "video"},
+        "image": {"image"},
+        "media": {"audio", "video"},
+        "audio": {"audio"},
+        "video": {"video"},
+    }.get(normalized_kind, {"image", "audio", "video"})
+
+    rows = []
+    media_root = Path(settings.MEDIA_ROOT)
+    for file_path in folder.iterdir():
+        if not file_path.is_file():
+            continue
+        resolved_kind = _resolve_richtext_media_kind(file_path)
+        if not resolved_kind or resolved_kind not in allowed_kinds:
+            continue
+
+        stat_result = file_path.stat()
+        relative_path = file_path.relative_to(media_root).as_posix()
+        rows.append(
+            {
+                "name": file_path.name,
+                "url": f"{settings.MEDIA_URL.rstrip('/')}/{relative_path}",
+                "kind": resolved_kind,
+                "size_kb": round(stat_result.st_size / 1024, 1),
+                "modified_at": int(stat_result.st_mtime),
+            }
+        )
+
+    rows.sort(key=lambda item: item["modified_at"], reverse=True)
+    return rows[: max(int(limit or 0), 1)]
 
 
 def save_question_image(question, uploaded_file):
@@ -154,7 +219,10 @@ def save_question_image(question, uploaded_file):
     )
     extension = Path(uploaded_file.name).suffix.lower() or ".bin"
     filename = f"{uuid.uuid4().hex}{extension}"
-    stored_name = storage.save(filename, uploaded_file)
+    stored_file = optimize_uploaded_image(uploaded_file)
+    if isinstance(stored_file, File):
+        stored_file.name = filename
+    stored_name = storage.save(filename, stored_file)
     new_url = storage.url(stored_name)
 
     old_url = question.question_image_url
@@ -167,14 +235,16 @@ def save_question_image(question, uploaded_file):
 
 def sync_question_options(question, cleaned_data):
     question_type = cleaned_data.get("question_type")
-    if question_type != Question.QuestionType.MULTIPLE_CHOICE:
+    if question_type not in {Question.QuestionType.MULTIPLE_CHOICE, Question.QuestionType.CHECKBOX}:
         QuestionOption.objects.filter(question=question).delete()
         return
 
     options = []
     display_order = 1
+    correct_option = cleaned_data.get("correct_option")
+    correct_options = set(cleaned_data.get("correct_options") or [])
     for letter in OPTION_LETTERS:
-        text = (cleaned_data.get(f"option_{letter.lower()}") or "").strip()
+        text = sanitize_richtext_html(cleaned_data.get(f"option_{letter.lower()}"))
         if not text:
             continue
         options.append(
@@ -182,7 +252,7 @@ def sync_question_options(question, cleaned_data):
                 question=question,
                 option_letter=letter,
                 option_text=text,
-                is_correct=(cleaned_data.get("correct_option") == letter),
+                is_correct=(correct_option == letter) if question_type == Question.QuestionType.MULTIPLE_CHOICE else (letter in correct_options),
                 display_order=display_order,
             )
         )
@@ -193,7 +263,13 @@ def sync_question_options(question, cleaned_data):
 
 def sync_question_answer(question, cleaned_data):
     question_type = cleaned_data.get("question_type")
-    if question_type == Question.QuestionType.MULTIPLE_CHOICE:
+    if question_type in {
+        Question.QuestionType.MULTIPLE_CHOICE,
+        Question.QuestionType.CHECKBOX,
+        Question.QuestionType.ORDERING,
+        Question.QuestionType.MATCHING,
+        Question.QuestionType.FILL_IN_BLANK,
+    }:
         QuestionAnswer.objects.filter(question=question).delete()
         return
 
@@ -205,6 +281,79 @@ def sync_question_answer(question, cleaned_data):
         "max_word_count": cleaned_data.get("max_word_count"),
     }
     QuestionAnswer.objects.update_or_create(question=question, defaults=defaults)
+
+
+def sync_question_ordering_items(question, cleaned_data):
+    question_type = cleaned_data.get("question_type")
+    if question_type != Question.QuestionType.ORDERING:
+        QuestionOrderingItem.objects.filter(question=question).delete()
+        return
+
+    ordering_items = []
+    for index, item_text in enumerate(cleaned_data.get("ordering_items") or [], start=1):
+        sanitized_text = sanitize_richtext_html(item_text)
+        if not sanitized_text:
+            continue
+        ordering_items.append(
+            QuestionOrderingItem(
+                question=question,
+                item_text=sanitized_text,
+                correct_order=index,
+            )
+        )
+
+    QuestionOrderingItem.objects.filter(question=question).delete()
+    QuestionOrderingItem.objects.bulk_create(ordering_items)
+
+
+def sync_question_matching_pairs(question, cleaned_data):
+    question_type = cleaned_data.get("question_type")
+    if question_type != Question.QuestionType.MATCHING:
+        QuestionMatchingPair.objects.filter(question=question).delete()
+        return
+
+    matching_pairs = []
+    for pair in cleaned_data.get("matching_pairs") or []:
+        prompt_text = sanitize_richtext_html(pair.get("prompt_text"))
+        answer_text = sanitize_richtext_html(pair.get("answer_text"))
+        if not prompt_text or not answer_text:
+            continue
+        matching_pairs.append(
+            QuestionMatchingPair(
+                question=question,
+                prompt_text=prompt_text,
+                answer_text=answer_text,
+                pair_order=int(pair.get("pair_order") or (len(matching_pairs) + 1)),
+            )
+        )
+
+    QuestionMatchingPair.objects.filter(question=question).delete()
+    QuestionMatchingPair.objects.bulk_create(matching_pairs)
+
+
+def sync_question_blank_answers(question, cleaned_data):
+    question_type = cleaned_data.get("question_type")
+    if question_type != Question.QuestionType.FILL_IN_BLANK:
+        QuestionBlankAnswer.objects.filter(question=question).delete()
+        return
+
+    blank_answers = []
+    for blank in cleaned_data.get("blank_answers") or []:
+        accepted_answers = [str(item).strip() for item in (blank.get("accepted_answers") or []) if str(item).strip()]
+        if not accepted_answers:
+            continue
+        blank_answers.append(
+            QuestionBlankAnswer(
+                question=question,
+                blank_number=int(blank.get("blank_number") or (len(blank_answers) + 1)),
+                accepted_answers=accepted_answers,
+                is_case_sensitive=bool(blank.get("is_case_sensitive")),
+                blank_points=blank.get("blank_points"),
+            )
+        )
+
+    QuestionBlankAnswer.objects.filter(question=question).delete()
+    QuestionBlankAnswer.objects.bulk_create(blank_answers)
 
 
 def sync_question_tags(question, cleaned_data):
@@ -219,12 +368,17 @@ def sync_question_tags(question, cleaned_data):
 def save_question_from_form(form, teacher, question=None):
     is_create = question is None
     target = form.save(commit=False)
+    target.question_text = sanitize_richtext_html(target.question_text)
+    target.explanation = sanitize_optional_richtext_html(target.explanation)
     if is_create:
         target.created_by = teacher
     target.save()
 
     cleaned_data = form.cleaned_data
     sync_question_options(target, cleaned_data)
+    sync_question_ordering_items(target, cleaned_data)
+    sync_question_matching_pairs(target, cleaned_data)
+    sync_question_blank_answers(target, cleaned_data)
     sync_question_answer(target, cleaned_data)
     sync_question_tags(target, cleaned_data)
     save_question_image(target, cleaned_data.get("question_image"))
@@ -240,9 +394,12 @@ def duplicate_question(source_question, teacher):
         question_type=source_question.question_type,
         question_text=source_question.question_text,
         question_image_url=source_question.question_image_url,
+        audio_play_limit=source_question.audio_play_limit,
+        video_play_limit=source_question.video_play_limit,
         points=source_question.points,
         difficulty_level=source_question.difficulty_level,
         explanation=source_question.explanation,
+        checkbox_scoring=source_question.checkbox_scoring,
         allow_previous=source_question.allow_previous,
         allow_next=source_question.allow_next,
         force_sequential=source_question.force_sequential,
@@ -274,6 +431,48 @@ def duplicate_question(source_question, teacher):
             keywords=source_answer.keywords,
             is_case_sensitive=source_answer.is_case_sensitive,
             max_word_count=source_answer.max_word_count,
+        )
+
+    source_ordering_items = source_question.ordering_items.all().order_by("correct_order")
+    if source_ordering_items.exists():
+        QuestionOrderingItem.objects.bulk_create(
+            [
+                QuestionOrderingItem(
+                    question=copy_question,
+                    item_text=item.item_text,
+                    correct_order=item.correct_order,
+                )
+                for item in source_ordering_items
+            ]
+        )
+
+    source_matching_pairs = source_question.matching_pairs.all().order_by("pair_order")
+    if source_matching_pairs.exists():
+        QuestionMatchingPair.objects.bulk_create(
+            [
+                QuestionMatchingPair(
+                    question=copy_question,
+                    prompt_text=pair.prompt_text,
+                    answer_text=pair.answer_text,
+                    pair_order=pair.pair_order,
+                )
+                for pair in source_matching_pairs
+            ]
+        )
+
+    source_blank_answers = source_question.blank_answers.all().order_by("blank_number")
+    if source_blank_answers.exists():
+        QuestionBlankAnswer.objects.bulk_create(
+            [
+                QuestionBlankAnswer(
+                    question=copy_question,
+                    blank_number=blank.blank_number,
+                    accepted_answers=blank.accepted_answers,
+                    is_case_sensitive=blank.is_case_sensitive,
+                    blank_points=blank.blank_points,
+                )
+                for blank in source_blank_answers
+            ]
         )
 
     source_tags = QuestionTagRelation.objects.filter(question=source_question).select_related("tag")

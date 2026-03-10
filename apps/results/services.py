@@ -95,6 +95,35 @@ def _to_float(value):
     return float(value)
 
 
+def _normalize_matching_answer_map(value):
+    if not isinstance(value, dict):
+        return {}
+    normalized = {}
+    for key, item_value in value.items():
+        prompt_id = str(key or "").strip()
+        answer_id = str(item_value or "").strip()
+        if not prompt_id or not answer_id:
+            continue
+        normalized[prompt_id] = answer_id
+    return normalized
+
+
+def _normalize_blank_answer_map(value):
+    if not isinstance(value, dict):
+        return {}
+    normalized = {}
+    for key, item_value in value.items():
+        blank_key = str(key or "").strip()
+        if not blank_key:
+            continue
+        normalized[blank_key] = str(item_value or "")
+    return normalized
+
+
+def _blank_answer_map_has_values(value):
+    return any(str(item or "").strip() for item in _normalize_blank_answer_map(value).values())
+
+
 def _policy_label(policy):
     return RETAKE_POLICY_LABELS.get((policy or "").strip().lower(), "Nilai Tertinggi")
 
@@ -838,7 +867,7 @@ def _performance_groups(exam):
 def build_item_analysis(exam):
     exam_questions = list(
         exam.exam_questions.select_related("question")
-        .prefetch_related("question__options")
+        .prefetch_related("question__options", "question__ordering_items", "question__matching_pairs", "question__blank_answers")
         .order_by("display_order")
     )
     if not exam_questions:
@@ -867,7 +896,14 @@ def build_item_analysis(exam):
         answered_count = sum(
             1
             for answer in question_answers
-            if answer.selected_option_id or (answer.answer_text and answer.answer_text.strip())
+                if (
+                    answer.selected_option_id
+                    or answer.selected_option_ids
+                    or answer.answer_order_json
+                    or answer.answer_matching_json
+                    or _blank_answer_map_has_values(answer.answer_blanks_json)
+                    or (answer.answer_text and answer.answer_text.strip())
+                )
         )
         correct_count = sum(1 for answer in question_answers if answer.is_correct is True)
         wrong_count = sum(1 for answer in question_answers if answer.is_correct is False)
@@ -883,11 +919,13 @@ def build_item_analysis(exam):
         discrimination = round((top_ratio - bottom_ratio) * 100, 2)
 
         distractor_rows = []
-        if question.question_type == "multiple_choice":
+        if question.question_type in {"multiple_choice", "checkbox"}:
             selection_map = defaultdict(int)
             for answer in question_answers:
                 if answer.selected_option_id:
                     selection_map[answer.selected_option_id] += 1
+                for option_id in answer.selected_option_ids or []:
+                    selection_map[option_id] += 1
 
             for option in question.options.order_by("display_order"):
                 selected = selection_map.get(option.id, 0)
@@ -982,7 +1020,7 @@ def build_answer_review_context(result):
     exam = result.exam
     exam_questions = list(
         exam.exam_questions.select_related("question", "question__correct_answer")
-        .prefetch_related("question__options")
+        .prefetch_related("question__options", "question__ordering_items", "question__matching_pairs", "question__blank_answers")
         .order_by("display_order")
     )
     answers = {
@@ -998,24 +1036,121 @@ def build_answer_review_context(result):
         student_answer = "-"
         correct_answer = "-"
         selected_option = None
+        selected_options = []
         correct_options = []
+        selected_ordering_items = []
+        correct_ordering_items = []
+        selected_matching_pairs = []
+        correct_matching_pairs = []
+        selected_blank_answers = []
+        correct_blank_answers = []
         explanation = (question.explanation or "").strip()
         status_label = "Tidak Dijawab"
         status_type = "secondary"
         points_earned = 0.0
         points_possible = _to_float(exam_question.points_override or question.points)
 
-        if question.question_type == "multiple_choice":
-            selected_option = answer.selected_option if answer and answer.selected_option else None
-            if answer and answer.selected_option:
-                student_answer = f"{answer.selected_option.option_letter}. {answer.selected_option.option_text}"
+        if question.question_type in {"multiple_choice", "checkbox"}:
             correct_options = [
                 option for option in question.options.all() if option.is_correct
             ]
             correct_options.sort(key=lambda option: option.display_order)
+            if question.question_type == "multiple_choice":
+                selected_option = answer.selected_option if answer and answer.selected_option else None
+                if selected_option:
+                    selected_options = [selected_option]
+                    student_answer = f"{selected_option.option_letter}. {selected_option.option_text}"
+            elif answer and answer.selected_option_ids:
+                option_map = {str(option.id): option for option in question.options.all()}
+                selected_options = [
+                    option_map[option_id]
+                    for option_id in answer.selected_option_ids
+                    if str(option_id) in option_map
+                ]
+                selected_options.sort(key=lambda option: option.display_order)
+                if selected_options:
+                    student_answer = ", ".join(
+                        [f"{option.option_letter}. {option.option_text}" for option in selected_options]
+                    )
             if correct_options:
-                correct_answer = ", ".join(
-                    [f"{option.option_letter}. {option.option_text}" for option in correct_options]
+                correct_answer = ", ".join([f"{option.option_letter}. {option.option_text}" for option in correct_options])
+        elif question.question_type == "ordering":
+            correct_ordering_items = list(question.ordering_items.all().order_by("correct_order"))
+            ordering_item_map = {str(item.id): item for item in correct_ordering_items}
+            if answer and answer.answer_order_json:
+                selected_ordering_items = [
+                    ordering_item_map[item_id]
+                    for item_id in answer.answer_order_json
+                    if str(item_id) in ordering_item_map
+                ]
+                if selected_ordering_items:
+                    student_answer = " -> ".join(
+                        [item.item_text for item in selected_ordering_items]
+                    )
+            if correct_ordering_items:
+                correct_answer = " -> ".join([item.item_text for item in correct_ordering_items])
+        elif question.question_type == "matching":
+            matching_pairs = list(question.matching_pairs.all().order_by("pair_order"))
+            pair_map = {str(item.id): item for item in matching_pairs}
+            selected_map = _normalize_matching_answer_map(answer.answer_matching_json if answer else {})
+            for pair in matching_pairs:
+                selected_pair = pair_map.get(selected_map.get(str(pair.id), ""))
+                selected_matching_pairs.append(
+                    {
+                        "prompt_text": pair.prompt_text,
+                        "answer_text": selected_pair.answer_text if selected_pair else "",
+                        "is_correct": bool(selected_pair and selected_pair.id == pair.id),
+                        "has_answer": bool(selected_pair),
+                    }
+                )
+                correct_matching_pairs.append(
+                    {
+                        "prompt_text": pair.prompt_text,
+                        "answer_text": pair.answer_text,
+                    }
+                )
+            answered_pairs = [item for item in selected_matching_pairs if item["has_answer"]]
+            if answered_pairs:
+                student_answer = "; ".join(
+                    [f"{item['prompt_text']} -> {item['answer_text']}" for item in answered_pairs]
+                )
+            if correct_matching_pairs:
+                correct_answer = "; ".join(
+                    [f"{item['prompt_text']} -> {item['answer_text']}" for item in correct_matching_pairs]
+                )
+        elif question.question_type == "fill_in_blank":
+            blank_defs = list(question.blank_answers.all().order_by("blank_number"))
+            student_map = _normalize_blank_answer_map(answer.answer_blanks_json if answer else {})
+            for blank_def in blank_defs:
+                blank_key = str(blank_def.blank_number)
+                accepted_answers = [str(item).strip() for item in (blank_def.accepted_answers or []) if str(item).strip()]
+                selected_value = str(student_map.get(blank_key, "") or "")
+                selected_blank_answers.append(
+                    {
+                        "blank_number": blank_def.blank_number,
+                        "value": selected_value,
+                        "has_answer": bool(selected_value.strip()),
+                    }
+                )
+                correct_blank_answers.append(
+                    {
+                        "blank_number": blank_def.blank_number,
+                        "accepted_answers": accepted_answers,
+                        "is_case_sensitive": bool(blank_def.is_case_sensitive),
+                        "blank_points": _to_float(blank_def.blank_points) if blank_def.blank_points is not None else None,
+                    }
+                )
+            answered_blanks = [item for item in selected_blank_answers if item["has_answer"]]
+            if answered_blanks:
+                student_answer = "; ".join(
+                    [f"Blank {item['blank_number']}: {item['value']}" for item in answered_blanks]
+                )
+            if correct_blank_answers:
+                correct_answer = "; ".join(
+                    [
+                        f"Blank {item['blank_number']}: {', '.join(item['accepted_answers'])}"
+                        for item in correct_blank_answers
+                    ]
                 )
         else:
             if answer and answer.answer_text:
@@ -1043,7 +1178,14 @@ def build_answer_review_context(result):
                 "student_answer": student_answer,
                 "correct_answer": correct_answer,
                 "selected_option": selected_option,
+                "selected_options": selected_options,
                 "correct_options": correct_options,
+                "selected_ordering_items": selected_ordering_items,
+                "correct_ordering_items": correct_ordering_items,
+                "selected_matching_pairs": selected_matching_pairs,
+                "correct_matching_pairs": correct_matching_pairs,
+                "selected_blank_answers": selected_blank_answers,
+                "correct_blank_answers": correct_blank_answers,
                 "status_label": status_label,
                 "status_type": status_type,
                 "points_earned": round(points_earned, 2),
