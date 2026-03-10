@@ -3,6 +3,48 @@
 
 {% block title %}{{ page_title }} - CBT{% endblock %}
 
+{% block extra_css %}
+<style>
+    .answer-option-badge {
+        width: 2.5rem;
+        height: 2.5rem;
+        min-width: 2.5rem;
+    }
+
+    .answer-option-item {
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .answer-option-item:focus-within {
+        border-color: rgba(var(--bs-primary-rgb), 0.35) !important;
+        box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.08);
+    }
+
+    .answer-option-editor {
+        min-width: 0;
+    }
+
+    .answer-option-editor .tox,
+    .answer-option-editor .tox-tinymce {
+        border-radius: 0.75rem;
+    }
+
+    .answer-option-actions .form-check-input {
+        float: none;
+        margin: 0;
+    }
+
+    .answer-option-remove {
+        width: 2.5rem;
+        height: 2.5rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 0.75rem;
+    }
+</style>
+{% endblock %}
+
 {% block topbar %}
     {% include "partials/topbar_teacher.html" with parent_label="Bank Soal" parent_url="/teacher/question-bank/" current_label=page_title %}
 {% endblock %}
@@ -122,37 +164,52 @@
                             <div class="row g-3">
                                 {% for row in form.option_field_rows %}
                                 <div class="col-12 option-item-row{% if row.removable %} optional-option-row{% endif %}{% if not row.default_visible %} d-none{% endif %}" data-letter="{{ row.letter }}" data-default-visible="{% if row.default_visible %}1{% else %}0{% endif %}">
-                                    <div class="d-flex align-items-start gap-2">
-                                        <div class="form-check mt-2 correct-option-single-wrap">
-                                            <input
-                                                class="form-check-input option-correct-radio"
-                                                type="radio"
-                                                name="correct_option"
-                                                value="{{ row.letter }}"
-                                                {% if form.correct_option.value == row.letter %}checked{% endif %}
-                                                title="Set jawaban benar opsi {{ row.letter }}"
-                                            >
+                                    <div class="answer-option-item border rounded-4 bg-body shadow-sm p-3 p-md-4 h-100">
+                                        <div class="vstack gap-3">
+                                            <div class="d-flex flex-column flex-md-row align-items-md-start justify-content-between gap-3">
+                                                <div class="d-flex align-items-center gap-3">
+                                                    <div class="answer-option-badge rounded-circle bg-primary-subtle text-primary-emphasis fw-semibold d-inline-flex align-items-center justify-content-center">{{ row.letter }}</div>
+                                                    <div>
+                                                        <label class="form-label{% if row.required_label %} required{% endif %} mb-0 fw-semibold">Opsi {{ row.letter }}</label>
+                                                    </div>
+                                                </div>
+                                                <div class="answer-option-actions d-flex flex-wrap align-items-center gap-3 justify-content-md-end">
+                                                    <div class="form-check form-check-inline m-0 correct-option-single-wrap">
+                                                        <input
+                                                            class="form-check-input option-correct-radio"
+                                                            type="radio"
+                                                            id="correctOption{{ row.letter }}"
+                                                            name="correct_option"
+                                                            value="{{ row.letter }}"
+                                                            {% if form.correct_option.value == row.letter %}checked{% endif %}
+                                                            title="Set jawaban benar opsi {{ row.letter }}"
+                                                        >
+                                                        <label class="form-check-label small text-body-secondary" for="correctOption{{ row.letter }}">Benar</label>
+                                                    </div>
+                                                    <div class="form-check form-check-inline m-0 d-none correct-option-multi-wrap">
+                                                        <input
+                                                            class="form-check-input option-correct-checkbox"
+                                                            type="checkbox"
+                                                            id="correctOptions{{ row.letter }}"
+                                                            name="correct_options"
+                                                            value="{{ row.letter }}"
+                                                            {% if form.correct_options.value and row.letter in form.correct_options.value %}checked{% endif %}
+                                                            title="Tandai jawaban benar opsi {{ row.letter }}"
+                                                        >
+                                                        <label class="form-check-label small text-body-secondary" for="correctOptions{{ row.letter }}">Benar</label>
+                                                    </div>
+                                                    {% if row.removable %}
+                                                    <button type="button" class="btn btn-outline-danger btn-sm remove-option-btn answer-option-remove" title="Hapus opsi {{ row.letter }}">
+                                                        <i class="ri-delete-bin-line"></i>
+                                                    </button>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                            <div class="answer-option-editor">
+                                                {{ row.field }}
+                                                {% if row.field.errors %}<div class="text-danger small mt-1">{{ row.field.errors|join:", " }}</div>{% endif %}
+                                            </div>
                                         </div>
-                                        <div class="form-check mt-2 d-none correct-option-multi-wrap">
-                                            <input
-                                                class="form-check-input option-correct-checkbox"
-                                                type="checkbox"
-                                                name="correct_options"
-                                                value="{{ row.letter }}"
-                                                {% if form.correct_options.value and row.letter in form.correct_options.value %}checked{% endif %}
-                                                title="Tandai jawaban benar opsi {{ row.letter }}"
-                                            >
-                                        </div>
-                                        <div class="flex-grow-1">
-                                            <label class="form-label{% if row.required_label %} required{% endif %} mb-1">Opsi {{ row.letter }}</label>
-                                            {{ row.field }}
-                                            {% if row.field.errors %}<div class="text-danger small mt-1">{{ row.field.errors|join:", " }}</div>{% endif %}
-                                        </div>
-                                        {% if row.removable %}
-                                        <button type="button" class="btn btn-outline-danger btn-sm remove-option-btn mt-4" title="Hapus opsi {{ row.letter }}">
-                                            <i class="ri-delete-bin-line"></i>
-                                        </button>
-                                        {% endif %}
                                     </div>
                                 </div>
                                 {% endfor %}

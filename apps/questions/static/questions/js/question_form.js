@@ -479,11 +479,7 @@
             height: options.height,
             min_height: options.minHeight || options.height,
             plugins: "advlist autolink lists link image media table charmap anchor code fullscreen preview autoresize",
-            toolbar: [
-                "undo redo | blocks | bold italic underline | alignleft aligncenter alignright alignjustify",
-                "bullist numlist outdent indent | table | image media link | removeformat | code preview"
-            ].join(" | "),
-            toolbar_mode: "sliding",
+            toolbar: false,
             contextmenu: "link image table",
             automatic_uploads: true,
             paste_data_images: true,

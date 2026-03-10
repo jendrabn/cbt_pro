@@ -1,0 +1,1075 @@
+{
+  "multiple_choice": [
+    {
+      "subject_code": "ALG2",
+      "teacher_username": "olivia.carter",
+      "category": "Linear Equations",
+      "question_text": "<p>Selesaikan persamaan berikut: <strong>2x + 5 = 17</strong>.</p>",
+      "difficulty_level": "easy",
+      "points": 5,
+      "explanation": "Kurangi 5 dari kedua ruas, lalu bagi 2 sehingga x = 6.",
+      "tags": ["algebra", "linear-equations", "plain"],
+      "options": [
+        {"text": "4", "is_correct": false},
+        {"text": "5", "is_correct": false},
+        {"text": "6", "is_correct": true},
+        {"text": "7", "is_correct": false}
+      ]
+    },
+    {
+      "subject_code": "GEOM",
+      "teacher_username": "olivia.carter",
+      "category": "Area of Triangles",
+      "question_text": "<p>Gunakan gambar segitiga berikut. Jika alas = 8 cm dan tinggi = 5 cm, berapa luas segitiga itu?</p>",
+      "question_image_url": "https://picsum.photos/seed/cbt-mc-geom-triangle/960/540",
+      "difficulty_level": "easy",
+      "points": 5,
+      "explanation": "Rumus luas segitiga adalah 1/2 x alas x tinggi.",
+      "tags": ["geometry", "area", "image"],
+      "options": [
+        {"text": "13 cm2", "is_correct": false},
+        {"text": "20 cm2", "is_correct": true},
+        {"text": "40 cm2", "is_correct": false},
+        {"text": "80 cm2", "is_correct": false}
+      ]
+    },
+    {
+      "subject_code": "BIO",
+      "teacher_username": "michael.reed",
+      "category": "Cell Biology",
+      "question_text": "<p>Perhatikan ilustrasi sel berikut.</p><p><img src='https://picsum.photos/seed/cbt-mc-cell/960/420' alt='Ilustrasi sel' /></p><p>Organel yang dikenal sebagai pusat kontrol sel adalah ...</p>",
+      "difficulty_level": "easy",
+      "points": 5,
+      "explanation": "Nukleus menyimpan materi genetik dan mengatur aktivitas sel.",
+      "tags": ["biology", "cells", "embedded-image"],
+      "options": [
+        {"text": "Nukleus", "is_correct": true},
+        {"text": "Mitokondria", "is_correct": false},
+        {"text": "Ribosom", "is_correct": false},
+        {"text": "Lisosom", "is_correct": false}
+      ]
+    },
+    {
+      "subject_code": "PHYS",
+      "teacher_username": "michael.reed",
+      "category": "Waves",
+      "question_text": "<p>Dengarkan klip audio contoh berikut untuk uji rich media.</p><p><audio controls src='https://www.w3schools.com/html/horse.mp3'></audio></p><p>Besaran yang menyatakan banyaknya getaran tiap detik disebut ...</p>",
+      "difficulty_level": "medium",
+      "points": 5,
+      "audio_play_limit": 2,
+      "explanation": "Banyaknya getaran tiap detik disebut frekuensi.",
+      "tags": ["physics", "waves", "audio"],
+      "options": [
+        {"text": "Amplitudo", "is_correct": false},
+        {"text": "Frekuensi", "is_correct": true},
+        {"text": "Periode", "is_correct": false},
+        {"text": "Resonansi", "is_correct": false}
+      ]
+    },
+    {
+      "subject_code": "CS",
+      "teacher_username": "sophia.bennett",
+      "category": "Algorithms",
+      "question_text": "<p>Tonton klip video contoh berikut untuk menguji pemutar video.</p><p><video controls width='480' height='270'><source src='https://www.w3schools.com/html/mov_bbb.mp4' type='video/mp4'></video></p><p>Representasi langkah-langkah logis yang sering divisualkan dengan simbol dan panah disebut ...</p>",
+      "difficulty_level": "easy",
+      "points": 5,
+      "video_play_limit": 1,
+      "explanation": "Diagram alir atau flowchart dipakai untuk memvisualkan langkah algoritmik.",
+      "tags": ["computer-science", "algorithms", "video"],
+      "options": [
+        {"text": "Flowchart", "is_correct": true},
+        {"text": "Compiler", "is_correct": false},
+        {"text": "Database", "is_correct": false},
+        {"text": "Firewall", "is_correct": false}
+      ]
+    },
+    {
+      "subject_code": "USHIST",
+      "teacher_username": "sophia.bennett",
+      "category": "Colonial America",
+      "question_text": "<p>Perhatikan tabel berikut.</p><table><tr><th>Act</th><th>Year</th></tr><tr><td>Stamp Act</td><td>1765</td></tr><tr><td>Tea Act</td><td>1773</td></tr><tr><td>Intolerable Acts</td><td>1774</td></tr></table><p>Undang-undang manakah yang muncul paling awal?</p>",
+      "difficulty_level": "easy",
+      "points": 5,
+      "explanation": "Stamp Act dikeluarkan pada tahun 1765, lebih awal daripada dua kebijakan lainnya.",
+      "tags": ["history", "colonial", "table"],
+      "options": [
+        {"text": "Tea Act", "is_correct": false},
+        {"text": "Intolerable Acts", "is_correct": false},
+        {"text": "Stamp Act", "is_correct": true},
+        {"text": "Bill of Rights", "is_correct": false}
+      ]
+    },
+    {
+      "subject_code": "CHEM",
+      "teacher_username": "michael.reed",
+      "category": "Atomic Structure",
+      "question_text": "<p>Lihat diagram atom sederhana berikut lalu tentukan nomor atom oksigen.</p>",
+      "question_image_url": "https://picsum.photos/seed/cbt-mc-oxygen/960/540",
+      "difficulty_level": "easy",
+      "points": 5,
+      "explanation": "Nomor atom menyatakan jumlah proton. Oksigen memiliki 8 proton.",
+      "tags": ["chemistry", "atoms", "image"],
+      "options": [
+        {"text": "6", "is_correct": false},
+        {"text": "7", "is_correct": false},
+        {"text": "8", "is_correct": true},
+        {"text": "9", "is_correct": false}
+      ]
+    },
+    {
+      "subject_code": "ENG-LIT",
+      "teacher_username": "sophia.bennett",
+      "category": "Literary Devices",
+      "question_text": "<p>Dalam sastra, apa yang dimaksud dengan metafora?</p>",
+      "difficulty_level": "easy",
+      "points": 5,
+      "explanation": "Metafora adalah perbandingan langsung tanpa memakai kata like atau as.",
+      "tags": ["english", "literary-devices", "plain"],
+      "options": [
+        {"text": "Perbandingan menggunakan like atau as", "is_correct": false},
+        {"text": "Perbandingan langsung tanpa like atau as", "is_correct": true},
+        {"text": "Pengulangan bunyi konsonan awal", "is_correct": false},
+        {"text": "Penggambaran yang dilebihkan", "is_correct": false}
+      ]
+    },
+    {
+      "subject_code": "ALG2",
+      "teacher_username": "olivia.carter",
+      "category": "Functions",
+      "question_text": "<p>Gunakan tabel berikut untuk menentukan gradien.</p><table><tr><th>x</th><th>y</th></tr><tr><td>0</td><td>3</td></tr><tr><td>1</td><td>5</td></tr><tr><td>2</td><td>7</td></tr></table><p>Gradien fungsi linear tersebut adalah ...</p>",
+      "difficulty_level": "medium",
+      "points": 5,
+      "explanation": "Nilai y bertambah 2 setiap x bertambah 1, jadi gradiennya 2.",
+      "tags": ["algebra", "functions", "table"],
+      "options": [
+        {"text": "1", "is_correct": false},
+        {"text": "2", "is_correct": true},
+        {"text": "3", "is_correct": false},
+        {"text": "5", "is_correct": false}
+      ]
+    },
+    {
+      "subject_code": "CS",
+      "teacher_username": "sophia.bennett",
+      "category": "HTML Basics",
+      "question_text": "<p>Perhatikan potongan kode berikut.</p><pre>&lt;table&gt;&lt;tr&gt;&lt;td&gt;42&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;</pre><p>Tag HTML yang dipakai untuk membuat tabel adalah ...</p>",
+      "difficulty_level": "easy",
+      "points": 5,
+      "explanation": "Elemen table digunakan untuk membentuk tabel HTML.",
+      "tags": ["computer-science", "html", "code"],
+      "options": [
+        {"text": "&lt;div&gt;", "is_correct": false},
+        {"text": "&lt;table&gt;", "is_correct": true},
+        {"text": "&lt;span&gt;", "is_correct": false},
+        {"text": "&lt;video&gt;", "is_correct": false}
+      ]
+    }
+  ],
+  "checkbox": [
+    {
+      "subject_code": "ALG2",
+      "teacher_username": "olivia.carter",
+      "category": "Expressions",
+      "question_text": "<p>Pilih semua ekspresi yang ekuivalen dengan <strong>2(x + 3)</strong>.</p>",
+      "difficulty_level": "medium",
+      "points": 6,
+      "checkbox_scoring": "partial_no_penalty",
+      "explanation": "Distribusikan angka 2 ke semua suku di dalam kurung.",
+      "tags": ["algebra", "distribution", "checkbox"],
+      "options": [
+        {"text": "2x + 6", "is_correct": true},
+        {"text": "6 + 2x", "is_correct": true},
+        {"text": "2x + 3", "is_correct": false},
+        {"text": "x + 6", "is_correct": false}
+      ]
+    },
+    {
+      "subject_code": "BIO",
+      "teacher_username": "michael.reed",
+      "category": "Characteristics of Life",
+      "question_text": "<p>Pilih semua ciri yang dimiliki makhluk hidup.</p>",
+      "difficulty_level": "easy",
+      "points": 6,
+      "checkbox_scoring": "partial",
+      "explanation": "Makhluk hidup tersusun atas sel, menggunakan energi, dan merespons rangsangan.",
+      "tags": ["biology", "life-science", "checkbox"],
+      "options": [
+        {"text": "Tersusun atas satu atau lebih sel", "is_correct": true},
+        {"text": "Menggunakan energi", "is_correct": true},
+        {"text": "Selalu berpindah tempat", "is_correct": false},
+        {"text": "Merespons rangsangan", "is_correct": true}
+      ]
+    },
+    {
+      "subject_code": "CS",
+      "teacher_username": "sophia.bennett",
+      "category": "Python Basics",
+      "question_text": "<p>Manakah yang termasuk tipe koleksi bawaan Python?</p>",
+      "difficulty_level": "easy",
+      "points": 6,
+      "checkbox_scoring": "all_or_nothing",
+      "explanation": "list, tuple, dan dictionary adalah tipe koleksi bawaan Python.",
+      "tags": ["computer-science", "python", "checkbox"],
+      "options": [
+        {"text": "list", "is_correct": true},
+        {"text": "tuple", "is_correct": true},
+        {"text": "dictionary", "is_correct": true},
+        {"text": "spreadsheet", "is_correct": false}
+      ]
+    },
+    {
+      "subject_code": "GEOM",
+      "teacher_username": "olivia.carter",
+      "category": "Quadrilaterals",
+      "question_text": "<p>Gunakan gambar bangun datar berikut lalu pilih semua pernyataan yang selalu benar untuk persegi panjang.</p>",
+      "question_image_url": "https://picsum.photos/seed/cbt-checkbox-rect/960/540",
+      "difficulty_level": "medium",
+      "points": 6,
+      "checkbox_scoring": "partial",
+      "explanation": "Persegi panjang punya empat sudut siku-siku, sisi berhadapan sejajar, dan diagonal sama panjang.",
+      "tags": ["geometry", "quadrilateral", "image"],
+      "options": [
+        {"text": "Memiliki empat sudut siku-siku", "is_correct": true},
+        {"text": "Sisi berhadapan sejajar", "is_correct": true},
+        {"text": "Semua sisinya harus sama panjang", "is_correct": false},
+        {"text": "Diagonalnya sama panjang", "is_correct": true}
+      ]
+    },
+    {
+      "subject_code": "CHEM",
+      "teacher_username": "michael.reed",
+      "category": "Lab Safety",
+      "question_text": "<p>Perhatikan situasi laboratorium pada gambar berikut. Pilih semua tindakan yang aman dilakukan.</p>",
+      "question_image_url": "https://picsum.photos/seed/cbt-checkbox-lab/960/540",
+      "difficulty_level": "easy",
+      "points": 6,
+      "checkbox_scoring": "partial_no_penalty",
+      "explanation": "Keselamatan lab menekankan APD, membaca label, dan mengikuti instruksi.",
+      "tags": ["chemistry", "lab-safety", "image"],
+      "options": [
+        {"text": "Memakai kacamata pelindung", "is_correct": true},
+        {"text": "Membaca label bahan sebelum digunakan", "is_correct": true},
+        {"text": "Mencicipi zat untuk mengidentifikasi", "is_correct": false},
+        {"text": "Mengikat rambut panjang saat eksperimen", "is_correct": true}
+      ]
+    },
+    {
+      "subject_code": "PHYS",
+      "teacher_username": "michael.reed",
+      "category": "Energy",
+      "question_text": "<p>Tonton klip video contoh berikut.</p><p><video controls width='480' height='270'><source src='https://www.w3schools.com/html/mov_bbb.mp4' type='video/mp4'></video></p><p>Pilih semua contoh perubahan energi yang benar.</p>",
+      "difficulty_level": "medium",
+      "points": 6,
+      "checkbox_scoring": "partial",
+      "video_play_limit": 1,
+      "explanation": "Energi dapat berubah bentuk, misalnya listrik ke cahaya dan potensial ke kinetik.",
+      "tags": ["physics", "energy", "video"],
+      "options": [
+        {"text": "Lampu menyala: energi listrik menjadi cahaya", "is_correct": true},
+        {"text": "Benda jatuh: energi potensial menjadi kinetik", "is_correct": true},
+        {"text": "Baterai: energi kimia menjadi listrik", "is_correct": true},
+        {"text": "Es mencair: energi panas menjadi massa", "is_correct": false}
+      ]
+    },
+    {
+      "subject_code": "USHIST",
+      "teacher_username": "sophia.bennett",
+      "category": "Bill of Rights",
+      "question_text": "<p>Gunakan tabel ringkas berikut.</p><table><tr><th>Amendment</th><th>Focus</th></tr><tr><td>First</td><td>Speech, religion, press</td></tr><tr><td>Second</td><td>Arms</td></tr><tr><td>Fourth</td><td>Search and seizure</td></tr></table><p>Pilih semua kebebasan yang dilindungi secara langsung oleh First Amendment.</p>",
+      "difficulty_level": "medium",
+      "points": 6,
+      "checkbox_scoring": "all_or_nothing",
+      "explanation": "First Amendment melindungi kebebasan beragama, berbicara, pers, berkumpul, dan petisi.",
+      "tags": ["history", "government", "table"],
+      "options": [
+        {"text": "Freedom of speech", "is_correct": true},
+        {"text": "Freedom of religion", "is_correct": true},
+        {"text": "Freedom of the press", "is_correct": true},
+        {"text": "Freedom from all taxes", "is_correct": false}
+      ]
+    },
+    {
+      "subject_code": "ENG-LIT",
+      "teacher_username": "sophia.bennett",
+      "category": "Poetry",
+      "question_text": "<p>Dengarkan audio contoh berikut lalu fokus pada ritmenya.</p><p><audio controls src='https://www.w3schools.com/html/horse.mp3'></audio></p><p>Pilih semua ciri yang dapat muncul dalam puisi bebas.</p>",
+      "difficulty_level": "medium",
+      "points": 6,
+      "checkbox_scoring": "partial",
+      "audio_play_limit": 2,
+      "explanation": "Free verse tidak harus berpola rima tetap, tetapi tetap bisa memakai citraan dan enjambment.",
+      "tags": ["english", "poetry", "audio"],
+      "options": [
+        {"text": "Tidak wajib memiliki pola rima tetap", "is_correct": true},
+        {"text": "Dapat memakai citraan", "is_correct": true},
+        {"text": "Harus selalu 14 baris", "is_correct": false},
+        {"text": "Dapat menggunakan enjambment", "is_correct": true}
+      ]
+    },
+    {
+      "subject_code": "BIO",
+      "teacher_username": "michael.reed",
+      "category": "Ecology",
+      "question_text": "<p>Perhatikan ilustrasi ekosistem berikut.</p><p><img src='https://picsum.photos/seed/cbt-checkbox-ecology/960/420' alt='Ilustrasi ekosistem' /></p><p>Pilih semua komponen biotik dalam suatu ekosistem.</p>",
+      "difficulty_level": "easy",
+      "points": 6,
+      "checkbox_scoring": "partial_no_penalty",
+      "explanation": "Komponen biotik adalah bagian hidup dari ekosistem.",
+      "tags": ["biology", "ecology", "embedded-image"],
+      "options": [
+        {"text": "Rumput", "is_correct": true},
+        {"text": "Batu", "is_correct": false},
+        {"text": "Jamur", "is_correct": true},
+        {"text": "Serangga", "is_correct": true}
+      ]
+    },
+    {
+      "subject_code": "CS",
+      "teacher_username": "sophia.bennett",
+      "category": "HTML Media",
+      "question_text": "<p>Perhatikan contoh media berikut.</p><p><audio controls src='https://www.w3schools.com/html/horse.mp3'></audio></p><p><video controls width='320' height='180'><source src='https://www.w3schools.com/html/mov_bbb.mp4' type='video/mp4'></video></p><p>Pilih semua tag HTML yang dipakai untuk menyisipkan media secara langsung.</p>",
+      "difficulty_level": "easy",
+      "points": 6,
+      "checkbox_scoring": "all_or_nothing",
+      "audio_play_limit": 2,
+      "video_play_limit": 1,
+      "explanation": "Elemen audio dan video adalah tag media HTML5, sedangkan source membantu mendefinisikan file sumber.",
+      "tags": ["computer-science", "html", "media"],
+      "options": [
+        {"text": "&lt;audio&gt;", "is_correct": true},
+        {"text": "&lt;video&gt;", "is_correct": true},
+        {"text": "&lt;source&gt;", "is_correct": true},
+        {"text": "&lt;table&gt;", "is_correct": false}
+      ]
+    }
+  ],
+  "ordering": [
+    {
+      "subject_code": "BIO",
+      "teacher_username": "michael.reed",
+      "category": "Organization in Biology",
+      "question_text": "<p>Urutkan tingkat organisasi kehidupan dari yang paling kecil ke paling besar.</p>",
+      "difficulty_level": "easy",
+      "points": 6,
+      "explanation": "Sel membentuk jaringan, jaringan membentuk organ, dan organ membentuk sistem organ.",
+      "tags": ["biology", "organization", "ordering"],
+      "ordering_items": ["Cell", "Tissue", "Organ", "Organ system"]
+    },
+    {
+      "subject_code": "USHIST",
+      "teacher_username": "sophia.bennett",
+      "category": "Civics Process",
+      "question_text": "<p>Urutkan tahapan umum bagaimana sebuah bill menjadi law di Amerika Serikat.</p>",
+      "difficulty_level": "medium",
+      "points": 6,
+      "explanation": "Bill diperkenalkan, dibahas dan disetujui, lalu dikirim ke presiden.",
+      "tags": ["history", "government", "ordering"],
+      "ordering_items": [
+        "A bill is introduced",
+        "The bill is debated and voted on in Congress",
+        "Both houses approve the bill",
+        "The president signs the bill"
+      ]
+    },
+    {
+      "subject_code": "CHEM",
+      "teacher_username": "michael.reed",
+      "category": "Scientific Method",
+      "question_text": "<p>Urutkan langkah-langkah dasar investigasi laboratorium.</p>",
+      "difficulty_level": "easy",
+      "points": 6,
+      "explanation": "Metode ilmiah biasanya diawali pertanyaan dan diakhiri analisis hasil.",
+      "tags": ["chemistry", "lab", "ordering"],
+      "ordering_items": [
+        "Ask a question",
+        "Form a hypothesis",
+        "Test the hypothesis",
+        "Analyze the results"
+      ]
+    },
+    {
+      "subject_code": "ALG2",
+      "teacher_username": "olivia.carter",
+      "category": "Equation Solving",
+      "question_text": "<p>Urutkan langkah yang benar untuk menyelesaikan persamaan <strong>3x - 4 = 11</strong>.</p>",
+      "difficulty_level": "easy",
+      "points": 6,
+      "explanation": "Tambahkan 4 ke kedua ruas lalu bagi 3.",
+      "tags": ["algebra", "solving-equations", "ordering"],
+      "ordering_items": [
+        "Add 4 to both sides",
+        "Get 3x = 15",
+        "Divide both sides by 3",
+        "Conclude that x = 5"
+      ]
+    },
+    {
+      "subject_code": "GEOM",
+      "teacher_username": "olivia.carter",
+      "category": "Proof Structure",
+      "question_text": "<p>Gunakan diagram berikut sebagai acuan lalu urutkan alur berpikir pembuktian sederhana.</p>",
+      "question_image_url": "https://picsum.photos/seed/cbt-ordering-proof/960/540",
+      "difficulty_level": "medium",
+      "points": 6,
+      "explanation": "Mulai dari identifikasi informasi, tentukan sifat relevan, lalu simpulkan.",
+      "tags": ["geometry", "proof", "image"],
+      "ordering_items": [
+        "Identify the given information",
+        "State the relevant geometry property",
+        "Apply the property to the diagram",
+        "Write the conclusion"
+      ]
+    },
+    {
+      "subject_code": "PHYS",
+      "teacher_username": "michael.reed",
+      "category": "Experimental Design",
+      "question_text": "<p>Tonton video contoh berikut.</p><p><video controls width='480' height='270'><source src='https://www.w3schools.com/html/mov_bbb.mp4' type='video/mp4'></video></p><p>Urutkan langkah kerja eksperimen sederhana dari awal sampai akhir.</p>",
+      "difficulty_level": "medium",
+      "points": 6,
+      "video_play_limit": 1,
+      "explanation": "Eksperimen diawali tujuan, lalu pengukuran, pencatatan, dan interpretasi.",
+      "tags": ["physics", "experiment", "video"],
+      "ordering_items": [
+        "Define the goal of the experiment",
+        "Measure the needed quantities",
+        "Record the observations",
+        "Interpret the results"
+      ]
+    },
+    {
+      "subject_code": "CS",
+      "teacher_username": "sophia.bennett",
+      "category": "Software Development",
+      "question_text": "<p>Urutkan tahapan umum siklus pengembangan perangkat lunak.</p>",
+      "difficulty_level": "easy",
+      "points": 6,
+      "explanation": "Kebutuhan dikumpulkan terlebih dahulu, lalu desain, implementasi, dan pengujian.",
+      "tags": ["computer-science", "software-development", "ordering"],
+      "ordering_items": [
+        "Gather requirements",
+        "Design the solution",
+        "Implement the code",
+        "Test the software"
+      ]
+    },
+    {
+      "subject_code": "ENG-LIT",
+      "teacher_username": "sophia.bennett",
+      "category": "Plot Structure",
+      "question_text": "<p>Urutkan bagian umum struktur plot dari awal sampai akhir.</p>",
+      "difficulty_level": "easy",
+      "points": 6,
+      "explanation": "Plot lazim bergerak dari exposition menuju rising action, climax, dan resolution.",
+      "tags": ["english", "plot", "ordering"],
+      "ordering_items": [
+        "Exposition",
+        "Rising action",
+        "Climax",
+        "Resolution"
+      ]
+    },
+    {
+      "subject_code": "BIO",
+      "teacher_username": "michael.reed",
+      "category": "Cell Division",
+      "question_text": "<p>Perhatikan ilustrasi berikut lalu urutkan tahap mitosis.</p><p><img src='https://picsum.photos/seed/cbt-ordering-mitosis/960/420' alt='Ilustrasi mitosis' /></p>",
+      "difficulty_level": "medium",
+      "points": 6,
+      "explanation": "Urutan mitosis adalah prophase, metaphase, anaphase, lalu telophase.",
+      "tags": ["biology", "mitosis", "embedded-image"],
+      "ordering_items": ["Prophase", "Metaphase", "Anaphase", "Telophase"]
+    },
+    {
+      "subject_code": "USHIST",
+      "teacher_username": "sophia.bennett",
+      "category": "Civil Rights",
+      "question_text": "<p>Urutkan peristiwa berikut dari yang paling awal ke yang paling akhir.</p><table><tr><th>Event</th><th>Clue</th></tr><tr><td>Brown v. Board of Education</td><td>1954</td></tr><tr><td>Civil Rights Act</td><td>1964</td></tr><tr><td>Voting Rights Act</td><td>1965</td></tr><tr><td>March on Washington</td><td>1963</td></tr></table>",
+      "difficulty_level": "medium",
+      "points": 6,
+      "explanation": "Gunakan tahun untuk menyusun kronologi yang benar.",
+      "tags": ["history", "civil-rights", "table"],
+      "ordering_items": [
+        "Brown v. Board of Education",
+        "March on Washington",
+        "Civil Rights Act",
+        "Voting Rights Act"
+      ]
+    }
+  ],
+  "matching": [
+    {
+      "subject_code": "GEOM",
+      "teacher_username": "olivia.carter",
+      "category": "Geometry Vocabulary",
+      "question_text": "<p>Cocokkan istilah geometri dengan definisinya.</p>",
+      "difficulty_level": "medium",
+      "points": 8,
+      "explanation": "Setiap istilah memiliki definisi standar dalam geometri.",
+      "tags": ["geometry", "vocabulary", "matching"],
+      "matching_pairs": [
+        {"prompt_text": "Radius", "answer_text": "A segment from the center of a circle to a point on the circle"},
+        {"prompt_text": "Diameter", "answer_text": "A segment passing through the center of a circle with endpoints on the circle"},
+        {"prompt_text": "Chord", "answer_text": "A segment with both endpoints on a circle"}
+      ]
+    },
+    {
+      "subject_code": "PHYS",
+      "teacher_username": "michael.reed",
+      "category": "Units and Quantities",
+      "question_text": "<p>Cocokkan setiap besaran fisika dengan satuan SI yang tepat.</p>",
+      "difficulty_level": "easy",
+      "points": 8,
+      "explanation": "Sistem SI memasangkan besaran dasar dengan satuan baku.",
+      "tags": ["physics", "units", "matching"],
+      "matching_pairs": [
+        {"prompt_text": "Length", "answer_text": "meter"},
+        {"prompt_text": "Mass", "answer_text": "kilogram"},
+        {"prompt_text": "Time", "answer_text": "second"}
+      ]
+    },
+    {
+      "subject_code": "ENG-LIT",
+      "teacher_username": "sophia.bennett",
+      "category": "Literary Devices",
+      "question_text": "<p>Cocokkan setiap perangkat sastra dengan penjelasan terbaiknya.</p>",
+      "difficulty_level": "easy",
+      "points": 8,
+      "explanation": "Perangkat sastra membantu penulis membentuk gaya dan makna.",
+      "tags": ["english", "literary-devices", "matching"],
+      "matching_pairs": [
+        {"prompt_text": "Simile", "answer_text": "A comparison using like or as"},
+        {"prompt_text": "Hyperbole", "answer_text": "An intentional exaggeration for emphasis"},
+        {"prompt_text": "Alliteration", "answer_text": "The repetition of initial consonant sounds"}
+      ]
+    },
+    {
+      "subject_code": "CHEM",
+      "teacher_username": "michael.reed",
+      "category": "Elements",
+      "question_text": "<p>Cocokkan simbol unsur dengan nama unsurnya.</p><table><tr><th>Symbol</th><th>Hint</th></tr><tr><td>Na</td><td>common in table salt</td></tr><tr><td>K</td><td>important for nerves</td></tr><tr><td>Fe</td><td>used in steel</td></tr></table>",
+      "difficulty_level": "easy",
+      "points": 8,
+      "explanation": "Simbol unsur adalah singkatan standar pada tabel periodik.",
+      "tags": ["chemistry", "elements", "table"],
+      "matching_pairs": [
+        {"prompt_text": "Na", "answer_text": "Sodium"},
+        {"prompt_text": "K", "answer_text": "Potassium"},
+        {"prompt_text": "Fe", "answer_text": "Iron"}
+      ]
+    },
+    {
+      "subject_code": "CS",
+      "teacher_username": "sophia.bennett",
+      "category": "Data Structures",
+      "question_text": "<p>Cocokkan struktur data dengan contoh penggunaan paling tepat.</p>",
+      "difficulty_level": "medium",
+      "points": 8,
+      "explanation": "Setiap struktur data lebih cocok untuk pola data tertentu.",
+      "tags": ["computer-science", "data-structures", "matching"],
+      "matching_pairs": [
+        {"prompt_text": "Queue", "answer_text": "Processing tasks in first-in first-out order"},
+        {"prompt_text": "Stack", "answer_text": "Undo history in a text editor"},
+        {"prompt_text": "Dictionary", "answer_text": "Fast lookup by key"}
+      ]
+    },
+    {
+      "subject_code": "BIO",
+      "teacher_username": "michael.reed",
+      "category": "Organelles",
+      "question_text": "<p>Perhatikan ilustrasi sel berikut lalu cocokkan organel dengan fungsinya.</p><p><img src='https://picsum.photos/seed/cbt-matching-organelles/960/420' alt='Ilustrasi organel' /></p>",
+      "difficulty_level": "medium",
+      "points": 8,
+      "explanation": "Organel sel memiliki fungsi spesifik yang saling melengkapi.",
+      "tags": ["biology", "organelles", "embedded-image"],
+      "matching_pairs": [
+        {"prompt_text": "Mitochondrion", "answer_text": "Produces ATP for the cell"},
+        {"prompt_text": "Ribosome", "answer_text": "Builds proteins"},
+        {"prompt_text": "Golgi apparatus", "answer_text": "Modifies and packages molecules"}
+      ]
+    },
+    {
+      "subject_code": "USHIST",
+      "teacher_username": "sophia.bennett",
+      "category": "Founding Documents",
+      "question_text": "<p>Cocokkan dokumen sejarah dengan deskripsi yang tepat.</p>",
+      "difficulty_level": "medium",
+      "points": 8,
+      "explanation": "Dokumen-dokumen utama ini berperan besar dalam sejarah awal Amerika Serikat.",
+      "tags": ["history", "founding-documents", "matching"],
+      "matching_pairs": [
+        {"prompt_text": "Declaration of Independence", "answer_text": "Announced separation from Britain"},
+        {"prompt_text": "Articles of Confederation", "answer_text": "Created an early national government"},
+        {"prompt_text": "Constitution", "answer_text": "Established the current federal framework"}
+      ]
+    },
+    {
+      "subject_code": "ALG2",
+      "teacher_username": "olivia.carter",
+      "category": "Function Forms",
+      "question_text": "<p>Cocokkan bentuk fungsi dengan deskripsinya.</p><table><tr><th>Form</th><th>Example</th></tr><tr><td>Slope-intercept</td><td>y = mx + b</td></tr><tr><td>Standard</td><td>Ax + By = C</td></tr><tr><td>Vertex</td><td>y = a(x - h)^2 + k</td></tr></table>",
+      "difficulty_level": "medium",
+      "points": 8,
+      "explanation": "Setiap bentuk persamaan menonjolkan informasi yang berbeda.",
+      "tags": ["algebra", "functions", "table"],
+      "matching_pairs": [
+        {"prompt_text": "Slope-intercept form", "answer_text": "Highlights slope and y-intercept"},
+        {"prompt_text": "Standard form", "answer_text": "Often used for linear equations with integer coefficients"},
+        {"prompt_text": "Vertex form", "answer_text": "Highlights the vertex of a parabola"}
+      ]
+    },
+    {
+      "subject_code": "PHYS",
+      "teacher_username": "michael.reed",
+      "category": "Waves",
+      "question_text": "<p>Dengarkan audio contoh berikut.</p><p><audio controls src='https://www.w3schools.com/html/horse.mp3'></audio></p><p>Cocokkan istilah gelombang dengan maknanya.</p>",
+      "difficulty_level": "easy",
+      "points": 8,
+      "audio_play_limit": 2,
+      "explanation": "Istilah dasar gelombang membantu menjelaskan perilaku bunyi dan cahaya.",
+      "tags": ["physics", "waves", "audio"],
+      "matching_pairs": [
+        {"prompt_text": "Amplitude", "answer_text": "The maximum displacement from equilibrium"},
+        {"prompt_text": "Frequency", "answer_text": "The number of cycles per second"},
+        {"prompt_text": "Wavelength", "answer_text": "The distance between matching points on consecutive cycles"}
+      ]
+    },
+    {
+      "subject_code": "CS",
+      "teacher_username": "sophia.bennett",
+      "category": "HTML Media",
+      "question_text": "<p>Cocokkan tag HTML dengan tujuan utamanya.</p><p><video controls width='320' height='180'><source src='https://www.w3schools.com/html/mov_bbb.mp4' type='video/mp4'></video></p>",
+      "difficulty_level": "easy",
+      "points": 8,
+      "video_play_limit": 1,
+      "explanation": "Tag HTML memiliki fungsi semantik yang berbeda-beda.",
+      "tags": ["computer-science", "html", "media"],
+      "matching_pairs": [
+        {"prompt_text": "&lt;audio&gt;", "answer_text": "Embeds playable audio"},
+        {"prompt_text": "&lt;video&gt;", "answer_text": "Embeds playable video"},
+        {"prompt_text": "&lt;source&gt;", "answer_text": "Specifies a media file for audio or video"}
+      ]
+    }
+  ],
+  "fill_in_blank": [
+    {
+      "subject_code": "CHEM",
+      "teacher_username": "michael.reed",
+      "category": "Chemical Basics",
+      "question_text": "<p>The chemical formula for water is {{1}}, and its freezing point in Celsius is {{2}}.</p>",
+      "difficulty_level": "easy",
+      "points": 8,
+      "explanation": "Water is written as H2O and freezes at 0 degrees Celsius under standard conditions.",
+      "tags": ["chemistry", "compounds", "fill-in-blank"],
+      "blank_answers": [
+        {"blank_number": 1, "accepted_answers": ["H2O", "h2o"], "blank_points": 4},
+        {"blank_number": 2, "accepted_answers": ["0", "zero"], "blank_points": 4}
+      ]
+    },
+    {
+      "subject_code": "USHIST",
+      "teacher_username": "sophia.bennett",
+      "category": "Founding Era",
+      "question_text": "<p>The Declaration of Independence was adopted in {{1}}.</p>",
+      "difficulty_level": "easy",
+      "points": 5,
+      "explanation": "The Continental Congress adopted the Declaration in 1776.",
+      "tags": ["history", "founding-documents", "fill-in-blank"],
+      "blank_answers": [
+        {"blank_number": 1, "accepted_answers": ["1776"], "blank_points": 5}
+      ]
+    },
+    {
+      "subject_code": "CS",
+      "teacher_username": "sophia.bennett",
+      "category": "Programming Fundamentals",
+      "question_text": "<p>In Python, a loop that continues while a condition is true is called a {{1}} loop.</p>",
+      "difficulty_level": "easy",
+      "points": 5,
+      "explanation": "A while loop repeats while its condition evaluates to true.",
+      "tags": ["computer-science", "python", "fill-in-blank"],
+      "blank_answers": [
+        {"blank_number": 1, "accepted_answers": ["while"], "blank_points": 5}
+      ]
+    },
+    {
+      "subject_code": "ALG2",
+      "teacher_username": "olivia.carter",
+      "category": "Linear Functions",
+      "question_text": "<p>In the slope-intercept form <strong>y = mx + b</strong>, the letter {{1}} represents the slope and the letter {{2}} represents the y-intercept.</p>",
+      "difficulty_level": "easy",
+      "points": 6,
+      "explanation": "The form y = mx + b highlights m for slope and b for intercept.",
+      "tags": ["algebra", "linear-functions", "fill-in-blank"],
+      "blank_answers": [
+        {"blank_number": 1, "accepted_answers": ["m"], "blank_points": 3},
+        {"blank_number": 2, "accepted_answers": ["b"], "blank_points": 3}
+      ]
+    },
+    {
+      "subject_code": "BIO",
+      "teacher_username": "michael.reed",
+      "category": "Photosynthesis",
+      "question_text": "<p>Photosynthesis mainly takes place in the {{1}} and uses the pigment {{2}} to capture light energy.</p>",
+      "difficulty_level": "medium",
+      "points": 6,
+      "explanation": "Chloroplasts are the site of photosynthesis and chlorophyll captures light.",
+      "tags": ["biology", "photosynthesis", "fill-in-blank"],
+      "blank_answers": [
+        {"blank_number": 1, "accepted_answers": ["chloroplast", "chloroplasts"], "blank_points": 3},
+        {"blank_number": 2, "accepted_answers": ["chlorophyll"], "blank_points": 3}
+      ]
+    },
+    {
+      "subject_code": "PHYS",
+      "teacher_username": "michael.reed",
+      "category": "Motion",
+      "question_text": "<p>Use the table below.</p><table><tr><th>Distance</th><th>Time</th></tr><tr><td>100 m</td><td>20 s</td></tr></table><p>Speed is calculated as {{1}} divided by {{2}}.</p>",
+      "difficulty_level": "easy",
+      "points": 6,
+      "explanation": "Average speed is distance divided by time.",
+      "tags": ["physics", "motion", "table"],
+      "blank_answers": [
+        {"blank_number": 1, "accepted_answers": ["distance"], "blank_points": 3},
+        {"blank_number": 2, "accepted_answers": ["time"], "blank_points": 3}
+      ]
+    },
+    {
+      "subject_code": "ENG-LIT",
+      "teacher_username": "sophia.bennett",
+      "category": "Literary Devices",
+      "question_text": "<p>A comparison that uses the words like or as is called a {{1}}.</p>",
+      "difficulty_level": "easy",
+      "points": 5,
+      "explanation": "A simile compares two unlike things using like or as.",
+      "tags": ["english", "literary-devices", "fill-in-blank"],
+      "blank_answers": [
+        {"blank_number": 1, "accepted_answers": ["simile"], "blank_points": 5}
+      ]
+    },
+    {
+      "subject_code": "GEOM",
+      "teacher_username": "olivia.carter",
+      "category": "Triangles",
+      "question_text": "<p>Perhatikan gambar segitiga berikut.</p><p><img src='https://picsum.photos/seed/cbt-fill-triangle/960/420' alt='Segitiga' /></p><p>The sum of the interior angles of a triangle is {{1}} degrees.</p>",
+      "difficulty_level": "easy",
+      "points": 5,
+      "explanation": "Every triangle has an interior angle sum of 180 degrees.",
+      "tags": ["geometry", "triangles", "embedded-image"],
+      "blank_answers": [
+        {"blank_number": 1, "accepted_answers": ["180"], "blank_points": 5}
+      ]
+    },
+    {
+      "subject_code": "CS",
+      "teacher_username": "sophia.bennett",
+      "category": "HTML Media",
+      "question_text": "<p>Perhatikan media berikut.</p><p><audio controls src='https://www.w3schools.com/html/horse.mp3'></audio></p><p><video controls width='320' height='180'><source src='https://www.w3schools.com/html/mov_bbb.mp4' type='video/mp4'></video></p><p>The HTML tags used to embed the media above are {{1}} and {{2}}.</p>",
+      "difficulty_level": "easy",
+      "points": 6,
+      "audio_play_limit": 2,
+      "video_play_limit": 1,
+      "explanation": "HTML5 uses audio and video elements for embedded media.",
+      "tags": ["computer-science", "html", "media"],
+      "blank_answers": [
+        {"blank_number": 1, "accepted_answers": ["audio", "<audio>", "&lt;audio&gt;"], "blank_points": 3},
+        {"blank_number": 2, "accepted_answers": ["video", "<video>", "&lt;video&gt;"], "blank_points": 3}
+      ]
+    },
+    {
+      "subject_code": "CHEM",
+      "teacher_username": "michael.reed",
+      "category": "Periodic Table",
+      "question_text": "<p>Complete the symbols: sodium is {{1}} and gold is {{2}}.</p>",
+      "question_image_url": "https://picsum.photos/seed/cbt-fill-periodic/960/540",
+      "difficulty_level": "medium",
+      "points": 6,
+      "explanation": "Sodium uses the symbol Na and gold uses Au.",
+      "tags": ["chemistry", "periodic-table", "image"],
+      "blank_answers": [
+        {"blank_number": 1, "accepted_answers": ["Na", "na"], "blank_points": 3},
+        {"blank_number": 2, "accepted_answers": ["Au", "au"], "blank_points": 3}
+      ]
+    }
+  ],
+  "essay": [
+    {
+      "subject_code": "ENG-LIT",
+      "teacher_username": "sophia.bennett",
+      "category": "Theme Analysis",
+      "question_text": "<p>Explain how a story's theme can be different from its plot. Use one example from any text you have read.</p>",
+      "difficulty_level": "medium",
+      "points": 10,
+      "explanation": "Strong responses distinguish events from the deeper message or insight.",
+      "tags": ["english", "theme", "essay"],
+      "answer_text": "Theme is the central message or idea, while plot is the sequence of events that happens in the story.",
+      "keywords": ["theme", "plot", "message", "events"],
+      "max_word_count": 150
+    },
+    {
+      "subject_code": "USHIST",
+      "teacher_username": "sophia.bennett",
+      "category": "American Revolution",
+      "question_text": "<p>Describe two causes of growing colonial resistance before the American Revolution.</p>",
+      "difficulty_level": "medium",
+      "points": 10,
+      "explanation": "Students should mention taxation, representation, British control, or punitive acts.",
+      "tags": ["history", "revolution", "essay"],
+      "answer_text": "Possible causes include taxation without representation, the Stamp Act, the Tea Act, and tighter British control over the colonies.",
+      "keywords": ["taxation", "representation", "Stamp Act", "Tea Act", "control"],
+      "max_word_count": 160
+    },
+    {
+      "subject_code": "BIO",
+      "teacher_username": "michael.reed",
+      "category": "Cell Structures",
+      "question_text": "<p>Compare the function of a cell membrane and a cell wall.</p>",
+      "difficulty_level": "medium",
+      "points": 10,
+      "explanation": "The membrane regulates transport, while the wall provides extra structure and support.",
+      "tags": ["biology", "cells", "essay"],
+      "answer_text": "The cell membrane controls what enters and leaves the cell, while the cell wall provides rigid support and protection in certain organisms.",
+      "keywords": ["membrane", "cell wall", "support", "transport", "protection"],
+      "max_word_count": 140
+    },
+    {
+      "subject_code": "PHYS",
+      "teacher_username": "michael.reed",
+      "category": "Forces",
+      "question_text": "<p>Tonton video contoh berikut.</p><p><video controls width='480' height='270'><source src='https://www.w3schools.com/html/mov_bbb.mp4' type='video/mp4'></video></p><p>Explain Newton's Third Law in your own words and provide one real-life example.</p>",
+      "difficulty_level": "medium",
+      "points": 10,
+      "video_play_limit": 1,
+      "explanation": "Answers should include action-reaction force pairs.",
+      "tags": ["physics", "forces", "video", "essay"],
+      "answer_text": "Newton's Third Law says that for every action force there is an equal and opposite reaction force. For example, a rocket pushes gas downward and the gas pushes the rocket upward.",
+      "keywords": ["equal", "opposite", "action", "reaction", "example"],
+      "max_word_count": 150
+    },
+    {
+      "subject_code": "CS",
+      "teacher_username": "sophia.bennett",
+      "category": "Algorithms",
+      "question_text": "<p>Use the flowchart image below as context. Explain why breaking a problem into steps helps programmers write better code.</p>",
+      "question_image_url": "https://picsum.photos/seed/cbt-essay-flowchart/960/540",
+      "difficulty_level": "easy",
+      "points": 10,
+      "explanation": "Good answers discuss clarity, debugging, testing, and maintainability.",
+      "tags": ["computer-science", "algorithms", "image", "essay"],
+      "answer_text": "Breaking a problem into steps makes the logic clearer, easier to test, easier to debug, and simpler to explain to others.",
+      "keywords": ["steps", "logic", "debug", "test", "clear"],
+      "max_word_count": 140
+    },
+    {
+      "subject_code": "GEOM",
+      "teacher_username": "olivia.carter",
+      "category": "Area Reasoning",
+      "question_text": "<p>Use the diagram below. Explain why the area formula for a triangle includes the factor one-half.</p>",
+      "question_image_url": "https://picsum.photos/seed/cbt-essay-triangle/960/540",
+      "difficulty_level": "medium",
+      "points": 10,
+      "explanation": "Students should relate the triangle to a rectangle or parallelogram with the same base and height.",
+      "tags": ["geometry", "area", "image", "essay"],
+      "answer_text": "A triangle with a given base and height takes up half the area of a rectangle or parallelogram with the same base and height, so the formula uses one-half.",
+      "keywords": ["half", "rectangle", "parallelogram", "base", "height"],
+      "max_word_count": 150
+    },
+    {
+      "subject_code": "CHEM",
+      "teacher_username": "michael.reed",
+      "category": "Lab Safety",
+      "question_text": "<p>Read the table and explain how a student should respond if an unknown chemical spills on the lab bench.</p><table><tr><th>Rule</th><th>Reason</th></tr><tr><td>Alert the teacher</td><td>Get trained support</td></tr><tr><td>Keep others away</td><td>Reduce exposure</td></tr><tr><td>Use proper cleanup tools</td><td>Prevent injury</td></tr></table>",
+      "difficulty_level": "medium",
+      "points": 10,
+      "explanation": "Good answers mention notifying the teacher and following safety procedures rather than improvising.",
+      "tags": ["chemistry", "lab-safety", "table", "essay"],
+      "answer_text": "The student should notify the teacher immediately, keep classmates away, and follow the approved cleanup procedure with proper safety equipment.",
+      "keywords": ["teacher", "safety", "cleanup", "equipment", "alert"],
+      "max_word_count": 150
+    },
+    {
+      "subject_code": "ALG2",
+      "teacher_username": "olivia.carter",
+      "category": "Graph Interpretation",
+      "question_text": "<p>Study the graph below and explain how you would identify the y-intercept and the slope from it.</p>",
+      "question_image_url": "https://picsum.photos/seed/cbt-essay-graph/960/540",
+      "difficulty_level": "medium",
+      "points": 10,
+      "explanation": "Students should identify where the line crosses the y-axis and how rise over run shows slope.",
+      "tags": ["algebra", "graphs", "image", "essay"],
+      "answer_text": "The y-intercept is the point where the line crosses the y-axis, and the slope is found by comparing the vertical change to the horizontal change between two points on the line.",
+      "keywords": ["y-axis", "intercept", "rise", "run", "slope"],
+      "max_word_count": 150
+    },
+    {
+      "subject_code": "ENG-LIT",
+      "teacher_username": "sophia.bennett",
+      "category": "Tone and Imagery",
+      "question_text": "<p>Dengarkan audio contoh berikut sebagai pemicu suasana.</p><p><audio controls src='https://www.w3schools.com/html/horse.mp3'></audio></p><p>Explain how imagery can shape the tone of a poem or short passage.</p>",
+      "difficulty_level": "medium",
+      "points": 10,
+      "audio_play_limit": 2,
+      "explanation": "Students should connect sensory details to emotional effect.",
+      "tags": ["english", "imagery", "audio", "essay"],
+      "answer_text": "Imagery shapes tone by using sensory details that make the reader feel a certain mood, such as calm, fear, or excitement.",
+      "keywords": ["imagery", "tone", "mood", "sensory", "details"],
+      "max_word_count": 150
+    },
+    {
+      "subject_code": "USHIST",
+      "teacher_username": "sophia.bennett",
+      "category": "Civil Rights Movement",
+      "question_text": "<p>Explain one major impact of the Civil Rights Act of 1964 on American society.</p>",
+      "difficulty_level": "medium",
+      "points": 10,
+      "explanation": "Strong answers should address legal segregation, discrimination, or expanded protections.",
+      "tags": ["history", "civil-rights", "essay"],
+      "answer_text": "The Civil Rights Act of 1964 helped end legal segregation and banned discrimination in many public spaces and workplaces.",
+      "keywords": ["segregation", "discrimination", "rights", "law", "protections"],
+      "max_word_count": 150
+    }
+  ],
+  "short_answer": [
+    {
+      "subject_code": "CHEM",
+      "teacher_username": "michael.reed",
+      "category": "Atomic Structure",
+      "question_text": "<p>Which subatomic particle has a negative charge?</p>",
+      "difficulty_level": "easy",
+      "points": 4,
+      "explanation": "Electrons carry a negative charge.",
+      "tags": ["chemistry", "atoms", "short-answer"],
+      "answer_text": "electron",
+      "keywords": ["electron"],
+      "is_case_sensitive": false,
+      "max_word_count": 3
+    },
+    {
+      "subject_code": "CS",
+      "teacher_username": "sophia.bennett",
+      "category": "Python Basics",
+      "question_text": "<p>What keyword is used to define a function in Python?</p>",
+      "difficulty_level": "easy",
+      "points": 4,
+      "explanation": "Python functions begin with the def keyword.",
+      "tags": ["computer-science", "python", "short-answer"],
+      "answer_text": "def",
+      "keywords": ["def"],
+      "is_case_sensitive": false,
+      "max_word_count": 2
+    },
+    {
+      "subject_code": "ALG2",
+      "teacher_username": "olivia.carter",
+      "category": "Expressions",
+      "question_text": "<p>In the expression <strong>3x + 7</strong>, what is the coefficient of x?</p>",
+      "difficulty_level": "easy",
+      "points": 4,
+      "explanation": "The coefficient is the number multiplying the variable.",
+      "tags": ["algebra", "expressions", "short-answer"],
+      "answer_text": "3",
+      "keywords": ["3"],
+      "is_case_sensitive": false,
+      "max_word_count": 2
+    },
+    {
+      "subject_code": "GEOM",
+      "teacher_username": "olivia.carter",
+      "category": "Triangles",
+      "question_text": "<p>How many degrees are in the interior angle sum of a triangle?</p>",
+      "difficulty_level": "easy",
+      "points": 4,
+      "explanation": "All triangles have an interior angle sum of 180 degrees.",
+      "tags": ["geometry", "triangles", "short-answer"],
+      "answer_text": "180",
+      "keywords": ["180"],
+      "is_case_sensitive": false,
+      "max_word_count": 3
+    },
+    {
+      "subject_code": "BIO",
+      "teacher_username": "michael.reed",
+      "category": "Cell Biology",
+      "question_text": "<p>Which organelle produces most of a cell's ATP?</p>",
+      "difficulty_level": "easy",
+      "points": 4,
+      "explanation": "Mitochondria produce ATP through cellular respiration.",
+      "tags": ["biology", "cells", "short-answer"],
+      "answer_text": "mitochondrion",
+      "keywords": ["mitochondrion", "mitochondria"],
+      "is_case_sensitive": false,
+      "max_word_count": 3
+    },
+    {
+      "subject_code": "PHYS",
+      "teacher_username": "michael.reed",
+      "category": "Forces",
+      "question_text": "<p>What is the SI unit of force?</p>",
+      "difficulty_level": "easy",
+      "points": 4,
+      "explanation": "Force is measured in newtons.",
+      "tags": ["physics", "forces", "short-answer"],
+      "answer_text": "newton",
+      "keywords": ["newton", "newtons", "N"],
+      "is_case_sensitive": false,
+      "max_word_count": 3
+    },
+    {
+      "subject_code": "ENG-LIT",
+      "teacher_username": "sophia.bennett",
+      "category": "Literary Devices",
+      "question_text": "<p>What literary device compares two things using the words like or as?</p>",
+      "difficulty_level": "easy",
+      "points": 4,
+      "explanation": "A simile compares unlike things using like or as.",
+      "tags": ["english", "literary-devices", "short-answer"],
+      "answer_text": "simile",
+      "keywords": ["simile"],
+      "is_case_sensitive": false,
+      "max_word_count": 3
+    },
+    {
+      "subject_code": "USHIST",
+      "teacher_username": "sophia.bennett",
+      "category": "Founding Documents",
+      "question_text": "<p>What is the common name for the first ten amendments to the U.S. Constitution?</p>",
+      "difficulty_level": "easy",
+      "points": 4,
+      "explanation": "The first ten amendments are called the Bill of Rights.",
+      "tags": ["history", "constitution", "short-answer"],
+      "answer_text": "Bill of Rights",
+      "keywords": ["bill of rights"],
+      "is_case_sensitive": false,
+      "max_word_count": 4
+    },
+    {
+      "subject_code": "CS",
+      "teacher_username": "sophia.bennett",
+      "category": "HTML Basics",
+      "question_text": "<p>Which HTML tag inserts a line break?</p>",
+      "difficulty_level": "easy",
+      "points": 4,
+      "explanation": "The br tag inserts a line break in HTML.",
+      "tags": ["computer-science", "html", "short-answer"],
+      "answer_text": "br",
+      "keywords": ["br", "<br>", "&lt;br&gt;"],
+      "is_case_sensitive": false,
+      "max_word_count": 3
+    },
+    {
+      "subject_code": "CHEM",
+      "teacher_username": "michael.reed",
+      "category": "Chemical Formulas",
+      "question_text": "<p>Use the image below as a periodic-table reminder. What is the formula for carbon dioxide?</p>",
+      "question_image_url": "https://picsum.photos/seed/cbt-short-periodic/960/540",
+      "difficulty_level": "easy",
+      "points": 4,
+      "explanation": "Carbon dioxide is written as CO2.",
+      "tags": ["chemistry", "formulas", "image", "short-answer"],
+      "answer_text": "CO2",
+      "keywords": ["CO2", "co2"],
+      "is_case_sensitive": false,
+      "max_word_count": 3
+    }
+  ]
+}

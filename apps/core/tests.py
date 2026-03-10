@@ -196,7 +196,8 @@ class EnumBadgeHelpersTests(TestCase):
 
 
 class SeedCommandTests(TestCase):
-    def test_seed_creates_at_least_three_questions_for_each_question_type(self):
+    def test_seed_creates_exactly_ten_questions_for_each_question_type_and_is_idempotent(self):
+        call_command("seed")
         call_command("seed")
 
         expected_types = [
@@ -211,7 +212,12 @@ class SeedCommandTests(TestCase):
 
         for question_type in expected_types:
             with self.subTest(question_type=question_type):
-                self.assertGreaterEqual(
+                self.assertEqual(
                     Question.objects.filter(question_type=question_type, is_deleted=False).count(),
-                    3,
+                    10,
                 )
+
+        self.assertEqual(
+            Question.objects.filter(is_deleted=False).count(),
+            70,
+        )

@@ -1,5 +1,9 @@
+import json
+from collections import Counter
+from pathlib import Path
+
 from django.contrib.auth import get_user_model
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 
 from apps.accounts.models import UserProfile
 from apps.notifications.models import SystemSetting
@@ -19,6 +23,17 @@ from apps.subjects.models import Subject
 User = get_user_model()
 
 OPTION_LETTERS = [choice.value for choice in QuestionOption.OptionLetter]
+QUESTION_BANK_FILE = Path(__file__).resolve().parent / "data" / "question_bank.json"
+EXPECTED_QUESTION_COUNT_PER_TYPE = 10
+QUESTION_TYPE_SEQUENCE = [
+    Question.QuestionType.MULTIPLE_CHOICE,
+    Question.QuestionType.CHECKBOX,
+    Question.QuestionType.ORDERING,
+    Question.QuestionType.MATCHING,
+    Question.QuestionType.FILL_IN_BLANK,
+    Question.QuestionType.ESSAY,
+    Question.QuestionType.SHORT_ANSWER,
+]
 
 ADMIN_ACCOUNT = {
     "username": "admin",
@@ -129,449 +144,6 @@ SUBJECTS = [
         "code": "CS",
         "name": "Computer Science",
         "description": "Programming fundamentals, algorithms, and digital logic.",
-    },
-]
-
-QUESTION_BANK = [
-    {
-        "subject_code": "ALG2",
-        "teacher_username": "olivia.carter",
-        "category": "Linear Equations",
-        "question_text": "Solve for x: 2x + 5 = 17",
-        "difficulty_level": Question.Difficulty.EASY,
-        "points": 5,
-        "explanation": "Subtract 5 from both sides to get 2x = 12, then divide by 2.",
-        "tags": ["algebra", "linear-equations"],
-        "options": [
-            {"text": "4", "is_correct": False},
-            {"text": "5", "is_correct": False},
-            {"text": "6", "is_correct": True},
-            {"text": "7", "is_correct": False},
-        ],
-    },
-    {
-        "subject_code": "ALG2",
-        "teacher_username": "olivia.carter",
-        "category": "Quadratic Expressions",
-        "question_text": "Which expression is equivalent to x^2 - 5x + 6?",
-        "difficulty_level": Question.Difficulty.MEDIUM,
-        "points": 5,
-        "explanation": "Look for two numbers that multiply to 6 and add to -5.",
-        "tags": ["algebra", "factoring", "quadratics"],
-        "options": [
-            {"text": "(x - 2)(x - 3)", "is_correct": True},
-            {"text": "(x + 2)(x + 3)", "is_correct": False},
-            {"text": "(x - 1)(x - 6)", "is_correct": False},
-            {"text": "(x + 1)(x + 6)", "is_correct": False},
-        ],
-    },
-    {
-        "subject_code": "GEOM",
-        "teacher_username": "olivia.carter",
-        "category": "Angle Relationships",
-        "question_text": "What is the sum of the interior angles of any triangle?",
-        "difficulty_level": Question.Difficulty.EASY,
-        "points": 5,
-        "explanation": "All triangles have interior angles that add up to 180 degrees.",
-        "tags": ["geometry", "angles"],
-        "options": [
-            {"text": "90 degrees", "is_correct": False},
-            {"text": "180 degrees", "is_correct": True},
-            {"text": "270 degrees", "is_correct": False},
-            {"text": "360 degrees", "is_correct": False},
-        ],
-    },
-    {
-        "subject_code": "BIO",
-        "teacher_username": "michael.reed",
-        "category": "Cell Biology",
-        "question_text": "Which organelle is known as the powerhouse of the cell?",
-        "difficulty_level": Question.Difficulty.EASY,
-        "points": 5,
-        "explanation": "Mitochondria produce ATP, which cells use for energy.",
-        "tags": ["biology", "cells"],
-        "options": [
-            {"text": "Nucleus", "is_correct": False},
-            {"text": "Mitochondrion", "is_correct": True},
-            {"text": "Ribosome", "is_correct": False},
-            {"text": "Golgi apparatus", "is_correct": False},
-        ],
-    },
-    {
-        "subject_code": "CHEM",
-        "teacher_username": "michael.reed",
-        "category": "Atomic Structure",
-        "question_text": "What is the atomic number of oxygen?",
-        "difficulty_level": Question.Difficulty.EASY,
-        "points": 5,
-        "explanation": "Atomic number tells you how many protons are in the nucleus. Oxygen has 8.",
-        "tags": ["chemistry", "atoms"],
-        "options": [
-            {"text": "6", "is_correct": False},
-            {"text": "7", "is_correct": False},
-            {"text": "8", "is_correct": True},
-            {"text": "9", "is_correct": False},
-        ],
-    },
-    {
-        "subject_code": "PHYS",
-        "teacher_username": "michael.reed",
-        "category": "Forces and Motion",
-        "question_text": "A net force of 20 N acts on a 4 kg object. What is the acceleration?",
-        "difficulty_level": Question.Difficulty.MEDIUM,
-        "points": 5,
-        "explanation": "Use Newton's second law: a = F / m = 20 / 4 = 5.",
-        "tags": ["physics", "newton-laws", "motion"],
-        "options": [
-            {"text": "4 m/s^2", "is_correct": False},
-            {"text": "5 m/s^2", "is_correct": True},
-            {"text": "8 m/s^2", "is_correct": False},
-            {"text": "16 m/s^2", "is_correct": False},
-        ],
-    },
-    {
-        "subject_code": "ENG-LIT",
-        "teacher_username": "sophia.bennett",
-        "category": "Literary Devices",
-        "question_text": "What is a metaphor?",
-        "difficulty_level": Question.Difficulty.EASY,
-        "points": 5,
-        "explanation": "A metaphor compares two unlike things without using 'like' or 'as'.",
-        "tags": ["english", "literary-devices"],
-        "options": [
-            {"text": "A comparison using 'like' or 'as'", "is_correct": False},
-            {"text": "A direct comparison without using 'like' or 'as'", "is_correct": True},
-            {"text": "An exaggeration used for emphasis", "is_correct": False},
-            {"text": "A repeated consonant sound", "is_correct": False},
-        ],
-    },
-    {
-        "subject_code": "ENG-LIT",
-        "teacher_username": "sophia.bennett",
-        "category": "Reading Analysis",
-        "question_text": "Which statement best describes the theme of a story?",
-        "difficulty_level": Question.Difficulty.MEDIUM,
-        "points": 5,
-        "explanation": "Theme is the central message or insight a reader can take from the story.",
-        "tags": ["english", "theme", "reading-analysis"],
-        "options": [
-            {"text": "The list of characters in the story", "is_correct": False},
-            {"text": "The lesson or central message explored by the story", "is_correct": True},
-            {"text": "The place where the story happens", "is_correct": False},
-            {"text": "The order of events in the plot", "is_correct": False},
-        ],
-    },
-    {
-        "subject_code": "USHIST",
-        "teacher_username": "sophia.bennett",
-        "category": "Founding Documents",
-        "question_text": "What is the name of the first ten amendments to the U.S. Constitution?",
-        "difficulty_level": Question.Difficulty.EASY,
-        "points": 5,
-        "explanation": "The first ten amendments are collectively called the Bill of Rights.",
-        "tags": ["history", "constitution", "government"],
-        "options": [
-            {"text": "The Federalist Papers", "is_correct": False},
-            {"text": "The Articles of Confederation", "is_correct": False},
-            {"text": "The Bill of Rights", "is_correct": True},
-            {"text": "The Emancipation Proclamation", "is_correct": False},
-        ],
-    },
-    {
-        "subject_code": "CS",
-        "teacher_username": "sophia.bennett",
-        "category": "Programming Fundamentals",
-        "question_text": "In Python, what does len([3, 4, 5]) return?",
-        "difficulty_level": Question.Difficulty.EASY,
-        "points": 5,
-        "explanation": "The len function returns the number of items in a list. This list has 3 items.",
-        "tags": ["computer-science", "python", "lists"],
-        "options": [
-            {"text": "2", "is_correct": False},
-            {"text": "3", "is_correct": True},
-            {"text": "4", "is_correct": False},
-            {"text": "12", "is_correct": False},
-        ],
-    },
-    {
-        "subject_code": "ALG2",
-        "teacher_username": "olivia.carter",
-        "category": "Algebra Review",
-        "question_type": Question.QuestionType.CHECKBOX,
-        "question_text": "Select all expressions equivalent to 2(x + 3).",
-        "difficulty_level": Question.Difficulty.MEDIUM,
-        "points": 6,
-        "checkbox_scoring": Question.CheckboxScoring.PARTIAL_NO_PENALTY,
-        "explanation": "Distribute the 2 to both terms inside the parentheses.",
-        "tags": ["algebra", "distribution", "checkbox"],
-        "options": [
-            {"text": "2x + 6", "is_correct": True},
-            {"text": "6 + 2x", "is_correct": True},
-            {"text": "2x + 3", "is_correct": False},
-            {"text": "x + 6", "is_correct": False},
-        ],
-    },
-    {
-        "subject_code": "BIO",
-        "teacher_username": "michael.reed",
-        "category": "Characteristics of Life",
-        "question_type": Question.QuestionType.CHECKBOX,
-        "question_text": "Select all characteristics shared by living organisms.",
-        "difficulty_level": Question.Difficulty.EASY,
-        "points": 6,
-        "checkbox_scoring": Question.CheckboxScoring.PARTIAL,
-        "explanation": "Living things are made of cells, use energy, grow, and respond to stimuli.",
-        "tags": ["biology", "life-science", "checkbox"],
-        "options": [
-            {"text": "Made of one or more cells", "is_correct": True},
-            {"text": "Can maintain internal balance", "is_correct": True},
-            {"text": "Always move from place to place", "is_correct": False},
-            {"text": "Use energy", "is_correct": True},
-        ],
-    },
-    {
-        "subject_code": "CS",
-        "teacher_username": "sophia.bennett",
-        "category": "Python Basics",
-        "question_type": Question.QuestionType.CHECKBOX,
-        "question_text": "Which of the following are valid built-in Python collection types?",
-        "difficulty_level": Question.Difficulty.EASY,
-        "points": 6,
-        "checkbox_scoring": Question.CheckboxScoring.ALL_OR_NOTHING,
-        "explanation": "List, tuple, and dictionary are built-in collection types in Python.",
-        "tags": ["computer-science", "python", "checkbox"],
-        "options": [
-            {"text": "list", "is_correct": True},
-            {"text": "tuple", "is_correct": True},
-            {"text": "dictionary", "is_correct": True},
-            {"text": "spreadsheet", "is_correct": False},
-        ],
-    },
-    {
-        "subject_code": "BIO",
-        "teacher_username": "michael.reed",
-        "category": "Organization in Biology",
-        "question_type": Question.QuestionType.ORDERING,
-        "question_text": "Order the levels of biological organization from smallest to largest.",
-        "difficulty_level": Question.Difficulty.EASY,
-        "points": 6,
-        "explanation": "Cells form tissues, tissues form organs, and organs form organ systems.",
-        "tags": ["biology", "organization", "ordering"],
-        "ordering_items": [
-            "Cell",
-            "Tissue",
-            "Organ",
-            "Organ system",
-        ],
-    },
-    {
-        "subject_code": "USHIST",
-        "teacher_username": "sophia.bennett",
-        "category": "Civics Process",
-        "question_type": Question.QuestionType.ORDERING,
-        "question_text": "Order the general steps for how a bill becomes a law in the United States.",
-        "difficulty_level": Question.Difficulty.MEDIUM,
-        "points": 6,
-        "explanation": "A bill is introduced, debated and approved by Congress, then sent to the president.",
-        "tags": ["history", "government", "ordering"],
-        "ordering_items": [
-            "A bill is introduced",
-            "The bill is debated and voted on in Congress",
-            "Both houses approve the bill",
-            "The president signs the bill",
-        ],
-    },
-    {
-        "subject_code": "CHEM",
-        "teacher_username": "michael.reed",
-        "category": "Scientific Method",
-        "question_type": Question.QuestionType.ORDERING,
-        "question_text": "Order these steps of a basic lab investigation.",
-        "difficulty_level": Question.Difficulty.EASY,
-        "points": 6,
-        "explanation": "A solid investigation starts with a question and ends with analysis.",
-        "tags": ["chemistry", "lab", "ordering"],
-        "ordering_items": [
-            "Ask a question",
-            "Form a hypothesis",
-            "Test the hypothesis",
-            "Analyze the results",
-        ],
-    },
-    {
-        "subject_code": "GEOM",
-        "teacher_username": "olivia.carter",
-        "category": "Geometry Vocabulary",
-        "question_type": Question.QuestionType.MATCHING,
-        "question_text": "Match each geometry term with its correct definition.",
-        "difficulty_level": Question.Difficulty.MEDIUM,
-        "points": 8,
-        "explanation": "Each term has a standard geometry definition used in proofs and measurement.",
-        "tags": ["geometry", "vocabulary", "matching"],
-        "matching_pairs": [
-            {"prompt_text": "Radius", "answer_text": "A segment from the center of a circle to a point on the circle"},
-            {"prompt_text": "Diameter", "answer_text": "A segment passing through the center of a circle with endpoints on the circle"},
-            {"prompt_text": "Chord", "answer_text": "A segment with both endpoints on a circle"},
-        ],
-    },
-    {
-        "subject_code": "PHYS",
-        "teacher_username": "michael.reed",
-        "category": "Units and Quantities",
-        "question_type": Question.QuestionType.MATCHING,
-        "question_text": "Match each physical quantity with its SI unit.",
-        "difficulty_level": Question.Difficulty.EASY,
-        "points": 8,
-        "explanation": "The SI system pairs each base quantity with a standard unit.",
-        "tags": ["physics", "units", "matching"],
-        "matching_pairs": [
-            {"prompt_text": "Length", "answer_text": "meter"},
-            {"prompt_text": "Mass", "answer_text": "kilogram"},
-            {"prompt_text": "Time", "answer_text": "second"},
-        ],
-    },
-    {
-        "subject_code": "ENG-LIT",
-        "teacher_username": "sophia.bennett",
-        "category": "Literary Devices",
-        "question_type": Question.QuestionType.MATCHING,
-        "question_text": "Match each literary device with the best description.",
-        "difficulty_level": Question.Difficulty.EASY,
-        "points": 8,
-        "explanation": "Literary devices help authors create style, tone, and meaning.",
-        "tags": ["english", "literary-devices", "matching"],
-        "matching_pairs": [
-            {"prompt_text": "Simile", "answer_text": "A comparison using like or as"},
-            {"prompt_text": "Hyperbole", "answer_text": "An intentional exaggeration for emphasis"},
-            {"prompt_text": "Alliteration", "answer_text": "The repetition of initial consonant sounds"},
-        ],
-    },
-    {
-        "subject_code": "CHEM",
-        "teacher_username": "michael.reed",
-        "category": "Chemical Basics",
-        "question_type": Question.QuestionType.FILL_IN_BLANK,
-        "question_text": "The chemical formula for water is {{1}}, and its freezing point in Celsius is {{2}}.",
-        "difficulty_level": Question.Difficulty.EASY,
-        "points": 8,
-        "explanation": "Water is written as H2O and freezes at 0°C under standard conditions.",
-        "tags": ["chemistry", "compounds", "fill-in-blank"],
-        "blank_answers": [
-            {"blank_number": 1, "accepted_answers": ["H2O", "h2o"], "blank_points": 4},
-            {"blank_number": 2, "accepted_answers": ["0", "zero"], "blank_points": 4},
-        ],
-    },
-    {
-        "subject_code": "USHIST",
-        "teacher_username": "sophia.bennett",
-        "category": "Founding Era",
-        "question_type": Question.QuestionType.FILL_IN_BLANK,
-        "question_text": "The Declaration of Independence was adopted in {{1}}.",
-        "difficulty_level": Question.Difficulty.EASY,
-        "points": 5,
-        "explanation": "The Continental Congress adopted the Declaration in 1776.",
-        "tags": ["history", "founding-documents", "fill-in-blank"],
-        "blank_answers": [
-            {"blank_number": 1, "accepted_answers": ["1776"], "blank_points": 5},
-        ],
-    },
-    {
-        "subject_code": "CS",
-        "teacher_username": "sophia.bennett",
-        "category": "Programming Fundamentals",
-        "question_type": Question.QuestionType.FILL_IN_BLANK,
-        "question_text": "In Python, a loop that continues while a condition is true is called a {{1}} loop.",
-        "difficulty_level": Question.Difficulty.EASY,
-        "points": 5,
-        "explanation": "A while loop repeats as long as its condition evaluates to true.",
-        "tags": ["computer-science", "python", "fill-in-blank"],
-        "blank_answers": [
-            {"blank_number": 1, "accepted_answers": ["while"], "blank_points": 5, "is_case_sensitive": False},
-        ],
-    },
-    {
-        "subject_code": "ENG-LIT",
-        "teacher_username": "sophia.bennett",
-        "category": "Essay Writing",
-        "question_type": Question.QuestionType.ESSAY,
-        "question_text": "Explain how setting can influence the mood of a story. Use one example in your response.",
-        "difficulty_level": Question.Difficulty.MEDIUM,
-        "points": 10,
-        "explanation": "Strong responses connect details about place and time to the reader's emotional experience.",
-        "tags": ["english", "essay", "analysis"],
-        "answer_text": "A strong answer explains that setting shapes mood through details about time, place, weather, and atmosphere, then supports the claim with an example.",
-        "max_word_count": 180,
-    },
-    {
-        "subject_code": "BIO",
-        "teacher_username": "michael.reed",
-        "category": "Cell Processes",
-        "question_type": Question.QuestionType.ESSAY,
-        "question_text": "Describe the process of photosynthesis and explain why it is important to ecosystems.",
-        "difficulty_level": Question.Difficulty.MEDIUM,
-        "points": 10,
-        "explanation": "Seed answer highlights light energy, glucose production, oxygen release, and food webs.",
-        "tags": ["biology", "essay", "photosynthesis"],
-        "answer_text": "Photosynthesis uses light energy, water, and carbon dioxide to produce glucose and oxygen, providing energy for plants and supporting ecosystems through food chains and oxygen production.",
-        "max_word_count": 200,
-    },
-    {
-        "subject_code": "USHIST",
-        "teacher_username": "sophia.bennett",
-        "category": "American Revolution",
-        "question_type": Question.QuestionType.ESSAY,
-        "question_text": "Explain one major cause of the American Revolution and how it increased tension between Britain and the colonies.",
-        "difficulty_level": Question.Difficulty.MEDIUM,
-        "points": 10,
-        "explanation": "Responses may discuss taxation, representation, trade restrictions, or military presence.",
-        "tags": ["history", "essay", "american-revolution"],
-        "answer_text": "A strong answer identifies one major cause such as taxation without representation and explains how colonists viewed British policies as unfair and controlling.",
-        "max_word_count": 180,
-    },
-    {
-        "subject_code": "ALG2",
-        "teacher_username": "olivia.carter",
-        "category": "Slope",
-        "question_type": Question.QuestionType.SHORT_ANSWER,
-        "question_text": "What is the slope of the line y = 3x + 1?",
-        "difficulty_level": Question.Difficulty.EASY,
-        "points": 4,
-        "explanation": "In slope-intercept form y = mx + b, the slope is the coefficient of x.",
-        "tags": ["algebra", "short-answer", "slope"],
-        "answer_text": "3",
-        "keywords": ["3"],
-        "is_case_sensitive": False,
-        "max_word_count": 2,
-    },
-    {
-        "subject_code": "CHEM",
-        "teacher_username": "michael.reed",
-        "category": "Atomic Structure",
-        "question_type": Question.QuestionType.SHORT_ANSWER,
-        "question_text": "Which subatomic particle has a negative charge?",
-        "difficulty_level": Question.Difficulty.EASY,
-        "points": 4,
-        "explanation": "Electrons carry a negative charge.",
-        "tags": ["chemistry", "short-answer", "atoms"],
-        "answer_text": "electron",
-        "keywords": ["electron"],
-        "is_case_sensitive": False,
-        "max_word_count": 3,
-    },
-    {
-        "subject_code": "CS",
-        "teacher_username": "sophia.bennett",
-        "category": "Python Basics",
-        "question_type": Question.QuestionType.SHORT_ANSWER,
-        "question_text": "What keyword is used to define a function in Python?",
-        "difficulty_level": Question.Difficulty.EASY,
-        "points": 4,
-        "explanation": "Python functions begin with the def keyword.",
-        "tags": ["computer-science", "python", "short-answer"],
-        "answer_text": "def",
-        "keywords": ["def"],
-        "is_case_sensitive": False,
-        "max_word_count": 2,
     },
 ]
 
@@ -772,19 +344,69 @@ SYSTEM_SETTINGS = [
 
 
 class Command(BaseCommand):
-    help = "Seed demo data with sample users, U.S. high school subjects, and example questions."
+    help = "Seed demo data with sample users, U.S. high school subjects, and rich media example questions."
 
     def handle(self, *args, **options):
         self.stdout.write(self.style.SUCCESS("Starting database seeding..."))
 
+        question_bank = self._load_question_bank()
         self.create_admin_user()
         teachers = self.create_teacher_users()
         self.create_student_users()
         subjects = self.create_subjects()
-        self.create_question_bank(teachers, subjects)
+        self.create_question_bank(question_bank, teachers, subjects)
         self.create_system_settings()
 
         self.stdout.write(self.style.SUCCESS("Database seeding completed."))
+
+    def _load_question_bank(self):
+        try:
+            payload = json.loads(QUESTION_BANK_FILE.read_text(encoding="utf-8"))
+        except FileNotFoundError as exc:
+            raise CommandError(f"Question seed file not found: {QUESTION_BANK_FILE}") from exc
+        except json.JSONDecodeError as exc:
+            raise CommandError(f"Question seed file is not valid JSON: {exc}") from exc
+
+        if not isinstance(payload, dict):
+            raise CommandError("Question seed file must be a JSON object keyed by question type.")
+
+        unexpected_keys = set(payload.keys()) - set(QUESTION_TYPE_SEQUENCE)
+        if unexpected_keys:
+            raise CommandError(
+                f"Unexpected question type sections in JSON seed file: {', '.join(sorted(unexpected_keys))}"
+            )
+
+        question_bank = []
+        for question_type in QUESTION_TYPE_SEQUENCE:
+            items = payload.get(question_type, [])
+            if not isinstance(items, list):
+                raise CommandError(f"Section '{question_type}' must be a list.")
+            if len(items) != EXPECTED_QUESTION_COUNT_PER_TYPE:
+                raise CommandError(
+                    f"Section '{question_type}' must contain exactly "
+                    f"{EXPECTED_QUESTION_COUNT_PER_TYPE} questions."
+                )
+            for item in items:
+                if not isinstance(item, dict):
+                    raise CommandError(f"Each item in '{question_type}' must be an object.")
+                question_row = dict(item)
+                question_row["question_type"] = question_type
+                question_bank.append(question_row)
+
+        counts = Counter(item["question_type"] for item in question_bank)
+        for question_type in QUESTION_TYPE_SEQUENCE:
+            if counts[question_type] != EXPECTED_QUESTION_COUNT_PER_TYPE:
+                raise CommandError(
+                    f"Question type '{question_type}' has {counts[question_type]} rows, "
+                    f"expected {EXPECTED_QUESTION_COUNT_PER_TYPE}."
+                )
+
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"Loaded {len(question_bank)} question seeds from {QUESTION_BANK_FILE.name}."
+            )
+        )
+        return question_bank
 
     def _upsert_user(self, account_data, role, is_superuser=False):
         defaults = {
@@ -905,7 +527,7 @@ class Command(BaseCommand):
 
     def _sync_question_options(self, question, options_data):
         if len(options_data) > len(OPTION_LETTERS):
-            raise ValueError(f"Question '{question.question_text[:40]}' has too many options.")
+            raise CommandError(f"Question '{question.question_text[:40]}' has too many options.")
 
         if question.question_type not in {
             Question.QuestionType.MULTIPLE_CHOICE,
@@ -915,9 +537,8 @@ class Command(BaseCommand):
             return
 
         QuestionOption.objects.filter(question=question).delete()
-        options = []
-        for index, option_data in enumerate(options_data):
-            options.append(
+        QuestionOption.objects.bulk_create(
+            [
                 QuestionOption(
                     question=question,
                     option_letter=OPTION_LETTERS[index],
@@ -926,8 +547,9 @@ class Command(BaseCommand):
                     is_correct=option_data["is_correct"],
                     display_order=index + 1,
                 )
-            )
-        QuestionOption.objects.bulk_create(options)
+                for index, option_data in enumerate(options_data)
+            ]
+        )
 
     def _sync_question_answer(self, question, question_data):
         if question.question_type in {
@@ -1012,10 +634,14 @@ class Command(BaseCommand):
             tag, _ = QuestionTag.objects.get_or_create(name=tag_name)
             QuestionTagRelation.objects.create(question=question, tag=tag)
 
-    def create_question_bank(self, teachers, subjects):
-        for question_data in QUESTION_BANK:
-            teacher = teachers[question_data["teacher_username"]]
-            subject = subjects[question_data["subject_code"]]
+    def create_question_bank(self, question_bank, teachers, subjects):
+        for question_data in question_bank:
+            try:
+                teacher = teachers[question_data["teacher_username"]]
+                subject = subjects[question_data["subject_code"]]
+            except KeyError as exc:
+                raise CommandError(f"Unknown teacher or subject reference in question seed: {question_data}") from exc
+
             category = self._get_or_create_category(question_data["category"])
             question_type = question_data.get("question_type", Question.QuestionType.MULTIPLE_CHOICE)
 
@@ -1028,7 +654,7 @@ class Command(BaseCommand):
                     "question_type": question_type,
                     "points": question_data["points"],
                     "difficulty_level": question_data["difficulty_level"],
-                    "explanation": question_data["explanation"],
+                    "explanation": question_data.get("explanation", ""),
                     "question_image_url": question_data.get("question_image_url", ""),
                     "audio_play_limit": question_data.get("audio_play_limit"),
                     "video_play_limit": question_data.get("video_play_limit"),
@@ -1036,8 +662,8 @@ class Command(BaseCommand):
                         "checkbox_scoring",
                         Question.CheckboxScoring.ALL_OR_NOTHING,
                     ),
-                    "allow_previous": True,
-                    "allow_next": True,
+                    "allow_previous": bool(question_data.get("allow_previous", True)),
+                    "allow_next": bool(question_data.get("allow_next", True)),
                     "force_sequential": bool(question_data.get("force_sequential", False)),
                     "time_limit_seconds": question_data.get("time_limit_seconds"),
                     "is_active": True,
@@ -1050,7 +676,7 @@ class Command(BaseCommand):
             self._sync_question_matching_pairs(question, question_data.get("matching_pairs", []))
             self._sync_question_blank_answers(question, question_data.get("blank_answers", []))
             self._sync_question_answer(question, question_data)
-            self._sync_question_tags(question, question_data["tags"])
+            self._sync_question_tags(question, question_data.get("tags", []))
 
             action = "Created" if created else "Updated"
             self.stdout.write(
