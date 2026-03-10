@@ -276,7 +276,7 @@ class TeacherResultsViewTests(TestCase):
         response = self.client.post(
             reverse("answer_review", kwargs={"result_id": self.result_one.id}),
             data={
-                "action": "grade_essay",
+                "action": "grade_open_answer",
                 "answer_id": str(essay_answer.id),
                 "points_awarded": "18",
                 "feedback": "Penjelasan sudah runtut dan cukup lengkap.",
@@ -293,10 +293,56 @@ class TeacherResultsViewTests(TestCase):
         self.assertEqual(grading.points_awarded, Decimal("18.00"))
         self.assertEqual(grading.feedback, "Penjelasan sudah runtut dan cukup lengkap.")
         self.assertEqual(essay_answer.points_earned, Decimal("18.00"))
-        self.assertTrue(essay_answer.is_correct)
+        self.assertFalse(essay_answer.is_correct)
         self.assertEqual(self.attempt_one.status, "completed")
         self.assertEqual(self.result_one.total_score, Decimal("28.00"))
         self.assertEqual(self.result_one.percentage, Decimal("93.33"))
+
+    def test_teacher_can_grade_short_answer_manually_from_review_page(self):
+        question_short_answer = Question.objects.create(
+            created_by=self.teacher,
+            subject=self.subject,
+            question_type="short_answer",
+            question_text="Pigmen hijau daun disebut apa?",
+            points=10,
+            difficulty_level="easy",
+            is_active=True,
+        )
+        ExamQuestion.objects.create(exam=self.exam, question=question_short_answer, display_order=3, points_override=10)
+        short_answer = StudentAnswer.objects.create(
+            attempt=self.attempt_one,
+            question=question_short_answer,
+            answer_type="short_answer",
+            answer_text="Pigmen fotosintesis",
+            is_correct=None,
+            points_earned=0,
+            points_possible=10,
+            time_spent_seconds=95,
+        )
+
+        self.client.force_login(self.teacher)
+        response = self.client.post(
+            reverse("answer_review", kwargs={"result_id": self.result_one.id}),
+            data={
+                "action": "grade_open_answer",
+                "answer_id": str(short_answer.id),
+                "points_awarded": "7.5",
+                "feedback": "Istilah umum benar, tetapi istilah ilmiah belum spesifik.",
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        short_answer.refresh_from_db()
+        self.result_one.refresh_from_db()
+        self.attempt_one.refresh_from_db()
+
+        grading = EssayGrading.objects.get(answer=short_answer)
+        self.assertEqual(grading.points_awarded, Decimal("7.50"))
+        self.assertEqual(short_answer.points_earned, Decimal("7.50"))
+        self.assertFalse(short_answer.is_correct)
+        self.assertEqual(self.attempt_one.status, "completed")
+        self.assertEqual(self.result_one.total_score, Decimal("31.50"))
+        self.assertEqual(self.result_one.percentage, Decimal("78.75"))
 
     def test_teacher_answer_review_renders_ordering_question(self):
         question_ordering = Question.objects.create(

@@ -1109,7 +1109,10 @@ def build_answer_review_context(result):
         correct_fill_blank_html = ""
         grading = _get_answer_grading(answer)
         manual_grading = {
-            "is_available": bool(question.question_type == Question.QuestionType.ESSAY and answer),
+            "is_available": bool(
+                question.question_type in {Question.QuestionType.ESSAY, Question.QuestionType.SHORT_ANSWER}
+                and answer
+            ),
             "can_grade": bool(answer and str(answer.answer_text or "").strip()),
             "has_grading": bool(grading),
             "answer_id": str(answer.id) if answer else "",
@@ -1124,7 +1127,7 @@ def build_answer_review_context(result):
         points_earned = 0.0
         points_possible = _to_float(exam_question.points_override or question.points)
 
-        if question.question_type == Question.QuestionType.ESSAY and answer:
+        if question.question_type in {Question.QuestionType.ESSAY, Question.QuestionType.SHORT_ANSWER} and answer:
             current_points = grading.points_awarded if grading else answer.points_earned
             manual_grading.update(
                 {
@@ -1267,7 +1270,17 @@ def build_answer_review_context(result):
 
         if answer:
             points_earned = _to_float(answer.points_earned)
-            if answer.is_correct is True:
+            if grading and question.question_type in {Question.QuestionType.ESSAY, Question.QuestionType.SHORT_ANSWER}:
+                if points_earned >= points_possible and points_possible > 0:
+                    status_label = "Benar"
+                    status_type = "success"
+                elif points_earned > 0:
+                    status_label = "Dinilai Parsial"
+                    status_type = "primary"
+                else:
+                    status_label = "Salah"
+                    status_type = "danger"
+            elif answer.is_correct is True:
                 status_label = "Benar"
                 status_type = "success"
             elif answer.is_correct is False:

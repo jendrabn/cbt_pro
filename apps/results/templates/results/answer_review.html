@@ -265,7 +265,7 @@
                                         {% endif %}
                                     </p>
                                     {% else %}
-                                    <p class="small text-muted mb-0">Jawaban esai ini belum dinilai manual.</p>
+                                    <p class="small text-muted mb-0">Jawaban ini belum dinilai manual.</p>
                                     {% endif %}
                                 </div>
                                 {% if row.manual_grading.has_grading %}
@@ -278,7 +278,7 @@
                             {% if row.manual_grading.can_grade %}
                             <form method="post" class="row g-3 align-items-start">
                                 {% csrf_token %}
-                                <input type="hidden" name="action" value="grade_essay">
+                                <input type="hidden" name="action" value="grade_open_answer">
                                 <input type="hidden" name="answer_id" value="{{ row.manual_grading.answer_id }}">
                                 <input type="hidden" name="next" value="{{ back_url }}">
                                 <div class="col-md-3">
@@ -304,9 +304,9 @@
                                 </div>
                             </form>
                             {% else %}
-                            <div class="alert alert-light border mb-0 small">
-                                Siswa tidak mengisi jawaban esai, jadi tidak ada jawaban yang perlu dinilai manual.
-                            </div>
+                                <div class="alert alert-light border mb-0 small">
+                                    Siswa tidak mengisi jawaban, jadi tidak ada jawaban yang perlu dinilai manual.
+                                </div>
                             {% endif %}
                         </div>
                         {% endif %}

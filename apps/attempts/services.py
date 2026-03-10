@@ -1486,6 +1486,7 @@ def upsert_exam_result_for_attempt(*, exam, attempt):
 
         evaluated_correct = answer.is_correct
         points_earned = _rounded_decimal(answer.points_earned if answer else Decimal("0.00"))
+        grading = answer.grading if answer and hasattr(answer, "grading") else None
 
         if question.question_type == Question.QuestionType.MULTIPLE_CHOICE:
             evaluated_correct = bool(answer.selected_option and answer.selected_option.is_correct)
@@ -1499,13 +1500,18 @@ def upsert_exam_result_for_attempt(*, exam, attempt):
         elif question.question_type == Question.QuestionType.FILL_IN_BLANK:
             evaluated_correct, points_earned = _evaluate_fill_in_blank_answer(question, answer, points_possible)
         elif question.question_type == Question.QuestionType.SHORT_ANSWER:
-            short_result = _evaluate_short_answer(question, answer.answer_text)
-            if short_result is not None:
-                evaluated_correct = short_result
-                points_earned = points_possible if short_result else Decimal("0.00")
+            if grading:
+                points_earned = _rounded_decimal(grading.points_awarded)
+                evaluated_correct = bool(points_earned >= points_possible and points_possible > 0)
+            else:
+                short_result = _evaluate_short_answer(question, answer.answer_text)
+                if short_result is not None:
+                    evaluated_correct = short_result
+                    points_earned = points_possible if short_result else Decimal("0.00")
         else:
-            if evaluated_correct is None and hasattr(answer, "grading"):
-                points_earned = _rounded_decimal(answer.grading.points_awarded)
+            if evaluated_correct is None and grading:
+                points_earned = _rounded_decimal(grading.points_awarded)
+                evaluated_correct = bool(points_earned >= points_possible and points_possible > 0)
 
         answer_updates = []
         if answer.points_possible != points_possible:

@@ -136,7 +136,7 @@ class EssayManualGradingForm(forms.Form):
 
     def clean_action(self):
         value = (self.cleaned_data.get("action") or "").strip()
-        if value != "grade_essay":
+        if value != "grade_open_answer":
             raise forms.ValidationError("Aksi grading tidak valid.")
         return value
 

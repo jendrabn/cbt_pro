@@ -453,10 +453,14 @@ class AnswerReviewView(TeacherResultsBaseView, DetailView):
     def _sync_manual_grading_attempt_status(self):
         pending_essay_answers = StudentAnswer.objects.filter(
             attempt=self.object.attempt,
-            question__question_type=Question.QuestionType.ESSAY,
+            question__question_type__in=[
+                Question.QuestionType.ESSAY,
+                Question.QuestionType.SHORT_ANSWER,
+            ],
         ).exclude(
             Q(answer_text__isnull=True) | Q(answer_text__exact="")
         ).filter(
+            is_correct__isnull=True,
             grading__isnull=True,
         )
         next_status = "grading" if pending_essay_answers.exists() else "completed"
@@ -482,12 +486,12 @@ class AnswerReviewView(TeacherResultsBaseView, DetailView):
             attempt=self.object.attempt,
         )
 
-        if answer.question.question_type != Question.QuestionType.ESSAY:
-            messages.error(request, "Hanya jawaban esai yang dapat dinilai manual.")
+        if answer.question.question_type not in {Question.QuestionType.ESSAY, Question.QuestionType.SHORT_ANSWER}:
+            messages.error(request, "Hanya jawaban esai dan jawaban singkat yang dapat dinilai manual.")
             return redirect(request.get_full_path())
 
         if not str(answer.answer_text or "").strip():
-            messages.error(request, "Jawaban esai kosong. Tidak ada yang bisa dinilai.")
+            messages.error(request, "Jawaban kosong. Tidak ada yang bisa dinilai.")
             return redirect(request.get_full_path())
 
         points_awarded = form.cleaned_data["points_awarded"]
@@ -510,12 +514,12 @@ class AnswerReviewView(TeacherResultsBaseView, DetailView):
                 },
             )
             answer.points_earned = points_awarded
-            answer.is_correct = bool(points_awarded > 0)
+            answer.is_correct = bool(points_awarded >= answer.points_possible and answer.points_possible > 0)
             answer.save(update_fields=["points_earned", "is_correct", "updated_at"])
             self._sync_manual_grading_attempt_status()
             upsert_exam_result_for_attempt(exam=self.object.exam, attempt=self.object.attempt)
 
-        messages.success(request, "Nilai esai berhasil disimpan.")
+        messages.success(request, "Nilai jawaban berhasil disimpan.")
         return redirect(request.get_full_path())
 
     def get_context_data(self, **kwargs):
