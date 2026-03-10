@@ -252,6 +252,64 @@
                             <span>Skor: <strong class="text-dark">{{ row.points_earned }} / {{ row.points_possible }}</strong></span>
                             <span>Waktu Soal: <strong class="text-dark">{{ row.time_spent_human }}</strong></span>
                         </div>
+                        {% if row.manual_grading.is_available %}
+                        <div class="border rounded-3 bg-light-subtle p-3 mt-3">
+                            <div class="d-flex flex-wrap gap-2 align-items-center justify-content-between mb-3">
+                                <div>
+                                    <h5 class="h6 mb-1">Penilaian Manual Guru</h5>
+                                    {% if row.manual_grading.has_grading %}
+                                    <p class="small text-muted mb-0">
+                                        Dinilai oleh <strong>{{ row.manual_grading.graded_by_name|default:"Guru" }}</strong>
+                                        {% if row.manual_grading.graded_at %}
+                                        pada {{ row.manual_grading.graded_at|date:"d M Y H:i" }}
+                                        {% endif %}
+                                    </p>
+                                    {% else %}
+                                    <p class="small text-muted mb-0">Jawaban esai ini belum dinilai manual.</p>
+                                    {% endif %}
+                                </div>
+                                {% if row.manual_grading.has_grading %}
+                                <span class="badge text-bg-success">Sudah Dinilai</span>
+                                {% else %}
+                                <span class="badge text-bg-warning">Belum Dinilai</span>
+                                {% endif %}
+                            </div>
+
+                            {% if row.manual_grading.can_grade %}
+                            <form method="post" class="row g-3 align-items-start">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="grade_essay">
+                                <input type="hidden" name="answer_id" value="{{ row.manual_grading.answer_id }}">
+                                <input type="hidden" name="next" value="{{ back_url }}">
+                                <div class="col-md-3">
+                                    <label class="form-label small fw-semibold">Nilai</label>
+                                    <input
+                                        type="number"
+                                        class="form-control form-control-sm"
+                                        name="points_awarded"
+                                        min="0"
+                                        max="{{ row.points_possible }}"
+                                        step="0.01"
+                                        value="{{ row.manual_grading.points_awarded }}"
+                                    >
+                                    <div class="form-text">Maksimal {{ row.points_possible }} poin.</div>
+                                </div>
+                                <div class="col-md-7">
+                                    <label class="form-label small fw-semibold">Feedback Guru</label>
+                                    <textarea class="form-control form-control-sm" name="feedback" rows="3" placeholder="Tulis catatan penilaian untuk siswa...">{{ row.manual_grading.feedback }}</textarea>
+                                </div>
+                                <div class="col-md-2 d-grid">
+                                    <label class="form-label small fw-semibold d-none d-md-block">&nbsp;</label>
+                                    <button type="submit" class="btn btn-sm btn-primary">Simpan Nilai</button>
+                                </div>
+                            </form>
+                            {% else %}
+                            <div class="alert alert-light border mb-0 small">
+                                Siswa tidak mengisi jawaban esai, jadi tidak ada jawaban yang perlu dinilai manual.
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
                     </article>
                     {% empty %}
                     <p class="text-muted mb-0">Belum ada jawaban yang dapat ditampilkan.</p>

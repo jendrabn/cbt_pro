@@ -1,11 +1,12 @@
 from datetime import timedelta
+from decimal import Decimal
 
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 
 from apps.accounts.models import User
-from apps.attempts.models import ExamAttempt, ExamViolation, StudentAnswer
+from apps.attempts.models import EssayGrading, ExamAttempt, ExamViolation, StudentAnswer
 from apps.exams.models import Class, ClassStudent, Exam, ExamAssignment, ExamQuestion
 from apps.questions.models import Question, QuestionAnswer
 from apps.results.models import ExamResult
@@ -258,6 +259,44 @@ class TeacherResultsViewTests(TestCase):
         response = self.client.get(reverse("answer_review", kwargs={"result_id": self.result_one.id}))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Lembar Jawaban Lengkap")
+
+    def test_teacher_answer_review_shows_manual_grading_form_for_essay(self):
+        self.client.force_login(self.teacher)
+        response = self.client.get(reverse("answer_review", kwargs={"result_id": self.result_one.id}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Penilaian Manual Guru")
+        self.assertContains(response, 'name="points_awarded"', html=False)
+        self.assertContains(response, 'name="feedback"', html=False)
+
+    def test_teacher_can_grade_essay_answer_manually_from_review_page(self):
+        essay_answer = StudentAnswer.objects.get(attempt=self.attempt_one, question=self.question_essay)
+        self.client.force_login(self.teacher)
+
+        response = self.client.post(
+            reverse("answer_review", kwargs={"result_id": self.result_one.id}),
+            data={
+                "action": "grade_essay",
+                "answer_id": str(essay_answer.id),
+                "points_awarded": "18",
+                "feedback": "Penjelasan sudah runtut dan cukup lengkap.",
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        essay_answer.refresh_from_db()
+        self.result_one.refresh_from_db()
+        self.attempt_one.refresh_from_db()
+
+        grading = EssayGrading.objects.get(answer=essay_answer)
+        self.assertEqual(grading.graded_by, self.teacher)
+        self.assertEqual(grading.points_awarded, Decimal("18.00"))
+        self.assertEqual(grading.feedback, "Penjelasan sudah runtut dan cukup lengkap.")
+        self.assertEqual(essay_answer.points_earned, Decimal("18.00"))
+        self.assertTrue(essay_answer.is_correct)
+        self.assertEqual(self.attempt_one.status, "completed")
+        self.assertEqual(self.result_one.total_score, Decimal("28.00"))
+        self.assertEqual(self.result_one.percentage, Decimal("93.33"))
 
     def test_teacher_answer_review_renders_ordering_question(self):
         question_ordering = Question.objects.create(

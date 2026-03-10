@@ -15,6 +15,7 @@ from django.utils.dateparse import parse_date
 
 from apps.attempts.models import ExamAttempt, ExamViolation, StudentAnswer
 from apps.exams.models import Class, ClassStudent, Exam
+from apps.questions.models import Question
 from apps.results.certificate_services import (
     certificate_state_label,
     get_certificate_download_url as get_direct_certificate_download_url,
@@ -168,6 +169,15 @@ def _build_fill_blank_review_html(question_text, blank_rows, mode="student"):
 
 def _blank_answer_map_has_values(value):
     return any(str(item or "").strip() for item in _normalize_blank_answer_map(value).values())
+
+
+def _get_answer_grading(answer):
+    if not answer:
+        return None
+    try:
+        return answer.grading
+    except StudentAnswer.grading.RelatedObjectDoesNotExist:
+        return None
 
 
 def _policy_label(policy):
@@ -1071,7 +1081,12 @@ def build_answer_review_context(result):
     )
     answers = {
         answer.question_id: answer
-        for answer in StudentAnswer.objects.filter(attempt=attempt).select_related("selected_option", "question")
+        for answer in StudentAnswer.objects.filter(attempt=attempt).select_related(
+            "selected_option",
+            "question",
+            "grading",
+            "grading__graded_by",
+        )
     }
     violations = list(ExamViolation.objects.filter(attempt=attempt).order_by("-detected_at"))
 
@@ -1092,11 +1107,37 @@ def build_answer_review_context(result):
         correct_blank_answers = []
         student_fill_blank_html = ""
         correct_fill_blank_html = ""
+        grading = _get_answer_grading(answer)
+        manual_grading = {
+            "is_available": bool(question.question_type == Question.QuestionType.ESSAY and answer),
+            "can_grade": bool(answer and str(answer.answer_text or "").strip()),
+            "has_grading": bool(grading),
+            "answer_id": str(answer.id) if answer else "",
+            "points_awarded": "",
+            "feedback": "",
+            "graded_by_name": "",
+            "graded_at": None,
+        }
         explanation = (question.explanation or "").strip()
         status_label = "Tidak Dijawab"
         status_type = "secondary"
         points_earned = 0.0
         points_possible = _to_float(exam_question.points_override or question.points)
+
+        if question.question_type == Question.QuestionType.ESSAY and answer:
+            current_points = grading.points_awarded if grading else answer.points_earned
+            manual_grading.update(
+                {
+                    "points_awarded": _to_float(current_points),
+                    "feedback": grading.feedback if grading and grading.feedback else "",
+                    "graded_by_name": (
+                        grading.graded_by.get_full_name() or grading.graded_by.username
+                        if grading and grading.graded_by_id
+                        else ""
+                    ),
+                    "graded_at": grading.graded_at if grading else None,
+                }
+            )
 
         if question.question_type in {"multiple_choice", "checkbox"}:
             correct_options = [
@@ -1241,6 +1282,8 @@ def build_answer_review_context(result):
                 "display_order": exam_question.display_order,
                 "question": question,
                 "answer": answer,
+                "grading": grading,
+                "manual_grading": manual_grading,
                 "student_answer": student_answer,
                 "correct_answer": correct_answer,
                 "selected_option": selected_option,

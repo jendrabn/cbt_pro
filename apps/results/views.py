@@ -15,10 +15,16 @@ from django.utils import timezone
 from django.utils.dateparse import parse_date
 from types import SimpleNamespace
 
-from apps.attempts.services import sync_missing_results_for_exam, sync_missing_results_for_student
+from apps.attempts.models import EssayGrading, StudentAnswer
+from apps.attempts.services import (
+    sync_missing_results_for_exam,
+    sync_missing_results_for_student,
+    upsert_exam_result_for_attempt,
+)
 from apps.core.mixins import RoleRequiredMixin
 from apps.core.services import get_branding_settings, get_certificate_feature_settings
 from apps.exams.models import Exam
+from apps.questions.models import Question
 from apps.results.models import Certificate, CertificateTemplate, ExamResult
 
 from .certificate_generators import DEFAULT_BODY_TEMPLATE, DEFAULT_HEADER_TEXT
@@ -38,6 +44,7 @@ from .exporters import (
     export_results_to_xlsx,
 )
 from .forms import CertificateTemplateForm
+from .forms import EssayManualGradingForm
 from .services import (
     build_attempt_history_rows,
     build_analytics_chart_data,
@@ -439,12 +446,83 @@ class AnswerReviewView(TeacherResultsBaseView, DetailView):
             .select_related("exam", "exam__subject", "student", "attempt")
         )
 
+    def _back_url(self):
+        default_back = reverse("exam_results_detail", kwargs={"exam_id": self.object.exam_id})
+        return (self.request.GET.get("next") or self.request.POST.get("next") or default_back).strip() or default_back
+
+    def _sync_manual_grading_attempt_status(self):
+        pending_essay_answers = StudentAnswer.objects.filter(
+            attempt=self.object.attempt,
+            question__question_type=Question.QuestionType.ESSAY,
+        ).exclude(
+            Q(answer_text__isnull=True) | Q(answer_text__exact="")
+        ).filter(
+            grading__isnull=True,
+        )
+        next_status = "grading" if pending_essay_answers.exists() else "completed"
+        if self.object.attempt.status != next_status:
+            self.object.attempt.status = next_status
+            self.object.attempt.save(update_fields=["status", "updated_at"])
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        form = EssayManualGradingForm(request.POST)
+        if not form.is_valid():
+            message = "; ".join(
+                error
+                for field_errors in form.errors.values()
+                for error in field_errors
+            )
+            messages.error(request, message or "Data penilaian esai tidak valid.")
+            return redirect(request.get_full_path())
+
+        answer = get_object_or_404(
+            StudentAnswer.objects.select_related("attempt", "question"),
+            id=form.cleaned_data["answer_id"],
+            attempt=self.object.attempt,
+        )
+
+        if answer.question.question_type != Question.QuestionType.ESSAY:
+            messages.error(request, "Hanya jawaban esai yang dapat dinilai manual.")
+            return redirect(request.get_full_path())
+
+        if not str(answer.answer_text or "").strip():
+            messages.error(request, "Jawaban esai kosong. Tidak ada yang bisa dinilai.")
+            return redirect(request.get_full_path())
+
+        points_awarded = form.cleaned_data["points_awarded"]
+        if points_awarded > answer.points_possible:
+            messages.error(
+                request,
+                f"Nilai esai tidak boleh melebihi {answer.points_possible} poin.",
+            )
+            return redirect(request.get_full_path())
+
+        feedback = form.cleaned_data["feedback"] or ""
+
+        with transaction.atomic():
+            EssayGrading.objects.update_or_create(
+                answer=answer,
+                defaults={
+                    "graded_by": request.user,
+                    "points_awarded": points_awarded,
+                    "feedback": feedback or None,
+                },
+            )
+            answer.points_earned = points_awarded
+            answer.is_correct = bool(points_awarded > 0)
+            answer.save(update_fields=["points_earned", "is_correct", "updated_at"])
+            self._sync_manual_grading_attempt_status()
+            upsert_exam_result_for_attempt(exam=self.object.exam, attempt=self.object.attempt)
+
+        messages.success(request, "Nilai esai berhasil disimpan.")
+        return redirect(request.get_full_path())
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         review_context = build_answer_review_context(self.object)
-        default_back = reverse("exam_results_detail", kwargs={"exam_id": self.object.exam_id})
         context.update(review_context)
-        context["back_url"] = (self.request.GET.get("next") or default_back).strip() or default_back
+        context["back_url"] = self._back_url()
         return context
 
 
