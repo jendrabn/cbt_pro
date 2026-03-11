@@ -532,7 +532,7 @@
                     card.draggable = true;
                     card.innerHTML = `
                         <div class="d-flex align-items-center gap-3">
-                            <div class="rounded-circle bg-warning-subtle text-warning-emphasis fw-semibold d-flex align-items-center justify-content-center flex-shrink-0" style="width: 36px; height: 36px;">
+                            <div class="ordering-item-marker">
                                 ${index + 1}
                             </div>
                             <div class="flex-grow-1 richtext-content">${item.text}</div>
@@ -605,7 +605,7 @@
         renderMatchingControl(question, currentNumber) {
             const helper = documentObj.createElement("div");
             helper.className = "small text-muted mb-2";
-            helper.textContent = "Seret kartu jawaban ke prompt yang sesuai. Dropdown tetap tersedia sebagai fallback.";
+            helper.textContent = "Klik kartu jawaban di bank, lalu klik prompt yang sesuai. Drag-and-drop dan dropdown tetap tersedia sebagai fallback.";
             this.elements.questionAnswerContainer.appendChild(helper);
 
             const matchingPairs = Array.isArray(question.matching_pairs) ? question.matching_pairs.slice() : [];
@@ -613,6 +613,7 @@
                 ? question.matching_answer_choices.slice()
                 : [];
             const workingMap = Object.assign({}, (question.answer && question.answer.answer_matching_json) || {});
+            let selectedChoiceId = "";
 
             if (!matchingPairs.length || !answerChoices.length) {
                 const emptyState = documentObj.createElement("div");
@@ -623,8 +624,11 @@
             }
 
             const answerBankWrap = documentObj.createElement("div");
-            answerBankWrap.className = "mb-3";
+            answerBankWrap.className = "matching-bank-shell mb-3 border rounded-4 p-3";
             answerBankWrap.innerHTML = '<div class="small fw-semibold text-muted mb-2">Bank Jawaban</div>';
+            const selectionBar = documentObj.createElement("div");
+            selectionBar.className = "matching-selection-bar d-flex align-items-center justify-content-between gap-2 rounded-3 border bg-light-subtle px-3 py-2 mb-3";
+            answerBankWrap.appendChild(selectionBar);
             const answerBankGrid = documentObj.createElement("div");
             answerBankGrid.className = "d-grid gap-2 matching-board-bank";
             answerBankWrap.appendChild(answerBankGrid);
@@ -665,6 +669,19 @@
                 workingMap[promptId] = choiceId;
             };
 
+            const assignSelectedChoiceToPrompt = (promptId) => {
+                if (!selectedChoiceId) {
+                    if (!workingMap[promptId]) {
+                        this.showAlert("Pilih dulu salah satu kartu jawaban dari bank.", "info", 2200);
+                    }
+                    return;
+                }
+                assignChoiceToPrompt(promptId, selectedChoiceId);
+                selectedChoiceId = "";
+                renderMatchingBoard();
+                persistMap();
+            };
+
             const findChoiceById = (choiceId) => {
                 return answerChoices.find((choice) => choice.id === choiceId) || null;
             };
@@ -681,20 +698,28 @@
 
             const buildMatchingChoiceCard = (choice, labelText, promptId) => {
                 const card = documentObj.createElement("div");
+                const isSelectable = !promptId;
                 card.className = "border rounded-3 p-2 bg-light-subtle matching-choice-card";
+                if (isSelectable) {
+                    card.classList.add("is-selectable");
+                }
+                if (isSelectable && selectedChoiceId === choice.id) {
+                    card.classList.add("is-selected");
+                }
                 card.draggable = true;
                 card.dataset.choiceId = choice.id;
+                card.tabIndex = 0;
                 card.innerHTML = `
-                    <div class="d-flex align-items-start justify-content-between gap-2">
-                        <div class="flex-grow-1">
+                    <div class="matching-choice-card-inner">
+                        <div class="matching-choice-content">
                             <div class="small text-muted mb-1">${this.escapeHtml(labelText)}</div>
                             <div class="richtext-content">${choice.answer_text || ""}</div>
                         </div>
-                        <div class="d-flex align-items-start gap-2">
-                            <span class="text-muted" title="Seret kartu jawaban">
+                        <div class="matching-choice-actions">
+                            <span class="matching-choice-drag" title="${isSelectable ? "Klik atau seret kartu jawaban" : "Seret kartu jawaban"}">
                                 <i class="ri-draggable"></i>
                             </span>
-                            ${promptId ? '<button type="button" class="btn btn-sm btn-outline-danger matching-choice-remove" title="Lepaskan jawaban"><i class="ri-close-line"></i></button>' : ""}
+                            ${promptId ? '<button type="button" class="matching-choice-remove" title="Lepaskan jawaban" aria-label="Lepaskan jawaban"><i class="ri-close-line"></i></button>' : ""}
                         </div>
                     </div>
                 `;
@@ -710,9 +735,25 @@
                     draggedChoiceId = "";
                     clearMatchingDropTargets();
                 });
+                if (isSelectable) {
+                    const toggleSelection = () => {
+                        selectedChoiceId = selectedChoiceId === choice.id ? "" : choice.id;
+                        renderMatchingBoard();
+                    };
+                    card.addEventListener("click", toggleSelection);
+                    card.addEventListener("keydown", (event) => {
+                        if (event.key !== "Enter" && event.key !== " ") {
+                            return;
+                        }
+                        event.preventDefault();
+                        toggleSelection();
+                    });
+                }
                 const removeBtn = card.querySelector(".matching-choice-remove");
                 if (removeBtn && promptId) {
-                    removeBtn.addEventListener("click", () => {
+                    removeBtn.addEventListener("click", (event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
                         delete workingMap[promptId];
                         renderMatchingBoard();
                         persistMap();
@@ -726,10 +767,37 @@
                 pairsWrap.innerHTML = "";
 
                 const assignedChoiceIds = new Set(Object.values(workingMap));
+                if (selectedChoiceId && assignedChoiceIds.has(selectedChoiceId)) {
+                    selectedChoiceId = "";
+                }
                 const availableChoices = answerChoices.filter((choice) => !assignedChoiceIds.has(choice.id));
+                const selectedChoice = findChoiceById(selectedChoiceId);
+
+                if (selectedChoice) {
+                    selectionBar.innerHTML = `
+                        <div class="small">
+                            <div class="text-muted">Jawaban terpilih</div>
+                            <div class="fw-semibold">${this.escapeHtml(this.stripRichTextToPlainText(selectedChoice.answer_text, "Pilihan jawaban"))}</div>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline-secondary">Batalkan Pilihan</button>
+                    `;
+                    const clearBtn = selectionBar.querySelector("button");
+                    if (clearBtn) {
+                        clearBtn.addEventListener("click", () => {
+                            selectedChoiceId = "";
+                            renderMatchingBoard();
+                        });
+                    }
+                } else {
+                    selectionBar.innerHTML = `
+                        <div class="small text-muted">
+                            Pilih satu kartu jawaban dari bank, lalu klik prompt untuk memasangnya.
+                        </div>
+                    `;
+                }
 
                 if (!availableChoices.length) {
-                    answerBankGrid.innerHTML = '<div class="alert alert-light border mb-0 small">Semua jawaban sudah dipasangkan. Seret kembali ke bank untuk melepas.</div>';
+                    answerBankGrid.innerHTML = '<div class="alert alert-light border mb-0 small">Semua jawaban sudah dipasangkan. Klik tombol lepas atau seret kembali ke bank untuk membatalkan pasangan.</div>';
                 } else {
                     availableChoices.forEach((choice, index) => {
                         answerBankGrid.appendChild(buildMatchingChoiceCard(choice, `Pilihan ${index + 1}`, ""));
@@ -738,7 +806,10 @@
 
                 matchingPairs.forEach((pair, pairIndex) => {
                     const card = documentObj.createElement("div");
-                    card.className = "border rounded-3 p-3 bg-white";
+                    card.className = "border rounded-3 p-3 bg-white matching-prompt-card";
+                    if (selectedChoiceId) {
+                        card.classList.add("is-selection-target");
+                    }
 
                     const currentAnswerId = workingMap[pair.id] || "";
                     const selectedChoice = findChoiceById(currentAnswerId);
@@ -751,9 +822,12 @@
                     }).join("");
 
                     card.innerHTML = `
-                        <div class="small text-muted mb-1">Prompt ${pairIndex + 1}</div>
+                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-1">
+                            <div class="small text-muted">Prompt ${pairIndex + 1}</div>
+                            ${selectedChoiceId ? '<button type="button" class="btn btn-sm btn-outline-primary matching-assign-btn">Gunakan Jawaban Terpilih</button>' : ""}
+                        </div>
                         <div class="richtext-content mb-3">${pair.prompt_text || ""}</div>
-                        <div class="matching-dropzone ${selectedChoice ? "is-filled" : ""}" data-pair-id="${pair.id}">
+                        <div class="matching-dropzone ${selectedChoice ? "is-filled" : ""}" data-pair-id="${pair.id}" tabindex="0">
                             <div class="matching-dropzone-content" data-dropzone-content></div>
                         </div>
                         <div class="matching-dropdown-fallback mt-3">
@@ -771,11 +845,21 @@
                         if (selectedChoice) {
                             dropzoneContent.appendChild(buildMatchingChoiceCard(selectedChoice, "Jawaban terpasang", pair.id));
                         } else {
-                            dropzoneContent.innerHTML = '<div class="matching-dropzone-empty">Lepaskan kartu jawaban di sini.</div>';
+                            dropzoneContent.innerHTML = '<div class="matching-dropzone-empty">Klik area ini untuk memasang jawaban terpilih, atau seret kartu ke sini.</div>';
                         }
                     }
 
                     if (dropzone) {
+                        dropzone.addEventListener("click", () => {
+                            assignSelectedChoiceToPrompt(pair.id);
+                        });
+                        dropzone.addEventListener("keydown", (event) => {
+                            if (event.key !== "Enter" && event.key !== " ") {
+                                return;
+                            }
+                            event.preventDefault();
+                            assignSelectedChoiceToPrompt(pair.id);
+                        });
                         dropzone.addEventListener("dragover", (event) => {
                             event.preventDefault();
                             dropzone.classList.add("is-active");
@@ -794,6 +878,13 @@
                             assignChoiceToPrompt(pair.id, choiceId);
                             renderMatchingBoard();
                             persistMap();
+                        });
+                    }
+
+                    const assignBtn = card.querySelector(".matching-assign-btn");
+                    if (assignBtn) {
+                        assignBtn.addEventListener("click", () => {
+                            assignSelectedChoiceToPrompt(pair.id);
                         });
                     }
 
@@ -829,6 +920,7 @@
                     return;
                 }
                 clearMatchingChoiceAssignment(choiceId);
+                selectedChoiceId = "";
                 renderMatchingBoard();
                 persistMap();
             });
@@ -852,10 +944,10 @@
                     : "";
                 return (
                     '<span class="d-inline-flex align-items-center mx-1 my-1">' +
-                    '<input type="text" class="form-control form-control-sm fill-blank-input" ' +
+                    '<input type="text" class="form-control fill-blank-input" ' +
                     `data-blank-number="${blankNumber}" ` +
                     `value="${this.escapeHtml(currentValue)}" ` +
-                    `placeholder="Blank ${blankNumber}" style="min-width: 160px; width: 12rem;">` +
+                    `placeholder="Blank ${blankNumber}">` +
                     "</span>"
                 );
             });
@@ -940,7 +1032,7 @@
                     }
                     btn.innerHTML = `
                         <div class="answer-option-layout">
-                            <span class="badge bg-primary answer-option-label">${option.letter}</span>
+                            <span class="answer-option-label">${option.letter}</span>
                             <div class="answer-option-content richtext-content">${this.buildOptionContentHtml(option)}</div>
                         </div>
                     `;
@@ -1006,7 +1098,7 @@
             } else {
                 inputEl = documentObj.createElement("input");
                 inputEl.type = "text";
-                inputEl.className = "form-control form-control-lg";
+                inputEl.className = "form-control";
             }
             inputEl.id = inputId;
             inputEl.placeholder = placeholder;

@@ -831,6 +831,11 @@ def _build_latest_answer_timestamp(answer_map, attempt):
     return latest_dt
 
 
+def _display_option_letter(index):
+    normalized_index = int(index or 0)
+    return chr(ord("A") + normalized_index)
+
+
 def _get_row_by_number(question_rows, number):
     if not question_rows:
         return None
@@ -979,11 +984,12 @@ def _serialize_question_payload(row, answer):
         answer_text = answer.answer_text
 
     options = []
-    for option in row["options"]:
+    for index, option in enumerate(row["options"]):
         options.append(
             {
                 "id": str(option.id),
-                "letter": option.option_letter,
+                "letter": _display_option_letter(index),
+                "original_letter": option.option_letter,
                 "text": sanitize_richtext_html(option.option_text),
                 "image_url": option.option_image_url or "",
             }

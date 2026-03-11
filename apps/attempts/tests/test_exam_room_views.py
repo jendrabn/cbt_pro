@@ -162,6 +162,41 @@ class StudentExamRoomViewTests(TestCase):
         payload = response.json()["payload"]
         self.assertIn("<img", payload["question"]["options"][0]["text"])
 
+    def test_question_api_relabels_randomized_options_sequentially(self):
+        self.exam.randomize_options = True
+        self.exam.save(update_fields=["randomize_options", "updated_at"])
+        option_b = self.question_mc.options.get(option_letter="B")
+        option_c = self.question_mc.options.create(
+            option_letter="C",
+            option_text="Gaya magnet",
+            is_correct=False,
+            display_order=3,
+        )
+        option_d = self.question_mc.options.create(
+            option_letter="D",
+            option_text="Gaya pegas",
+            is_correct=False,
+            display_order=4,
+        )
+
+        self.client.force_login(self.student)
+        response = self.client.get(
+            reverse("attempt_question_api", kwargs={"attempt_id": self.attempt.id, "number": 1}),
+            {"current_number": 1},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()["payload"]
+        option_letters = [item["letter"] for item in payload["question"]["options"]]
+        original_letters = {item["original_letter"] for item in payload["question"]["options"]}
+
+        self.assertEqual(option_letters, ["A", "B", "C", "D"])
+        self.assertEqual(original_letters, {"A", "B", "C", "D"})
+        self.assertEqual(
+            {item["id"] for item in payload["question"]["options"]},
+            {str(self.option_a.id), str(option_b.id), str(option_c.id), str(option_d.id)},
+        )
+
     def test_question_api_sanitizes_legacy_rich_html(self):
         self.question_mc.question_text = '<p>Soal aman</p><script>alert("x")</script><img src="https://example.com/q.png" onerror="alert(1)">'
         self.question_mc.save(update_fields=["question_text"])
