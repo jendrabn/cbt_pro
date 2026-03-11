@@ -66,6 +66,13 @@
             </div>
         </section>
 
+        {% if summary.jumlah_menunggu_penilaian %}
+        <div class="alert alert-warning d-flex align-items-center gap-2 mb-4" role="alert">
+            <i class="ri-time-line"></i>
+            <span>{{ summary.jumlah_menunggu_penilaian }} hasil ujian belum selesai dinilai. Skor akhir bisa berubah setelah guru menilai jawaban terbuka.</span>
+        </div>
+        {% endif %}
+
         <section class="card border-0 shadow-sm mb-4">
             <div class="card-body">
                 <form method="get" class="cbt-inline-filter">
@@ -101,6 +108,7 @@
                             <option value="" {% if not filters.status %}selected{% endif %}>Semua Status</option>
                             <option value="passed" {% if filters.status == 'passed' %}selected{% endif %}>Lulus</option>
                             <option value="failed" {% if filters.status == 'failed' %}selected{% endif %}>Belum Lulus</option>
+                            <option value="pending" {% if filters.status == 'pending' %}selected{% endif %}>Belum Selesai Dinilai</option>
                         </select>
                     </div>
                     <button type="submit" class="btn btn-primary" title="Terapkan filter">
@@ -159,6 +167,9 @@
                                         {{ row.exam.title }}
                                         {% if row.allow_retake %}
                                         {% soft_badge "Retake" "secondary" "ms-1" %}
+                                        {% endif %}
+                                        {% if row.pending_grading %}
+                                        {% soft_badge "Belum Selesai Dinilai" "warning" "ms-1" %}
                                         {% endif %}
                                     </p>
                                     <p class="small text-muted mb-0">{{ row.subject_name }}</p>

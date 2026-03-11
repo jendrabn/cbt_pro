@@ -14,6 +14,7 @@ from django.utils import timezone
 from django.utils.dateparse import parse_date
 
 from apps.attempts.models import ExamAttempt, ExamViolation, StudentAnswer
+from apps.attempts.services import get_pending_manual_grading_attempt_ids
 from apps.exams.models import Class, ClassStudent, Exam
 from apps.questions.models import Question
 from apps.results.certificate_services import (
@@ -25,7 +26,7 @@ from apps.results.models import ExamResult
 from apps.subjects.models import Subject
 
 
-COMPLETED_ATTEMPT_STATUSES = ("submitted", "auto_submitted", "completed")
+COMPLETED_ATTEMPT_STATUSES = ("submitted", "auto_submitted", "completed", "grading")
 
 SORTABLE_STUDENT_COLUMNS = {
     "rank",
@@ -184,6 +185,18 @@ def _policy_label(policy):
     return RETAKE_POLICY_LABELS.get((policy or "").strip().lower(), "Nilai Tertinggi")
 
 
+def _result_status_meta(*, passed=False, pending_grading=False):
+    if pending_grading:
+        return {
+            "label": "Belum Selesai Dinilai",
+            "tone": "warning",
+        }
+    return {
+        "label": "Lulus" if passed else "Belum Lulus",
+        "tone": "success" if passed else "danger",
+    }
+
+
 def _select_result_by_policy(policy, result_rows):
     if not result_rows:
         return None
@@ -308,7 +321,7 @@ def parse_student_results_filters(request):
         date_from, date_to = date_to, date_from
 
     status = (request.GET.get("status") or "").strip().lower()
-    if status not in {"", "passed", "failed"}:
+    if status not in {"", "passed", "failed", "pending"}:
         status = ""
 
     return StudentResultsFilters(
@@ -380,6 +393,7 @@ def build_student_results_rows(results_qs, status_filter=""):
         grouped[result.exam_id].append(result)
 
     rows = []
+    selected_attempt_ids = []
     for _, result_rows in grouped.items():
         exam = result_rows[0].exam
         metrics = _resolve_final_result_metrics(exam, result_rows)
@@ -387,40 +401,21 @@ def build_student_results_rows(results_qs, status_filter=""):
         if not selected_result:
             continue
 
-        submitted_at = (
-            selected_result.attempt.submit_time
-            or selected_result.attempt.end_time
-            or selected_result.created_at
-        )
-        submitted_label = "-"
-        if submitted_at:
-            submitted_label = timezone.localtime(submitted_at).strftime("%d %b %Y %H:%M")
-
-        if status_filter == "passed" and not metrics["passed"]:
-            continue
-        if status_filter == "failed" and metrics["passed"]:
-            continue
-
-        certificate = _result_certificate(selected_result)
-        certificate_state = certificate_state_label(certificate)
-        certificate_available = certificate_state == "active"
-
-        status_label = "Lulus" if metrics["passed"] else "Belum Lulus"
-        status_tone = "success" if metrics["passed"] else "danger"
-
+        selected_attempt_ids.append(selected_result.attempt_id)
         rows.append(
             {
                 "id": str(selected_result.id),
                 "result": selected_result,
                 "exam": exam,
                 "subject_name": exam.subject.name if exam.subject_id else "-",
-                "submitted_at": submitted_at,
-                "submitted_label": submitted_label,
+                "submitted_at": (
+                    selected_result.attempt.submit_time
+                    or selected_result.attempt.end_time
+                    or selected_result.created_at
+                ),
                 "total_score": round(metrics["final_score"], 2),
                 "percentage": round(metrics["final_percentage"], 2),
                 "passed": bool(metrics["passed"]),
-                "status_label": status_label,
-                "status_tone": status_tone,
                 "correct_answers": int(selected_result.correct_answers or 0),
                 "wrong_answers": int(selected_result.wrong_answers or 0),
                 "unanswered": int(selected_result.unanswered or 0),
@@ -428,10 +423,6 @@ def build_student_results_rows(results_qs, status_filter=""):
                 "time_taken_human": format_seconds_human(selected_result.time_taken_seconds or 0),
                 "time_efficiency": _to_float(selected_result.time_efficiency) if selected_result.time_efficiency is not None else None,
                 "review_enabled": bool(exam.allow_review),
-                "certificate_available": certificate_available,
-                "certificate_state": certificate_state,
-                "certificate_id": str(certificate.id) if certificate else "",
-                "certificate_number": certificate.certificate_number if certificate else "",
                 "allow_retake": bool(exam.allow_retake),
                 "max_retake_attempts": int(exam.max_retake_attempts or 1),
                 "attempts_used": int(metrics["attempts_used"] or 1),
@@ -439,8 +430,49 @@ def build_student_results_rows(results_qs, status_filter=""):
             }
         )
 
-    rows.sort(key=lambda item: item["submitted_at"] or item["result"].created_at, reverse=True)
-    return rows
+    pending_attempt_ids = get_pending_manual_grading_attempt_ids(selected_attempt_ids)
+    final_rows = []
+    for row in rows:
+        pending_grading = str(row["result"].attempt_id) in pending_attempt_ids
+        if status_filter == "pending" and not pending_grading:
+            continue
+        if status_filter == "passed" and (pending_grading or not row["passed"]):
+            continue
+        if status_filter == "failed" and (pending_grading or row["passed"]):
+            continue
+
+        submitted_at = row["submitted_at"]
+        submitted_label = "-"
+        if submitted_at:
+            submitted_label = timezone.localtime(submitted_at).strftime("%d %b %Y %H:%M")
+
+        selected_result = row["result"]
+        certificate = _result_certificate(selected_result)
+        certificate_state = certificate_state_label(certificate)
+        certificate_available = certificate_state == "active"
+
+        status_meta = _result_status_meta(
+            passed=row["passed"],
+            pending_grading=pending_grading,
+        )
+
+        final_rows.append(
+            {
+                **row,
+                "submitted_at": submitted_at,
+                "submitted_label": submitted_label,
+                "status_label": status_meta["label"],
+                "status_tone": status_meta["tone"],
+                "pending_grading": pending_grading,
+                "certificate_available": certificate_available,
+                "certificate_state": certificate_state,
+                "certificate_id": str(certificate.id) if certificate else "",
+                "certificate_number": certificate.certificate_number if certificate else "",
+            }
+        )
+
+    final_rows.sort(key=lambda item: item["submitted_at"] or item["result"].created_at, reverse=True)
+    return final_rows
 
 
 def build_student_results_summary(result_rows):
@@ -461,10 +493,12 @@ def build_student_results_summary(result_rows):
         }
 
     total_hasil = len(result_rows)
+    jumlah_menunggu_penilaian = sum(1 for row in result_rows if row.get("pending_grading"))
     percentages = [row["percentage"] for row in result_rows]
-    jumlah_lulus = sum(1 for row in result_rows if row["passed"])
-    jumlah_belum_lulus = total_hasil - jumlah_lulus
-    persentase_lulus = round((jumlah_lulus / total_hasil) * 100, 2) if total_hasil else 0.0
+    graded_rows = [row for row in result_rows if not row.get("pending_grading")]
+    jumlah_lulus = sum(1 for row in graded_rows if row["passed"])
+    jumlah_belum_lulus = len(graded_rows) - jumlah_lulus
+    persentase_lulus = round((jumlah_lulus / len(graded_rows)) * 100, 2) if graded_rows else 0.0
     efficiency_values = [row["time_efficiency"] for row in result_rows if row["time_efficiency"] is not None]
 
     return {
@@ -474,6 +508,7 @@ def build_student_results_summary(result_rows):
         "nilai_terendah": round(min(percentages), 2),
         "jumlah_lulus": jumlah_lulus,
         "jumlah_belum_lulus": jumlah_belum_lulus,
+        "jumlah_menunggu_penilaian": jumlah_menunggu_penilaian,
         "persentase_lulus": persentase_lulus,
         "jumlah_sertifikat": sum(1 for row in result_rows if row["certificate_available"]),
         "total_benar": sum(row["correct_answers"] for row in result_rows),
@@ -537,6 +572,8 @@ def build_student_result_detail_context(result):
     )
     final_metrics = _resolve_final_result_metrics(exam, all_results)
     selected_result = final_metrics["selected_result"] or result
+    pending_attempt_ids = get_pending_manual_grading_attempt_ids([item.attempt_id for item in all_results])
+    selected_pending_grading = str(selected_result.attempt_id) in pending_attempt_ids
     review_context = build_answer_review_context(selected_result)
     certificate = _result_certificate(selected_result)
     certificate_state = certificate_state_label(certificate)
@@ -555,6 +592,11 @@ def build_student_result_detail_context(result):
         all_results,
         key=lambda item: int(item.attempt.attempt_number or 0),
     ):
+        history_pending_grading = str(history_result.attempt_id) in pending_attempt_ids
+        history_status_meta = _result_status_meta(
+            passed=history_result.passed,
+            pending_grading=history_pending_grading,
+        )
         history_rows.append(
             {
                 "result_id": str(history_result.id),
@@ -566,19 +608,27 @@ def build_student_result_detail_context(result):
                 "total_score": round(_to_float(history_result.total_score), 2),
                 "percentage": round(_to_float(history_result.percentage), 2),
                 "passed": bool(history_result.passed),
-                "status_label": "Lulus" if history_result.passed else "Belum Lulus",
+                "status_label": history_status_meta["label"],
+                "status_tone": history_status_meta["tone"],
+                "pending_grading": history_pending_grading,
                 "duration_label": format_seconds_human(history_result.time_taken_seconds or 0),
                 "is_final": bool(selected_result.id == history_result.id),
             }
         )
+
+    final_status_meta = _result_status_meta(
+        passed=final_metrics["passed"],
+        pending_grading=selected_pending_grading,
+    )
 
     return {
         **review_context,
         "score_total": round(final_metrics["final_score"], 2),
         "score_max": score_max,
         "percentage_value": round(final_metrics["final_percentage"], 2),
-        "status_label": "Lulus" if final_metrics["passed"] else "Belum Lulus",
-        "status_tone": "success" if final_metrics["passed"] else "danger",
+        "status_label": final_status_meta["label"],
+        "status_tone": final_status_meta["tone"],
+        "pending_grading": selected_pending_grading,
         "rank_label": selected_result.rank_in_exam or "-",
         "percentile_label": round(_to_float(selected_result.percentile), 2) if selected_result.percentile is not None else None,
         "time_taken_human": format_seconds_human(selected_result.time_taken_seconds or 0),
@@ -685,6 +735,9 @@ def build_exam_rows(exams_qs):
         .order_by("exam_id", "student_id", "-attempt__attempt_number", "-created_at")
     ):
         results_group[result.exam_id][result.student_id].append(result)
+    pending_attempt_ids = get_pending_manual_grading_attempt_ids(
+        [result.attempt_id for student_map in results_group.values() for rows in student_map.values() for result in rows]
+    )
 
     rows = []
     for exam in exams:
@@ -693,10 +746,14 @@ def build_exam_rows(exams_qs):
 
         final_percentages = []
         total_passed = 0
+        pending_grading_count = 0
         per_student_rows = results_group.get(exam.id, {})
         for _, student_rows in per_student_rows.items():
             metrics = _resolve_final_result_metrics(exam, student_rows)
             final_percentages.append(metrics["final_percentage"])
+            selected_result = metrics["selected_result"]
+            if selected_result and str(selected_result.attempt_id) in pending_attempt_ids:
+                pending_grading_count += 1
             if metrics["passed"]:
                 total_passed += 1
 
@@ -724,6 +781,7 @@ def build_exam_rows(exams_qs):
                 "pass_rate": pass_rate,
                 "attempt_count": attempt.get("total_attempts", 0) or 0,
                 "completed_attempt_count": attempt.get("completed_attempts", 0) or 0,
+                "pending_grading_count": pending_grading_count,
                 "class_names": ", ".join(class_names) if class_names else "-",
             }
         )
@@ -807,7 +865,6 @@ def build_student_result_rows(results_qs, sort_by="rank", direction="asc"):
                 "total_score": round(metrics["final_score"], 2),
                 "percentage": round(metrics["final_percentage"], 2),
                 "passed": bool(metrics["passed"]),
-                "status_label": "Lulus" if metrics["passed"] else "Belum Lulus",
                 "time_taken_seconds": int(selected_result.time_taken_seconds or 0),
                 "time_taken_human": format_seconds_human(selected_result.time_taken_seconds or 0),
                 "total_violations": int(selected_result.total_violations or 0),
@@ -821,6 +878,19 @@ def build_student_result_rows(results_qs, sort_by="rank", direction="asc"):
                 "certificate_number": certificate.certificate_number if certificate else "",
             }
         )
+
+    pending_attempt_ids = get_pending_manual_grading_attempt_ids(
+        [row["result"].attempt_id for row in base_rows]
+    )
+    for row in base_rows:
+        pending_grading = str(row["result"].attempt_id) in pending_attempt_ids
+        status_meta = _result_status_meta(
+            passed=row["passed"],
+            pending_grading=pending_grading,
+        )
+        row["pending_grading"] = pending_grading
+        row["status_label"] = status_meta["label"]
+        row["status_tone"] = status_meta["tone"]
 
     ranking_sorted = sorted(
         base_rows,
@@ -868,9 +938,10 @@ def calculate_statistics_cards(student_rows):
 
 def calculate_exam_summary(student_rows, exam):
     total = len(student_rows)
-    passed = len([row for row in student_rows if row["passed"]])
-    failed = total - passed
-    pass_rate = round((passed / total) * 100, 2) if total else 0.0
+    graded_rows = [row for row in student_rows if not row.get("pending_grading")]
+    passed = len([row for row in graded_rows if row["passed"]])
+    failed = len(graded_rows) - passed
+    pass_rate = round((passed / len(graded_rows)) * 100, 2) if graded_rows else 0.0
     avg_time = round(sum(row["time_taken_seconds"] for row in student_rows) / total, 2) if total else 0
 
     return {
@@ -879,6 +950,7 @@ def calculate_exam_summary(student_rows, exam):
         "total_participants": total,
         "passed_count": passed,
         "failed_count": failed,
+        "pending_grading_count": len([row for row in student_rows if row.get("pending_grading")]),
         "pass_rate": pass_rate,
         "average_time_seconds": avg_time,
         "average_time_human": format_seconds_human(avg_time),

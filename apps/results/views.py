@@ -17,6 +17,7 @@ from types import SimpleNamespace
 
 from apps.attempts.models import EssayGrading, StudentAnswer
 from apps.attempts.services import (
+    has_pending_manual_grading,
     sync_missing_results_for_exam,
     sync_missing_results_for_student,
     upsert_exam_result_for_attempt,
@@ -451,19 +452,7 @@ class AnswerReviewView(TeacherResultsBaseView, DetailView):
         return (self.request.GET.get("next") or self.request.POST.get("next") or default_back).strip() or default_back
 
     def _sync_manual_grading_attempt_status(self):
-        pending_essay_answers = StudentAnswer.objects.filter(
-            attempt=self.object.attempt,
-            question__question_type__in=[
-                Question.QuestionType.ESSAY,
-                Question.QuestionType.SHORT_ANSWER,
-            ],
-        ).exclude(
-            Q(answer_text__isnull=True) | Q(answer_text__exact="")
-        ).filter(
-            is_correct__isnull=True,
-            grading__isnull=True,
-        )
-        next_status = "grading" if pending_essay_answers.exists() else "completed"
+        next_status = "grading" if has_pending_manual_grading(self.object.attempt) else "completed"
         if self.object.attempt.status != next_status:
             self.object.attempt.status = next_status
             self.object.attempt.save(update_fields=["status", "updated_at"])

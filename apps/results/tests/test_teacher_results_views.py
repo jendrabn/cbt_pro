@@ -240,6 +240,40 @@ class TeacherResultsViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Hasil & Analitik")
 
+    def test_teacher_results_list_flags_exam_with_pending_manual_grading(self):
+        StudentAnswer.objects.create(
+            attempt=self.attempt_three,
+            question=self.question_essay,
+            answer_type="essay",
+            answer_text="Fotosintesis mengubah energi cahaya menjadi energi kimia.",
+            is_correct=None,
+            points_earned=0,
+            points_possible=20,
+            time_spent_seconds=420,
+        )
+        self.attempt_three.status = "grading"
+        self.attempt_three.save(update_fields=["status", "updated_at"])
+        ExamResult.objects.create(
+            attempt=self.attempt_three,
+            exam=self.exam,
+            student=self.student_three,
+            total_score=10,
+            percentage=33.33,
+            passed=False,
+            total_questions=2,
+            correct_answers=1,
+            wrong_answers=1,
+            unanswered=0,
+            time_taken_seconds=3300,
+            total_violations=0,
+        )
+
+        self.client.force_login(self.teacher)
+        response = self.client.get(reverse("teacher_results"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "belum selesai dinilai")
+
     def test_non_teacher_forbidden_results_list(self):
         self.client.force_login(self.admin)
         response = self.client.get(reverse("teacher_results"))
@@ -253,6 +287,40 @@ class TeacherResultsViewTests(TestCase):
         self.assertContains(response, self.exam.title)
         self.assertContains(response, self.student_three.get_full_name())
         self.assertTrue(ExamResult.objects.filter(attempt=self.attempt_three).exists())
+
+    def test_teacher_exam_results_detail_flags_student_pending_manual_grading(self):
+        StudentAnswer.objects.create(
+            attempt=self.attempt_three,
+            question=self.question_essay,
+            answer_type="essay",
+            answer_text="Fotosintesis membutuhkan cahaya, karbon dioksida, dan air.",
+            is_correct=None,
+            points_earned=0,
+            points_possible=20,
+            time_spent_seconds=300,
+        )
+        self.attempt_three.status = "grading"
+        self.attempt_three.save(update_fields=["status", "updated_at"])
+        ExamResult.objects.create(
+            attempt=self.attempt_three,
+            exam=self.exam,
+            student=self.student_three,
+            total_score=10,
+            percentage=33.33,
+            passed=False,
+            total_questions=2,
+            correct_answers=1,
+            wrong_answers=1,
+            unanswered=0,
+            time_taken_seconds=3300,
+            total_violations=0,
+        )
+
+        self.client.force_login(self.teacher)
+        response = self.client.get(reverse("exam_results_detail", kwargs={"exam_id": self.exam.id}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Belum Selesai Dinilai")
 
     def test_teacher_can_open_answer_review_page(self):
         self.client.force_login(self.teacher)

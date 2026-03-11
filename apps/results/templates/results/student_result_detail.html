@@ -88,6 +88,13 @@
             </div>
         </section>
 
+        {% if pending_grading %}
+        <div class="alert alert-warning d-flex align-items-center gap-2 mb-4" role="alert">
+            <i class="ri-time-line"></i>
+            <span>Hasil ini belum selesai dinilai. Skor, status, dan sertifikat baru final setelah guru menyelesaikan penilaian jawaban terbuka.</span>
+        </div>
+        {% endif %}
+
         <section class="row g-4 mb-4">
             <div class="col-xl-8">
                 <div class="card border-0 shadow-sm h-100">
@@ -218,13 +225,7 @@
                                 <td>{{ row.submit_time_label }}</td>
                                 <td>{{ row.total_score }}</td>
                                 <td>{{ row.percentage }}%</td>
-                                <td>
-                                    {% if row.passed %}
-                                    {% soft_badge row.status_label "success" %}
-                                    {% else %}
-                                    {% soft_badge row.status_label "danger" %}
-                                    {% endif %}
-                                </td>
+                                <td>{% soft_badge row.status_label row.status_tone %}</td>
                                 <td>{{ row.duration_label }}</td>
                                 <td class="pe-3">{% if row.is_final %}{% soft_badge "Final" "primary" %}{% else %}-{% endif %}</td>
                             </tr>

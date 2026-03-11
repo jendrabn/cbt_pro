@@ -467,7 +467,7 @@
         renderOrderingControl(question, currentNumber) {
             const helper = documentObj.createElement("div");
             helper.className = "small text-muted mb-2";
-            helper.textContent = "Seret item ke posisi yang benar. Tombol naik/turun tetap tersedia sebagai fallback.";
+            helper.textContent = "Seret item ke posisi yang benar.";
             this.elements.questionAnswerContainer.appendChild(helper);
 
             const orderingItems = Array.isArray(question.ordering_items)
@@ -531,32 +531,16 @@
                     card.className = "border rounded-3 p-3 bg-white ordering-draggable-card";
                     card.draggable = true;
                     card.innerHTML = `
-                        <div class="d-flex align-items-start gap-3">
+                        <div class="d-flex align-items-center gap-3">
                             <div class="rounded-circle bg-warning-subtle text-warning-emphasis fw-semibold d-flex align-items-center justify-content-center flex-shrink-0" style="width: 36px; height: 36px;">
                                 ${index + 1}
                             </div>
                             <div class="flex-grow-1 richtext-content">${item.text}</div>
-                            <div class="text-muted d-flex align-items-center" title="Seret untuk ubah urutan">
+                            <div class="ordering-drag-handle" title="Seret untuk ubah urutan" aria-hidden="true">
                                 <i class="ri-draggable"></i>
-                            </div>
-                            <div class="d-flex flex-column gap-2">
-                                <button type="button" class="btn btn-sm btn-outline-secondary ordering-up-btn" ${index === 0 ? "disabled" : ""} title="Naikkan item ini">
-                                    <i class="ri-arrow-up-line"></i>
-                                </button>
-                                <button type="button" class="btn btn-sm btn-outline-secondary ordering-down-btn" ${index === orderingItems.length - 1 ? "disabled" : ""} title="Turunkan item ini">
-                                    <i class="ri-arrow-down-line"></i>
-                                </button>
                             </div>
                         </div>
                     `;
-                    const upBtn = card.querySelector(".ordering-up-btn");
-                    const downBtn = card.querySelector(".ordering-down-btn");
-                    if (upBtn) {
-                        upBtn.addEventListener("click", () => moveItem(index, index - 1));
-                    }
-                    if (downBtn) {
-                        downBtn.addEventListener("click", () => moveItem(index, index + 1));
-                    }
                     card.addEventListener("dragstart", (event) => {
                         draggedIndex = index;
                         card.classList.add("is-dragging");

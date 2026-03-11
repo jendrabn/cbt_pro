@@ -627,6 +627,30 @@ class StudentExamRoomViewTests(TestCase):
         self.assertTrue(ExamResult.objects.filter(attempt=self.attempt).exists())
         self.assertTrue(response.json().get("redirect_url"))
 
+    def test_submit_api_marks_attempt_as_grading_when_open_answer_still_needs_review(self):
+        StudentAnswer.objects.create(
+            attempt=self.attempt,
+            question=self.question_essay,
+            answer_type="essay",
+            answer_text="Benda akan tetap diam atau bergerak lurus beraturan jika resultan gaya nol.",
+            is_correct=None,
+            points_earned=0,
+            points_possible=10,
+            time_spent_seconds=240,
+        )
+
+        self.client.force_login(self.student)
+        response = self.client.post(
+            reverse("attempt_submit_api", kwargs={"attempt_id": self.attempt.id}),
+            data=json.dumps({}),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.attempt.refresh_from_db()
+        self.assertEqual(self.attempt.status, "grading")
+        self.assertTrue(ExamResult.objects.filter(attempt=self.attempt).exists())
+
     @patch("apps.attempts.views.submit_attempt")
     def test_submit_api_handles_lock_timeout_when_already_submitted(self, submit_mock):
         submit_mock.side_effect = OperationalError(1205, "Lock wait timeout exceeded")

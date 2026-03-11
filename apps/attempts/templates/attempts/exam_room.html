@@ -17,6 +17,16 @@
         transition: border-color 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
     }
 
+    .ordering-drag-handle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        align-self: center;
+        width: 2rem;
+        min-width: 2rem;
+        color: var(--bs-secondary-color);
+    }
+
     .ordering-draggable-card.is-dragging,
     .matching-choice-card.is-dragging {
         opacity: 0.55;
@@ -121,7 +131,7 @@
                         <div class="form-check m-0">
                             <input class="form-check-input" type="checkbox" id="markReviewCheckbox">
                             <label class="form-check-label small" for="markReviewCheckbox">
-                                <i class="ri-bookmark-line me-1"></i>Tandai untuk ditinjau
+                                Tandai untuk ditinjau
                             </label>
                         </div>
                     </div>
@@ -324,5 +334,5 @@
     <script src="{% static 'attempts/js/timer.js' %}"></script>
     <script src="{% static 'attempts/js/auto_save.js' %}"></script>
     <script src="{% static 'attempts/js/anti_cheat.js' %}"></script>
-    <script src="{% static 'attempts/js/exam_room.js' %}"></script>
+    <script src="{% static 'attempts/js/exam_room.js' %}?v=20260311-1"></script>
 {% endblock %}

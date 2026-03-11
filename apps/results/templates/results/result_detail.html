@@ -57,6 +57,13 @@
             </div>
         </section>
 
+        {% if summary.pending_grading_count %}
+        <div class="alert alert-warning d-flex align-items-center gap-2 mb-4" role="alert">
+            <i class="ri-time-line"></i>
+            <span>{{ summary.pending_grading_count }} hasil siswa belum selesai dinilai. Nilai dan status akhir masih dapat berubah.</span>
+        </div>
+        {% endif %}
+
         <section class="row g-4 mb-4">
             <div class="col-xl-8">
                 <div class="card border-0 shadow-sm h-100">
@@ -172,11 +179,7 @@
                                     <td title="Nilai final ({{ row.final_policy_label }} dari {{ row.attempts_used }} attempt)">{{ row.total_score }}</td>
                                     <td>{{ row.percentage }}%</td>
                                     <td>
-                                        {% if row.passed %}
-                                        {% soft_badge row.status_label "success" %}
-                                        {% else %}
-                                        {% soft_badge row.status_label "danger" %}
-                                        {% endif %}
+                                        {% soft_badge row.status_label row.status_tone %}
                                     </td>
                                     <td>
                                         {% if row.certificate_state == "active" %}

@@ -10,7 +10,7 @@ from apps.questions.models import Question
 from apps.subjects.models import Subject
 from apps.results.models import ExamResult
 
-from apps.attempts.models import ExamAttempt
+from apps.attempts.models import ExamAttempt, StudentAnswer
 
 
 class StudentExamListViewTests(TestCase):
@@ -169,6 +169,72 @@ class StudentExamListViewTests(TestCase):
         response = self.client.get(reverse("student_exam_list"), data={"tab": "completed"})
         self.assertContains(response, self.completed_exam.title)
         self.assertNotContains(response, self.ongoing_exam.title)
+
+    def test_completed_tab_flags_exam_with_pending_manual_grading(self):
+        essay_question = Question.objects.create(
+            created_by=self.teacher,
+            subject=self.completed_exam.subject,
+            question_type="essay",
+            question_text="Jelaskan dampak tanam paksa.",
+            points=10,
+            is_active=True,
+        )
+        pending_exam = Exam.objects.create(
+            created_by=self.teacher,
+            subject=self.completed_exam.subject,
+            title="Ujian Sejarah Essay",
+            start_time=timezone.now() - timedelta(days=5),
+            end_time=timezone.now() - timedelta(days=5, hours=-1),
+            duration_minutes=60,
+            passing_score=70,
+            total_points=10,
+            status="completed",
+        )
+        ExamQuestion.objects.create(exam=pending_exam, question=essay_question, display_order=1, points_override=10)
+        ExamAssignment.objects.create(exam=pending_exam, assigned_to_type="student", student=self.student)
+        pending_attempt = ExamAttempt.objects.create(
+            exam=pending_exam,
+            student=self.student,
+            attempt_number=1,
+            status="grading",
+            start_time=timezone.now() - timedelta(days=5),
+            end_time=timezone.now() - timedelta(days=5, hours=-1),
+            submit_time=timezone.now() - timedelta(days=5, hours=-1),
+            total_score=0,
+            percentage=0,
+            passed=False,
+            time_spent_seconds=1800,
+        )
+        StudentAnswer.objects.create(
+            attempt=pending_attempt,
+            question=essay_question,
+            answer_type="essay",
+            answer_text="Sistem tanam paksa membebani rakyat karena kewajiban setor hasil panen.",
+            is_correct=None,
+            points_earned=0,
+            points_possible=10,
+            time_spent_seconds=240,
+        )
+        ExamResult.objects.create(
+            attempt=pending_attempt,
+            exam=pending_exam,
+            student=self.student,
+            total_score=0,
+            percentage=0,
+            passed=False,
+            total_questions=1,
+            correct_answers=0,
+            wrong_answers=1,
+            unanswered=0,
+            time_taken_seconds=1800,
+            total_violations=0,
+        )
+
+        self.client.force_login(self.student)
+        response = self.client.get(reverse("student_exam_list"), data={"tab": "completed"})
+
+        self.assertContains(response, pending_exam.title)
+        self.assertContains(response, "Belum Selesai Dinilai")
 
     def test_student_can_start_ongoing_exam(self):
         self.client.force_login(self.student)

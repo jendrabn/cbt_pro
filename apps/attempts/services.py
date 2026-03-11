@@ -47,6 +47,10 @@ EXAM_ROOM_COMPLETED_STATUSES = {
     ExamAttempt.Status.COMPLETED,
     ExamAttempt.Status.GRADING,
 }
+OPEN_ENDED_MANUAL_GRADING_TYPES = (
+    Question.QuestionType.ESSAY,
+    Question.QuestionType.SHORT_ANSWER,
+)
 
 
 class RetakeNotAllowed(Exception):
@@ -161,13 +165,39 @@ def _result_key_for_policy(policy, result):
     )
 
 
-def _build_final_result_summary(exam, exam_results):
+def get_pending_manual_grading_attempt_ids(attempt_ids):
+    normalized_ids = [item for item in dict.fromkeys(str(item) for item in (attempt_ids or []) if item)]
+    if not normalized_ids:
+        return set()
+
+    return {
+        str(item)
+        for item in StudentAnswer.objects.filter(
+            attempt_id__in=normalized_ids,
+            question__question_type__in=OPEN_ENDED_MANUAL_GRADING_TYPES,
+        )
+        .exclude(Q(answer_text__isnull=True) | Q(answer_text__exact=""))
+        .filter(is_correct__isnull=True)
+        .values_list("attempt_id", flat=True)
+        .distinct()
+    }
+
+
+def has_pending_manual_grading(attempt):
+    if not attempt:
+        return False
+    return str(attempt.id) in get_pending_manual_grading_attempt_ids([attempt.id])
+
+
+def _build_final_result_summary(exam, exam_results, pending_attempt_ids=None):
     if not exam_results:
         return {
             "has_result": False,
             "score": 0.0,
             "percentage": 0.0,
             "status": "Belum Ada Hasil",
+            "status_tone": "secondary",
+            "pending_grading": False,
             "correct": 0,
             "wrong": 0,
             "unanswered": 0,
@@ -179,17 +209,29 @@ def _build_final_result_summary(exam, exam_results):
 
     policy = (exam.retake_score_policy or "highest").strip().lower()
     selected = max(exam_results, key=lambda item: _result_key_for_policy(policy, item))
+    pending_attempt_ids = pending_attempt_ids or get_pending_manual_grading_attempt_ids(
+        [item.attempt_id for item in exam_results]
+    )
+    selected_pending_grading = str(selected.attempt_id) in pending_attempt_ids
+
+    def _status_meta(passed_value):
+        if selected_pending_grading:
+            return "Belum Selesai Dinilai", "warning"
+        return ("Lulus", "success") if passed_value else ("Belum Lulus", "danger")
 
     if policy == "average":
         score_value = sum(float(item.total_score or 0) for item in exam_results) / len(exam_results)
         percentage_value = sum(float(item.percentage or 0) for item in exam_results) / len(exam_results)
         passed_value = percentage_value >= float(exam.passing_score or 0)
         latest = max(exam_results, key=lambda item: int(item.attempt.attempt_number or 0))
+        status_label, status_tone = _status_meta(passed_value)
         return {
             "has_result": True,
             "score": round(score_value, 2),
             "percentage": round(percentage_value, 2),
-            "status": "Lulus" if passed_value else "Belum Lulus",
+            "status": status_label,
+            "status_tone": status_tone,
+            "pending_grading": selected_pending_grading,
             "correct": int(latest.correct_answers or 0),
             "wrong": int(latest.wrong_answers or 0),
             "unanswered": int(latest.unanswered or 0),
@@ -199,11 +241,14 @@ def _build_final_result_summary(exam, exam_results):
             "policy_label": _retake_policy_label(policy),
         }
 
+    status_label, status_tone = _status_meta(selected.passed)
     return {
         "has_result": True,
         "score": round(float(selected.total_score or 0), 2),
         "percentage": round(float(selected.percentage or 0), 2),
-        "status": "Lulus" if selected.passed else "Belum Lulus",
+        "status": status_label,
+        "status_tone": status_tone,
+        "pending_grading": selected_pending_grading,
         "correct": int(selected.correct_answers or 0),
         "wrong": int(selected.wrong_answers or 0),
         "unanswered": int(selected.unanswered or 0),
@@ -500,6 +545,9 @@ def build_exam_card_rows(student, exams_qs, selected_tab):
     exam_ids = [exam.id for exam in exams]
     attempt_map = _attempt_map(student, exam_ids)
     result_map = _result_map(student, exam_ids)
+    pending_manual_attempt_ids = get_pending_manual_grading_attempt_ids(
+        [result.attempt_id for exam_results in result_map.values() for result in exam_results]
+    )
 
     all_rows = []
     tab_counts = {tab: 0 for tab in LIST_TABS}
@@ -511,16 +559,25 @@ def build_exam_card_rows(student, exams_qs, selected_tab):
         tab_counts[status_key] += 1
 
         start_allowed = can_start_exam(exam, latest_attempt, status_key)
-        result_summary = _build_final_result_summary(exam, exam_results)
+        result_summary = _build_final_result_summary(
+            exam,
+            exam_results,
+            pending_attempt_ids=pending_manual_attempt_ids,
+        )
         retake_meta = _build_retake_meta(exam, latest_attempt, now)
         action = _action_meta(exam, status_key, start_allowed, result_summary)
         status_meta = STATUS_META[status_key]
+        status_label = status_meta["label"]
+        status_tone = status_meta["tone"]
+        if status_key == "completed" and result_summary.get("pending_grading"):
+            status_label = "Belum Selesai Dinilai"
+            status_tone = "warning"
 
         row = {
             "exam": exam,
             "status_key": status_key,
-            "status_label": status_meta["label"],
-            "status_tone": status_meta["tone"],
+            "status_label": status_label,
+            "status_tone": status_tone,
             "question_count": exam.exam_questions.count(),
             "countdown_target": exam.start_time.isoformat() if status_key == "upcoming" else "",
             "start_allowed": start_allowed,
@@ -1723,6 +1780,9 @@ def submit_attempt(*, exam, attempt, auto_submit=False, reason=""):
         ]
     )
     upsert_exam_result_for_attempt(exam=exam, attempt=attempt)
+    if has_pending_manual_grading(attempt) and attempt.status != ExamAttempt.Status.GRADING:
+        attempt.status = ExamAttempt.Status.GRADING
+        attempt.save(update_fields=["status", "updated_at"])
     _schedule_post_submit_housekeeping(attempt.id, exam.id)
     eligibility = check_retake_eligibility(exam.id, attempt.student_id)
 

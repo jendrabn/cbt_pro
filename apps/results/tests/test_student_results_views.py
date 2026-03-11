@@ -243,6 +243,76 @@ class StudentResultsViewTests(TestCase):
         self.assertContains(response, "Hasil & Review Ujian")
         self.assertContains(response, self.exam_review_on.title)
 
+    def test_student_results_list_flags_pending_manual_grading(self):
+        pending_exam = Exam.objects.create(
+            created_by=self.teacher,
+            subject=self.subject,
+            title="Ujian Kimia Essay Lanjutan",
+            description="Ujian dengan penilaian manual",
+            start_time=timezone.now() - timedelta(days=2),
+            end_time=timezone.now() - timedelta(days=2, hours=-1),
+            duration_minutes=60,
+            passing_score=70,
+            total_points=10,
+            show_results_immediately=True,
+            allow_review=True,
+            status="completed",
+        )
+        ExamAssignment.objects.create(exam=pending_exam, assigned_to_type="student", student=self.student)
+        essay_question = Question.objects.create(
+            created_by=self.teacher,
+            subject=self.subject,
+            question_type="essay",
+            question_text="Jelaskan sifat ikatan kovalen.",
+            points=10,
+            is_active=True,
+        )
+        ExamQuestion.objects.create(exam=pending_exam, question=essay_question, display_order=1, points_override=10)
+        pending_attempt = ExamAttempt.objects.create(
+            exam=pending_exam,
+            student=self.student,
+            status="grading",
+            start_time=timezone.now() - timedelta(days=2, minutes=40),
+            end_time=timezone.now() - timedelta(days=2, minutes=5),
+            submit_time=timezone.now() - timedelta(days=2, minutes=5),
+            total_score=0,
+            percentage=0,
+            passed=False,
+            time_spent_seconds=2100,
+        )
+        StudentAnswer.objects.create(
+            attempt=pending_attempt,
+            question=essay_question,
+            answer_type="essay",
+            answer_text="Ikatan kovalen terjadi karena pemakaian bersama pasangan elektron.",
+            is_correct=None,
+            points_earned=0,
+            points_possible=10,
+            time_spent_seconds=260,
+        )
+        pending_result = ExamResult.objects.create(
+            attempt=pending_attempt,
+            exam=pending_exam,
+            student=self.student,
+            total_score=0,
+            percentage=0,
+            passed=False,
+            total_questions=1,
+            correct_answers=0,
+            wrong_answers=1,
+            unanswered=0,
+            time_taken_seconds=2100,
+            total_violations=0,
+        )
+
+        self.client.force_login(self.student)
+        response = self.client.get(reverse("student_results"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, pending_exam.title)
+        self.assertContains(response, "Belum Selesai Dinilai")
+        self.assertContains(response, reverse("student_result_detail", kwargs={"result_id": pending_result.id}))
+
     def test_non_student_forbidden_results_list(self):
         self.client.force_login(self.teacher)
         response = self.client.get(reverse("student_results"))
@@ -254,6 +324,74 @@ class StudentResultsViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Ringkasan Jawaban")
         self.assertContains(response, self.exam_review_on.title)
+
+    def test_student_result_detail_shows_pending_manual_grading_alert(self):
+        pending_exam = Exam.objects.create(
+            created_by=self.teacher,
+            subject=self.subject,
+            title="Ujian Kimia Essay Pending",
+            description="Detail status pending",
+            start_time=timezone.now() - timedelta(days=1),
+            end_time=timezone.now() - timedelta(days=1, hours=-1),
+            duration_minutes=60,
+            passing_score=70,
+            total_points=10,
+            show_results_immediately=True,
+            allow_review=True,
+            status="completed",
+        )
+        ExamAssignment.objects.create(exam=pending_exam, assigned_to_type="student", student=self.student)
+        essay_question = Question.objects.create(
+            created_by=self.teacher,
+            subject=self.subject,
+            question_type="essay",
+            question_text="Jelaskan perbedaan senyawa ion dan kovalen.",
+            points=10,
+            is_active=True,
+        )
+        ExamQuestion.objects.create(exam=pending_exam, question=essay_question, display_order=1, points_override=10)
+        pending_attempt = ExamAttempt.objects.create(
+            exam=pending_exam,
+            student=self.student,
+            status="grading",
+            start_time=timezone.now() - timedelta(days=1, minutes=50),
+            end_time=timezone.now() - timedelta(days=1, minutes=8),
+            submit_time=timezone.now() - timedelta(days=1, minutes=8),
+            total_score=0,
+            percentage=0,
+            passed=False,
+            time_spent_seconds=2520,
+        )
+        StudentAnswer.objects.create(
+            attempt=pending_attempt,
+            question=essay_question,
+            answer_type="essay",
+            answer_text="Ikatan ion terjadi karena transfer elektron, sedangkan kovalen karena berbagi elektron.",
+            is_correct=None,
+            points_earned=0,
+            points_possible=10,
+            time_spent_seconds=320,
+        )
+        pending_result = ExamResult.objects.create(
+            attempt=pending_attempt,
+            exam=pending_exam,
+            student=self.student,
+            total_score=0,
+            percentage=0,
+            passed=False,
+            total_questions=1,
+            correct_answers=0,
+            wrong_answers=1,
+            unanswered=0,
+            time_taken_seconds=2520,
+            total_violations=0,
+        )
+
+        self.client.force_login(self.student)
+        response = self.client.get(reverse("student_result_detail", kwargs={"result_id": pending_result.id}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "belum selesai dinilai")
 
     def test_student_cannot_access_other_student_result_detail(self):
         self.client.force_login(self.student)

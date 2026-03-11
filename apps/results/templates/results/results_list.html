@@ -116,7 +116,12 @@
                             {% for row in exam_rows %}
                             <tr>
                                 <td class="ps-3">
-                                    <p class="mb-1 fw-semibold">{{ row.exam.title }}</p>
+                                    <p class="mb-1 fw-semibold">
+                                        {{ row.exam.title }}
+                                        {% if row.pending_grading_count %}
+                                        {% soft_badge row.pending_grading_count|stringformat:"s"|add:" belum selesai dinilai" "warning" "ms-1" %}
+                                        {% endif %}
+                                    </p>
                                     <p class="small text-muted mb-0">Status: {% enum_badge "exam_status" row.exam.status %}</p>
                                 </td>
                                 <td>{{ row.exam.subject.name }}</td>
