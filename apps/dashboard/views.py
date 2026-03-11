@@ -1,4 +1,3 @@
-import re
 import shutil
 from datetime import datetime
 
@@ -6,15 +5,11 @@ from django.conf import settings
 from django.contrib.sessions.models import Session
 from django.db import connections
 from django.db.models import Avg, Count, Max, Q
-from django.shortcuts import redirect
-from django.urls import reverse
 from django.utils import timezone
 from django.views.generic import TemplateView
 
 from apps.accounts.models import User, UserActivityLog
-from apps.accounts.views import get_role_redirect_url
 from apps.attempts.models import ExamAttempt
-from apps.core.services import get_branding_settings
 from apps.core.mixins import RoleRequiredMixin
 from apps.exams.models import ClassStudent, Exam, ExamAssignment
 from apps.notifications.models import Notification
@@ -22,94 +17,6 @@ from apps.questions.models import Question
 from apps.results.models import ExamResult
 from apps.results.services import build_student_results_rows
 from apps.subjects.models import Subject
-
-DEFAULT_WHATSAPP_NUMBER = "628xxxxxxxxxx"
-
-
-class LandingView(TemplateView):
-    template_name = "dashboard/landing.html"
-
-    def get(self, request, *args, **kwargs):
-        branding = get_branding_settings()
-        if not branding.get("landing_page_enabled", True):
-            return redirect("login")
-        self._branding = branding
-        return super().get(request, *args, **kwargs)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        branding = getattr(self, "_branding", get_branding_settings())
-        user = self.request.user
-
-        dashboard_url = reverse("login")
-        dashboard_label = "Login"
-        dashboard_icon = "ri-login-box-line"
-        if user.is_authenticated:
-            dashboard_url = get_role_redirect_url(user)
-            role_labels = {
-                "admin": "Dashboard Admin",
-                "teacher": "Dashboard Guru",
-                "student": "Dashboard Siswa",
-            }
-            dashboard_label = role_labels.get(getattr(user, "role", ""), "Dashboard")
-            dashboard_icon = "ri-dashboard-line"
-        elif settings.DEMO_MODE:
-            dashboard_label = "Demo"
-            dashboard_icon = "ri-play-circle-line"
-
-        context["features"] = [
-            {
-                "icon": "ri-layout-grid-line",
-                "title": "Bank Soal Terstruktur",
-                "description": "Kelola ribuan soal per mapel, tingkat kesulitan, dan tag kompetensi dalam satu panel yang mudah ditelusuri.",
-            },
-            {
-                "icon": "ri-shuffle-line",
-                "title": "Randomisasi Cerdas",
-                "description": "Acak soal dan opsi jawaban otomatis untuk tiap peserta, menjaga keadilan ujian tanpa konfigurasi rumit.",
-            },
-            {
-                "icon": "ri-shield-check-line",
-                "title": "Pengawasan Terintegrasi",
-                "description": "Dukungan monitoring aktivitas dan sinyal pelanggaran agar pengawas bisa bertindak cepat saat ujian berlangsung.",
-            },
-            {
-                "icon": "ri-medal-line",
-                "title": "Penilaian Otomatis",
-                "description": "Skor objektif dihitung instan, sehingga guru dapat langsung menganalisis hasil tanpa menunggu proses manual.",
-            },
-            {
-                "icon": "ri-line-chart-line",
-                "title": "Analitik Berbasis Data",
-                "description": "Lihat performa siswa, tingkat keberhasilan per soal, dan tren kelas untuk perbaikan pembelajaran berikutnya.",
-            },
-            {
-                "icon": "ri-team-line",
-                "title": "Multi-Role Workflow",
-                "description": "Admin, guru, dan siswa mendapat dashboard sesuai kebutuhan masing-masing agar alur kerja tetap fokus dan efisien.",
-            },
-        ]
-        for idx, feature in enumerate(context["features"]):
-            feature["delay_class"] = f"d{(idx % 4) + 1}"
-
-        whatsapp_raw = getattr(settings, "WHATSAPP_NUMBER", DEFAULT_WHATSAPP_NUMBER) or DEFAULT_WHATSAPP_NUMBER
-        whatsapp_digits = re.sub(r"\D", "", whatsapp_raw)
-        if not whatsapp_digits:
-            whatsapp_digits = DEFAULT_WHATSAPP_NUMBER
-        context["whatsapp_number"] = whatsapp_digits
-        context["whatsapp_url"] = f"https://wa.me/{whatsapp_digits}"
-        context["stats"] = [
-            {"label": "Pengguna Aktif", "value": 1280, "suffix": "+"},
-            {"label": "Bank Soal", "value": 5400, "suffix": "+"},
-            {"label": "Sesi Ujian", "value": 920, "suffix": "+"},
-            {"label": "Rata-rata Uptime", "value": 99, "suffix": "%"},
-        ]
-        context["branding"] = branding
-        context["current_year"] = timezone.now().year
-        context["dashboard_url"] = dashboard_url
-        context["dashboard_label"] = dashboard_label
-        context["dashboard_icon"] = dashboard_icon
-        return context
 
 
 class DashboardBaseView(RoleRequiredMixin, TemplateView):

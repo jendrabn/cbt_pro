@@ -44,6 +44,7 @@ def _env_json(name, default):
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-change-this-in-production')
 
 CBT_SITE_NAME = os.getenv('CBT_SITE_NAME', 'Sistem CBT')
+MARKETING_SITE_URL = os.getenv('MARKETING_SITE_URL', 'https://cbtpro.web.id').strip().rstrip('/')
 WHATSAPP_NUMBER = os.getenv('WHATSAPP_NUMBER', '628xxxxxxxxxx')
 DEMO_MODE = _env_bool('DEMO', _env_bool('DEMO_MODE', False))
 DEMO_TEACHER_USERNAME = os.getenv('DEMO_TEACHER_USERNAME', 'olivia.carter').strip()
@@ -91,6 +92,7 @@ INSTALLED_APPS = [
     "apps.notifications",
     "apps.analytics",
     "apps.dashboard",
+    "apps.marketing",
 ]
 
 MIDDLEWARE = [

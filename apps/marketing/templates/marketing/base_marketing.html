@@ -1,0 +1,174 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id" prefix="og: https://ogp.me/ns#">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ meta_title }}</title>
+    <meta name="description" content="{{ meta_description }}">
+    <meta name="keywords" content="{{ meta_keywords }}">
+    <meta name="author" content="{{ product_name }}">
+    <meta name="robots" content="{{ robots_meta_content }}">
+    <meta name="theme-color" content="{{ theme_color }}">
+    <meta name="application-name" content="{{ product_name }}">
+    <link rel="canonical" href="{{ canonical_url }}">
+    <link rel="alternate" hreflang="id-ID" href="{{ canonical_url }}">
+    <link rel="manifest" href="{% url 'marketing_manifest' %}">
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    <link rel="icon" type="image/svg+xml" href="{% static 'images/favicon.svg' %}">
+    <link rel="icon" type="image/png" sizes="96x96" href="{% static 'images/favicon-96x96.png' %}">
+    <link rel="apple-touch-icon" href="{% static 'images/apple-touch-icon.png' %}">
+    <link rel="sitemap" type="application/xml" title="Sitemap" href="{% url 'marketing_sitemap' %}">
+
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="id_ID">
+    <meta property="og:site_name" content="{{ product_name }}">
+    <meta property="og:title" content="{{ meta_title }}">
+    <meta property="og:description" content="{{ meta_description }}">
+    <meta property="og:url" content="{{ canonical_url }}">
+    <meta property="og:image" content="{{ og_image_url }}">
+    <meta property="og:image:alt" content="{{ product_name }} marketing page">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ meta_title }}">
+    <meta name="twitter:description" content="{{ meta_description }}">
+    <meta name="twitter:image" content="{{ og_image_url }}">
+
+    <script type="application/ld+json">{{ organization_schema_json|safe }}</script>
+    <script type="application/ld+json">{{ website_schema_json|safe }}</script>
+    <script type="application/ld+json">{{ page_schema_json|safe }}</script>
+    {% for schema_json in extra_schema_json_list %}
+    <script type="application/ld+json">{{ schema_json|safe }}</script>
+    {% endfor %}
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.0.0/fonts/remixicon.css" rel="stylesheet">
+    <link href="{% static 'css/marketing.css' %}?v={{ marketing_asset_version }}" rel="stylesheet">
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="marketing-shell {{ body_class }}">
+    <a class="skip-link" href="#main-content">Lewati ke konten</a>
+
+    {% if show_marketing_chrome %}
+    <header class="site-header">
+        <nav class="marketing-navbar" aria-label="Navigasi utama">
+            <div class="container">
+                <div class="marketing-navbar__inner">
+                    <a class="brand-mark" href="{% url 'landing' %}" aria-label="{{ product_name }}">
+                        <img src="{{ marketing_logo_url }}" alt="{{ product_name }}" class="brand-mark__logo">
+                        <span class="brand-mark__text">{{ product_name }}</span>
+                    </a>
+                    <div class="marketing-navlinks">
+                        {% with current=request.resolver_match.url_name %}
+                        <a href="{% url 'landing' %}" class="{% if current == 'landing' %}is-active{% endif %}">Home</a>
+                        <a href="{% url 'marketing_features' %}" class="{% if current == 'marketing_features' %}is-active{% endif %}">Features</a>
+                        <a href="{% url 'marketing_pricing' %}" class="{% if current == 'marketing_pricing' %}is-active{% endif %}">Pricing</a>
+                        <a href="{% url 'marketing_faq' %}" class="{% if current == 'marketing_faq' %}is-active{% endif %}">FAQ</a>
+                        <a href="{% url 'marketing_contact' %}" class="{% if current == 'marketing_contact' %}is-active{% endif %}">Contact</a>
+                        {% endwith %}
+                    </div>
+                    <div class="marketing-actions">
+                        <a href="{{ whatsapp_url }}?text=Halo%2C%20saya%20ingin%20konsultasi%20tentang%20CBT%20Pro."
+                           class="btn btn-whatsapp"
+                           target="_blank"
+                           rel="noopener noreferrer">
+                            <i class="ri-whatsapp-line" aria-hidden="true"></i>
+                            Konsultasi
+                        </a>
+                        <a href="{{ dashboard_url }}" class="btn btn-primary-soft">
+                            <i class="{{ dashboard_icon }}" aria-hidden="true"></i>
+                            {{ dashboard_label }}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+    {% endif %}
+
+    <main id="main-content" class="marketing-main {% if not show_marketing_chrome %}marketing-main--minimal{% endif %}">
+        {% if show_marketing_chrome %}
+        {% if breadcrumbs %}
+        <section class="breadcrumb-wrap">
+            <div class="container">
+                <nav aria-label="Breadcrumb">
+                    <ol class="breadcrumb marketing-breadcrumb">
+                        {% for breadcrumb in breadcrumbs %}
+                        <li class="breadcrumb-item {% if forloop.last %}active{% endif %}">
+                            {% if forloop.last %}
+                            <span aria-current="page">{{ breadcrumb.label }}</span>
+                            {% else %}
+                            <a href="{{ breadcrumb.url }}">{{ breadcrumb.label }}</a>
+                            {% endif %}
+                        </li>
+                        {% endfor %}
+                    </ol>
+                </nav>
+            </div>
+        </section>
+        {% endif %}
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    {% if show_marketing_chrome %}
+    <footer class="site-footer">
+        <div class="container">
+            <div class="site-footer__grid">
+                <div>
+                    <div class="footer-brand">CBT Pro</div>
+                    <p class="footer-copy">Aplikasi CBT sekolah untuk ujian online, try out, dan asesmen digital dengan kontrol data yang lebih penuh.</p>
+                </div>
+                <div>
+                    <div class="footer-title">Halaman</div>
+                    <div class="footer-links">
+                        <a href="{% url 'landing' %}">Home</a>
+                        <a href="{% url 'marketing_features' %}">Features</a>
+                        <a href="{% url 'marketing_pricing' %}">Pricing</a>
+                        <a href="{% url 'marketing_faq' %}">FAQ</a>
+                        <a href="{% url 'marketing_contact' %}">Contact</a>
+                    </div>
+                </div>
+                <div>
+                    <div class="footer-title">Kontak</div>
+                    <div class="footer-links">
+                        <a href="{{ whatsapp_url }}" target="_blank" rel="noopener noreferrer">{{ whatsapp_display }}</a>
+                        <a href="mailto:{{ contact_email }}">{{ contact_email }}</a>
+                        <span>{{ operating_hours }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="site-footer__bottom">
+                <span>&copy; {{ current_year }} {{ product_name }}. Semua hak dilindungi.</span>
+                <div class="footer-links footer-links--inline">
+                    <a href="{% url 'marketing_robots' %}">robots.txt</a>
+                    <a href="{% url 'marketing_sitemap' %}">sitemap.xml</a>
+                    <a href="{% url 'marketing_manifest' %}">manifest</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+    {% endif %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    const revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add("is-visible");
+                revealObserver.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.12 });
+
+    document.querySelectorAll("[data-reveal]").forEach((element) => revealObserver.observe(element));
+    </script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

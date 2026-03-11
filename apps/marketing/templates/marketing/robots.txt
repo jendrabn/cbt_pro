@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+{% for path in disallow_paths %}
+Disallow: {{ path }}
+{% endfor %}
+
+Host: {{ host_name }}
+Sitemap: {{ sitemap_url }}
