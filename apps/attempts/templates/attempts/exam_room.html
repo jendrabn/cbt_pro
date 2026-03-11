@@ -1,270 +1,319 @@
-{% extends "layouts/base_dashboard.html" %}
+{% extends "layouts/base_exam.html" %}
 {% load static %}
 
 {% block title %}Ruang Ujian - CBT{% endblock %}
 
-{% block shell_class %}{% endblock %}
-{% block body_classes %} exam-room-body{% endblock %}
+{% block body_classes %}exam-room-body{% endblock %}
 
 {% block topbar %}
-<header class="dashboard-topbar border-bottom exam-room-topbar">
-    <div class="container-fluid px-3 px-md-4 py-3 d-flex flex-wrap gap-3 align-items-center justify-content-between">
-        <div>
-            <p class="small text-muted mb-1">Ruang Ujian Siswa</p>
-            <h1 class="h5 mb-0">{{ exam.title }}</h1>
-            <p class="small text-muted mb-0 mt-1">{{ exam.subject.name }}</p>
-            {% if exam.allow_retake and exam.max_retake_attempts > 1 %}
-            <span id="attemptCounterBadge" class="cbt-status-badge is-secondary mt-1">
-                Attempt {{ attempt.attempt_number }} dari {{ exam.max_retake_attempts }}
-            </span>
-            {% endif %}
-        </div>
-        <div class="d-flex flex-wrap align-items-center gap-2">
-            <div class="text-center timer-chip">
-                <p class="small text-body-secondary mb-0">Sisa Waktu</p>
-                <strong id="timerDisplay">00:00</strong>
-            </div>
-            <span class="cbt-status-badge is-warning" id="violationCounterChip">Pelanggaran: 0</span>
-            <button type="button" class="btn btn-primary" id="openSubmitModalBtn" title="Buka konfirmasi kirim ujian">
-                <i class="ri-send-plane-fill me-1"></i>Kirim Ujian
-            </button>
-            <a href="{{ back_url }}" class="btn btn-outline-secondary" title="Kembali ke daftar ujian">
-                <i class="ri-arrow-left-line me-1"></i>Daftar Ujian
-            </a>
-        </div>
+<header class="topbar">
+    <div class="topbar-brand">
+        <div class="t-name">{{ exam.title }}</div>
+        <div class="t-sub">{{ exam.subject.name }}</div>
     </div>
+
+    <div class="badge-timer timer-chip">
+        <i class="ri-time-line" aria-hidden="true"></i>
+        <span id="timer">00:00:00</span>
+    </div>
+
+    <div class="topbar-extras">
+        <div class="badge-violation">
+            <i class="ri-error-warning-line" aria-hidden="true"></i>
+            <span id="violationCounterChip">0 Pelanggaran</span>
+        </div>
+        <a href="{{ back_url }}" class="btn-daftar" title="Kembali ke daftar ujian">
+            <i class="ri-list-check-3" aria-hidden="true"></i>
+            <span>Daftar Ujian</span>
+        </a>
+    </div>
+
+    <button type="button" class="btn-kirim" id="openSubmitModalBtn" title="Buka konfirmasi kirim ujian">
+        <i class="ri-send-plane-line" aria-hidden="true"></i>
+        <span class="lbl">Kirim Ujian</span>
+    </button>
 </header>
 {% endblock %}
 
-{% block main_attrs %}class="container-fluid px-3 px-md-4 py-3"{% endblock %}
+{% block main_attrs %}class="exam-room-main"{% endblock %}
 
 {% block page_header %}{% endblock %}
 
 {% block content %}
-        {% if messages %}
-        <div class="mb-3">
-            {% for message in messages %}
-            <div class="alert alert-{{ message.tags|default:'info' }} py-2 mb-2">{{ message }}</div>
-            {% endfor %}
+<h1 class="visually-hidden">Ruang Ujian Siswa</h1>
+{% if messages %}
+<div class="mb-3">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags|default:'info' }} py-2 mb-2">{{ message }}</div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div id="examRoomAlertHost" class="exam-room-alert-host"></div>
+<div id="navigationRestriction" class="alert alert-warning py-2 px-3 border-0 shadow-sm d-none"></div>
+
+<div class="exam-wrapper">
+    <div class="question-area">
+        <div class="q-header">
+            <div class="q-meta">
+                <div class="q-number" id="qNum">1</div>
+                <div class="q-type-badge" id="qType">Memuat soal</div>
+                <div class="q-points" id="qPoints">0 poin</div>
+            </div>
+            <div class="q-actions">
+                <button type="button" class="btn-flag" id="flagQuestionBtn" title="Tandai soal ini untuk review">
+                    <i class="ri-flag-line" aria-hidden="true"></i>
+                    <span class="lbl">Tandai</span>
+                </button>
+                <button type="button" class="btn-clear" id="clearAnswerBtn" title="Kosongkan jawaban soal saat ini">
+                    <i class="ri-eraser-line" aria-hidden="true"></i>
+                    <span class="lbl">Kosongkan</span>
+                </button>
+            </div>
         </div>
-        {% endif %}
 
-        <div id="examRoomAlertHost"></div>
-        <div id="navigationRestriction" class="alert alert-warning py-2 d-none"></div>
+        <div class="q-panel active" id="questionPanel">
+            <div id="questionText" class="q-text richtext-content"></div>
+            <p id="questionTypeHint" class="q-instruction d-none"></p>
+            <div id="questionImageWrap" class="d-none">
+                <img id="questionImage" src="" alt="Gambar soal" class="essay-img">
+            </div>
+            <div id="questionMediaLimitNotice" class="alert alert-info py-2 px-3 small border-0 mb-3 d-none"></div>
+            <div id="questionAnswerContainer"></div>
+        </div>
+    </div>
 
-        <section class="row g-3">
-            <div class="col-xl-8">
-                <article class="card border-0 shadow-sm h-100">
-                    <div class="card-header bg-white d-flex flex-wrap justify-content-between align-items-center gap-2">
-                        <div>
-                            <h2 class="h6 mb-0">Soal <span id="questionIndexLabel">0</span> dari <span id="totalQuestionLabel">0</span></h2>
-                            <p class="small text-muted mb-0">Status simpan: <span id="autoSaveLabel">Belum tersimpan</span></p>
-                        </div>
-                        <div class="form-check m-0">
-                            <input class="form-check-input" type="checkbox" id="markReviewCheckbox">
-                            <label class="form-check-label small" for="markReviewCheckbox">
-                                Tandai untuk ditinjau
-                            </label>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <div id="questionText" class="exam-question-text mb-3"></div>
-                        <div id="questionImageWrap" class="mb-3 d-none">
-                            <img id="questionImage" src="" alt="Gambar soal" class="img-fluid rounded border">
-                        </div>
-                        <div id="questionMediaLimitNotice" class="alert alert-info py-2 small d-none"></div>
-                        <div id="questionAnswerContainer"></div>
-                    </div>
-                    <div class="card-footer bg-white d-flex flex-wrap justify-content-between align-items-center gap-2">
-                        <div class="d-flex gap-2">
-                            <button type="button" class="btn btn-outline-secondary" id="prevQuestionBtn" title="Ke soal sebelumnya">
-                                <i class="ri-arrow-left-line me-1"></i>Sebelumnya
-                            </button>
-                            <button type="button" class="btn btn-outline-danger" id="clearAnswerBtn" title="Kosongkan jawaban soal saat ini">
-                                <i class="ri-eraser-line me-1"></i>Kosongkan Jawaban
-                            </button>
-                        </div>
-                        <button type="button" class="btn btn-primary" id="nextQuestionBtn" title="Ke soal berikutnya">
-                            Berikutnya<i class="ri-arrow-right-line ms-1"></i>
-                        </button>
-                    </div>
-                </article>
+    <aside class="sidebar">
+        <div class="sidebar-title">Navigasi Soal</div>
+        <div class="nav-grid" id="navGrid"></div>
+
+        <div class="divider"></div>
+        <div class="sidebar-title" style="font-size:.8rem; margin-bottom:10px;">Status</div>
+        <div class="legend-item"><div class="legend-dot dot-current"></div> Saat ini</div>
+        <div class="legend-item"><div class="legend-dot dot-answered"></div> Terjawab</div>
+        <div class="legend-item"><div class="legend-dot dot-flagged"></div> Ditandai</div>
+        <div class="legend-item"><div class="legend-dot dot-empty"></div> Belum dijawab</div>
+
+        <div class="divider"></div>
+        <div class="sidebar-title" style="font-size:.8rem; margin-bottom:10px;">Progres</div>
+        <div class="progress-label"><span>Terjawab</span><span id="progLabel">0/0</span></div>
+        <div class="progress-bar-wrap"><div class="progress-fill" id="progBar" style="width:0%"></div></div>
+        <div class="progress-stats">
+            <div class="stat-row"><span class="stat-lbl">Terjawab</span><span class="stat-val sv-green" id="statAns">0</span></div>
+            <div class="stat-row"><span class="stat-lbl">Belum dijawab</span><span class="stat-val sv-red" id="statUnans">0</span></div>
+            <div class="stat-row"><span class="stat-lbl">Ditandai</span><span class="stat-val sv-orange" id="statFlag">0</span></div>
+        </div>
+
+        <div class="divider"></div>
+        <div class="monitor-title">Pengawasan Ujian</div>
+        <div class="monitor-item"><i class="ri-shield-check-line ic-green" aria-hidden="true"></i><span id="antiCheatMediaRule">Perangkat pengawasan: -</span></div>
+        <div class="monitor-item"><i class="ri-fullscreen-line ic-green" aria-hidden="true"></i><span id="antiCheatFullscreenRule">Mode fullscreen: -</span></div>
+        <div class="monitor-item"><i class="ri-eye-line ic-green" aria-hidden="true"></i><span id="antiCheatTabRule">Deteksi perpindahan tab: -</span></div>
+        <div class="monitor-item"><i class="ri-camera-line ic-green" aria-hidden="true"></i><span id="antiCheatScreenshotRule">Screenshot berkala: -</span></div>
+        <div class="monitor-item"><i class="ri-error-warning-line ic-orange" aria-hidden="true"></i><span id="antiCheatLimitRule">Batas pelanggaran: -</span></div>
+    </aside>
+</div>
+
+<div class="footer-bar">
+    <button type="button" class="btn-prev" id="prevQuestionBtn" title="Ke soal sebelumnya">
+        <i class="ri-arrow-left-s-line" aria-hidden="true"></i><span class="lbl">Sebelumnya</span>
+    </button>
+
+    <div class="q-counter" id="footerCounter">0 dari 0</div>
+
+    <button type="button" class="btn-nav-mob" id="openMobileNavBtn" title="Buka navigasi soal">
+        <i class="ri-grid-fill" aria-hidden="true"></i> Nav
+    </button>
+
+    <button type="button" class="btn-next" id="nextQuestionBtn" title="Ke soal berikutnya">
+        <span class="lbl">Selanjutnya</span><i class="ri-arrow-right-s-line" aria-hidden="true"></i>
+    </button>
+</div>
+
+<div class="mob-overlay" id="mobNav">
+    <div class="mob-backdrop"></div>
+    <div class="mob-sheet">
+        <div class="mob-handle"></div>
+        <div class="mob-body">
+            <div class="mob-header">
+                <span class="mob-title">Navigasi Soal</span>
+                <button type="button" class="btn-mob-x" id="closeMobileNavBtn" aria-label="Tutup navigasi soal">
+                    <i class="ri-close-line" aria-hidden="true"></i>
+                </button>
             </div>
 
-            <div class="col-xl-4">
-                <article class="card border-0 shadow-sm mb-3">
-                    <div class="card-header bg-white">
-                        <h2 class="h6 mb-0"><i class="ri-grid-line me-1"></i>Navigasi Soal</h2>
-                    </div>
-                    <div class="card-body">
-                        <div id="questionGrid" class="question-grid"></div>
-                        <hr>
-                        <div class="small text-muted d-flex flex-wrap gap-2">
-                            <span><span class="badge bg-primary">&nbsp;</span> Saat ini</span>
-                            <span><span class="badge bg-success">&nbsp;</span> Terjawab</span>
-                            <span><span class="badge bg-warning text-dark">&nbsp;</span> Ditandai</span>
-                            <span><span class="badge bg-secondary">&nbsp;</span> Belum jawab</span>
-                            <span><span class="badge bg-dark">&nbsp;</span> Terkunci</span>
-                        </div>
-                    </div>
-                </article>
-
-                <article class="card border-0 shadow-sm mb-3">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center small mb-2">
-                            <span class="text-muted">Progres Jawaban</span>
-                            <strong id="progressLabel">0 / 0</strong>
-                        </div>
-                        <div class="progress exam-progress">
-                            <div id="progressBar" class="progress-bar bg-success exam-progress-bar" role="progressbar"></div>
-                        </div>
-                        <div class="mt-3 small">
-                            <p class="mb-1">Terjawab: <strong id="summaryAnswered">0</strong></p>
-                            <p class="mb-1">Belum dijawab: <strong id="summaryUnanswered">0</strong></p>
-                            <p class="mb-0">Ditandai: <strong id="summaryMarked">0</strong></p>
-                        </div>
-                    </div>
-                </article>
-
-                <article class="card border-0 shadow-sm">
-                    <div class="card-body">
-                        <h3 class="h6 mb-2">Pengawasan Ujian</h3>
-                        <ul class="small text-muted mb-0 ps-3">
-                            <li id="antiCheatMediaRule">Perangkat pengawasan: -</li>
-                            <li id="antiCheatFullscreenRule">Mode fullscreen: -</li>
-                            <li id="antiCheatTabRule">Deteksi perpindahan tab: -</li>
-                            <li id="antiCheatScreenshotRule">Screenshot berkala: -</li>
-                            <li id="antiCheatLimitRule">Batas pelanggaran: -</li>
-                        </ul>
-                    </div>
-                </article>
+            <div class="pills-row">
+                <div class="pill pill-green"><span id="mAns">0</span><small>Terjawab</small></div>
+                <div class="pill pill-red"><span id="mUnans">0</span><small>Belum</small></div>
+                <div class="pill pill-orange"><span id="mFlag">0</span><small>Ditandai</small></div>
             </div>
-        </section>
+
+            <div class="progress-label" style="font-size:.75rem; margin-bottom:6px;">
+                <span>Progres</span><span id="mProg">0/0</span>
+            </div>
+            <div class="progress-bar-wrap" style="margin-bottom:14px;">
+                <div class="progress-fill" id="mProgBar" style="width:0%"></div>
+            </div>
+
+            <div class="leg-row">
+                <div class="leg-item"><div class="leg-dot dot-current"></div>Saat ini</div>
+                <div class="leg-item"><div class="leg-dot dot-answered"></div>Terjawab</div>
+                <div class="leg-item"><div class="leg-dot dot-flagged"></div>Ditandai</div>
+                <div class="leg-item"><div class="leg-dot dot-empty"></div>Belum</div>
+            </div>
+
+            <div class="nav-grid-mob" id="navGridMob"></div>
+
+            <div style="font-size:.82rem; font-weight:800; margin-bottom:10px;">Pengawasan Ujian</div>
+            <div class="mon-grid">
+                <div class="mon-item"><i class="ri-shield-check-line ic-green" aria-hidden="true"></i><span id="antiCheatMediaRuleMobile">Perangkat pengawasan: -</span></div>
+                <div class="mon-item"><i class="ri-fullscreen-line ic-green" aria-hidden="true"></i><span id="antiCheatFullscreenRuleMobile">Mode fullscreen: -</span></div>
+                <div class="mon-item"><i class="ri-eye-line ic-green" aria-hidden="true"></i><span id="antiCheatTabRuleMobile">Deteksi tab: -</span></div>
+                <div class="mon-item"><i class="ri-camera-line ic-green" aria-hidden="true"></i><span id="antiCheatScreenshotRuleMobile">Screenshot: -</span></div>
+                <div class="mon-item"><i class="ri-error-warning-line ic-orange" aria-hidden="true"></i><span id="antiCheatLimitRuleMobile">Batas: -</span></div>
+            </div>
+
+            <button type="button" class="btn-submit-sheet" id="openSubmitModalBtnMobile">
+                <i class="ri-send-plane-line" aria-hidden="true"></i> Kirim Ujian
+            </button>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block after_main %}
 {% if exam.require_camera or exam.require_microphone or exam.require_fullscreen %}
 <div id="permissionOverlay" class="fullscreen-overlay d-none">
-        <div class="overlay-card">
-            <h2 class="h6 mb-2">Persyaratan Perangkat Ujian</h2>
-            <p class="small text-muted mb-3">
-                Ujian tidak bisa dilanjutkan sebelum
+    <div class="overlay-card">
+        <h2 class="h6 mb-2">Persyaratan Perangkat Ujian</h2>
+        <p class="small text-muted mb-3">
+            Ujian tidak bisa dilanjutkan sebelum
+            {% if exam.require_camera and exam.require_microphone %}
+            browser mengizinkan kamera dan mikrofon.
+            {% elif exam.require_camera %}
+            browser mengizinkan kamera.
+            {% elif exam.require_microphone %}
+            browser mengizinkan mikrofon.
+            {% else %}
+            persyaratan perangkat ujian terpenuhi.
+            {% endif %}
+            {% if exam.require_fullscreen %} Fullscreen juga wajib aktif.{% endif %}
+        </p>
+        <ul class="small ps-3 mb-3">
+            {% if exam.require_camera %}
+            <li>Kamera: <strong id="permissionOverlayCameraStatus">Belum dicek</strong></li>
+            {% endif %}
+            {% if exam.require_microphone %}
+            <li>Mikrofon: <strong id="permissionOverlayMicrophoneStatus">Belum dicek</strong></li>
+            {% endif %}
+            {% if exam.require_fullscreen %}
+            <li>Fullscreen: <strong id="permissionOverlayFullscreenStatus">Belum aktif</strong></li>
+            {% endif %}
+        </ul>
+        <div id="permissionOverlayMessage" class="alert alert-warning py-2 small d-none"></div>
+        <div class="d-flex flex-column gap-2">
+            {% if exam.require_camera or exam.require_microphone %}
+            <button type="button" class="btn btn-primary btn-sm" id="requestMediaAccessBtn" title="Izinkan kamera dan mikrofon">
+                <i class="ri-camera-line me-1" aria-hidden="true"></i>
                 {% if exam.require_camera and exam.require_microphone %}
-                browser mengizinkan kamera dan mikrofon.
+                Izinkan Kamera & Mikrofon
                 {% elif exam.require_camera %}
-                browser mengizinkan kamera.
-                {% elif exam.require_microphone %}
-                browser mengizinkan mikrofon.
+                Izinkan Kamera
                 {% else %}
-                persyaratan perangkat ujian terpenuhi.
+                Izinkan Mikrofon
                 {% endif %}
-                {% if exam.require_fullscreen %} Fullscreen juga wajib aktif.{% endif %}
-            </p>
-            <ul class="small ps-3 mb-3">
-                {% if exam.require_camera %}
-                <li>Kamera: <strong id="permissionOverlayCameraStatus">Belum dicek</strong></li>
-                {% endif %}
-                {% if exam.require_microphone %}
-                <li>Mikrofon: <strong id="permissionOverlayMicrophoneStatus">Belum dicek</strong></li>
-                {% endif %}
-                {% if exam.require_fullscreen %}
-                <li>Fullscreen: <strong id="permissionOverlayFullscreenStatus">Belum aktif</strong></li>
-                {% endif %}
+            </button>
+            {% endif %}
+            {% if exam.require_fullscreen %}
+            <button type="button" class="btn btn-outline-primary btn-sm" id="requestPermissionFullscreenBtn" title="Aktifkan fullscreen">
+                <i class="ri-fullscreen-line me-1" aria-hidden="true"></i>Aktifkan Fullscreen
+            </button>
+            {% endif %}
+        </div>
+        <div class="small text-muted mt-3">
+            <p class="fw-semibold mb-2">Jika izin sempat ditolak:</p>
+            <ul class="mb-0 ps-3">
+                <li>Chrome: klik ikon kunci, kamera, atau mikrofon di address bar, izinkan perangkat yang dibutuhkan, lalu muat ulang bila perlu.</li>
+                <li>Firefox: klik ikon izin atau ikon kunci di address bar, izinkan perangkat yang dibutuhkan, lalu muat ulang bila perlu.</li>
             </ul>
-            <div id="permissionOverlayMessage" class="alert alert-warning py-2 small d-none"></div>
-            <div class="d-flex flex-column gap-2">
-                {% if exam.require_camera or exam.require_microphone %}
-                <button type="button" class="btn btn-primary btn-sm" id="requestMediaAccessBtn" title="Izinkan kamera dan mikrofon">
-                    <i class="ri-camera-line me-1"></i>
-                    {% if exam.require_camera and exam.require_microphone %}
-                    Izinkan Kamera & Mikrofon
-                    {% elif exam.require_camera %}
-                    Izinkan Kamera
-                    {% else %}
-                    Izinkan Mikrofon
-                    {% endif %}
-                </button>
-                {% endif %}
-                {% if exam.require_fullscreen %}
-                <button type="button" class="btn btn-outline-primary btn-sm" id="requestPermissionFullscreenBtn" title="Aktifkan fullscreen">
-                    <i class="ri-fullscreen-line me-1"></i>Aktifkan Fullscreen
-                </button>
-                {% endif %}
-            </div>
-            <div class="small text-muted mt-3">
-                <p class="fw-semibold mb-2">Jika izin sempat ditolak:</p>
-                <ul class="mb-0 ps-3">
-                    <li>Chrome: klik ikon kunci, kamera, atau mikrofon di address bar, izinkan perangkat yang dibutuhkan, lalu muat ulang bila perlu.</li>
-                    <li>Firefox: klik ikon izin atau ikon kunci di address bar, izinkan perangkat yang dibutuhkan, lalu muat ulang bila perlu.</li>
-                </ul>
-            </div>
         </div>
     </div>
+</div>
 {% endif %}
 
 <div id="fullscreenOverlay" class="fullscreen-overlay d-none">
-        <div class="overlay-card">
-            <h2 class="h6 mb-2">Mode Layar Penuh Wajib Aktif</h2>
-            <p class="small text-muted mb-3">Anda keluar dari mode fullscreen. Klik tombol berikut untuk kembali melanjutkan ujian.</p>
-            <button type="button" class="btn btn-primary btn-sm" id="returnFullscreenBtn" title="Kembali ke mode fullscreen">
-                <i class="ri-fullscreen-line me-1"></i>Kembali ke Fullscreen
-            </button>
-        </div>
+    <div class="overlay-card">
+        <h2 class="h6 mb-2">Mode Layar Penuh Wajib Aktif</h2>
+        <p class="small text-muted mb-3">Anda keluar dari mode fullscreen. Klik tombol berikut untuk kembali melanjutkan ujian.</p>
+        <button type="button" class="btn btn-primary btn-sm" id="returnFullscreenBtn" title="Kembali ke mode fullscreen">
+            <i class="ri-fullscreen-line me-1" aria-hidden="true"></i>Kembali ke Fullscreen
+        </button>
     </div>
+</div>
 
-    <div class="modal fade" id="violationModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2 class="h6 mb-0"><i class="ri-error-warning-line text-danger me-1"></i>Peringatan Pelanggaran</h2>
-                </div>
-                <div class="modal-body">
-                    <p class="mb-2" id="violationMessage">Pelanggaran terdeteksi.</p>
-                    <p class="small text-muted mb-0">Jumlah pelanggaran: <strong id="violationCountLabel">0</strong></p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary btn-sm" id="closeViolationModalBtn" data-bs-dismiss="modal" title="Kembali mengerjakan ujian">
-                        Kembali ke Ujian
-                    </button>
-                </div>
+<div class="modal fade" id="violationModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="h6 mb-0"><i class="ri-error-warning-line text-danger me-1" aria-hidden="true"></i>Peringatan Pelanggaran</h2>
+            </div>
+            <div class="modal-body">
+                <p class="mb-2" id="violationMessage">Pelanggaran terdeteksi.</p>
+                <p class="small text-muted mb-0">Jumlah pelanggaran: <strong id="violationCountLabel">0</strong></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary btn-sm" id="closeViolationModalBtn" data-bs-dismiss="modal" title="Kembali mengerjakan ujian">
+                    Kembali ke Ujian
+                </button>
             </div>
         </div>
     </div>
+</div>
 
-    <div class="modal fade" id="submitModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2 class="h6 mb-0"><i class="ri-send-plane-line text-primary me-1"></i>Konfirmasi Kirim Ujian</h2>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+<div class="modal fade" id="submitModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:16px; border:none; overflow:hidden;">
+            <div class="modal-header" style="background:var(--primary); border:none; padding:18px 22px;">
+                <h2 class="modal-title text-white fw-bold h5 mb-0">
+                    <i class="ri-send-plane-fill me-2" aria-hidden="true"></i>Kirim Ujian
+                </h2>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Tutup"></button>
+            </div>
+            <div class="modal-body p-4">
+                <p class="mb-3" style="font-size:.92rem; color:var(--text);">Apakah Anda yakin ingin mengirim ujian sekarang?</p>
+                <div class="row g-2 text-center">
+                    <div class="col-4"><div style="background:#f0fdf4; border-radius:10px; padding:12px 6px;">
+                        <div style="font-size:1.4rem; font-weight:800; color:var(--green);" id="modalAns">0</div>
+                        <div style="font-size:.78rem; color:var(--muted);">Terjawab</div>
+                    </div></div>
+                    <div class="col-4"><div style="background:#fef2f2; border-radius:10px; padding:12px 6px;">
+                        <div style="font-size:1.4rem; font-weight:800; color:var(--red);" id="modalUnans">0</div>
+                        <div style="font-size:.78rem; color:var(--muted);">Belum</div>
+                    </div></div>
+                    <div class="col-4"><div style="background:#fffbeb; border-radius:10px; padding:12px 6px;">
+                        <div style="font-size:1.4rem; font-weight:800; color:var(--orange);" id="modalFlag">0</div>
+                        <div style="font-size:.78rem; color:var(--muted);">Ditandai</div>
+                    </div></div>
                 </div>
-                <div class="modal-body">
-                    <p class="small text-muted">Periksa ringkasan sebelum mengirim:</p>
-                    <ul class="small mb-0 ps-3">
-                        <li>Total soal: <strong id="submitTotalCount">0</strong></li>
-                        <li>Terjawab: <strong id="submitAnsweredCount">0</strong></li>
-                        <li>Belum dijawab: <strong id="submitUnansweredCount">0</strong></li>
-                        <li>Ditandai: <strong id="submitMarkedCount">0</strong></li>
-                    </ul>
-                    <p id="submitRetakeInfo" class="small text-muted mt-2 mb-0 d-none"></p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal" title="Kembali ke ruang ujian">Batal</button>
-                    <button type="button" class="btn btn-primary btn-sm" id="confirmSubmitBtn" title="Kirim ujian sekarang">
-                        <i class="ri-send-plane-fill me-1"></i>Kirim Ujian
-                    </button>
-                </div>
+                <p id="submitRetakeInfo" class="small text-muted mt-3 mb-0 d-none"></p>
+            </div>
+            <div class="modal-footer border-0 px-4 pb-4 gap-2">
+                <button type="button" class="btn btn-outline-secondary rounded-3" data-bs-dismiss="modal">Batal</button>
+                <button type="button" class="btn fw-bold rounded-3" id="confirmSubmitBtn" style="background:var(--primary); color:#fff; padding:10px 22px;">
+                    <i class="ri-send-plane-fill me-1" aria-hidden="true"></i>Kirim Sekarang
+                </button>
             </div>
         </div>
     </div>
+</div>
 
-    {{ exam_room_config|json_script:"exam-room-config" }}
+{{ exam_room_config|json_script:"exam-room-config" }}
 {% endblock %}
 
 {% block vendor_js %}
-    <script src="https://cdn.jsdelivr.net/npm/axios@1.6.2/dist/axios.min.js"></script>
-    <script src="{% static 'attempts/js/timer.js' %}"></script>
-    <script src="{% static 'attempts/js/auto_save.js' %}"></script>
-    <script src="{% static 'attempts/js/anti_cheat.js' %}"></script>
-    <script src="{% static 'attempts/js/exam_room.js' %}?v=20260311-1"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios@1.6.2/dist/axios.min.js"></script>
+<script src="{% static 'attempts/js/timer.js' %}"></script>
+<script src="{% static 'attempts/js/auto_save.js' %}"></script>
+<script src="{% static 'attempts/js/anti_cheat.js' %}"></script>
+<script src="{% static 'attempts/js/exam_room.js' %}?v=20260312-1"></script>
 {% endblock %}

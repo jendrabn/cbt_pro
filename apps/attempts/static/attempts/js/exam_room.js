@@ -75,36 +75,52 @@
 
         cacheElements() {
             const byId = (id) => documentObj.getElementById(id);
+            const byIds = (...ids) => ids.map((id) => byId(id)).find(Boolean) || null;
             this.elements = {
                 alertHost: byId("examRoomAlertHost"),
                 restrictionAlert: byId("navigationRestriction"),
-                timerDisplay: byId("timerDisplay"),
-                timerChip: documentObj.querySelector(".timer-chip"),
+                timerDisplay: byIds("timer", "timerDisplay"),
+                timerChip: documentObj.querySelector(".timer-chip, .badge-timer"),
                 violationCounterChip: byId("violationCounterChip"),
                 attemptCounterBadge: byId("attemptCounterBadge"),
-                questionIndexLabel: byId("questionIndexLabel"),
-                totalQuestionLabel: byId("totalQuestionLabel"),
+                questionNumberPill: byIds("qNum", "questionNumberPill"),
+                questionTypeBadge: byIds("qType", "questionTypeBadge"),
+                questionPointsLabel: byIds("qPoints", "questionPointsLabel"),
+                questionTypeHint: byId("questionTypeHint"),
+                footerCounter: byId("footerCounter"),
                 autoSaveLabel: byId("autoSaveLabel"),
+                questionPanel: byId("questionPanel"),
                 questionText: byId("questionText"),
                 questionImageWrap: byId("questionImageWrap"),
                 questionImage: byId("questionImage"),
                 questionMediaLimitNotice: byId("questionMediaLimitNotice"),
                 questionAnswerContainer: byId("questionAnswerContainer"),
-                markReviewCheckbox: byId("markReviewCheckbox"),
+                flagQuestionBtn: byId("flagQuestionBtn"),
                 prevQuestionBtn: byId("prevQuestionBtn"),
                 nextQuestionBtn: byId("nextQuestionBtn"),
                 clearAnswerBtn: byId("clearAnswerBtn"),
-                questionGrid: byId("questionGrid"),
-                progressLabel: byId("progressLabel"),
-                progressBar: byId("progressBar"),
-                summaryAnswered: byId("summaryAnswered"),
-                summaryUnanswered: byId("summaryUnanswered"),
-                summaryMarked: byId("summaryMarked"),
+                questionGrid: byIds("navGrid", "questionGrid"),
+                questionGridMobile: byIds("navGridMob", "questionGridMobile"),
+                progressLabel: byIds("progLabel", "progressLabel"),
+                progressBar: byIds("progBar", "progressBar"),
+                summaryAnswered: byIds("statAns", "summaryAnswered"),
+                summaryUnanswered: byIds("statUnans", "summaryUnanswered"),
+                summaryMarked: byIds("statFlag", "summaryMarked"),
+                progressLabelMobile: byIds("mProg", "progressLabelMobile"),
+                progressBarMobile: byIds("mProgBar", "progressBarMobile"),
+                summaryAnsweredMobile: byIds("mAns", "summaryAnsweredMobile"),
+                summaryUnansweredMobile: byIds("mUnans", "summaryUnansweredMobile"),
+                summaryMarkedMobile: byIds("mFlag", "summaryMarkedMobile"),
                 antiCheatFullscreenRule: byId("antiCheatFullscreenRule"),
                 antiCheatMediaRule: byId("antiCheatMediaRule"),
                 antiCheatTabRule: byId("antiCheatTabRule"),
                 antiCheatScreenshotRule: byId("antiCheatScreenshotRule"),
                 antiCheatLimitRule: byId("antiCheatLimitRule"),
+                antiCheatFullscreenRuleMobile: byId("antiCheatFullscreenRuleMobile"),
+                antiCheatMediaRuleMobile: byId("antiCheatMediaRuleMobile"),
+                antiCheatTabRuleMobile: byId("antiCheatTabRuleMobile"),
+                antiCheatScreenshotRuleMobile: byId("antiCheatScreenshotRuleMobile"),
+                antiCheatLimitRuleMobile: byId("antiCheatLimitRuleMobile"),
                 permissionOverlay: byId("permissionOverlay"),
                 permissionOverlayCameraStatus: byId("permissionOverlayCameraStatus"),
                 permissionOverlayMicrophoneStatus: byId("permissionOverlayMicrophoneStatus"),
@@ -114,12 +130,17 @@
                 requestPermissionFullscreenBtn: byId("requestPermissionFullscreenBtn"),
                 fullscreenOverlay: byId("fullscreenOverlay"),
                 returnFullscreenBtn: byId("returnFullscreenBtn"),
+                mobileNav: byId("mobNav"),
+                mobileNavBackdrop: documentObj.querySelector("#mobNav .mob-backdrop"),
+                openMobileNavBtn: byId("openMobileNavBtn"),
+                closeMobileNavBtn: byId("closeMobileNavBtn"),
                 openSubmitModalBtn: byId("openSubmitModalBtn"),
+                openSubmitModalBtnMobile: byId("openSubmitModalBtnMobile"),
                 confirmSubmitBtn: byId("confirmSubmitBtn"),
                 submitTotalCount: byId("submitTotalCount"),
-                submitAnsweredCount: byId("submitAnsweredCount"),
-                submitUnansweredCount: byId("submitUnansweredCount"),
-                submitMarkedCount: byId("submitMarkedCount"),
+                submitAnsweredCount: byIds("modalAns", "submitAnsweredCount"),
+                submitUnansweredCount: byIds("modalUnans", "submitUnansweredCount"),
+                submitMarkedCount: byIds("modalFlag", "submitMarkedCount"),
                 submitRetakeInfo: byId("submitRetakeInfo"),
                 violationMessage: byId("violationMessage"),
                 violationCountLabel: byId("violationCountLabel"),
@@ -150,16 +171,23 @@
             if (this.elements.clearAnswerBtn) {
                 this.elements.clearAnswerBtn.addEventListener("click", () => this.clearCurrentAnswer());
             }
-            if (this.elements.markReviewCheckbox) {
-                this.elements.markReviewCheckbox.addEventListener("change", (event) => {
-                    this.saveCurrentAnswer({
-                        question_number: this.getCurrentNumber(),
-                        is_marked_for_review: Boolean(event.target.checked),
-                    });
-                });
+            if (this.elements.flagQuestionBtn) {
+                this.elements.flagQuestionBtn.addEventListener("click", () => this.toggleReviewFlag());
+            }
+            if (this.elements.openMobileNavBtn) {
+                this.elements.openMobileNavBtn.addEventListener("click", () => this.openMobileNav());
+            }
+            if (this.elements.closeMobileNavBtn) {
+                this.elements.closeMobileNavBtn.addEventListener("click", () => this.closeMobileNav());
+            }
+            if (this.elements.mobileNavBackdrop) {
+                this.elements.mobileNavBackdrop.addEventListener("click", () => this.closeMobileNav());
             }
             if (this.elements.openSubmitModalBtn) {
                 this.elements.openSubmitModalBtn.addEventListener("click", () => this.openSubmitModal());
+            }
+            if (this.elements.openSubmitModalBtnMobile) {
+                this.elements.openSubmitModalBtnMobile.addEventListener("click", () => this.openSubmitModal());
             }
             if (this.elements.confirmSubmitBtn) {
                 this.elements.confirmSubmitBtn.addEventListener("click", () => this.submitExam(false));
@@ -202,6 +230,56 @@
             return this.payload && this.payload.anti_cheat ? this.payload.anti_cheat : {};
         }
 
+        getMarkedForReviewState() {
+            const question = this.payload && this.payload.question ? this.payload.question : null;
+            return Boolean(question && question.answer && question.answer.marked_for_review);
+        }
+
+        getQuestionTypeMeta(questionType) {
+            const metaMap = {
+                short_answer: {
+                    label: "Jawaban Singkat",
+                    hint: "",
+                },
+                multiple_choice: {
+                    label: "Pilihan Ganda",
+                    hint: "",
+                },
+                essay: {
+                    label: "Esai",
+                    hint: "",
+                },
+                checkbox: {
+                    label: "Checkbox",
+                    hint: "* Pilih satu atau lebih jawaban yang benar",
+                },
+                matching: {
+                    label: "Matching",
+                    hint: "",
+                },
+                ordering: {
+                    label: "Ordering",
+                    hint: "* Gunakan tombol panah untuk mengubah urutan",
+                },
+                fill_in_blank: {
+                    label: "Fill In Blank",
+                    hint: "",
+                },
+            };
+            return metaMap[questionType] || {
+                label: "Soal",
+                hint: "",
+            };
+        }
+
+        formatPoints(pointsValue) {
+            const points = Number(pointsValue || 0);
+            if (!Number.isFinite(points)) {
+                return "0 poin";
+            }
+            return `${new Intl.NumberFormat("id-ID", { maximumFractionDigits: 2 }).format(points)} poin`;
+        }
+
         renderPayload(payload) {
             if (!payload) {
                 this.showAlert("Data ruang ujian tidak tersedia.", "danger");
@@ -221,14 +299,31 @@
         renderHeader() {
             const current = this.getCurrentNumber();
             const total = this.getTotalQuestions();
-            if (this.elements.questionIndexLabel) {
-                this.elements.questionIndexLabel.textContent = String(current);
+            const question = this.payload && this.payload.question ? this.payload.question : null;
+            const questionMeta = this.getQuestionTypeMeta(question ? question.question_type : "");
+
+            if (this.elements.questionNumberPill) {
+                this.elements.questionNumberPill.textContent = String(current);
             }
-            if (this.elements.totalQuestionLabel) {
-                this.elements.totalQuestionLabel.textContent = String(total);
+            if (this.elements.footerCounter) {
+                this.elements.footerCounter.textContent = `${current} dari ${total}`;
+            }
+            if (this.elements.questionTypeBadge) {
+                this.elements.questionTypeBadge.textContent = questionMeta.label;
+                this.elements.questionTypeBadge.dataset.questionType = question ? (question.question_type || "") : "";
+            }
+            if (this.elements.questionPointsLabel) {
+                this.elements.questionPointsLabel.textContent = this.formatPoints(question ? question.points : 0);
+            }
+            if (this.elements.questionTypeHint) {
+                this.elements.questionTypeHint.textContent = questionMeta.hint;
+                this.elements.questionTypeHint.classList.toggle("d-none", !questionMeta.hint);
             }
             if (this.elements.autoSaveLabel) {
                 this.elements.autoSaveLabel.textContent = this.payload.last_saved_label || "Belum tersimpan";
+            }
+            if (this.elements.questionPanel) {
+                this.elements.questionPanel.classList.add("active");
             }
             if (this.elements.attemptCounterBadge) {
                 var allowRetake = !!this.payload.allow_retake;
@@ -261,9 +356,15 @@
             if (!question) {
                 if (this.elements.questionText) {
                     this.elements.questionText.textContent = "Soal tidak tersedia.";
+                    this.elements.questionText.classList.remove("fib-text");
+                }
+                if (this.elements.questionTypeHint) {
+                    this.elements.questionTypeHint.textContent = "";
+                    this.elements.questionTypeHint.classList.add("d-none");
                 }
                 if (this.elements.questionAnswerContainer) {
                     this.elements.questionAnswerContainer.innerHTML = "";
+                    this.elements.questionAnswerContainer.dataset.questionType = "";
                 }
                 if (this.elements.questionMediaLimitNotice) {
                     this.elements.questionMediaLimitNotice.textContent = "";
@@ -286,8 +387,18 @@
                 }
             }
 
-            if (this.elements.markReviewCheckbox) {
-                this.elements.markReviewCheckbox.checked = Boolean(question.answer && question.answer.marked_for_review);
+            if (this.elements.flagQuestionBtn) {
+                this.elements.flagQuestionBtn.classList.toggle(
+                    "is-active",
+                    Boolean(question.answer && question.answer.marked_for_review)
+                );
+            }
+            if (this.elements.questionAnswerContainer) {
+                this.elements.questionAnswerContainer.dataset.questionType = question.question_type || "";
+            }
+            if (this.elements.questionText) {
+                this.elements.questionText.dataset.questionType = question.question_type || "";
+                this.elements.questionText.classList.toggle("fib-text", question.question_type === "fill_in_blank");
             }
 
             this.renderAnswerControl(question);
@@ -465,17 +576,30 @@
         }
 
         renderOrderingControl(question, currentNumber) {
-            const helper = documentObj.createElement("div");
-            helper.className = "small text-muted mb-2";
-            helper.textContent = "Seret item ke posisi yang benar.";
-            this.elements.questionAnswerContainer.appendChild(helper);
-
-            const orderingItems = Array.isArray(question.ordering_items)
+            const rawItems = Array.isArray(question.ordering_items)
                 ? question.ordering_items.map((item) => ({
-                    id: item.id,
+                    id: String(item.id),
                     text: item.text || "",
                 }))
                 : [];
+            const savedOrder = Array.isArray(question.answer && question.answer.answer_order_json)
+                ? question.answer.answer_order_json.map((itemId) => String(itemId))
+                : [];
+            const itemMap = new Map(rawItems.map((item) => [item.id, item]));
+            const orderingItems = [];
+
+            savedOrder.forEach((itemId) => {
+                if (itemMap.has(itemId)) {
+                    orderingItems.push(itemMap.get(itemId));
+                    itemMap.delete(itemId);
+                }
+            });
+            rawItems.forEach((item) => {
+                if (itemMap.has(item.id)) {
+                    orderingItems.push(itemMap.get(item.id));
+                    itemMap.delete(item.id);
+                }
+            });
 
             if (!orderingItems.length) {
                 const emptyState = documentObj.createElement("div");
@@ -486,7 +610,7 @@
             }
 
             const listWrap = documentObj.createElement("div");
-            listWrap.className = "d-grid gap-2 ordering-list-surface";
+            listWrap.id = "order-list";
             this.elements.questionAnswerContainer.appendChild(listWrap);
             let draggedIndex = null;
 
@@ -494,9 +618,7 @@
                 this.saveCurrentAnswer({
                     question_number: currentNumber,
                     answer_order_json: orderingItems.map((item) => item.id),
-                    is_marked_for_review: this.elements.markReviewCheckbox
-                        ? Boolean(this.elements.markReviewCheckbox.checked)
-                        : false,
+                    is_marked_for_review: this.getMarkedForReviewState(),
                 });
             };
 
@@ -504,46 +626,40 @@
                 if (fromIndex < 0 || fromIndex >= orderingItems.length) {
                     return;
                 }
-                if (toIndex < 0 || toIndex > orderingItems.length) {
+                if (toIndex < 0 || toIndex >= orderingItems.length) {
                     return;
                 }
-                if (fromIndex === toIndex || fromIndex + 1 === toIndex) {
+                if (fromIndex === toIndex) {
                     return;
                 }
                 const movedItem = orderingItems.splice(fromIndex, 1)[0];
-                const insertionIndex = fromIndex < toIndex ? toIndex - 1 : toIndex;
-                orderingItems.splice(insertionIndex, 0, movedItem);
+                orderingItems.splice(toIndex, 0, movedItem);
                 renderItems();
                 persistOrder();
-            };
-
-            const clearOrderingDropTargets = () => {
-                listWrap.classList.remove("ordering-drop-target");
-                Array.from(listWrap.querySelectorAll(".ordering-draggable-card")).forEach((cardEl) => {
-                    cardEl.classList.remove("ordering-drop-target", "is-dragging");
-                });
             };
 
             const renderItems = () => {
                 listWrap.innerHTML = "";
                 orderingItems.forEach((item, index) => {
                     const card = documentObj.createElement("div");
-                    card.className = "border rounded-3 p-3 bg-white ordering-draggable-card";
+                    card.className = "order-item";
                     card.draggable = true;
                     card.innerHTML = `
-                        <div class="d-flex align-items-center gap-3">
-                            <div class="ordering-item-marker">
-                                ${index + 1}
-                            </div>
-                            <div class="flex-grow-1 richtext-content">${item.text}</div>
-                            <div class="ordering-drag-handle" title="Seret untuk ubah urutan" aria-hidden="true">
-                                <i class="ri-draggable"></i>
-                            </div>
+                        <i class="ri-draggable drag-handle" aria-hidden="true"></i>
+                        <div class="order-num">${index + 1}</div>
+                        <span class="order-text richtext-content">${item.text}</span>
+                        <div class="order-arrows">
+                            <button type="button" class="btn-arrow" data-direction="up" ${index === 0 ? "disabled" : ""} title="Naikkan urutan">
+                                <i class="ri-arrow-up-s-line" aria-hidden="true"></i>
+                            </button>
+                            <button type="button" class="btn-arrow" data-direction="down" ${index === orderingItems.length - 1 ? "disabled" : ""} title="Turunkan urutan">
+                                <i class="ri-arrow-down-s-line" aria-hidden="true"></i>
+                            </button>
                         </div>
                     `;
                     card.addEventListener("dragstart", (event) => {
                         draggedIndex = index;
-                        card.classList.add("is-dragging");
+                        card.classList.add("dragging");
                         if (event.dataTransfer) {
                             event.dataTransfer.effectAllowed = "move";
                             event.dataTransfer.setData("text/plain", String(index));
@@ -551,69 +667,45 @@
                     });
                     card.addEventListener("dragend", () => {
                         draggedIndex = null;
-                        clearOrderingDropTargets();
+                        card.classList.remove("dragging");
                     });
                     card.addEventListener("dragover", (event) => {
                         event.preventDefault();
-                        card.classList.add("ordering-drop-target");
-                    });
-                    card.addEventListener("dragleave", () => {
-                        card.classList.remove("ordering-drop-target");
                     });
                     card.addEventListener("drop", (event) => {
                         event.preventDefault();
                         const sourceIndex = draggedIndex;
                         draggedIndex = null;
-                        clearOrderingDropTargets();
                         if (sourceIndex === null) {
                             return;
                         }
                         moveItem(sourceIndex, index);
                     });
+                    const moveUpBtn = card.querySelector('[data-direction="up"]');
+                    const moveDownBtn = card.querySelector('[data-direction="down"]');
+                    if (moveUpBtn) {
+                        moveUpBtn.addEventListener("click", () => {
+                            moveItem(index, index - 1);
+                        });
+                    }
+                    if (moveDownBtn) {
+                        moveDownBtn.addEventListener("click", () => {
+                            moveItem(index, index + 1);
+                        });
+                    }
                     listWrap.appendChild(card);
                 });
             };
-
-            listWrap.addEventListener("dragover", (event) => {
-                if (event.target === listWrap) {
-                    event.preventDefault();
-                    listWrap.classList.add("ordering-drop-target");
-                }
-            });
-            listWrap.addEventListener("dragleave", (event) => {
-                if (event.target === listWrap) {
-                    listWrap.classList.remove("ordering-drop-target");
-                }
-            });
-            listWrap.addEventListener("drop", (event) => {
-                if (event.target !== listWrap) {
-                    return;
-                }
-                event.preventDefault();
-                const sourceIndex = draggedIndex;
-                draggedIndex = null;
-                clearOrderingDropTargets();
-                if (sourceIndex === null) {
-                    return;
-                }
-                moveItem(sourceIndex, orderingItems.length);
-            });
 
             renderItems();
         }
 
         renderMatchingControl(question, currentNumber) {
-            const helper = documentObj.createElement("div");
-            helper.className = "small text-muted mb-2";
-            helper.textContent = "Klik kartu jawaban di bank, lalu klik prompt yang sesuai. Drag-and-drop dan dropdown tetap tersedia sebagai fallback.";
-            this.elements.questionAnswerContainer.appendChild(helper);
-
             const matchingPairs = Array.isArray(question.matching_pairs) ? question.matching_pairs.slice() : [];
             const answerChoices = Array.isArray(question.matching_answer_choices)
                 ? question.matching_answer_choices.slice()
                 : [];
             const workingMap = Object.assign({}, (question.answer && question.answer.answer_matching_json) || {});
-            let selectedChoiceId = "";
 
             if (!matchingPairs.length || !answerChoices.length) {
                 const emptyState = documentObj.createElement("div");
@@ -624,34 +716,41 @@
             }
 
             const answerBankWrap = documentObj.createElement("div");
-            answerBankWrap.className = "matching-bank-shell mb-3 border rounded-4 p-3";
-            answerBankWrap.innerHTML = '<div class="small fw-semibold text-muted mb-2">Bank Jawaban</div>';
-            const selectionBar = documentObj.createElement("div");
-            selectionBar.className = "matching-selection-bar d-flex align-items-center justify-content-between gap-2 rounded-3 border bg-light-subtle px-3 py-2 mb-3";
-            answerBankWrap.appendChild(selectionBar);
-            const answerBankGrid = documentObj.createElement("div");
-            answerBankGrid.className = "d-grid gap-2 matching-board-bank";
-            answerBankWrap.appendChild(answerBankGrid);
+            answerBankWrap.className = "answer-bank";
+            const answerBankItemsHtml = answerChoices.map((choice, index) => {
+                const label = this.escapeHtml(
+                    this.stripRichTextToPlainText(choice.answer_text, `Pilihan ${index + 1}`)
+                );
+                return label;
+            }).join(" • ");
+            answerBankWrap.innerHTML = `
+                <i class="ri-list-check-3"></i>&nbsp;<strong>Bank Jawaban:</strong> ${answerBankItemsHtml}
+            `;
+            const normalizedAnswerBankItemsHtml = answerChoices.map((choice, index) => {
+                return this.escapeHtml(
+                    this.stripRichTextToPlainText(choice.answer_text, `Pilihan ${index + 1}`)
+                );
+            }).join(" &bull; ");
+            answerBankWrap.innerHTML = `
+                <i class="ri-list-check-3"></i>&nbsp;<strong>Bank Jawaban:</strong> ${normalizedAnswerBankItemsHtml}
+            `;
             this.elements.questionAnswerContainer.appendChild(answerBankWrap);
 
             const pairsWrap = documentObj.createElement("div");
-            pairsWrap.className = "vstack gap-3";
+            pairsWrap.className = "vstack gap-3 matching-inline-list";
             this.elements.questionAnswerContainer.appendChild(pairsWrap);
-            let draggedChoiceId = "";
 
             const persistMap = () => {
                 this.saveCurrentAnswer({
                     question_number: currentNumber,
                     answer_matching_json: workingMap,
-                    is_marked_for_review: this.elements.markReviewCheckbox
-                        ? Boolean(this.elements.markReviewCheckbox.checked)
-                        : false,
+                    is_marked_for_review: this.getMarkedForReviewState(),
                 });
             };
 
-            const clearMatchingChoiceAssignment = (choiceId) => {
+            const clearMatchingChoiceAssignment = (choiceId, excludedPromptId) => {
                 Object.keys(workingMap).forEach((promptId) => {
-                    if (workingMap[promptId] === choiceId) {
+                    if (promptId !== excludedPromptId && workingMap[promptId] === choiceId) {
                         delete workingMap[promptId];
                     }
                 });
@@ -665,235 +764,53 @@
                 if (!choiceId) {
                     return;
                 }
-                clearMatchingChoiceAssignment(choiceId);
+                clearMatchingChoiceAssignment(choiceId, promptId);
                 workingMap[promptId] = choiceId;
             };
 
-            const assignSelectedChoiceToPrompt = (promptId) => {
-                if (!selectedChoiceId) {
-                    if (!workingMap[promptId]) {
-                        this.showAlert("Pilih dulu salah satu kartu jawaban dari bank.", "info", 2200);
-                    }
-                    return;
-                }
-                assignChoiceToPrompt(promptId, selectedChoiceId);
-                selectedChoiceId = "";
-                renderMatchingBoard();
-                persistMap();
-            };
-
-            const findChoiceById = (choiceId) => {
-                return answerChoices.find((choice) => choice.id === choiceId) || null;
-            };
-
-            const clearMatchingDropTargets = () => {
-                answerBankGrid.classList.remove("is-active");
-                Array.from(pairsWrap.querySelectorAll(".matching-dropzone")).forEach((dropzoneEl) => {
-                    dropzoneEl.classList.remove("is-active");
-                });
-                Array.from(this.elements.questionAnswerContainer.querySelectorAll(".matching-choice-card")).forEach((cardEl) => {
-                    cardEl.classList.remove("is-dragging");
-                });
-            };
-
-            const buildMatchingChoiceCard = (choice, labelText, promptId) => {
-                const card = documentObj.createElement("div");
-                const isSelectable = !promptId;
-                card.className = "border rounded-3 p-2 bg-light-subtle matching-choice-card";
-                if (isSelectable) {
-                    card.classList.add("is-selectable");
-                }
-                if (isSelectable && selectedChoiceId === choice.id) {
-                    card.classList.add("is-selected");
-                }
-                card.draggable = true;
-                card.dataset.choiceId = choice.id;
-                card.tabIndex = 0;
-                card.innerHTML = `
-                    <div class="matching-choice-card-inner">
-                        <div class="matching-choice-content">
-                            <div class="small text-muted mb-1">${this.escapeHtml(labelText)}</div>
-                            <div class="richtext-content">${choice.answer_text || ""}</div>
-                        </div>
-                        <div class="matching-choice-actions">
-                            <span class="matching-choice-drag" title="${isSelectable ? "Klik atau seret kartu jawaban" : "Seret kartu jawaban"}">
-                                <i class="ri-draggable"></i>
-                            </span>
-                            ${promptId ? '<button type="button" class="matching-choice-remove" title="Lepaskan jawaban" aria-label="Lepaskan jawaban"><i class="ri-close-line"></i></button>' : ""}
-                        </div>
-                    </div>
-                `;
-                card.addEventListener("dragstart", (event) => {
-                    draggedChoiceId = choice.id;
-                    card.classList.add("is-dragging");
-                    if (event.dataTransfer) {
-                        event.dataTransfer.effectAllowed = "move";
-                        event.dataTransfer.setData("text/plain", choice.id);
-                    }
-                });
-                card.addEventListener("dragend", () => {
-                    draggedChoiceId = "";
-                    clearMatchingDropTargets();
-                });
-                if (isSelectable) {
-                    const toggleSelection = () => {
-                        selectedChoiceId = selectedChoiceId === choice.id ? "" : choice.id;
-                        renderMatchingBoard();
-                    };
-                    card.addEventListener("click", toggleSelection);
-                    card.addEventListener("keydown", (event) => {
-                        if (event.key !== "Enter" && event.key !== " ") {
-                            return;
-                        }
-                        event.preventDefault();
-                        toggleSelection();
-                    });
-                }
-                const removeBtn = card.querySelector(".matching-choice-remove");
-                if (removeBtn && promptId) {
-                    removeBtn.addEventListener("click", (event) => {
-                        event.preventDefault();
-                        event.stopPropagation();
-                        delete workingMap[promptId];
-                        renderMatchingBoard();
-                        persistMap();
-                    });
-                }
-                return card;
-            };
-
-            const renderMatchingBoard = () => {
-                answerBankGrid.innerHTML = "";
+            const renderMatchingRows = () => {
                 pairsWrap.innerHTML = "";
-
-                const assignedChoiceIds = new Set(Object.values(workingMap));
-                if (selectedChoiceId && assignedChoiceIds.has(selectedChoiceId)) {
-                    selectedChoiceId = "";
-                }
-                const availableChoices = answerChoices.filter((choice) => !assignedChoiceIds.has(choice.id));
-                const selectedChoice = findChoiceById(selectedChoiceId);
-
-                if (selectedChoice) {
-                    selectionBar.innerHTML = `
-                        <div class="small">
-                            <div class="text-muted">Jawaban terpilih</div>
-                            <div class="fw-semibold">${this.escapeHtml(this.stripRichTextToPlainText(selectedChoice.answer_text, "Pilihan jawaban"))}</div>
-                        </div>
-                        <button type="button" class="btn btn-sm btn-outline-secondary">Batalkan Pilihan</button>
-                    `;
-                    const clearBtn = selectionBar.querySelector("button");
-                    if (clearBtn) {
-                        clearBtn.addEventListener("click", () => {
-                            selectedChoiceId = "";
-                            renderMatchingBoard();
-                        });
-                    }
-                } else {
-                    selectionBar.innerHTML = `
-                        <div class="small text-muted">
-                            Pilih satu kartu jawaban dari bank, lalu klik prompt untuk memasangnya.
-                        </div>
-                    `;
-                }
-
-                if (!availableChoices.length) {
-                    answerBankGrid.innerHTML = '<div class="alert alert-light border mb-0 small">Semua jawaban sudah dipasangkan. Klik tombol lepas atau seret kembali ke bank untuk membatalkan pasangan.</div>';
-                } else {
-                    availableChoices.forEach((choice, index) => {
-                        answerBankGrid.appendChild(buildMatchingChoiceCard(choice, `Pilihan ${index + 1}`, ""));
-                    });
-                }
 
                 matchingPairs.forEach((pair, pairIndex) => {
                     const card = documentObj.createElement("div");
-                    card.className = "border rounded-3 p-3 bg-white matching-prompt-card";
-                    if (selectedChoiceId) {
-                        card.classList.add("is-selection-target");
-                    }
-
+                    card.className = "match-row matching-inline-row";
                     const currentAnswerId = workingMap[pair.id] || "";
-                    const selectedChoice = findChoiceById(currentAnswerId);
+                    const usedChoiceIds = new Set(
+                        Object.keys(workingMap)
+                            .filter((promptId) => promptId !== pair.id && workingMap[promptId])
+                            .map((promptId) => workingMap[promptId])
+                    );
                     const choiceOptionsHtml = answerChoices.map((choice, choiceIndex) => {
                         const label = this.escapeHtml(
                             this.stripRichTextToPlainText(choice.answer_text, `Pilihan ${choiceIndex + 1}`)
                         );
                         const selectedAttr = choice.id === currentAnswerId ? " selected" : "";
-                        return `<option value="${choice.id}"${selectedAttr}>${label}</option>`;
+                        const disabledAttr = choice.id !== currentAnswerId && usedChoiceIds.has(choice.id) ? " disabled" : "";
+                        return `<option value="${choice.id}"${selectedAttr}${disabledAttr}>${label}</option>`;
                     }).join("");
 
                     card.innerHTML = `
-                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-1">
-                            <div class="small text-muted">Prompt ${pairIndex + 1}</div>
-                            ${selectedChoiceId ? '<button type="button" class="btn btn-sm btn-outline-primary matching-assign-btn">Gunakan Jawaban Terpilih</button>' : ""}
+                        <div class="match-term matching-inline-row__label">
+                            <div class="richtext-content mb-0">${pair.prompt_text || ""}</div>
                         </div>
-                        <div class="richtext-content mb-3">${pair.prompt_text || ""}</div>
-                        <div class="matching-dropzone ${selectedChoice ? "is-filled" : ""}" data-pair-id="${pair.id}" tabindex="0">
-                            <div class="matching-dropzone-content" data-dropzone-content></div>
+                        <div class="match-arrow matching-inline-row__arrow" aria-hidden="true">
+                            <i class="ri-arrow-right-line"></i>
                         </div>
-                        <div class="matching-dropdown-fallback mt-3">
-                            <label class="form-label small text-muted">Pilih jawaban</label>
-                            <select class="form-select matching-answer-select" data-pair-id="${pair.id}">
-                                <option value="">Pilih pasangan jawaban...</option>
+                        <div class="matching-inline-row__control">
+                            <label class="visually-hidden" for="matching-answer-${pair.id}">Pilih jawaban untuk pasangan ${pairIndex + 1}</label>
+                            <select id="matching-answer-${pair.id}" class="match-select matching-answer-select" data-pair-id="${pair.id}">
+                                <option value="">Pilih jawaban...</option>
                                 ${choiceOptionsHtml}
                             </select>
                         </div>
                     `;
-
-                    const dropzone = card.querySelector(".matching-dropzone");
-                    const dropzoneContent = card.querySelector("[data-dropzone-content]");
-                    if (dropzoneContent) {
-                        if (selectedChoice) {
-                            dropzoneContent.appendChild(buildMatchingChoiceCard(selectedChoice, "Jawaban terpasang", pair.id));
-                        } else {
-                            dropzoneContent.innerHTML = '<div class="matching-dropzone-empty">Klik area ini untuk memasang jawaban terpilih, atau seret kartu ke sini.</div>';
-                        }
-                    }
-
-                    if (dropzone) {
-                        dropzone.addEventListener("click", () => {
-                            assignSelectedChoiceToPrompt(pair.id);
-                        });
-                        dropzone.addEventListener("keydown", (event) => {
-                            if (event.key !== "Enter" && event.key !== " ") {
-                                return;
-                            }
-                            event.preventDefault();
-                            assignSelectedChoiceToPrompt(pair.id);
-                        });
-                        dropzone.addEventListener("dragover", (event) => {
-                            event.preventDefault();
-                            dropzone.classList.add("is-active");
-                        });
-                        dropzone.addEventListener("dragleave", () => {
-                            dropzone.classList.remove("is-active");
-                        });
-                        dropzone.addEventListener("drop", (event) => {
-                            event.preventDefault();
-                            const choiceId = draggedChoiceId;
-                            draggedChoiceId = "";
-                            clearMatchingDropTargets();
-                            if (!choiceId) {
-                                return;
-                            }
-                            assignChoiceToPrompt(pair.id, choiceId);
-                            renderMatchingBoard();
-                            persistMap();
-                        });
-                    }
-
-                    const assignBtn = card.querySelector(".matching-assign-btn");
-                    if (assignBtn) {
-                        assignBtn.addEventListener("click", () => {
-                            assignSelectedChoiceToPrompt(pair.id);
-                        });
-                    }
 
                     const selectEl = card.querySelector(".matching-answer-select");
                     if (selectEl) {
                         selectEl.addEventListener("change", (event) => {
                             const nextAnswerId = event.target.value || "";
                             assignChoiceToPrompt(pair.id, nextAnswerId);
-                            renderMatchingBoard();
+                            renderMatchingRows();
                             persistMap();
                         });
                     }
@@ -902,38 +819,10 @@
                 });
             };
 
-            answerBankGrid.addEventListener("dragover", (event) => {
-                event.preventDefault();
-                answerBankGrid.classList.add("is-active");
-            });
-            answerBankGrid.addEventListener("dragleave", (event) => {
-                if (event.target === answerBankGrid) {
-                    answerBankGrid.classList.remove("is-active");
-                }
-            });
-            answerBankGrid.addEventListener("drop", (event) => {
-                event.preventDefault();
-                const choiceId = draggedChoiceId;
-                draggedChoiceId = "";
-                clearMatchingDropTargets();
-                if (!choiceId) {
-                    return;
-                }
-                clearMatchingChoiceAssignment(choiceId);
-                selectedChoiceId = "";
-                renderMatchingBoard();
-                persistMap();
-            });
-
-            renderMatchingBoard();
+            renderMatchingRows();
         }
 
         renderFillInBlankControl(question, currentNumber) {
-            const helper = documentObj.createElement("div");
-            helper.className = "small text-muted mb-2";
-            helper.textContent = "Isi setiap blank langsung pada teks soal. Jawaban tersimpan otomatis.";
-            this.elements.questionAnswerContainer.appendChild(helper);
-
             const workingAnswers = Object.assign({}, (question.answer && question.answer.answer_blanks_json) || {});
             const placeholderPattern = /\{\{\s*(\d+)\s*\}\}/g;
             const questionHtml = question.question_text || "";
@@ -943,12 +832,10 @@
                     ? workingAnswers[blankNumber]
                     : "";
                 return (
-                    '<span class="d-inline-flex align-items-center mx-1 my-1">' +
-                    '<input type="text" class="form-control fill-blank-input" ' +
+                    '<input type="text" class="fib-input fill-blank-input" ' +
                     `data-blank-number="${blankNumber}" ` +
                     `value="${this.escapeHtml(currentValue)}" ` +
-                    `placeholder="Blank ${blankNumber}">` +
-                    "</span>"
+                    'placeholder="...">'
                 );
             });
 
@@ -973,18 +860,14 @@
                     this.saveCurrentAnswer({
                         question_number: currentNumber,
                         answer_blanks_json: payloadValue,
-                        is_marked_for_review: this.elements.markReviewCheckbox
-                            ? Boolean(this.elements.markReviewCheckbox.checked)
-                            : false,
+                        is_marked_for_review: this.getMarkedForReviewState(),
                     });
                 }, 600)
                 : ((payloadValue) => {
                     this.saveCurrentAnswer({
                         question_number: currentNumber,
                         answer_blanks_json: payloadValue,
-                        is_marked_for_review: this.elements.markReviewCheckbox
-                            ? Boolean(this.elements.markReviewCheckbox.checked)
-                            : false,
+                        is_marked_for_review: this.getMarkedForReviewState(),
                     });
                 });
 
@@ -1013,30 +896,34 @@
                     ? question.answer.selected_option_ids
                     : [];
 
-                if (question.question_type === "checkbox") {
-                    const helper = documentObj.createElement("div");
-                    helper.className = "small text-muted mb-2";
-                    helper.textContent = `Pilih semua jawaban yang benar. Terpilih: ${selectedOptionIds.length}`;
-                    this.elements.questionAnswerContainer.appendChild(helper);
-                }
-
                 (question.options || []).forEach((option) => {
-                    const btn = documentObj.createElement("button");
-                    btn.type = "button";
-                    btn.className = "answer-option-item w-100 text-start";
+                    const optionCard = documentObj.createElement("div");
+                    optionCard.className = question.question_type === "checkbox"
+                        ? "cb-option"
+                        : "mc-option";
                     const isSelected = question.question_type === "multiple_choice"
                         ? (selectedOptionId && selectedOptionId === option.id)
                         : selectedOptionIds.indexOf(option.id) >= 0;
                     if (isSelected) {
-                        btn.classList.add("selected");
+                        optionCard.classList.add(question.question_type === "checkbox" ? "checked" : "selected");
                     }
-                    btn.innerHTML = `
-                        <div class="answer-option-layout">
-                            <span class="answer-option-label">${option.letter}</span>
-                            <div class="answer-option-content richtext-content">${this.buildOptionContentHtml(option)}</div>
-                        </div>
-                    `;
-                    btn.addEventListener("click", () => {
+                    optionCard.setAttribute("role", "button");
+                    optionCard.setAttribute("tabindex", "0");
+                    optionCard.setAttribute("aria-pressed", String(isSelected));
+                    if (question.question_type === "checkbox") {
+                        optionCard.innerHTML = `
+                            <input type="checkbox" tabindex="-1" aria-hidden="true">
+                            <div class="cb-box" aria-hidden="true"></div>
+                            <span class="cb-text richtext-content">${option.letter}.&nbsp;${this.buildOptionContentHtml(option)}</span>
+                        `;
+                    } else {
+                        optionCard.innerHTML = `
+                            <input type="radio" tabindex="-1" aria-hidden="true">
+                            <div class="mc-label">${option.letter}</div>
+                            <span class="mc-text richtext-content">${this.buildOptionContentHtml(option)}</span>
+                        `;
+                    }
+                    const saveSelection = () => {
                         if (question.question_type === "checkbox") {
                             const nextSelectedIds = selectedOptionIds.slice();
                             const selectedIndex = nextSelectedIds.indexOf(option.id);
@@ -1048,21 +935,24 @@
                             this.saveCurrentAnswer({
                                 question_number: currentNumber,
                                 selected_option_ids: nextSelectedIds,
-                                is_marked_for_review: this.elements.markReviewCheckbox
-                                    ? Boolean(this.elements.markReviewCheckbox.checked)
-                                    : false,
+                                is_marked_for_review: this.getMarkedForReviewState(),
                             });
                             return;
                         }
                         this.saveCurrentAnswer({
                             question_number: currentNumber,
                             selected_option_id: option.id,
-                            is_marked_for_review: this.elements.markReviewCheckbox
-                                ? Boolean(this.elements.markReviewCheckbox.checked)
-                                : false,
+                            is_marked_for_review: this.getMarkedForReviewState(),
                         });
+                    };
+                    optionCard.addEventListener("click", saveSelection);
+                    optionCard.addEventListener("keydown", (event) => {
+                        if (event.key === "Enter" || event.key === " ") {
+                            event.preventDefault();
+                            saveSelection();
+                        }
                     });
-                    this.elements.questionAnswerContainer.appendChild(btn);
+                    this.elements.questionAnswerContainer.appendChild(optionCard);
                 });
                 return;
             }
@@ -1083,34 +973,35 @@
             }
 
             const textWrap = documentObj.createElement("div");
-            textWrap.className = "mb-2";
+            textWrap.className = question.question_type === "essay" ? "essay-wrap" : "short-wrap";
             const inputId = question.question_type === "essay" ? "essayAnswerInput" : "shortAnswerInput";
             const placeholder = question.question_type === "essay"
-                ? "Tulis jawaban esai Anda di sini..."
-                : "Tulis jawaban singkat di sini...";
+                ? "Jawaban Esai"
+                : "Ketik jawaban singkat Anda di sini...";
             const answerValue = (question.answer && question.answer.answer_text) || "";
 
             let inputEl = null;
             if (question.question_type === "essay") {
                 inputEl = documentObj.createElement("textarea");
-                inputEl.rows = 8;
-                inputEl.className = "form-control";
+                inputEl.rows = 10;
+                inputEl.className = "essay-textarea";
             } else {
                 inputEl = documentObj.createElement("input");
                 inputEl.type = "text";
-                inputEl.className = "form-control";
+                inputEl.className = "short-input";
             }
             inputEl.id = inputId;
             inputEl.placeholder = placeholder;
             inputEl.value = answerValue;
+            inputEl.autocomplete = "off";
             textWrap.appendChild(inputEl);
 
             const helper = documentObj.createElement("div");
-            helper.className = "small text-muted mt-1";
+            helper.className = "char-counter";
             helper.id = "textAnswerCounter";
             helper.textContent = question.question_type === "essay"
-                ? `Karakter: ${answerValue.length}`
-                : `Panjang jawaban: ${answerValue.length} karakter`;
+                ? `${answerValue.length}/1000 karakter`
+                : `${answerValue.length}/200 karakter`;
             textWrap.appendChild(helper);
 
             this.elements.questionAnswerContainer.appendChild(textWrap);
@@ -1120,26 +1011,22 @@
                     this.saveCurrentAnswer({
                         question_number: currentNumber,
                         answer_text: value,
-                        is_marked_for_review: this.elements.markReviewCheckbox
-                            ? Boolean(this.elements.markReviewCheckbox.checked)
-                            : false,
+                        is_marked_for_review: this.getMarkedForReviewState(),
                     });
                 }, 700)
                 : ((value) => {
                     this.saveCurrentAnswer({
                         question_number: currentNumber,
                         answer_text: value,
-                        is_marked_for_review: this.elements.markReviewCheckbox
-                            ? Boolean(this.elements.markReviewCheckbox.checked)
-                            : false,
+                        is_marked_for_review: this.getMarkedForReviewState(),
                     });
                 });
 
             inputEl.addEventListener("input", (event) => {
                 const value = event.target.value || "";
                 helper.textContent = question.question_type === "essay"
-                    ? `Karakter: ${value.length}`
-                    : `Panjang jawaban: ${value.length} karakter`;
+                    ? `${value.length}/1000 karakter`
+                    : `${value.length}/200 karakter`;
                 debouncedSave(value);
             });
         }
@@ -1151,55 +1038,68 @@
             const nav = this.payload.navigation;
             const current = this.getCurrentNumber();
             const total = this.getTotalQuestions();
+            const isLastQuestion = Boolean(nav.is_last || current >= total);
 
             if (this.elements.prevQuestionBtn) {
                 this.elements.prevQuestionBtn.disabled = !nav.can_previous || current <= 1;
             }
             if (this.elements.nextQuestionBtn) {
-                if (nav.is_last || current >= total) {
-                    this.elements.nextQuestionBtn.innerHTML = '<i class="ri-send-plane-fill me-1"></i>Kirim Ujian';
-                } else {
-                    this.elements.nextQuestionBtn.innerHTML = 'Berikutnya<i class="ri-arrow-right-line ms-1"></i>';
-                }
-                if (!nav.is_last && !nav.can_next) {
-                    this.elements.nextQuestionBtn.disabled = true;
-                } else {
-                    this.elements.nextQuestionBtn.disabled = false;
-                }
+                this.elements.nextQuestionBtn.innerHTML = isLastQuestion
+                    ? '<span class="lbl">Kirim Ujian</span><i class="ri-send-plane-line"></i>'
+                    : '<span class="lbl">Selanjutnya</span><i class="ri-arrow-right-s-line"></i>';
+                this.elements.nextQuestionBtn.disabled = !isLastQuestion && !nav.can_next;
             }
         }
 
         renderQuestionMap() {
-            if (!this.elements.questionGrid) {
+            const mapRows = this.payload.question_map || [];
+            const grids = [
+                { element: this.elements.questionGrid, baseClass: "nav-btn" },
+                { element: this.elements.questionGridMobile, baseClass: "nav-btn-mob" },
+            ].filter((grid) => grid.element);
+
+            if (!grids.length) {
                 return;
             }
-            this.elements.questionGrid.innerHTML = "";
-            const mapRows = this.payload.question_map || [];
-            mapRows.forEach((item) => {
-                const btn = documentObj.createElement("button");
-                btn.type = "button";
-                btn.className = "btn btn-sm question-nav-btn";
-                btn.textContent = item.number;
-                btn.title = `Ke soal nomor ${item.number}`;
 
+            const resolveMapState = (item) => {
                 if (item.locked) {
-                    btn.classList.add("is-locked");
-                    btn.disabled = true;
-                    btn.title = `Soal ${item.number} terkunci`;
-                } else if (item.current) {
-                    btn.classList.add("is-current");
-                } else if (item.answered) {
-                    btn.classList.add("is-answered");
-                } else if (item.marked) {
-                    btn.classList.add("is-marked");
-                } else {
-                    btn.classList.add("is-empty");
+                    return "locked";
                 }
+                if (item.current) {
+                    return "current";
+                }
+                if (item.marked) {
+                    return "flagged";
+                }
+                if (item.answered) {
+                    return "answered";
+                }
+                return "empty";
+            };
 
-                btn.addEventListener("click", () => {
-                    this.loadQuestion(item.number);
+            grids.forEach((grid) => {
+                grid.element.innerHTML = "";
+                mapRows.forEach((item) => {
+                    const btn = documentObj.createElement("button");
+                    const stateClass = resolveMapState(item);
+                    btn.type = "button";
+                    btn.className = grid.baseClass;
+                    btn.classList.add(stateClass);
+                    btn.textContent = item.number;
+                    btn.title = item.locked
+                        ? `Soal ${item.number} terkunci`
+                        : `Ke soal nomor ${item.number}`;
+                    btn.disabled = Boolean(item.locked);
+                    btn.setAttribute("aria-current", item.current ? "page" : "false");
+                    btn.addEventListener("click", () => {
+                        if (grid.element === this.elements.questionGridMobile) {
+                            this.closeMobileNav();
+                        }
+                        this.loadQuestion(item.number);
+                    });
+                    grid.element.appendChild(btn);
                 });
-                this.elements.questionGrid.appendChild(btn);
             });
         }
 
@@ -1211,21 +1111,36 @@
             const marked = parseInt(summary.marked_count || 0, 10);
             const percentage = total > 0 ? Math.min(Math.round((answered / total) * 100), 100) : 0;
 
-            if (this.elements.progressLabel) {
-                this.elements.progressLabel.textContent = `${answered} / ${total}`;
-            }
-            if (this.elements.progressBar) {
-                this.elements.progressBar.style.width = `${percentage}%`;
-            }
-            if (this.elements.summaryAnswered) {
-                this.elements.summaryAnswered.textContent = String(answered);
-            }
-            if (this.elements.summaryUnanswered) {
-                this.elements.summaryUnanswered.textContent = String(unanswered);
-            }
-            if (this.elements.summaryMarked) {
-                this.elements.summaryMarked.textContent = String(marked);
-            }
+            [
+                this.elements.progressLabel,
+                this.elements.progressLabelMobile,
+            ].filter(Boolean).forEach((element) => {
+                element.textContent = `${answered}/${total}`;
+            });
+            [
+                this.elements.progressBar,
+                this.elements.progressBarMobile,
+            ].filter(Boolean).forEach((element) => {
+                element.style.width = `${percentage}%`;
+            });
+            [
+                this.elements.summaryAnswered,
+                this.elements.summaryAnsweredMobile,
+            ].filter(Boolean).forEach((element) => {
+                element.textContent = String(answered);
+            });
+            [
+                this.elements.summaryUnanswered,
+                this.elements.summaryUnansweredMobile,
+            ].filter(Boolean).forEach((element) => {
+                element.textContent = String(unanswered);
+            });
+            [
+                this.elements.summaryMarked,
+                this.elements.summaryMarkedMobile,
+            ].filter(Boolean).forEach((element) => {
+                element.textContent = String(marked);
+            });
         }
 
         updateSubmitModalStats() {
@@ -1260,31 +1175,51 @@
 
         renderAntiCheatRules() {
             const antiCheat = this.getAntiCheatConfig();
-            if (this.elements.antiCheatMediaRule) {
-                if (antiCheat.require_camera && antiCheat.require_microphone) {
-                    this.elements.antiCheatMediaRule.textContent = "Perangkat pengawasan: Kamera dan mikrofon wajib";
-                } else if (antiCheat.require_camera) {
-                    this.elements.antiCheatMediaRule.textContent = "Perangkat pengawasan: Kamera wajib";
-                } else if (antiCheat.require_microphone) {
-                    this.elements.antiCheatMediaRule.textContent = "Perangkat pengawasan: Mikrofon wajib";
-                } else {
-                    this.elements.antiCheatMediaRule.textContent = "Perangkat pengawasan: Tidak wajib";
-                }
+            let mediaRuleText = "Perangkat pengawasan: Tidak wajib";
+            if (antiCheat.require_camera && antiCheat.require_microphone) {
+                mediaRuleText = "Perangkat pengawasan: Kamera dan mikrofon wajib";
+            } else if (antiCheat.require_camera) {
+                mediaRuleText = "Perangkat pengawasan: Kamera wajib";
+            } else if (antiCheat.require_microphone) {
+                mediaRuleText = "Perangkat pengawasan: Mikrofon wajib";
             }
-            if (this.elements.antiCheatFullscreenRule) {
-                this.elements.antiCheatFullscreenRule.textContent = `Mode fullscreen: ${antiCheat.require_fullscreen ? "Wajib" : "Tidak wajib"}`;
-            }
-            if (this.elements.antiCheatTabRule) {
-                this.elements.antiCheatTabRule.textContent = `Deteksi perpindahan tab: ${antiCheat.detect_tab_switch ? "Aktif" : "Tidak aktif"}`;
-            }
-            if (this.elements.antiCheatScreenshotRule) {
-                this.elements.antiCheatScreenshotRule.textContent = antiCheat.enable_screenshot_proctoring
-                    ? `Screenshot berkala: Aktif setiap ${antiCheat.screenshot_interval_seconds} detik`
-                    : "Screenshot berkala: Tidak aktif";
-            }
-            if (this.elements.antiCheatLimitRule) {
-                this.elements.antiCheatLimitRule.textContent = `Batas pelanggaran: ${antiCheat.max_violations_allowed}`;
-            }
+            const fullscreenRuleText = `Mode fullscreen: ${antiCheat.require_fullscreen ? "Wajib" : "Tidak wajib"}`;
+            const tabRuleText = `Deteksi perpindahan tab: ${antiCheat.detect_tab_switch ? "Aktif" : "Tidak aktif"}`;
+            const screenshotRuleText = antiCheat.enable_screenshot_proctoring
+                ? `Screenshot berkala: Aktif setiap ${antiCheat.screenshot_interval_seconds} detik`
+                : "Screenshot berkala: Tidak aktif";
+            const limitRuleText = `Batas pelanggaran: ${antiCheat.max_violations_allowed}`;
+
+            [
+                this.elements.antiCheatMediaRule,
+                this.elements.antiCheatMediaRuleMobile,
+            ].filter(Boolean).forEach((element) => {
+                element.textContent = mediaRuleText;
+            });
+            [
+                this.elements.antiCheatFullscreenRule,
+                this.elements.antiCheatFullscreenRuleMobile,
+            ].filter(Boolean).forEach((element) => {
+                element.textContent = fullscreenRuleText;
+            });
+            [
+                this.elements.antiCheatTabRule,
+                this.elements.antiCheatTabRuleMobile,
+            ].filter(Boolean).forEach((element) => {
+                element.textContent = tabRuleText;
+            });
+            [
+                this.elements.antiCheatScreenshotRule,
+                this.elements.antiCheatScreenshotRuleMobile,
+            ].filter(Boolean).forEach((element) => {
+                element.textContent = screenshotRuleText;
+            });
+            [
+                this.elements.antiCheatLimitRule,
+                this.elements.antiCheatLimitRuleMobile,
+            ].filter(Boolean).forEach((element) => {
+                element.textContent = limitRuleText;
+            });
         }
 
         initOrUpdateTimer() {
@@ -1326,7 +1261,7 @@
                 return;
             }
             const count = parseInt(this.payload.anti_cheat.current_violations || 0, 10);
-            this.elements.violationCounterChip.textContent = `Pelanggaran: ${count}`;
+            this.elements.violationCounterChip.textContent = `${count} Pelanggaran`;
         }
 
         showAlert(message, type = "info", timeoutMs = 4200) {
@@ -1347,7 +1282,27 @@
             }
         }
 
+        openMobileNav() {
+            if (this.elements.mobileNav) {
+                this.elements.mobileNav.classList.add("open");
+            }
+        }
+
+        closeMobileNav() {
+            if (this.elements.mobileNav) {
+                this.elements.mobileNav.classList.remove("open");
+            }
+        }
+
+        toggleReviewFlag() {
+            this.saveCurrentAnswer({
+                question_number: this.getCurrentNumber(),
+                is_marked_for_review: !this.getMarkedForReviewState(),
+            });
+        }
+
         openSubmitModal() {
+            this.closeMobileNav();
             this.updateSubmitModalStats();
             if (this.submitModal) {
                 this.submitModal.show();
@@ -1382,9 +1337,7 @@
             await this.saveCurrentAnswer({
                 question_number: this.getCurrentNumber(),
                 clear_answer: true,
-                is_marked_for_review: this.elements.markReviewCheckbox
-                    ? Boolean(this.elements.markReviewCheckbox.checked)
-                    : false,
+                is_marked_for_review: this.getMarkedForReviewState(),
             });
         }
 

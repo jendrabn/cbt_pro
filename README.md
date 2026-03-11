@@ -74,6 +74,29 @@ git clone <URL_REPO_ANDA> /var/www/cbt_pro
 cd /var/www/cbt_pro
 ```
 
+Jika repository bersifat private dan server akan menjalankan `git pull` langsung, siapkan akses GitHub untuk user `deploy`:
+
+```bash
+sudo -iu deploy
+mkdir -p ~/.ssh
+chmod 700 ~/.ssh
+ssh-keygen -t ed25519 -C "cbt-pro-vps" -f ~/.ssh/id_ed25519
+cat ~/.ssh/id_ed25519.pub
+```
+
+Tambahkan public key tersebut sebagai `Deploy key` di repository GitHub Anda, lalu uji:
+
+```bash
+ssh -T git@github.com
+git -C /var/www/cbt_pro remote -v
+```
+
+Jika remote repo masih memakai URL HTTPS, ganti ke SSH agar `git pull` non-interaktif:
+
+```bash
+git -C /var/www/cbt_pro remote set-url origin git@github.com:OWNER/NAMA_REPO.git
+```
+
 ## 3. Buat virtualenv dan install dependency Python
 
 ```bash
@@ -426,6 +449,157 @@ sudo systemctl restart cbt_pro-gunicorn cbt_pro-celery
 ```
 
 Jika update hanya mengubah file Python atau template, langkah di atas tetap aman dipakai. Jika update membawa perubahan dependency, asset frontend, atau migration database, langkah ini menjadi wajib.
+
+### Opsi otomatis: GitHub Actions ke VPS
+
+Repo ini sekarang sudah menyiapkan workflow [`deploy.yml`](./.github/workflows/deploy.yml) dan script server [`scripts/deploy_vps.sh`](./scripts/deploy_vps.sh). Saat ada `push` ke branch `main`, GitHub Actions akan SSH ke VPS lalu menjalankan alur deploy berikut secara otomatis:
+
+- `git pull --ff-only`
+- `pip install -r requirements.txt`
+- `npm ci`
+- `npm run build:css`
+- `python manage.py migrate --noinput`
+- `python manage.py collectstatic --noinput`
+- `python manage.py check --deploy`
+- restart `cbt_pro-gunicorn` dan `cbt_pro-celery`
+
+Setup satu kali yang diperlukan:
+
+1. Pastikan permission user `deploy` di VPS sudah benar.
+
+   ```bash
+   sudo chown -R deploy:deploy /var/www/cbt_pro
+   sudo install -d -m 700 -o deploy -g deploy /home/deploy/.ssh
+   sudo touch /home/deploy/.ssh/authorized_keys
+   sudo chown deploy:deploy /home/deploy/.ssh/authorized_keys
+   sudo chmod 600 /home/deploy/.ssh/authorized_keys
+   ```
+
+   User `deploy` minimal harus bisa:
+
+   - membaca dan menulis isi `/var/www/cbt_pro`
+   - mengeksekusi `/var/www/cbt_pro/.venv/bin/python` dan `/var/www/cbt_pro/.venv/bin/pip`
+   - menjalankan `git pull` di repo production
+   - menjalankan `npm ci` dan `npm run build:css`
+   - merestart service systemd yang dipakai aplikasi
+
+2. Siapkan SSH key untuk koneksi GitHub Actions ke VPS.
+
+   ```bash
+   ssh-keygen -t ed25519 -C "github-actions-cbt-pro" -f ~/.ssh/cbt_pro_actions
+   ```
+
+3. Tambahkan public key ke user `deploy` di VPS.
+
+   ```bash
+   ssh-copy-id -i ~/.ssh/cbt_pro_actions.pub deploy@IP_VPS_ANDA
+   ```
+
+   Jika `ssh-copy-id` tidak tersedia, tempel isi file `~/.ssh/cbt_pro_actions.pub` ke `/home/deploy/.ssh/authorized_keys`.
+
+4. Simpan host key VPS agar koneksi SSH dari GitHub Actions tidak bergantung pada `trust on first use`.
+
+   Jalankan dari mesin lokal Anda:
+
+   ```bash
+   ssh-keyscan -H -p 22 IP_VPS_ANDA
+   ```
+
+   Simpan output lengkapnya sebagai secret `VPS_HOST_KEY`. Jika secret ini dikosongkan, workflow akan fallback ke `ssh-keyscan` saat runtime.
+
+5. Jika repository GitHub bersifat private, pastikan VPS juga bisa mengakses repo untuk `git pull`.
+
+   Karena workflow ini menjalankan `git pull` di dalam VPS, ada dua SSH key yang berbeda:
+
+   - key `GitHub Actions -> VPS`, disimpan di secret `VPS_SSH_PRIVATE_KEY`
+   - key `VPS -> GitHub repository`, disimpan di `/home/deploy/.ssh/` dan didaftarkan sebagai `Deploy key` repo GitHub
+
+   Tanpa key kedua, deploy otomatis akan gagal di langkah `git fetch` atau `git pull`.
+
+6. Tambahkan GitHub repository secrets.
+
+- `VPS_HOST`: IP atau domain VPS
+- `VPS_PORT`: port SSH, boleh dikosongkan jika tetap `22`
+- `VPS_USER`: user SSH, disarankan `deploy`
+- `VPS_SSH_PRIVATE_KEY`: isi private key dari `~/.ssh/cbt_pro_actions`
+- `VPS_HOST_KEY`: host key VPS hasil `ssh-keyscan -H -p 22 IP_VPS_ANDA`
+
+7. Tambahkan GitHub repository variables bila ingin override default.
+
+- `APP_DIR`: default `/var/www/cbt_pro`
+- `APP_BRANCH`: default `main`
+- `GIT_REMOTE`: default `origin`
+- `VENV_DIR`: default `/var/www/cbt_pro/.venv`
+- `PYTHON_BIN`: default `$VENV_DIR/bin/python`
+- `PIP_BIN`: default `$VENV_DIR/bin/pip`
+- `SYSTEMD_SERVICES`: default `cbt_pro-gunicorn cbt_pro-celery`
+- `RUN_DAEMON_RELOAD`: default `0`
+- `RUN_PIP_INSTALL`: default `1`
+- `RUN_NPM_CI`: default `1`
+- `RUN_BUILD_CSS`: default `1`
+- `RUN_MIGRATE`: default `1`
+- `RUN_COLLECTSTATIC`: default `1`
+- `RUN_DEPLOY_CHECK`: default `1`
+
+8. Jika workflow login memakai user `deploy`, izinkan restart service tanpa prompt password.
+
+   ```bash
+   sudo visudo -f /etc/sudoers.d/cbt_pro-github-actions
+   ```
+
+   Isi file:
+
+   ```sudoers
+   deploy ALL=NOPASSWD: /bin/systemctl restart cbt_pro-gunicorn, /bin/systemctl restart cbt_pro-celery, /bin/systemctl is-active cbt_pro-gunicorn, /bin/systemctl is-active cbt_pro-celery
+   ```
+
+   Jika Anda mengaktifkan variable `RUN_DAEMON_RELOAD=1`, tambahkan juga izin:
+
+   ```sudoers
+   deploy ALL=NOPASSWD: /bin/systemctl daemon-reload
+   ```
+
+   Setelah menyimpan file sudoers:
+
+   ```bash
+   sudo chmod 440 /etc/sudoers.d/cbt_pro-github-actions
+   sudo visudo -cf /etc/sudoers.d/cbt_pro-github-actions
+   ```
+
+9. Cara memakai workflow.
+
+   Mode otomatis:
+
+   - setiap `push` ke branch `main` akan memicu deploy
+
+   Mode manual:
+
+   - buka tab `Actions` di GitHub
+   - pilih workflow `Deploy to VPS`
+   - klik `Run workflow`
+   - isi `app_branch` jika ingin deploy branch selain default
+
+10. Verifikasi setelah setup pertama.
+
+   Dari GitHub Actions:
+
+   - pastikan job `Deploy to VPS` sukses
+   - cek log langkah `Run deploy script on VPS`
+
+   Di VPS:
+
+   ```bash
+   sudo systemctl status cbt_pro-gunicorn cbt_pro-celery
+   sudo journalctl -u cbt_pro-gunicorn -n 50 --no-pager
+   sudo journalctl -u cbt_pro-celery -n 50 --no-pager
+   ```
+
+Catatan penting:
+
+- Direktori repo di VPS harus bersih dari perubahan lokal. Workflow sengaja gagal jika `git status` di server tidak bersih.
+- Workflow ini mengasumsikan `.venv`, `.env`, Node.js, MySQL, Redis, dan service systemd sudah pernah disiapkan di VPS sesuai panduan deployment manual di atas.
+- Jika Anda ingin deploy dari branch selain `main`, cukup ubah variable `APP_BRANCH` di GitHub.
+- Workflow hanya membutuhkan permission GitHub `contents: read`; tidak perlu token dengan akses write ke repository.
 
 ## 16. Troubleshooting singkat
 

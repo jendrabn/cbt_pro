@@ -1,0 +1,118 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      app_branch:
+        description: Branch yang akan dideploy ke VPS
+        required: false
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Prepare SSH access
+        shell: bash
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_PORT: ${{ secrets.VPS_PORT }}
+          VPS_HOST_KEY: ${{ secrets.VPS_HOST_KEY }}
+          VPS_SSH_PRIVATE_KEY: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+        run: |
+          set -euo pipefail
+
+          test -n "${VPS_HOST}"
+          test -n "${VPS_SSH_PRIVATE_KEY}"
+
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "${VPS_SSH_PRIVATE_KEY}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          if [ -n "${VPS_HOST_KEY:-}" ]; then
+            printf '%s\n' "${VPS_HOST_KEY}" >> ~/.ssh/known_hosts
+          else
+            ssh-keyscan -p "${VPS_PORT:-22}" -H "${VPS_HOST}" >> ~/.ssh/known_hosts
+          fi
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Run deploy script on VPS
+        shell: bash
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_PORT: ${{ secrets.VPS_PORT }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          APP_BRANCH_INPUT: ${{ github.event.inputs.app_branch }}
+          APP_DIR: ${{ vars.APP_DIR }}
+          APP_BRANCH: ${{ vars.APP_BRANCH }}
+          GIT_REMOTE: ${{ vars.GIT_REMOTE }}
+          VENV_DIR: ${{ vars.VENV_DIR }}
+          PYTHON_BIN: ${{ vars.PYTHON_BIN }}
+          PIP_BIN: ${{ vars.PIP_BIN }}
+          SYSTEMD_SERVICES: ${{ vars.SYSTEMD_SERVICES }}
+          RUN_DAEMON_RELOAD: ${{ vars.RUN_DAEMON_RELOAD }}
+          RUN_PIP_INSTALL: ${{ vars.RUN_PIP_INSTALL }}
+          RUN_NPM_CI: ${{ vars.RUN_NPM_CI }}
+          RUN_BUILD_CSS: ${{ vars.RUN_BUILD_CSS }}
+          RUN_MIGRATE: ${{ vars.RUN_MIGRATE }}
+          RUN_COLLECTSTATIC: ${{ vars.RUN_COLLECTSTATIC }}
+          RUN_DEPLOY_CHECK: ${{ vars.RUN_DEPLOY_CHECK }}
+        run: |
+          set -euo pipefail
+
+          test -n "${VPS_HOST}"
+          test -n "${VPS_USER}"
+
+          : "${APP_DIR:=/var/www/cbt_pro}"
+          : "${APP_BRANCH:=main}"
+          : "${GIT_REMOTE:=origin}"
+          : "${VENV_DIR:=}"
+          : "${PYTHON_BIN:=}"
+          : "${PIP_BIN:=}"
+          : "${SYSTEMD_SERVICES:=cbt_pro-gunicorn cbt_pro-celery}"
+          : "${RUN_DAEMON_RELOAD:=0}"
+          : "${RUN_PIP_INSTALL:=1}"
+          : "${RUN_NPM_CI:=1}"
+          : "${RUN_BUILD_CSS:=1}"
+          : "${RUN_MIGRATE:=1}"
+          : "${RUN_COLLECTSTATIC:=1}"
+          : "${RUN_DEPLOY_CHECK:=1}"
+
+          if [ -n "${APP_BRANCH_INPUT:-}" ]; then
+            APP_BRANCH="${APP_BRANCH_INPUT}"
+          fi
+
+          remote_cmd="$(printf 'APP_DIR=%q APP_BRANCH=%q GIT_REMOTE=%q VENV_DIR=%q PYTHON_BIN=%q PIP_BIN=%q SYSTEMD_SERVICES=%q RUN_DAEMON_RELOAD=%q RUN_PIP_INSTALL=%q RUN_NPM_CI=%q RUN_BUILD_CSS=%q RUN_MIGRATE=%q RUN_COLLECTSTATIC=%q RUN_DEPLOY_CHECK=%q bash -s' \
+            "${APP_DIR}" \
+            "${APP_BRANCH}" \
+            "${GIT_REMOTE}" \
+            "${VENV_DIR}" \
+            "${PYTHON_BIN}" \
+            "${PIP_BIN}" \
+            "${SYSTEMD_SERVICES}" \
+            "${RUN_DAEMON_RELOAD}" \
+            "${RUN_PIP_INSTALL}" \
+            "${RUN_NPM_CI}" \
+            "${RUN_BUILD_CSS}" \
+            "${RUN_MIGRATE}" \
+            "${RUN_COLLECTSTATIC}" \
+            "${RUN_DEPLOY_CHECK}")"
+
+          ssh \
+            -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes \
+            -p "${VPS_PORT:-22}" \
+            "${VPS_USER}@${VPS_HOST}" \
+            "${remote_cmd}" < scripts/deploy_vps.sh
