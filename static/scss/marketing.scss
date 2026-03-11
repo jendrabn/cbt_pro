@@ -21,7 +21,7 @@ html {
 }
 
 body {
-  font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+  font-family: 'Inter', -apple-system, sans-serif;
   color: var(--c-ink);
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden
@@ -280,13 +280,13 @@ body {
 }
 
 /* â”€â”€ STATS â”€â”€ */
-.stats-grid {
+.stats-row {
   display: flex;
   align-items: center;
   flex-wrap: wrap
 }
 
-.stats-item {
+.stat-block {
   flex: 1 1 140px;
   text-align: center;
   padding: 1.5rem 1rem
@@ -318,13 +318,13 @@ body {
     display: none
   }
 
-  .stats-item {
+  .stat-block {
     flex: 1 1 45%;
     border-bottom: 1px solid rgba(255, 255, 255, .08);
     padding: 1.25rem .5rem
   }
 
-  .stats-item:nth-child(n+5) {
+  .stat-block:nth-child(n+5) {
     border-bottom: none
   }
 }
@@ -375,15 +375,16 @@ body {
 
 .price-left {
   flex-shrink: 0;
-  width: 240px;
+  width: auto;
   background: var(--c-blue);
-  padding: 2.5rem 2rem;
+  padding: 2.5rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
   gap: .5rem;
   position: relative;
   overflow: hidden;
+  white-space: nowrap;
 }
 
 .price-left::after {
@@ -557,6 +558,7 @@ body {
 
 @media (max-width: 767px) {
   .price-left {
+    white-space: normal;
     width: 100% !important;
     padding: 2rem
   }

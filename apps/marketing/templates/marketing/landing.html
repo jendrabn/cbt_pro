@@ -41,7 +41,7 @@
 {% endfor %}
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="{% static 'css/marketing.css' %}?v={{ marketing_asset_version }}" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@4.0.0/fonts/remixicon.css" rel="stylesheet">
@@ -55,7 +55,7 @@
   <nav id="navbar" aria-label="Menu utama">
     <div class="container py-3">
       <div class="d-flex align-items-center justify-content-between">
-        <a href="/" class="brand brand-logo" aria-label="CBT Pro"><img src="{% static 'images/logo-dark.png' %}" alt="CBT Pro Logo"></a>
+        <a href="/" class="brand" aria-label="CBT Pro">CBT<span class="sl">/</span><span class="pr">Pro</span></a>
         <div class="d-none d-lg-flex align-items-center gap-1">
           <a href="#fitur"     class="nav-lnk">Fitur</a>
           <a href="#tentang"   class="nav-lnk">Tentang</a>
@@ -64,7 +64,7 @@
           <a href="#faq"       class="nav-lnk">FAQ</a>
         </div>
         <a href="{{ dashboard_url }}" class="btn-blue" aria-label="{{ dashboard_label }}">
-          <i class="{{ dashboard_icon }} me-1" aria-hidden="true"></i>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
           {{ dashboard_label }}
         </a>
       </div>
@@ -252,30 +252,25 @@
       <h2 class="sec-title text-white mb-3" id="stats-h">Sudah Digunakan,<br>Bukan Sekadar Klaim</h2>
       <p class="mx-auto mb-0" style="font-size:.9375rem;color:var(--c-ink-4);max-width:400px">Angka di bawah ini berasal dari penggunaan nyata di lapangan.</p>
     </div>
-    <div class="row g-0 stats-grid sr">
-      <div class="col-6 col-lg sr d1">
-        <div class="stats-item text-center">
-          <p class="stat-n mb-1"><span class="cnt" data-to="195">0</span><span class="suf">+</span></p>
-          <p class="stats-label mb-0">Pengguna Aktif</p>
-        </div>
+    <div class="stats-row sr">
+      <div class="stat-block d1">
+        <div class="stat-n mb-1"><span class="cnt" data-to="195">0</span><span class="suf">+</span></div>
+        <div class="small fw-medium" style="color:var(--c-ink-4)">Pengguna Aktif</div>
       </div>
-      <div class="col-6 col-lg sr d2">
-        <div class="stats-item text-center">
-          <p class="stat-n mb-1"><span class="cnt" data-to="825">0</span><span class="suf">+</span></p>
-          <p class="stats-label mb-0">Bank Soal</p>
-        </div>
+      <div class="stat-sep" aria-hidden="true"></div>
+      <div class="stat-block d2">
+        <div class="stat-n mb-1"><span class="cnt" data-to="825">0</span><span class="suf">+</span></div>
+        <div class="small fw-medium" style="color:var(--c-ink-4)">Bank Soal</div>
       </div>
-      <div class="col-6 col-lg sr d3">
-        <div class="stats-item text-center">
-          <p class="stat-n mb-1"><span class="cnt" data-to="140">0</span><span class="suf">+</span></p>
-          <p class="stats-label mb-0">Sesi Ujian</p>
-        </div>
+      <div class="stat-sep" aria-hidden="true"></div>
+      <div class="stat-block d3">
+        <div class="stat-n mb-1"><span class="cnt" data-to="140">0</span><span class="suf">+</span></div>
+        <div class="small fw-medium" style="color:var(--c-ink-4)">Sesi Ujian</div>
       </div>
-      <div class="col-6 col-lg sr d4">
-        <div class="stats-item text-center">
-          <p class="stat-n mb-1"><span class="cnt" data-to="99">0</span><span class="suf">%</span></p>
-          <p class="stats-label mb-0">Rata-rata Uptime</p>
-        </div>
+      <div class="stat-sep" aria-hidden="true"></div>
+      <div class="stat-block d4">
+        <div class="stat-n mb-1"><span class="cnt" data-to="99">0</span><span class="suf">%</span></div>
+        <div class="small fw-medium" style="color:var(--c-ink-4)">Rata-rata Uptime</div>
       </div>
     </div>
   </div>
@@ -653,6 +648,7 @@
             <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.553 4.116 1.524 5.849L.057 23.7a.75.75 0 0 0 .938.938l5.86-1.488A11.95 11.95 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.907 0-3.695-.502-5.24-1.38l-.372-.212-3.849.977.998-3.829-.232-.383A9.952 9.952 0 0 1 2 12C2 6.486 6.486 2 12 2s10 4.486 10 10-4.486 10-10 10z"/></svg>
             Hubungi Kami via WhatsApp
           </a>
+          <span class="small" style="color:rgba(255,255,255,.5)">Gratis konsultasi &nbsp;·&nbsp; Tanpa kontrak jangka panjang</span>
         </div>
       </div>
     </div>
