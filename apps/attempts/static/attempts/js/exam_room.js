@@ -737,7 +737,6 @@
             this.elements.questionAnswerContainer.appendChild(answerBankWrap);
 
             const pairsWrap = documentObj.createElement("div");
-            pairsWrap.className = "vstack gap-3 matching-inline-list";
             this.elements.questionAnswerContainer.appendChild(pairsWrap);
 
             const persistMap = () => {
@@ -771,9 +770,9 @@
             const renderMatchingRows = () => {
                 pairsWrap.innerHTML = "";
 
-                matchingPairs.forEach((pair, pairIndex) => {
+                matchingPairs.forEach((pair) => {
                     const card = documentObj.createElement("div");
-                    card.className = "match-row matching-inline-row";
+                    card.className = "match-row";
                     const currentAnswerId = workingMap[pair.id] || "";
                     const usedChoiceIds = new Set(
                         Object.keys(workingMap)
@@ -790,19 +789,12 @@
                     }).join("");
 
                     card.innerHTML = `
-                        <div class="match-term matching-inline-row__label">
-                            <div class="richtext-content mb-0">${pair.prompt_text || ""}</div>
-                        </div>
-                        <div class="match-arrow matching-inline-row__arrow" aria-hidden="true">
-                            <i class="ri-arrow-right-line"></i>
-                        </div>
-                        <div class="matching-inline-row__control">
-                            <label class="visually-hidden" for="matching-answer-${pair.id}">Pilih jawaban untuk pasangan ${pairIndex + 1}</label>
-                            <select id="matching-answer-${pair.id}" class="match-select matching-answer-select" data-pair-id="${pair.id}">
-                                <option value="">Pilih jawaban...</option>
-                                ${choiceOptionsHtml}
-                            </select>
-                        </div>
+                        <span class="match-term richtext-content">${pair.prompt_text || ""}</span>
+                        <i class="ri-arrow-right-line match-arrow" aria-hidden="true"></i>
+                        <select id="matching-answer-${pair.id}" class="match-select matching-answer-select" data-pair-id="${pair.id}">
+                            <option value="">Pilih jawaban...</option>
+                            ${choiceOptionsHtml}
+                        </select>
                     `;
 
                     const selectEl = card.querySelector(".matching-answer-select");
@@ -817,9 +809,36 @@
 
                     pairsWrap.appendChild(card);
                 });
+
+                this.syncMatchingPromptWidths(pairsWrap);
             };
 
             renderMatchingRows();
+        }
+
+        syncMatchingPromptWidths(container) {
+            if (!container) {
+                return;
+            }
+            const labels = Array.from(container.querySelectorAll(".match-term"));
+            if (!labels.length) {
+                return;
+            }
+            labels.forEach((label) => {
+                label.style.width = "";
+            });
+            if (windowObj.innerWidth <= 767) {
+                return;
+            }
+            const maxWidth = labels.reduce((result, label) => {
+                return Math.max(result, Math.ceil(label.getBoundingClientRect().width));
+            }, 0);
+            if (!maxWidth) {
+                return;
+            }
+            labels.forEach((label) => {
+                label.style.width = `${maxWidth}px`;
+            });
         }
 
         renderFillInBlankControl(question, currentNumber) {

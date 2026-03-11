@@ -36,6 +36,8 @@ html {
 }
 
 body.exam-room-body {
+    margin: 0;
+    padding: 0;
     font-family: "Plus Jakarta Sans", sans-serif;
     background: var(--surface);
     color: var(--text);
@@ -599,6 +601,8 @@ select {
     font-size: 0.92rem;
     min-width: 90px;
     flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
 }
 
 .match-arrow {
@@ -628,38 +632,6 @@ select {
 .match-select:focus {
     outline: none;
     border-color: var(--primary);
-}
-
-.matching-inline-list {
-    gap: 0 !important;
-}
-
-.matching-inline-row__label {
-    font-weight: 700;
-    font-size: 0.92rem;
-    min-width: 90px;
-    flex-shrink: 0;
-}
-
-.matching-inline-row__label .richtext-content {
-    margin-bottom: 0;
-}
-
-.matching-inline-row__arrow {
-    color: #94a3b8;
-    font-size: 1rem;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-}
-
-.matching-inline-row__control {
-    flex: 1;
-    min-width: 0;
-}
-
-.matching-inline-row__control .match-select {
-    width: 100%;
 }
 
 .fib-text {
@@ -1415,14 +1387,6 @@ select {
 
     .match-arrow {
         display: none;
-    }
-
-    .matching-inline-row__arrow {
-        display: none;
-    }
-
-    .matching-inline-row__control {
-        width: 100%;
     }
 
     .match-select {
