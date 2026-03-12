@@ -47,10 +47,19 @@
             this.submitModal = null;
             this.violationModal = null;
             this.isReportingViolation = false;
+            this.initialLayoutAligned = false;
+            this.layoutObserver = null;
+            this.handleLayoutMetricsChange = null;
+            this.handlePageShow = null;
         }
 
         init() {
+            if (windowObj.history && "scrollRestoration" in windowObj.history) {
+                windowObj.history.scrollRestoration = "manual";
+            }
             this.cacheElements();
+            this.syncLayoutMetrics();
+            this.bindLayoutEvents();
             this.setupModals();
             this.bindEvents();
             this.renderPayload(this.payload);
@@ -71,6 +80,20 @@
             if (this.guard && typeof this.guard.destroy === "function") {
                 this.guard.destroy();
             }
+            if (this.layoutObserver) {
+                this.layoutObserver.disconnect();
+                this.layoutObserver = null;
+            }
+            if (this.handleLayoutMetricsChange) {
+                windowObj.removeEventListener("load", this.handleLayoutMetricsChange);
+                windowObj.removeEventListener("resize", this.handleLayoutMetricsChange);
+                if (windowObj.visualViewport) {
+                    windowObj.visualViewport.removeEventListener("resize", this.handleLayoutMetricsChange);
+                }
+            }
+            if (this.handlePageShow) {
+                windowObj.removeEventListener("pageshow", this.handlePageShow);
+            }
         }
 
         cacheElements() {
@@ -79,6 +102,10 @@
             this.elements = {
                 alertHost: byId("examRoomAlertHost"),
                 restrictionAlert: byId("navigationRestriction"),
+                topbar: documentObj.querySelector(".topbar"),
+                questionArea: documentObj.querySelector(".question-area"),
+                sidebar: documentObj.querySelector(".sidebar"),
+                footerBar: documentObj.querySelector(".footer-bar"),
                 timerDisplay: byIds("timer", "timerDisplay"),
                 timerChip: documentObj.querySelector(".timer-chip, .badge-timer"),
                 violationCounterChip: byId("violationCounterChip"),
@@ -212,6 +239,67 @@
             }
         }
 
+        bindLayoutEvents() {
+            this.handleLayoutMetricsChange = () => this.syncLayoutMetrics();
+            this.handlePageShow = () => {
+                this.syncLayoutMetrics();
+                this.resetViewportPositions();
+            };
+
+            windowObj.addEventListener("load", this.handleLayoutMetricsChange);
+            windowObj.addEventListener("resize", this.handleLayoutMetricsChange);
+            windowObj.addEventListener("pageshow", this.handlePageShow);
+
+            if (windowObj.visualViewport) {
+                windowObj.visualViewport.addEventListener("resize", this.handleLayoutMetricsChange);
+            }
+
+            if (documentObj.fonts && documentObj.fonts.ready && typeof documentObj.fonts.ready.then === "function") {
+                documentObj.fonts.ready.then(() => this.syncLayoutMetrics()).catch(() => {});
+            }
+
+            if (windowObj.ResizeObserver) {
+                this.layoutObserver = new windowObj.ResizeObserver(() => this.syncLayoutMetrics());
+                if (this.elements.topbar) {
+                    this.layoutObserver.observe(this.elements.topbar);
+                }
+                if (this.elements.footerBar) {
+                    this.layoutObserver.observe(this.elements.footerBar);
+                }
+            }
+        }
+
+        syncLayoutMetrics() {
+            const rootStyle = documentObj.documentElement.style;
+            const topbarHeight = this.elements.topbar
+                ? Math.ceil(this.elements.topbar.getBoundingClientRect().height)
+                : 0;
+            const footerHeight = this.elements.footerBar
+                ? Math.ceil(this.elements.footerBar.getBoundingClientRect().height)
+                : 0;
+
+            if (topbarHeight > 0) {
+                rootStyle.setProperty("--topbar-h", `${topbarHeight}px`);
+            }
+            if (footerHeight > 0) {
+                rootStyle.setProperty("--footer-h", `${footerHeight}px`);
+            }
+        }
+
+        resetViewportPositions() {
+            windowObj.requestAnimationFrame(() => {
+                windowObj.requestAnimationFrame(() => {
+                    windowObj.scrollTo(0, 0);
+                    if (this.elements.questionArea) {
+                        this.elements.questionArea.scrollTop = 0;
+                    }
+                    if (this.elements.sidebar) {
+                        this.elements.sidebar.scrollTop = 0;
+                    }
+                });
+            });
+        }
+
         getCurrentNumber() {
             if (!this.payload) {
                 return 1;
@@ -285,6 +373,7 @@
                 this.showAlert("Data ruang ujian tidak tersedia.", "danger");
                 return;
             }
+            const previousQuestionNumber = this.payload ? parseInt(this.payload.current_number || 0, 10) : 0;
             this.payload = payload;
             this.renderHeader();
             this.renderRestrictionMessage();
@@ -294,6 +383,15 @@
             this.renderAntiCheatRules();
             this.updateSubmitModalStats();
             this.initOrUpdateTimer();
+            this.alignInitialViewport(previousQuestionNumber !== this.getCurrentNumber());
+        }
+
+        alignInitialViewport(questionChanged) {
+            if (!this.initialLayoutAligned || questionChanged) {
+                this.initialLayoutAligned = true;
+                this.syncLayoutMetrics();
+                this.resetViewportPositions();
+            }
         }
 
         renderHeader() {

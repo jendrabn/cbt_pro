@@ -18,6 +18,7 @@
     --radius-sm: 8px;
     --topbar-h: 60px;
     --footer-h: 68px;
+    --sidebar-w: clamp(280px, 20vw, 316px);
 }
 
 *,
@@ -191,17 +192,16 @@ select {
 }
 
 .exam-wrapper {
-    display: grid;
-    grid-template-columns: 1fr 296px;
+    display: block;
     min-height: 100vh;
-    padding-top: var(--topbar-h);
-    padding-bottom: var(--footer-h);
+    padding: var(--topbar-h) var(--sidebar-w) var(--footer-h) 0;
 }
 
 .question-area {
-    padding: 14px 28px 24px;
+    padding: 6px 24px 24px;
     overflow-y: auto;
     min-width: 0;
+    min-height: calc(100vh - var(--topbar-h) - var(--footer-h));
 }
 
 .q-header {
@@ -210,8 +210,8 @@ select {
     justify-content: space-between;
     flex-wrap: wrap;
     gap: 10px;
-    margin-bottom: 22px;
-    padding-bottom: 16px;
+    margin-bottom: 18px;
+    padding-bottom: 14px;
     border-bottom: 1px solid var(--border);
 }
 
@@ -663,36 +663,41 @@ select {
 .sidebar {
     background: var(--card);
     border-left: 1px solid var(--border);
-    padding: 12px 18px 22px;
+    padding: 10px 16px 20px;
     overflow-y: auto;
-    height: calc(100vh - var(--topbar-h) - var(--footer-h));
-    position: sticky;
-    top: var(--topbar-h);
+    position: fixed;
+    inset: var(--topbar-h) 0 var(--footer-h) auto;
+    width: var(--sidebar-w);
+    max-height: calc(100vh - var(--topbar-h) - var(--footer-h));
+    z-index: 1030;
+    box-shadow: -10px 0 24px rgba(15, 23, 42, 0.05);
 }
 
 .sidebar-title {
-    font-size: 0.88rem;
+    font-size: 0.84rem;
     font-weight: 800;
-    margin-bottom: 14px;
+    margin-bottom: 10px;
     letter-spacing: 0.01em;
 }
 
 .nav-grid {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 6px;
-    margin-bottom: 20px;
+    grid-template-columns: repeat(5, minmax(0, 2.85rem));
+    justify-content: start;
+    gap: 0.45rem;
+    margin-bottom: 16px;
 }
 
 .nav-btn {
     aspect-ratio: 1;
-    border-radius: 7px;
+    width: 100%;
+    border-radius: 0.65rem;
     border: 1.5px solid var(--border);
     background: var(--card);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.8rem;
+    font-size: 0.82rem;
     font-weight: 700;
     cursor: pointer;
     transition: all 0.12s;
@@ -1267,7 +1272,7 @@ select {
 
 @media (max-width: 991px) {
     .exam-wrapper {
-        grid-template-columns: 1fr;
+        padding-right: 0;
     }
 
     .sidebar {
