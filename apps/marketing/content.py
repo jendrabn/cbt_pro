@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import Final
 
+LOCAL_MARKETING_IMAGE_URL: Final[str] = "/static/images/og-image.png"
+
 
 HOME_PROOF_POINTS: Final[list[dict[str, str]]] = [
     {
@@ -85,7 +87,7 @@ FEATURE_PAGE_ITEMS: Final[list[dict[str, object]]] = [
             "Pengelompokan berdasarkan mapel, kelas, dan kompetensi",
             "Pratinjau soal sebelum dipublikasikan ke peserta",
         ],
-        "image_url": "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80",
+        "image_url": LOCAL_MARKETING_IMAGE_URL,
         "image_alt": "Guru berdiskusi menyiapkan bank soal digital di ruang kerja sekolah",
     },
     {
@@ -96,7 +98,7 @@ FEATURE_PAGE_ITEMS: Final[list[dict[str, object]]] = [
             "Dukungan pengaturan sesi dan jadwal ujian",
             "Lebih aman untuk try out, PTS, PAS, dan asesmen internal",
         ],
-        "image_url": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200&q=80",
+        "image_url": LOCAL_MARKETING_IMAGE_URL,
         "image_alt": "Siswa menggunakan laptop untuk mengikuti ujian online di kelas",
     },
     {
@@ -107,7 +109,7 @@ FEATURE_PAGE_ITEMS: Final[list[dict[str, object]]] = [
             "Catatan pelanggaran lebih mudah ditinjau kembali",
             "Cocok untuk ruang ujian fisik maupun hybrid",
         ],
-        "image_url": "https://images.unsplash.com/photo-1513258496099-48168024aec0?auto=format&fit=crop&w=1200&q=80",
+        "image_url": LOCAL_MARKETING_IMAGE_URL,
         "image_alt": "Pengawas sekolah memonitor aktivitas siswa dari dashboard laptop",
     },
     {
@@ -118,7 +120,7 @@ FEATURE_PAGE_ITEMS: Final[list[dict[str, object]]] = [
             "Rekap hasil per siswa dan per ujian",
             "Analitik performa untuk evaluasi butir soal",
         ],
-        "image_url": "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=1200&q=80",
+        "image_url": LOCAL_MARKETING_IMAGE_URL,
         "image_alt": "Dashboard analitik hasil ujian digital ditinjau oleh tim sekolah",
     },
     {
@@ -129,7 +131,7 @@ FEATURE_PAGE_ITEMS: Final[list[dict[str, object]]] = [
             "Alur kerja lebih aman untuk tim sekolah yang berganti-ganti",
             "Dukungan sertifikat PDF dan fitur lanjutan lain saat dibutuhkan",
         ],
-        "image_url": "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1200&q=80",
+        "image_url": LOCAL_MARKETING_IMAGE_URL,
         "image_alt": "Tim sekolah berkolaborasi menggunakan aplikasi CBT untuk berbagai peran",
     },
 ]

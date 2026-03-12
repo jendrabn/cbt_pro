@@ -16,7 +16,6 @@ from django.views import View
 from django.views.generic import FormView, TemplateView
 
 from apps.accounts.views import get_role_redirect_url
-from apps.core.services import get_branding_settings
 
 from .content import (
     FAQ_PREVIEW,
@@ -32,11 +31,11 @@ from .content import (
 from .forms import MarketingContactForm
 
 
-DEFAULT_WHATSAPP_NUMBER = "628xxxxxxxxxx"
-DEFAULT_CONTACT_EMAIL = "halo@cbtpro.web.id"
-DEFAULT_OPERATING_HOURS = "Senin - Sabtu, 08.00 - 17.00 WIB"
+DEFAULT_WHATSAPP_NUMBER = getattr(settings, "MARKETING_WHATSAPP_NUMBER", "628xxxxxxxxxx")
+DEFAULT_CONTACT_EMAIL = getattr(settings, "MARKETING_CONTACT_EMAIL", "halo@cbtpro.web.id")
+DEFAULT_OPERATING_HOURS = getattr(settings, "MARKETING_OPERATING_HOURS", "Senin - Sabtu, 08.00 - 17.00 WIB")
 DEFAULT_THEME_COLOR = "#16335B"
-PRODUCT_NAME = "CBT Pro"
+PRODUCT_NAME = getattr(settings, "MARKETING_PRODUCT_NAME", "CBT Pro")
 
 
 def _json_ld(payload: dict) -> str:
@@ -52,9 +51,27 @@ def _marketing_asset_version() -> str:
 
 
 def _normalized_whatsapp_number() -> str:
-    raw_value = getattr(settings, "WHATSAPP_NUMBER", DEFAULT_WHATSAPP_NUMBER) or DEFAULT_WHATSAPP_NUMBER
+    raw_value = getattr(settings, "MARKETING_WHATSAPP_NUMBER", DEFAULT_WHATSAPP_NUMBER) or DEFAULT_WHATSAPP_NUMBER
     digits = re.sub(r"\D", "", raw_value)
     return digits or DEFAULT_WHATSAPP_NUMBER
+
+
+def _format_idr(value: int) -> str:
+    return f"{max(value, 0):,}".replace(",", ".")
+
+
+def _marketing_pricing_data() -> dict[str, int | str]:
+    list_price = max(int(getattr(settings, "MARKETING_LIST_PRICE", 999999)), 0)
+    discount_percent = int(getattr(settings, "MARKETING_DISCOUNT_PERCENT", 80))
+    discount_percent = max(min(discount_percent, 100), 0)
+    final_price = int(round(list_price * (100 - discount_percent) / 100))
+    return {
+        "list_price": list_price,
+        "discount_percent": discount_percent,
+        "final_price": final_price,
+        "list_price_display": _format_idr(list_price),
+        "final_price_display": _format_idr(final_price),
+    }
 
 
 def _site_root_url() -> str:
@@ -64,6 +81,10 @@ def _site_root_url() -> str:
 def _absolute_public_url(path: str) -> str:
     base_url = f"{_site_root_url()}/"
     return urljoin(base_url, path.lstrip("/"))
+
+
+def _marketing_static_image_url(filename: str) -> str:
+    return _absolute_public_url(static(f"images/{filename}"))
 
 
 def _dashboard_cta(request) -> dict[str, str]:
@@ -103,8 +124,7 @@ class MarketingPageMixin:
     is_indexable = True
 
     def dispatch(self, request, *args, **kwargs):
-        self.branding = get_branding_settings()
-        if not self.branding.get("landing_page_enabled", True):
+        if not getattr(settings, "MARKETING_ENABLED", True):
             return redirect("login")
         return super().dispatch(request, *args, **kwargs)
 
@@ -124,11 +144,10 @@ class MarketingPageMixin:
         return _site_root_url()
 
     def get_logo_url(self) -> str:
-        logo_url = self.branding.get("institution_logo_url") or static("images/logo-dark.png")
-        return _absolute_public_url(logo_url)
+        return _marketing_static_image_url("logo-dark.png")
 
     def get_og_image_url(self) -> str:
-        return _absolute_public_url(static("images/og-image.png"))
+        return _marketing_static_image_url("og-image.png")
 
     def get_breadcrumbs(self) -> list[dict[str, str]]:
         if not self.show_marketing_chrome:
@@ -165,13 +184,20 @@ class MarketingPageMixin:
         return "noindex, nofollow, noarchive, nosnippet"
 
     def get_contact_email(self) -> str:
-        return str(self.branding.get("institution_email") or "").strip() or DEFAULT_CONTACT_EMAIL
+        return str(getattr(settings, "MARKETING_CONTACT_EMAIL", DEFAULT_CONTACT_EMAIL)).strip() or DEFAULT_CONTACT_EMAIL
 
     def get_contact_phone(self) -> str:
         return _normalized_whatsapp_number()
 
+    def get_operating_hours(self) -> str:
+        return str(getattr(settings, "MARKETING_OPERATING_HOURS", DEFAULT_OPERATING_HOURS)).strip() or DEFAULT_OPERATING_HOURS
+
+    def get_marketing_pricing_data(self) -> dict[str, int | str]:
+        return _marketing_pricing_data()
+
     def get_common_context(self) -> dict[str, object]:
         whatsapp_number = self.get_contact_phone()
+        pricing_data = self.get_marketing_pricing_data()
         phone_display = f"+{whatsapp_number}" if whatsapp_number.startswith("62") else whatsapp_number
         breadcrumbs = self.get_breadcrumbs()
         extra_schema = list(self.get_extra_schema())
@@ -228,8 +254,19 @@ class MarketingPageMixin:
             "whatsapp_display": phone_display,
             "whatsapp_url": f"https://wa.me/{whatsapp_number}",
             "contact_email": self.get_contact_email(),
-            "operating_hours": DEFAULT_OPERATING_HOURS,
-            "marketing_logo_url": self.branding.get("institution_logo_url") or static("images/logo-dark.png"),
+            "operating_hours": self.get_operating_hours(),
+            "marketing_list_price": pricing_data["list_price"],
+            "marketing_list_price_display": pricing_data["list_price_display"],
+            "marketing_discount_percent": pricing_data["discount_percent"],
+            "marketing_final_price": pricing_data["final_price"],
+            "marketing_final_price_display": pricing_data["final_price_display"],
+            "marketing_logo_url": _marketing_static_image_url("logo-dark.png"),
+            "favicon_ico_url": _marketing_static_image_url("favicon.ico"),
+            "favicon_svg_url": _marketing_static_image_url("favicon.svg"),
+            "favicon_96_url": _marketing_static_image_url("favicon-96x96.png"),
+            "apple_touch_icon_url": _marketing_static_image_url("apple-touch-icon.png"),
+            "manifest_icon_192_url": _marketing_static_image_url("web-app-manifest-192x192.png"),
+            "manifest_icon_512_url": _marketing_static_image_url("web-app-manifest-512x512.png"),
             "theme_color": DEFAULT_THEME_COLOR,
             "canonical_url": self.get_canonical_url(),
             "og_image_url": self.get_og_image_url(),
@@ -273,8 +310,10 @@ class LandingPageView(MarketingPageMixin, TemplateView):
     ]
     page_name = "CBT Pro landing page"
     body_class = "page-landing"
+    show_marketing_chrome = False
 
     def get_extra_schema(self) -> list[dict]:
+        pricing_data = self.get_marketing_pricing_data()
         return [
             {
                 "@context": "https://schema.org",
@@ -286,7 +325,7 @@ class LandingPageView(MarketingPageMixin, TemplateView):
                 "url": self.get_site_root(),
                 "offers": {
                     "@type": "Offer",
-                    "price": "499000",
+                    "price": str(pricing_data["final_price"]),
                     "priceCurrency": "IDR",
                     "availability": "https://schema.org/InStock",
                 },
@@ -295,6 +334,7 @@ class LandingPageView(MarketingPageMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        screenshot_url = _marketing_static_image_url("og-image.png")
         context.update(
             {
                 "proof_points": HOME_PROOF_POINTS,
@@ -303,6 +343,10 @@ class LandingPageView(MarketingPageMixin, TemplateView):
                 "implementation_steps": IMPLEMENTATION_STEPS,
                 "faq_preview": FAQ_PREVIEW,
                 "pricing_plan": PRICING_PLAN,
+                "landing_screenshot_dashboard_url": screenshot_url,
+                "landing_screenshot_exam_url": screenshot_url,
+                "landing_screenshot_bank_soal_url": screenshot_url,
+                "landing_screenshot_certificate_url": screenshot_url,
             }
         )
         return context
@@ -330,7 +374,8 @@ class FeaturesPageView(MarketingPageMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["feature_page_items"] = FEATURE_PAGE_ITEMS
+        fallback_image_url = _marketing_static_image_url("og-image.png")
+        context["feature_page_items"] = [{**item, "image_url": fallback_image_url} for item in FEATURE_PAGE_ITEMS]
         return context
 
 
@@ -433,7 +478,7 @@ class ContactPageView(MarketingPageMixin, FormView):
                 "icon": "ri-time-line",
                 "title": "Jam operasional",
                 "description": "Tim marketing dan setup tersedia pada jam kerja untuk respons konsultasi dan tindak lanjut.",
-                "display_value": DEFAULT_OPERATING_HOURS,
+                "display_value": self.get_operating_hours(),
                 "href": reverse("marketing_contact"),
                 "link_label": "Isi form kontak",
             },

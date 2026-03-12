@@ -15,6 +15,9 @@ class MarketingPagesTests(TestCase):
         self.assertContains(response, "Aplikasi CBT Sekolah")
         self.assertContains(response, "manifest.json")
         self.assertContains(response, 'content="index, follow', html=False)
+        self.assertContains(response, "https://cbtpro.web.id/static/images/favicon.ico")
+        self.assertContains(response, "https://cbtpro.web.id/static/images/og-image.png")
+        self.assertNotContains(response, "images.unsplash.com")
 
     def test_secondary_pages_show_coming_soon_state(self):
         for route_name in (
@@ -48,3 +51,9 @@ class MarketingPagesTests(TestCase):
         self.assertContains(response, '"start_url": "/"', html=False)
         self.assertContains(response, '"scope": "/"', html=False)
         self.assertContains(response, '"id": "/"', html=False)
+
+    @override_settings(MARKETING_CONTACT_EMAIL="marketing@example.com")
+    def test_marketing_email_uses_env_setting(self):
+        response = self.client.get(reverse("landing"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "marketing@example.com", html=False)

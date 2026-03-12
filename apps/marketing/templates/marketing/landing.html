@@ -1,56 +1,5 @@
-﻿{% load static %}
-<!DOCTYPE html>
-<html lang="id" prefix="og: https://ogp.me/ns#">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<title>{{ meta_title }}</title>
-<meta name="description" content="{{ meta_description }}">
-<meta name="keywords" content="{{ meta_keywords }}">
-<meta name="author" content="{{ product_name }}">
-<meta name="robots" content="{{ robots_meta_content }}">
-<meta name="theme-color" content="{{ theme_color }}">
-<meta name="application-name" content="{{ product_name }}">
-<link rel="canonical" href="{{ canonical_url }}">
-<link rel="alternate" hreflang="id-ID" href="{{ canonical_url }}">
-<link rel="manifest" href="{% url 'marketing_manifest' %}">
-<link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
-<link rel="icon" type="image/svg+xml" href="{% static 'images/favicon.svg' %}">
-<link rel="icon" type="image/png" sizes="96x96" href="{% static 'images/favicon-96x96.png' %}">
-<link rel="apple-touch-icon" href="{% static 'images/apple-touch-icon.png' %}">
-<link rel="sitemap" type="application/xml" title="Sitemap" href="{% url 'marketing_sitemap' %}">
-<meta property="og:type" content="website">
-<meta property="og:url" content="{{ canonical_url }}">
-<meta property="og:title" content="{{ meta_title }}">
-<meta property="og:description" content="{{ meta_description }}">
-<meta property="og:image" content="{{ og_image_url }}">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta property="og:locale" content="id_ID">
-<meta property="og:site_name" content="{{ product_name }}">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="{{ meta_title }}">
-<meta name="twitter:description" content="{{ meta_description }}">
-<meta name="twitter:image" content="{{ og_image_url }}">
-<script type="application/ld+json">{{ organization_schema_json|safe }}</script>
-<script type="application/ld+json">{{ website_schema_json|safe }}</script>
-<script type="application/ld+json">{{ page_schema_json|safe }}</script>
-{% for schema_json in extra_schema_json_list %}
-<script type="application/ld+json">{{ schema_json|safe }}</script>
-{% endfor %}
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="{% static 'css/marketing.css' %}?v={{ marketing_asset_version }}" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/remixicon@4.0.0/fonts/remixicon.css" rel="stylesheet">
-
-</head>
-
-<body class="bg-white">
-
-<!-- â•â•â•â•â•â•â•â• NAVBAR â•â•â•â•â•â•â•â• -->
+﻿{% extends "marketing/base_marketing.html" %}
+{% block content %}
 <header>
   <nav id="navbar" aria-label="Menu utama">
     <div class="container py-3">
@@ -71,10 +20,6 @@
     </div>
   </nav>
 </header>
-
-<main>
-
-<!-- â•â•â•â•â•â•â•â• HERO â•â•â•â•â•â•â•â• -->
 <section class="hero py-5 py-lg-0" aria-labelledby="hero-h">
   <div class="container py-lg-5">
     <div class="row align-items-center g-4 g-xl-5 py-lg-4">
@@ -157,7 +102,6 @@
   </div>
 </section>
 
-<!-- â•â•â•â•â•â•â•â• FITUR â•â•â•â•â•â•â•â• -->
 <section id="fitur" class="py-5" style="background:var(--c-bg)" aria-labelledby="fitur-h">
   <div class="container py-4">
 
@@ -245,7 +189,6 @@
   </div>
 </section>
 
-<!-- â•â•â•â•â•â•â•â• STATS â•â•â•â•â•â•â•â• -->
 <section class="py-5" style="background:var(--c-ink)" aria-labelledby="stats-h">
   <div class="container py-4">
     <div class="text-center mb-5 sr">
@@ -276,7 +219,6 @@
   </div>
 </section>
 
-<!-- â•â•â•â•â•â•â•â• TENTANG â•â•â•â•â•â•â•â• -->
 <section id="tentang" class="bg-white py-5" aria-labelledby="tentang-h">
   <div class="container py-4">
 
@@ -330,7 +272,6 @@
   </div>
 </section>
 
-<!-- â•â•â•â•â•â•â•â• TEKNOLOGI â•â•â•â•â•â•â•â• -->
 <section id="teknologi" class="py-5 border-top bg-white" aria-labelledby="tech-h">
   <div class="container py-4">
 
@@ -401,7 +342,6 @@
   </div>
 </section>
 
-<!-- â•â•â•â•â•â•â•â• SCREENSHOT â•â•â•â•â•â•â•â• -->
 <section class="py-5 border-top" style="background:var(--c-bg)" aria-labelledby="ss-h">
   <div class="container py-4">
 
@@ -420,7 +360,7 @@
           <div class="carousel-inner rounded-4 overflow-hidden border shadow-sm">
 
             <div class="carousel-item active">
-              <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1400&h=700&fit=crop&q=80"
+              <img src="{{ landing_screenshot_dashboard_url }}"
                    alt="Dashboard Admin" class="d-block w-100" style="height:420px;object-fit:cover;object-position:top">
               <div class="bg-white text-center py-3 border-top">
                 <span class="fw-semibold" style="color:var(--c-ink)">Dashboard Admin</span>
@@ -428,7 +368,7 @@
             </div>
 
             <div class="carousel-item">
-              <img src="https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=1400&h=700&fit=crop&q=80"
+              <img src="{{ landing_screenshot_exam_url }}"
                    alt="Halaman Pengerjaan Ujian" class="d-block w-100" style="height:420px;object-fit:cover;object-position:center">
               <div class="bg-white text-center py-3 border-top">
                 <span class="fw-semibold" style="color:var(--c-ink)">Halaman Pengerjaan Ujian</span>
@@ -436,7 +376,7 @@
             </div>
 
             <div class="carousel-item">
-              <img src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=1400&h=700&fit=crop&q=80"
+              <img src="{{ landing_screenshot_bank_soal_url }}"
                    alt="Manajemen Bank Soal" class="d-block w-100" style="height:420px;object-fit:cover;object-position:top">
               <div class="bg-white text-center py-3 border-top">
                 <span class="fw-semibold" style="color:var(--c-ink)">Manajemen Bank Soal</span>
@@ -444,7 +384,7 @@
             </div>
 
             <div class="carousel-item">
-              <img src="https://images.unsplash.com/photo-1546410531-bb4caa6b424d?w=1400&h=700&fit=crop&q=80"
+              <img src="{{ landing_screenshot_certificate_url }}"
                    alt="Penerbitan Sertifikat PDF" class="d-block w-100" style="height:420px;object-fit:cover;object-position:center">
               <div class="bg-white text-center py-3 border-top">
                 <span class="fw-semibold" style="color:var(--c-ink)">Penerbitan Sertifikat PDF</span>
@@ -474,7 +414,6 @@
   </div>
 </section>
 
-<!-- â•â•â•â•â•â•â•â• HARGA â•â•â•â•â•â•â•â• -->
 <section id="harga" class="bg-white border-top py-5" aria-labelledby="harga-h">
   <div class="container py-4">
 
@@ -489,9 +428,10 @@
     <div class="d-flex price-card-wrap border rounded-4 overflow-hidden shadow sr">
 
       <div class="price-left">
-        <span class="d-block text-decoration-line-through mb-1" style="font-size:.875rem;color:rgba(255,255,255,.4)">Rp 999.999</span>
+        <span class="badge rounded-pill mb-2" style="background:rgba(255,255,255,.15);color:#fff;font-size:.75rem">Diskon {{ marketing_discount_percent }}%</span>
+        <span class="d-block text-decoration-line-through mb-1" style="font-size:.875rem;color:rgba(255,255,255,.4)">Rp {{ marketing_list_price_display }}</span>
         <div class="text-white lh-1 mb-2" style="font-size:2.75rem;font-weight:900;letter-spacing:-2px">
-          <sup style="font-size:.9rem;font-weight:700;vertical-align:super">Rp</sup>499.000
+          <sup style="font-size:.9rem;font-weight:700;vertical-align:super">Rp</sup>{{ marketing_final_price_display }}
         </div>
         <p class="mb-0" style="font-size:.78rem;color:rgba(255,255,255,.55);line-height:1.6">Bayar sekali,<br>pakai selamanya</p>
       </div>
@@ -565,7 +505,6 @@
   </div>
 </section>
 
-<!-- â•â•â•â•â•â•â•â• FAQ â•â•â•â•â•â•â•â• -->
 <section id="faq" class="py-5 border-top" style="background:var(--c-bg)" aria-labelledby="faq-h">
   <div class="container py-4">
 
@@ -580,10 +519,10 @@
 
           <div class="faq-item sr d1">
             <div class="faq-q" role="button" tabindex="0" aria-expanded="false">
-              Apakah Rp499.000 sudah termasuk pemasangan?
+              Apakah Rp{{ marketing_final_price_display }} sudah termasuk pemasangan?
               <svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
             </div>
-            <div class="faq-a">Ya, harga Rp499.000 sudah termasuk jasa pemasangan dan konfigurasi awal di server Anda. Yang perlu Anda siapkan sendiri hanya VPS dan domain.</div>
+            <div class="faq-a">Ya, harga Rp{{ marketing_final_price_display }} sudah termasuk jasa pemasangan dan konfigurasi awal di server Anda. Yang perlu Anda siapkan sendiri hanya VPS dan domain.</div>
           </div>
 
           <div class="faq-item sr d2">
@@ -625,7 +564,6 @@
   </div>
 </section>
 
-<!-- â•â•â•â•â•â•â•â• CTA â•â•â•â•â•â•â•â• -->
 <section class="py-5 border-top bg-white" aria-labelledby="cta-h">
   <div class="container py-4">
     <div class="rounded-4 p-4 p-md-5 sr" style="background:linear-gradient(135deg,var(--c-blue) 0%,var(--c-blue-dk) 100%)">
@@ -648,20 +586,15 @@
             <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.553 4.116 1.524 5.849L.057 23.7a.75.75 0 0 0 .938.938l5.86-1.488A11.95 11.95 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.907 0-3.695-.502-5.24-1.38l-.372-.212-3.849.977.998-3.829-.232-.383A9.952 9.952 0 0 1 2 12C2 6.486 6.486 2 12 2s10 4.486 10 10-4.486 10-10 10z"/></svg>
             Hubungi Kami via WhatsApp
           </a>
-          <span class="small" style="color:rgba(255,255,255,.5)">Gratis konsultasi &nbsp;·&nbsp; Tanpa kontrak jangka panjang</span>
         </div>
       </div>
     </div>
   </div>
 </section>
-
-</main>
-
-<!-- â•â•â•â•â•â•â•â• FOOTER â•â•â•â•â•â•â•â• -->
 <footer class="bg-white border-top py-4" role="contentinfo">
   <div class="container">
     <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-3">
-      <small style="color:var(--c-ink-3)">© {{ current_year }} CBT Pro. Hak cipta dilindungi. Dibangun dengan Django 6 &amp; Python 3.13.</small>
+      <small style="color:var(--c-ink-3)">© {{ current_year }} CBT Pro. Hak cipta dilindungi.</small>
       <nav class="d-flex align-items-center gap-3" aria-label="Media sosial">
         <a href="#" class="soc" aria-label="Instagram CBT Pro">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
@@ -679,8 +612,8 @@
     </div>
   </div>
 </footer>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}
+{% block extra_scripts %}
 <script>
 'use strict';
 
@@ -722,7 +655,5 @@ document.querySelectorAll('.faq-q').forEach(btn => {
   btn.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } });
 });
 </script>
-</body>
-</html>
-
+{% endblock %}
 

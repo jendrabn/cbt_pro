@@ -37,6 +37,14 @@ def _env_json(name, default):
         return json.loads(str(default).replace("'", '"'))
 
 
+def _env_int(name, default):
+    raw_value = os.getenv(name, default)
+    try:
+        return int(str(raw_value).strip())
+    except (TypeError, ValueError):
+        return int(default)
+
+
 # =============================================================================
 # SECURITY SETTINGS
 # =============================================================================
@@ -45,7 +53,16 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-change-this-in-production'
 
 CBT_SITE_NAME = os.getenv('CBT_SITE_NAME', 'Sistem CBT')
 MARKETING_SITE_URL = os.getenv('MARKETING_SITE_URL', 'https://cbtpro.web.id').strip().rstrip('/')
-WHATSAPP_NUMBER = os.getenv('WHATSAPP_NUMBER', '628xxxxxxxxxx')
+MARKETING_ENABLED = _env_bool('MARKETING_ENABLED', True)
+MARKETING_PRODUCT_NAME = os.getenv('MARKETING_PRODUCT_NAME', 'CBT Pro').strip() or 'CBT Pro'
+MARKETING_CONTACT_EMAIL = os.getenv('MARKETING_CONTACT_EMAIL', 'halo@cbtpro.web.id').strip() or 'halo@cbtpro.web.id'
+MARKETING_WHATSAPP_NUMBER = os.getenv('MARKETING_WHATSAPP_NUMBER', '628xxxxxxxxxx').strip() or '628xxxxxxxxxx'
+MARKETING_OPERATING_HOURS = (
+    os.getenv('MARKETING_OPERATING_HOURS', 'Senin - Sabtu, 08.00 - 17.00 WIB').strip()
+    or 'Senin - Sabtu, 08.00 - 17.00 WIB'
+)
+MARKETING_LIST_PRICE = max(_env_int('MARKETING_LIST_PRICE', 999999), 0)
+MARKETING_DISCOUNT_PERCENT = min(max(_env_int('MARKETING_DISCOUNT_PERCENT', 80), 0), 100)
 DEMO_MODE = _env_bool('DEMO', _env_bool('DEMO_MODE', False))
 DEMO_TEACHER_USERNAME = os.getenv('DEMO_TEACHER_USERNAME', 'olivia.carter').strip()
 DEMO_TEACHER_EMAIL = os.getenv('DEMO_TEACHER_EMAIL', 'olivia.carter@mail.com').strip()
