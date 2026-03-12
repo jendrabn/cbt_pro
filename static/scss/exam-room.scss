@@ -56,7 +56,7 @@ select {
 
 .exam-room-main {
     position: relative;
-    padding: 0;
+    padding: var(--topbar-h) 0 var(--footer-h);
 }
 
 .topbar {
@@ -192,16 +192,16 @@ select {
 }
 
 .exam-wrapper {
-    display: block;
-    min-height: 100vh;
-    padding: var(--topbar-h) var(--sidebar-w) var(--footer-h) 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--sidebar-w);
+    align-items: start;
+    min-height: calc(100vh - var(--topbar-h) - var(--footer-h));
 }
 
 .question-area {
     padding: 6px 24px 24px;
     overflow-y: auto;
     min-width: 0;
-    min-height: calc(100vh - var(--topbar-h) - var(--footer-h));
 }
 
 .q-header {
@@ -665,11 +665,11 @@ select {
     border-left: 1px solid var(--border);
     padding: 10px 16px 20px;
     overflow-y: auto;
-    position: fixed;
-    inset: var(--topbar-h) 0 var(--footer-h) auto;
-    width: var(--sidebar-w);
+    position: sticky;
+    top: 0;
+    width: 100%;
     max-height: calc(100vh - var(--topbar-h) - var(--footer-h));
-    z-index: 1030;
+    align-self: start;
     box-shadow: -10px 0 24px rgba(15, 23, 42, 0.05);
 }
 
@@ -1272,7 +1272,7 @@ select {
 
 @media (max-width: 991px) {
     .exam-wrapper {
-        padding-right: 0;
+        grid-template-columns: 1fr;
     }
 
     .sidebar {

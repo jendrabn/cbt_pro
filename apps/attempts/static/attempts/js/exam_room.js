@@ -48,8 +48,6 @@
             this.violationModal = null;
             this.isReportingViolation = false;
             this.initialLayoutAligned = false;
-            this.layoutObserver = null;
-            this.handleLayoutMetricsChange = null;
             this.handlePageShow = null;
         }
 
@@ -58,8 +56,7 @@
                 windowObj.history.scrollRestoration = "manual";
             }
             this.cacheElements();
-            this.syncLayoutMetrics();
-            this.bindLayoutEvents();
+            this.bindViewportEvents();
             this.setupModals();
             this.bindEvents();
             this.renderPayload(this.payload);
@@ -80,17 +77,6 @@
             if (this.guard && typeof this.guard.destroy === "function") {
                 this.guard.destroy();
             }
-            if (this.layoutObserver) {
-                this.layoutObserver.disconnect();
-                this.layoutObserver = null;
-            }
-            if (this.handleLayoutMetricsChange) {
-                windowObj.removeEventListener("load", this.handleLayoutMetricsChange);
-                windowObj.removeEventListener("resize", this.handleLayoutMetricsChange);
-                if (windowObj.visualViewport) {
-                    windowObj.visualViewport.removeEventListener("resize", this.handleLayoutMetricsChange);
-                }
-            }
             if (this.handlePageShow) {
                 windowObj.removeEventListener("pageshow", this.handlePageShow);
             }
@@ -102,10 +88,8 @@
             this.elements = {
                 alertHost: byId("examRoomAlertHost"),
                 restrictionAlert: byId("navigationRestriction"),
-                topbar: documentObj.querySelector(".topbar"),
                 questionArea: documentObj.querySelector(".question-area"),
                 sidebar: documentObj.querySelector(".sidebar"),
-                footerBar: documentObj.querySelector(".footer-bar"),
                 timerDisplay: byIds("timer", "timerDisplay"),
                 timerChip: documentObj.querySelector(".timer-chip, .badge-timer"),
                 violationCounterChip: byId("violationCounterChip"),
@@ -239,51 +223,11 @@
             }
         }
 
-        bindLayoutEvents() {
-            this.handleLayoutMetricsChange = () => this.syncLayoutMetrics();
+        bindViewportEvents() {
             this.handlePageShow = () => {
-                this.syncLayoutMetrics();
                 this.resetViewportPositions();
             };
-
-            windowObj.addEventListener("load", this.handleLayoutMetricsChange);
-            windowObj.addEventListener("resize", this.handleLayoutMetricsChange);
             windowObj.addEventListener("pageshow", this.handlePageShow);
-
-            if (windowObj.visualViewport) {
-                windowObj.visualViewport.addEventListener("resize", this.handleLayoutMetricsChange);
-            }
-
-            if (documentObj.fonts && documentObj.fonts.ready && typeof documentObj.fonts.ready.then === "function") {
-                documentObj.fonts.ready.then(() => this.syncLayoutMetrics()).catch(() => {});
-            }
-
-            if (windowObj.ResizeObserver) {
-                this.layoutObserver = new windowObj.ResizeObserver(() => this.syncLayoutMetrics());
-                if (this.elements.topbar) {
-                    this.layoutObserver.observe(this.elements.topbar);
-                }
-                if (this.elements.footerBar) {
-                    this.layoutObserver.observe(this.elements.footerBar);
-                }
-            }
-        }
-
-        syncLayoutMetrics() {
-            const rootStyle = documentObj.documentElement.style;
-            const topbarHeight = this.elements.topbar
-                ? Math.ceil(this.elements.topbar.getBoundingClientRect().height)
-                : 0;
-            const footerHeight = this.elements.footerBar
-                ? Math.ceil(this.elements.footerBar.getBoundingClientRect().height)
-                : 0;
-
-            if (topbarHeight > 0) {
-                rootStyle.setProperty("--topbar-h", `${topbarHeight}px`);
-            }
-            if (footerHeight > 0) {
-                rootStyle.setProperty("--footer-h", `${footerHeight}px`);
-            }
         }
 
         resetViewportPositions() {
@@ -389,7 +333,6 @@
         alignInitialViewport(questionChanged) {
             if (!this.initialLayoutAligned || questionChanged) {
                 this.initialLayoutAligned = true;
-                this.syncLayoutMetrics();
                 this.resetViewportPositions();
             }
         }
