@@ -775,8 +775,6 @@
             answerBankWrap.innerHTML = `
                 <i class="ri-list-check-3"></i>&nbsp;<strong>Bank Jawaban:</strong> ${normalizedAnswerBankItemsHtml}
             `;
-            this.elements.questionAnswerContainer.appendChild(answerBankWrap);
-
             const pairsWrap = documentObj.createElement("div");
             this.elements.questionAnswerContainer.appendChild(pairsWrap);
 
