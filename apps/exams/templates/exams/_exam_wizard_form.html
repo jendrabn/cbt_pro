@@ -141,7 +141,7 @@
                                     </select>
                                 </div>
                                 <div class="col-3 col-lg-1 d-grid">
-                                    <button type="button" class="btn btn-sm btn-outline-secondary" id="questionFilterResetBtn" title="Reset filter">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" id="questionFilterResetBtn" data-bs-toggle="tooltip" data-bs-title="Reset filter">
                                         <i class="ri-refresh-line me-1"></i><span class="d-none d-lg-inline">Reset</span>
                                     </button>
                                 </div>
@@ -149,7 +149,7 @@
                         </div>
 
                         <div class="d-flex flex-wrap gap-2 align-items-center mb-3">
-                            <button type="button" class="btn btn-sm btn-outline-secondary" id="availableToggleSelectBtn" title="Toggle pilih semua pada daftar soal tersedia">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" id="availableToggleSelectBtn" data-bs-toggle="tooltip" data-bs-title="Toggle pilih semua pada daftar soal tersedia">
                                 <i class="ri-check-double-line me-1"></i><span class="available-toggle-select-label">Pilih Semua</span>
                             </button>
                             <select class="form-select form-select-sm w-auto flex-grow-1" id="bulkCategorySelector" title="Pilih kategori untuk menambah soal massal" aria-label="Tambah soal berdasarkan kategori">
@@ -158,7 +158,7 @@
                                 <option value="{{ category.id }}">{{ category.name }}</option>
                                 {% endfor %}
                             </select>
-                            <button type="button" id="addCategoryQuestionsBtn" class="btn btn-sm btn-outline-primary" title="Tambahkan semua soal dari kategori terpilih">
+                            <button type="button" id="addCategoryQuestionsBtn" class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip" data-bs-title="Tambahkan semua soal dari kategori terpilih">
                                 <i class="ri-add-line me-1"></i>Tambah Kategori
                             </button>
                         </div>
@@ -167,7 +167,7 @@
                             <div class="list-group-item text-muted small">Memuat daftar soal...</div>
                         </div>
                         <div class="d-flex justify-content-center mt-2">
-                            <button type="button" class="btn btn-sm btn-outline-secondary d-none" id="availableQuestionLoadMoreBtn" title="Muat data soal berikutnya">
+                            <button type="button" class="btn btn-sm btn-outline-secondary d-none" id="availableQuestionLoadMoreBtn" data-bs-toggle="tooltip" data-bs-title="Muat data soal berikutnya">
                                 Muat lebih banyak
                             </button>
                         </div>
@@ -185,7 +185,7 @@
                     <div class="card-body">
                         <div class="border rounded p-2 mb-3 bg-light">
                             <div class="d-flex flex-wrap gap-2 align-items-center">
-                                <button type="button" class="btn btn-sm btn-outline-secondary" id="selectedToggleSelectBtn" title="Toggle pilih semua pada daftar soal terpilih">
+                                <button type="button" class="btn btn-sm btn-outline-secondary" id="selectedToggleSelectBtn" data-bs-toggle="tooltip" data-bs-title="Toggle pilih semua pada daftar soal terpilih">
                                     <i class="ri-check-double-line me-1"></i><span class="selected-toggle-select-label">Pilih Semua</span>
                                 </button>
                                 <input type="number" min="0.01" step="0.01" class="form-control form-control-sm" id="bulkPointsOverride" placeholder="Poin timpa" style="width: 140px;" aria-label="Timpa poin untuk soal terpilih">
@@ -204,10 +204,10 @@
                                     <option value="true">Paksa Berurutan: Ya</option>
                                     <option value="false">Paksa Berurutan: Tidak</option>
                                 </select>
-                                <button type="button" class="btn btn-sm btn-outline-primary" id="applyBulkSelectedBtn" title="Terapkan pengaturan ke soal terpilih">
+                                <button type="button" class="btn btn-sm btn-outline-primary" id="applyBulkSelectedBtn" data-bs-toggle="tooltip" data-bs-title="Terapkan pengaturan ke soal terpilih">
                                     <i class="ri-check-line me-1"></i>Terapkan
                                 </button>
-                                <button type="button" class="btn btn-sm btn-outline-danger" id="deleteBulkSelectedBtn" title="Hapus semua soal yang dicentang dari daftar terpilih">
+                                <button type="button" class="btn btn-sm btn-outline-danger" id="deleteBulkSelectedBtn" data-bs-toggle="tooltip" data-bs-title="Hapus semua soal yang dicentang dari daftar terpilih">
                                     <i class="ri-delete-bin-line me-1"></i>Hapus
                                 </button>
                             </div>
@@ -500,11 +500,11 @@
     </section>
 
     <div class="d-flex flex-wrap gap-2 justify-content-between mt-3">
-        <button type="button" class="btn btn-outline-secondary" id="wizardPrevBtn" title="Kembali ke langkah sebelumnya">Sebelumnya</button>
+        <button type="button" class="btn btn-outline-secondary" id="wizardPrevBtn" data-bs-toggle="tooltip" data-bs-title="Kembali ke langkah sebelumnya">Sebelumnya</button>
         <div class="d-flex flex-wrap gap-2">
-            <button type="button" class="btn btn-primary" id="wizardNextBtn" title="Lanjut ke langkah berikutnya">Berikutnya</button>
-            <button type="submit" class="btn btn-outline-primary wizard-submit-btn d-none" data-status-action="draft" title="Simpan ujian sebagai draf">Simpan Draf</button>
-            <button type="submit" class="btn btn-success wizard-submit-btn d-none" data-status-action="publish" title="Simpan dan publikasikan ujian">Publikasikan</button>
+            <button type="button" class="btn btn-primary" id="wizardNextBtn" data-bs-toggle="tooltip" data-bs-title="Lanjut ke langkah berikutnya">Berikutnya</button>
+            <button type="submit" class="btn btn-outline-primary wizard-submit-btn d-none" data-status-action="draft" data-bs-toggle="tooltip" data-bs-title="Simpan ujian sebagai draf">Simpan Draf</button>
+            <button type="submit" class="btn btn-success wizard-submit-btn d-none" data-status-action="publish" data-bs-toggle="tooltip" data-bs-title="Simpan dan publikasikan ujian">Publikasikan</button>
         </div>
     </div>
 </form>

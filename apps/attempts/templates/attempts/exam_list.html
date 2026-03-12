@@ -15,7 +15,7 @@
             {% include "partials/page_header.html" with eyebrow="Panel Siswa" title="Daftar Ujian" subtitle="Lihat jadwal sesi dan status keikutsertaan agar siap saat ujian dimulai." %}
             <div class="d-flex align-items-center gap-2 cbt-page-header-actions">
                 <div class="d-flex flex-wrap gap-2">
-                                <a href="{% url 'student_results' %}" class="btn btn-outline-info" title="Buka halaman hasil & review ujian">
+                                <a href="{% url 'student_results' %}" class="btn btn-outline-info" data-bs-toggle="tooltip" data-bs-title="Buka halaman hasil &amp; review ujian">
                                     <i class="ri-bar-chart-line me-1"></i>Hasil Ujian
                                 </a>
                             </div>
@@ -58,10 +58,10 @@
                     <div class="cbt-inline-filter-date">
                         <input type="date" class="form-control" name="date" value="{{ filters.selected_date_raw }}">
                     </div>
-                    <button type="submit" class="btn btn-primary" title="Terapkan filter">
+                    <button type="submit" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-title="Terapkan filter">
                         <i class="ri-filter-3-line me-1"></i>Terapkan
                     </button>
-                    <a href="{% url 'student_exam_list' %}?tab={{ active_tab }}" class="btn btn-outline-secondary cbt-inline-filter-reset" title="Reset filter tab ini">
+                    <a href="{% url 'student_exam_list' %}?tab={{ active_tab }}" class="btn btn-outline-secondary cbt-inline-filter-reset" data-bs-toggle="tooltip" data-bs-title="Reset filter tab ini">
                         <i class="ri-refresh-line me-1"></i>Reset
                     </a>
                 </form>
@@ -134,31 +134,28 @@
                             <button
                                 type="button"
                                 class="btn btn-sm btn-outline-info exam-detail-btn"
-                                data-bs-toggle="modal"
-                                data-bs-target="#examDetailModal"
-                                data-title="{{ row.detail.title }}"
-                                data-subject="{{ row.detail.subject }}"
-                                data-description="{{ row.detail.description }}"
-                                data-instructions="{{ row.detail.instructions }}"
-                                data-schedule="{{ row.detail.schedule }}"
-                                data-duration="{{ row.detail.duration }}"
-                                data-question-count="{{ row.detail.question_count }}"
-                                data-navigation-rules="{{ row.detail.navigation_rules }}"
-                                data-anti-cheat="{{ row.detail.anti_cheat_rules }}"
-                                data-start-url="{{ row.detail.start_url }}"
-                                data-retake-enabled="{{ row.detail.retake_enabled|yesno:'true,false' }}"
-                                data-retake-max-attempts="{{ row.detail.retake_max_attempts }}"
-                                data-retake-attempts-used="{{ row.detail.retake_attempts_used }}"
-                                data-retake-remaining-attempts="{{ row.detail.retake_remaining_attempts }}"
-                                data-retake-policy="{{ row.detail.retake_policy_label }}"
-                                data-retake-cooldown="{{ row.detail.retake_cooldown_minutes }}"
-                                title="Lihat detail lengkap ujian"
+                                data-exam-id="{{ row.detail.id }}"
+                                data-exam-title="{{ row.detail.title }}"
+                                data-exam-subject="{{ row.detail.subject_name }}"
+                                data-exam-duration="{{ row.detail.duration_minutes }}"
+                                data-exam-schedule-start="{{ row.detail.start_time_iso }}"
+                                data-exam-schedule-end="{{ row.detail.end_time_iso }}"
+                                data-exam-question-count="{{ row.detail.question_count }}"
+                                data-exam-passing-score="{{ row.detail.passing_score }}"
+                                data-exam-status="{{ row.detail.status_label }}"
+                                data-exam-attempts-used="{{ row.detail.attempts_used }}"
+                                data-exam-retake-max-attempts="{{ row.detail.retake_max_attempts }}"
+                                data-exam-retake-attempts-used="{{ row.detail.retake_attempts_used }}"
+                                data-exam-retake-remaining-attempts="{{ row.detail.retake_remaining_attempts }}"
+                                data-exam-retake-policy="{{ row.detail.retake_policy_label }}"
+                                data-exam-retake-cooldown="{{ row.detail.retake_cooldown_minutes }}"
+                                data-bs-toggle="tooltip" data-bs-title="Lihat detail lengkap ujian"
                             >
                                 <i class="ri-information-line"></i>
                             </button>
 
                             {% if row.action.type == "start" %}
-                            <a href="{{ row.action.url }}" class="btn btn-sm {{ row.action.class_name }} flex-grow-1" title="Mulai ujian sekarang">
+                            <a href="{{ row.action.url }}" class="btn btn-sm {{ row.action.class_name }} flex-grow-1" data-bs-toggle="tooltip" data-bs-title="Mulai ujian sekarang">
                                 <i class="{{ row.action.icon }} me-1"></i>{{ row.action.label }}
                             </a>
                             {% elif row.action.type == "result" and row.result_summary.has_result %}
@@ -176,12 +173,12 @@
                                 data-unanswered="{{ row.result_summary.unanswered }}"
                                 data-time-spent="{{ row.result_summary.time_spent_seconds }}"
                                 data-result-url="{{ row.result_summary.detail_url }}"
-                                title="Lihat ringkasan hasil ujian"
+                                data-bs-toggle="tooltip" data-bs-title="Lihat ringkasan hasil ujian"
                             >
                                 <i class="{{ row.action.icon }} me-1"></i>{{ row.action.label }}
                             </button>
                             {% else %}
-                            <button type="button" class="btn btn-sm {{ row.action.class_name }} flex-grow-1" disabled title="Aksi belum tersedia untuk ujian ini">
+                            <button type="button" class="btn btn-sm {{ row.action.class_name }} flex-grow-1" disabled data-bs-toggle="tooltip" data-bs-title="Aksi belum tersedia untuk ujian ini">
                                 <i class="{{ row.action.icon }} me-1"></i>{{ row.action.label }}
                             </button>
                             {% endif %}
@@ -189,13 +186,13 @@
                             {% if row.status_key == "completed" and row.retake.enabled and row.retake.remaining_attempts > 0 %}
                                 {% if row.retake.eligible %}
                                     {% if row.retake.show_review %}
-                                    <a href="{{ row.retake.review_url }}" class="btn btn-sm btn-outline-warning" title="Review sebelum retake">
+                                    <a href="{{ row.retake.review_url }}" class="btn btn-sm btn-outline-warning" data-bs-toggle="tooltip" data-bs-title="Review sebelum retake">
                                         <i class="ri-repeat-line me-1"></i>Ujian Ulang
                                     </a>
                                     {% else %}
                                     <form method="post" action="{{ row.retake.start_url }}" class="d-inline">
                                         {% csrf_token %}
-                                        <button type="submit" class="btn btn-sm btn-outline-warning" title="Mulai ujian ulang">
+                                        <button type="submit" class="btn btn-sm btn-outline-warning" data-bs-toggle="tooltip" data-bs-title="Mulai ujian ulang">
                                             <i class="ri-repeat-line me-1"></i>Ujian Ulang
                                         </button>
                                     </form>
@@ -208,7 +205,7 @@
                                             disabled
                                             data-retake-countdown
                                             data-next-available="{{ row.retake.next_available_at_iso }}"
-                                            title="Retake belum tersedia"
+                                            data-bs-toggle="tooltip" data-bs-title="Retake belum tersedia"
                                         >
                                             <i class="ri-repeat-line me-1"></i>Tersedia dalam cooldown
                                         </button>
@@ -274,7 +271,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <a id="detailStartBtn" href="#" class="btn btn-success" title="Konfirmasi untuk mulai ujian">
+                    <a id="detailStartBtn" href="#" class="btn btn-success" data-bs-toggle="tooltip" data-bs-title="Konfirmasi untuk mulai ujian">
                         <i class="ri-play-circle-line me-1"></i>Mulai Ujian
                     </a>
                 </div>
@@ -302,7 +299,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <a id="resultDetailLink" href="{% url 'student_results' %}" class="btn btn-primary" title="Buka halaman detail hasil ujian ini">
+                    <a id="resultDetailLink" href="{% url 'student_results' %}" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-title="Buka halaman detail hasil ujian ini">
                         <i class="ri-file-chart-line me-1"></i>Lihat Detail Hasil
                     </a>
                 </div>

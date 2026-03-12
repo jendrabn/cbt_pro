@@ -155,7 +155,7 @@
                     <div class="card border-0 shadow-sm mb-4" id="multipleChoiceCard">
                         <div class="card-header bg-white border-0 pt-3 d-flex justify-content-between align-items-center">
                             <h2 class="h6 mb-0">Bagian Opsi Jawaban</h2>
-                            <button type="button" id="addOptionBtn" class="btn btn-sm btn-outline-primary" title="Tambah opsi jawaban hingga J">
+                            <button type="button" id="addOptionBtn" class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip" data-bs-title="Tambah opsi jawaban hingga J">
                                 <i class="ri-add-line me-1"></i>Tambah Opsi
                             </button>
                         </div>
@@ -199,7 +199,7 @@
                                                         <label class="form-check-label small text-body-secondary" for="correctOptions{{ row.letter }}">Benar</label>
                                                     </div>
                                                     {% if row.removable %}
-                                                    <button type="button" class="btn btn-outline-danger btn-sm remove-option-btn answer-option-remove" title="Hapus opsi {{ row.letter }}">
+                                                    <button type="button" class="btn btn-outline-danger btn-sm remove-option-btn answer-option-remove" data-bs-toggle="tooltip" data-bs-title="Hapus opsi {{ row.letter }}">
                                                         <i class="ri-delete-bin-line"></i>
                                                     </button>
                                                     {% endif %}
@@ -228,7 +228,7 @@
                     <div class="card border-0 shadow-sm mb-4 d-none" id="orderingCard">
                         <div class="card-header bg-white border-0 pt-3 d-flex justify-content-between align-items-center">
                             <h2 class="h6 mb-0">Bagian Item Ordering</h2>
-                            <button type="button" id="addOrderingItemBtn" class="btn btn-sm btn-outline-primary" title="Tambah item urutan">
+                            <button type="button" id="addOrderingItemBtn" class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip" data-bs-title="Tambah item urutan">
                                 <i class="ri-add-line me-1"></i>Tambah Item
                             </button>
                         </div>
@@ -247,7 +247,7 @@
                                             {% if row.field.errors %}<div class="text-danger small mt-1">{{ row.field.errors|join:", " }}</div>{% endif %}
                                         </div>
                                         {% if row.removable %}
-                                        <button type="button" class="btn btn-outline-danger btn-sm remove-ordering-item-btn mt-4" title="Hapus item {{ row.index }}">
+                                        <button type="button" class="btn btn-outline-danger btn-sm remove-ordering-item-btn mt-4" data-bs-toggle="tooltip" data-bs-title="Hapus item {{ row.index }}">
                                             <i class="ri-delete-bin-line"></i>
                                         </button>
                                         {% endif %}
@@ -261,7 +261,7 @@
                     <div class="card border-0 shadow-sm mb-4 d-none" id="matchingCard">
                         <div class="card-header bg-white border-0 pt-3 d-flex justify-content-between align-items-center">
                             <h2 class="h6 mb-0">Bagian Matching</h2>
-                            <button type="button" id="addMatchingPairBtn" class="btn btn-sm btn-outline-primary" title="Tambah pasangan matching">
+                            <button type="button" id="addMatchingPairBtn" class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip" data-bs-title="Tambah pasangan matching">
                                 <i class="ri-add-line me-1"></i>Tambah Pasangan
                             </button>
                         </div>
@@ -274,7 +274,7 @@
                                         <div class="d-flex align-items-center justify-content-between gap-2 mb-3">
                                             <h3 class="h6 mb-0">Pasangan {{ row.index }}</h3>
                                             {% if row.removable %}
-                                            <button type="button" class="btn btn-outline-danger btn-sm remove-matching-pair-btn" title="Hapus pasangan {{ row.index }}">
+                                            <button type="button" class="btn btn-outline-danger btn-sm remove-matching-pair-btn" data-bs-toggle="tooltip" data-bs-title="Hapus pasangan {{ row.index }}">
                                                 <i class="ri-delete-bin-line"></i>
                                             </button>
                                             {% endif %}
@@ -451,15 +451,15 @@
                                 </label>
                             </div>
                             <div class="d-grid gap-2 mt-3">
-                                <button type="submit" class="btn btn-primary" title="Simpan data soal">
+                                <button type="submit" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-title="Simpan data soal">
                                     <i class="ri-save-line me-1"></i>{{ submit_label }}
                                 </button>
                                 {% if is_create %}
-                                <button type="submit" name="save_and_add" value="1" class="btn btn-outline-primary" title="Simpan lalu tambah soal baru">
+                                <button type="submit" name="save_and_add" value="1" class="btn btn-outline-primary" data-bs-toggle="tooltip" data-bs-title="Simpan lalu tambah soal baru">
                                     Simpan & Tambah Lagi
                                 </button>
                                 {% endif %}
-                                <a href="{% if request.GET.next %}{{ request.GET.next }}{% else %}{% url 'question_list' %}{% endif %}" class="btn btn-outline-secondary" title="Batalkan pengisian">
+                                <a href="{% if request.GET.next %}{{ request.GET.next }}{% else %}{% url 'question_list' %}{% endif %}" class="btn btn-outline-secondary" data-bs-toggle="tooltip" data-bs-title="Batalkan pengisian">
                                     Batal
                                 </a>
                             </div>

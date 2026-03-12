@@ -3,6 +3,8 @@ from django.urls import reverse
 
 
 @override_settings(
+    DEBUG=False,
+    SERVE_STATIC_WITH_DJANGO=True,
     SECURE_SSL_REDIRECT=False,
     ALLOWED_HOSTS=["testserver", "localhost", "127.0.0.1"],
 )
@@ -43,4 +45,6 @@ class MarketingPagesTests(TestCase):
         response = self.client.get(reverse("marketing_manifest"))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response["Content-Type"], "application/manifest+json")
-        self.assertContains(response, '"start_url": "https://cbtpro.web.id/"', html=False)
+        self.assertContains(response, '"start_url": "/"', html=False)
+        self.assertContains(response, '"scope": "/"', html=False)
+        self.assertContains(response, '"id": "/"', html=False)

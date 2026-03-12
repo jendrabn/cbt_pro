@@ -73,10 +73,10 @@
                     <input type="date" class="form-control" name="date_to" value="{{ filters.date_to|date:'Y-m-d' }}">
                 </div>
             </div>
-            <button type="submit" class="btn btn-primary" title="Terapkan filter">
+            <button type="submit" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-title="Terapkan filter">
                 <i class="ri-filter-3-line me-1"></i>Terapkan
             </button>
-            <a href="{% url 'teacher_certificate_list' %}" class="btn btn-outline-secondary cbt-inline-filter-reset" title="Reset filter">
+            <a href="{% url 'teacher_certificate_list' %}" class="btn btn-outline-secondary cbt-inline-filter-reset" data-bs-toggle="tooltip" data-bs-title="Reset filter">
                 <i class="ri-refresh-line me-1"></i>Reset
             </a>
         </form>
@@ -92,7 +92,7 @@
                 </select>
             </div>
             <input type="hidden" name="next" value="{{ request.get_full_path }}">
-            <button type="submit" class="btn btn-outline-warning" title="Terbitkan sertifikat yang belum terbit untuk ujian terpilih">
+            <button type="submit" class="btn btn-outline-warning" data-bs-toggle="tooltip" data-bs-title="Terbitkan sertifikat yang belum terbit untuk ujian terpilih">
                 <i class="ri-award-line me-1"></i>Issue Manual per Ujian
             </button>
         </form>
@@ -132,7 +132,7 @@
                         </td>
                         <td class="text-end">
                             <div class="d-flex justify-content-end gap-1">
-                                <a href="{% url 'certificate_verify_token' cert.verification_token %}" target="_blank" class="btn btn-sm btn-outline-info" title="Buka halaman verifikasi publik">
+                                <a href="{% url 'certificate_verify_token' cert.verification_token %}" target="_blank" class="btn btn-sm btn-outline-info" data-bs-toggle="tooltip" data-bs-title="Buka halaman verifikasi publik">
                                     <i class="ri-shield-check-line"></i>
                                 </a>
                                 {% if not cert.is_revoked %}
@@ -144,7 +144,7 @@
                                     data-cert-number="{{ cert.certificate_number }}"
                                     data-revoke-url="{% url 'teacher_certificate_revoke' cert.id %}"
                                     data-next="{{ request.get_full_path }}"
-                                    title="Cabut sertifikat ini"
+                                    data-bs-toggle="tooltip" data-bs-title="Cabut sertifikat ini"
                                 >
                                     <i class="ri-forbid-line"></i>
                                 </button>

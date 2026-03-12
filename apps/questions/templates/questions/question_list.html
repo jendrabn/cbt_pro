@@ -15,13 +15,13 @@
             {% include "partials/page_header.html" with eyebrow="Panel Guru" title="Manajemen Bank Soal" subtitle="Kelola koleksi soal dan proses impor/ekspor bank soal." %}
             <div class="d-flex align-items-center gap-2 cbt-page-header-actions">
                 <div class="d-flex flex-wrap gap-2">
-                    <a href="{% url 'question_create' %}" class="btn btn-primary" title="Tambah soal baru">
+                    <a href="{% url 'question_create' %}" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-title="Tambah soal baru">
                         <i class="ri-add-line me-1"></i>Tambah Soal
                     </a>
                     <a
                         href="{% url 'question_import' %}"
                         class="btn btn-outline-secondary"
-                        title="Buka halaman impor soal"
+                        data-bs-toggle="tooltip" data-bs-title="Buka halaman impor soal"
                     >
                         <i class="ri-upload-line me-1"></i>Impor Soal
                     </a>
@@ -115,10 +115,10 @@
                         {% endfor %}
                     </select>
                 </div>
-                <button type="submit" class="btn btn-primary" title="Terapkan filter">
+                <button type="submit" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-title="Terapkan filter">
                     <i class="ri-filter-3-line me-1"></i>Terapkan
                 </button>
-                <a href="{% url 'question_list' %}" class="btn btn-outline-secondary cbt-inline-filter-reset" title="Reset semua filter">
+                <a href="{% url 'question_list' %}" class="btn btn-outline-secondary cbt-inline-filter-reset" data-bs-toggle="tooltip" data-bs-title="Reset semua filter">
                     <i class="ri-refresh-line me-1"></i>Reset
                 </a>
             </form>
@@ -138,18 +138,18 @@
                             <option value="export_csv">Ekspor CSV</option>
                             <option value="export_excel">Ekspor Excel</option>
                         </select>
-                        <button type="submit" class="btn btn-sm btn-outline-primary" title="Terapkan aksi bulk ke soal terpilih">
+                        <button type="submit" class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip" data-bs-title="Terapkan aksi bulk ke soal terpilih">
                             <i class="ri-check-line me-1"></i>Terapkan
                         </button>
-                        <button type="button" class="btn btn-sm btn-outline-secondary" id="toggle-select-all" title="Pilih semua soal">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" id="toggle-select-all" data-bs-toggle="tooltip" data-bs-title="Pilih semua soal">
                             <i class="ri-check-double-line me-1"></i><span class="toggle-select-all-label">Pilih Semua</span>
                         </button>
                     </div>
                     <div class="d-flex flex-wrap gap-2">
-                        <a href="{% url 'question_export' %}?format=csv{% if querystring %}&{{ querystring }}{% endif %}" class="btn btn-sm btn-outline-success" title="Ekspor semua data soal ke CSV">
+                        <a href="{% url 'question_export' %}?format=csv{% if querystring %}&{{ querystring }}{% endif %}" class="btn btn-sm btn-outline-success" data-bs-toggle="tooltip" data-bs-title="Ekspor semua data soal ke CSV">
                             <i class="ri-download-line me-1"></i>CSV
                         </a>
-                        <a href="{% url 'question_export' %}?format=xlsx{% if querystring %}&{{ querystring }}{% endif %}" class="btn btn-sm btn-outline-success" title="Ekspor semua data soal ke Excel">
+                        <a href="{% url 'question_export' %}?format=xlsx{% if querystring %}&{{ querystring }}{% endif %}" class="btn btn-sm btn-outline-success" data-bs-toggle="tooltip" data-bs-title="Ekspor semua data soal ke Excel">
                             <i class="ri-download-line me-1"></i>Excel
                         </a>
                     </div>
@@ -177,7 +177,7 @@
                                         class="form-check-input row-check question-select-item"
                                         name="selected_ids"
                                         value="{{ question.id }}"
-                                        title="Pilih soal ini"
+                                        data-bs-toggle="tooltip" data-bs-title="Pilih soal ini"
                                     >
                                 </td>
                                 <td><small class="text-muted" title="{{ question.id }}">{{ question.id|truncatechars:8 }}</small></td>
@@ -206,14 +206,14 @@
                                             data-preview-url="{% url 'question_preview' question.id %}"
                                             data-bs-toggle="modal"
                                             data-bs-target="#previewModal"
-                                            title="Pratinjau soal"
+                                            data-bs-toggle="tooltip" data-bs-title="Pratinjau soal"
                                         >
                                             <i class="ri-eye-line"></i>
                                         </button>
                                         <a
                                             href="{% url 'question_edit' question.id %}?next={{ request.get_full_path|urlencode }}"
                                             class="btn btn-sm btn-outline-primary"
-                                            title="Edit soal"
+                                            data-bs-toggle="tooltip" data-bs-title="Edit soal"
                                         >
                                             <i class="ri-edit-line"></i>
                                         </a>
@@ -222,7 +222,7 @@
                                             formaction="{% url 'question_duplicate' question.id %}"
                                             formmethod="post"
                                             class="btn btn-sm btn-outline-secondary"
-                                            title="Duplikasi soal"
+                                            data-bs-toggle="tooltip" data-bs-title="Duplikasi soal"
                                         >
                                             <i class="ri-file-copy-line"></i>
                                         </button>
@@ -233,7 +233,7 @@
                                             data-question-text="{{ question.question_text|striptags|truncatechars:60 }}"
                                             data-bs-toggle="modal"
                                             data-bs-target="#deleteModal"
-                                            title="Hapus soal"
+                                            data-bs-toggle="tooltip" data-bs-title="Hapus soal"
                                         >
                                             <i class="ri-delete-bin-line"></i>
                                         </button>

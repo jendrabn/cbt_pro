@@ -23,7 +23,7 @@
         <div class="card border-0 shadow-sm">
             <div class="card-header bg-white border-0 pt-3 d-flex justify-content-between align-items-center">
                 <h1 class="h5 mb-0">Konfirmasi Mulai Ujian</h1>
-                <a href="{{ back_url }}" class="btn btn-sm btn-outline-secondary" title="Kembali ke daftar ujian">
+                <a href="{{ back_url }}" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" data-bs-title="Kembali ke daftar ujian">
                     <i class="ri-arrow-left-line me-1"></i>Kembali
                 </a>
             </div>
@@ -95,16 +95,16 @@
                 <form method="post" id="examStartForm" data-require-fullscreen="{% if exam.require_fullscreen %}true{% else %}false{% endif %}" data-require-camera="{% if exam.require_camera %}true{% else %}false{% endif %}" data-require-microphone="{% if exam.require_microphone %}true{% else %}false{% endif %}" data-require-preflight="{% if exam.require_camera or exam.require_microphone or exam.require_fullscreen %}true{% else %}false{% endif %}">
                     {% csrf_token %}
                     {% if exam.require_camera or exam.require_microphone or exam.require_fullscreen %}
-                    <button type="button" class="btn btn-success" id="openPermissionPreflightBtn" title="Periksa izin perangkat sebelum mulai ujian">
+                    <button type="button" class="btn btn-success" id="openPermissionPreflightBtn" data-bs-toggle="tooltip" data-bs-title="Periksa izin perangkat sebelum mulai ujian">
                         <i class="ri-shield-check-line me-1"></i>Cek Izin & Mulai Ujian
                     </button>
                     {% else %}
-                    <button type="submit" class="btn btn-success" title="Mulai ujian sekarang">
+                    <button type="submit" class="btn btn-success" data-bs-toggle="tooltip" data-bs-title="Mulai ujian sekarang">
                         <i class="ri-play-circle-line me-1"></i>Mulai Ujian
                     </button>
                     {% endif %}
                     <noscript>
-                        <button type="submit" class="btn btn-success" title="Mulai ujian sekarang">
+                        <button type="submit" class="btn btn-success" data-bs-toggle="tooltip" data-bs-title="Mulai ujian sekarang">
                             <i class="ri-play-circle-line me-1"></i>Mulai Ujian
                         </button>
                     </noscript>

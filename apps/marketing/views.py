@@ -498,9 +498,9 @@ class ManifestView(View):
             "categories": ["education", "productivity"],
             "lang": "id-ID",
             "dir": "ltr",
-            "id": _absolute_public_url(reverse("landing")),
-            "start_url": _absolute_public_url(reverse("landing")),
-            "scope": _absolute_public_url("/"),
+            "id": reverse("landing"),
+            "start_url": reverse("landing"),
+            "scope": "/",
             "display": "standalone",
             "display_override": ["window-controls-overlay", "standalone", "browser"],
             "orientation": "portrait-primary",
@@ -509,13 +509,13 @@ class ManifestView(View):
             "theme_color": DEFAULT_THEME_COLOR,
             "icons": [
                 {
-                    "src": _absolute_public_url(static("images/web-app-manifest-192x192.png")),
+                    "src": static("images/web-app-manifest-192x192.png"),
                     "sizes": "192x192",
                     "type": "image/png",
                     "purpose": "any",
                 },
                 {
-                    "src": _absolute_public_url(static("images/web-app-manifest-512x512.png")),
+                    "src": static("images/web-app-manifest-512x512.png"),
                     "sizes": "512x512",
                     "type": "image/png",
                     "purpose": "any",

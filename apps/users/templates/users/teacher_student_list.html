@@ -83,10 +83,10 @@
                             <option value="-last_login" {% if filters.sort == '-last_login' %}selected{% endif %}>Login Terakhir</option>
                         </select>
                     </div>
-                    <button type="submit" class="btn btn-primary" title="Terapkan filter">
+                    <button type="submit" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-title="Terapkan filter">
                         <i class="ri-filter-3-line me-1"></i>Terapkan
                     </button>
-                    <a href="{% url 'teacher_student_list' %}" class="btn btn-outline-secondary cbt-inline-filter-reset" title="Reset semua filter">
+                    <a href="{% url 'teacher_student_list' %}" class="btn btn-outline-secondary cbt-inline-filter-reset" data-bs-toggle="tooltip" data-bs-title="Reset semua filter">
                         <i class="ri-refresh-line me-1"></i>Reset
                     </a>
                 </form>
@@ -140,7 +140,7 @@
                                     {% endif %}
                                 </td>
                                 <td class="text-end pe-3">
-                                    <a href="{% url 'teacher_student_detail' row.user.id %}{% if querystring %}?{{ querystring }}{% endif %}" class="btn btn-sm btn-outline-primary" title="Lihat detail siswa">
+                                    <a href="{% url 'teacher_student_detail' row.user.id %}{% if querystring %}?{{ querystring }}{% endif %}" class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip" data-bs-title="Lihat detail siswa">
                                         <i class="ri-eye-line"></i>
                                     </a>
                                 </td>

@@ -15,7 +15,7 @@
             {% include "partials/page_header.html" with eyebrow="Admin Panel" title="Manajemen Mata Pelajaran" subtitle="Atur mata pelajaran yang dipakai pada seluruh ujian." %}
             <div class="d-flex align-items-center gap-2 cbt-page-header-actions">
                 <div class="d-flex align-items-center gap-2">
-                                <button type="button" class="btn btn-primary" id="openCreateModalBtn" title="Tambah mata pelajaran baru">
+                                <button type="button" class="btn btn-primary" id="openCreateModalBtn" data-bs-toggle="tooltip" data-bs-title="Tambah mata pelajaran baru">
                                     <i class="ri-add-line me-1"></i>Tambah Mata Pelajaran
                                 </button>
                             </div>
@@ -74,10 +74,10 @@
                             <option value="-updated" {% if filters.sort == '-updated' %}selected{% endif %}>Terbaru</option>
                         </select>
                     </div>
-                    <button type="submit" class="btn btn-primary" title="Terapkan filter">
+                    <button type="submit" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-title="Terapkan filter">
                         <i class="ri-filter-3-line me-1"></i>Terapkan
                     </button>
-                    <a href="{% url 'subject_list' %}" class="btn btn-outline-secondary cbt-inline-filter-reset" title="Reset semua filter">
+                    <a href="{% url 'subject_list' %}" class="btn btn-outline-secondary cbt-inline-filter-reset" data-bs-toggle="tooltip" data-bs-title="Reset semua filter">
                         <i class="ri-refresh-line me-1"></i>Reset
                     </a>
                 </form>
@@ -126,10 +126,10 @@
                                 <td>{{ row.exam_count }}</td>
                                 <td class="text-end">
                                     <div class="d-flex justify-content-end gap-1">
-                                        <button type="button" class="btn btn-sm btn-outline-primary edit-subject-btn" title="Edit mata pelajaran">
+                                        <button type="button" class="btn btn-sm btn-outline-primary edit-subject-btn" data-bs-toggle="tooltip" data-bs-title="Edit mata pelajaran">
                                             <i class="ri-edit-line"></i>
                                         </button>
-                                        <button type="button" class="btn btn-sm btn-outline-danger delete-subject-btn" title="Hapus mata pelajaran">
+                                        <button type="button" class="btn btn-sm btn-outline-danger delete-subject-btn" data-bs-toggle="tooltip" data-bs-title="Hapus mata pelajaran">
                                             <i class="ri-delete-bin-line"></i>
                                         </button>
                                     </div>

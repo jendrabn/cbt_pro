@@ -55,7 +55,9 @@ DEMO_STUDENT_EMAIL = os.getenv('DEMO_STUDENT_EMAIL', 'ethan.walker@mail.com').st
 DEMO_STUDENT_PASSWORD = os.getenv('DEMO_STUDENT_PASSWORD', 'student123')
 
 DEBUG = _env_bool('DEBUG', True)
+CUSTOM_ERROR_PAGES = _env_bool('CUSTOM_ERROR_PAGES', not DEBUG)
 HTTPS_ENABLED = _env_bool('HTTPS_ENABLED', _env_bool('SECURE_SSL_REDIRECT', not DEBUG))
+SERVE_STATIC_WITH_DJANGO = _env_bool('SERVE_STATIC_WITH_DJANGO', DEBUG or not HTTPS_ENABLED)
 
 ALLOWED_HOSTS = _env_list('ALLOWED_HOSTS', 'localhost,127.0.0.1')
 CSRF_TRUSTED_ORIGINS = _env_list('CSRF_TRUSTED_ORIGINS')
@@ -96,6 +98,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "apps.core.middleware.ErrorPageMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",

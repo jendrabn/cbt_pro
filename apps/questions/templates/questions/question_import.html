@@ -15,7 +15,7 @@
             {% include "partials/page_header.html" with eyebrow="Panel Guru" title="Impor Bank Soal" %}
             <div class="d-flex align-items-center gap-2 cbt-page-header-actions">
                 <div class="d-flex gap-2">
-                    <a href="{% url 'question_list' %}" class="btn btn-outline-primary" title="Kembali ke daftar bank soal">
+                    <a href="{% url 'question_list' %}" class="btn btn-outline-primary" data-bs-toggle="tooltip" data-bs-title="Kembali ke daftar bank soal">
                         <i class="ri-arrow-left-line me-1"></i>Kembali ke Bank Soal
                     </a>
                 </div>
@@ -51,7 +51,7 @@
                                 <div class="form-text">Format didukung: `.xlsx` (maksimal 10MB).</div>
                             </div>
                             <div class="d-grid gap-2">
-                                <button type="submit" class="btn btn-primary" title="Mulai proses impor soal">
+                                <button type="submit" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-title="Mulai proses impor soal">
                                     <i class="ri-upload-line me-1"></i>Mulai Impor
                                 </button>
                             </div>
@@ -100,7 +100,7 @@
                     <div class="card-body">
                         <p class="mb-2">Template Excel menggunakan header teknis pada baris pertama, misalnya <code>subject</code>, <code>question_type</code>, dan <code>question_text</code>.</p>
                         <div class="d-flex flex-wrap gap-2 mb-3">
-                            <a href="{% url 'question_import_template' %}" class="btn btn-outline-primary btn-sm" title="Unduh templat impor Excel">
+                            <a href="{% url 'question_import_template' %}" class="btn btn-outline-primary btn-sm" data-bs-toggle="tooltip" data-bs-title="Unduh templat impor Excel">
                                 <i class="ri-download-line me-1"></i>Template Bank Soal
                             </a>
                         </div>
@@ -181,7 +181,7 @@
                                         <td>{% enum_badge "question_import_status" row.status %}</td>
                                         <td class="text-end pe-3">
                                             <div class="d-flex justify-content-end gap-1">
-                                                <a href="{% url 'question_import_report' row.id %}" class="btn btn-sm btn-outline-primary" title="Unduh laporan import soal">
+                                                <a href="{% url 'question_import_report' row.id %}" class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip" data-bs-title="Unduh laporan import soal">
                                                     <i class="ri-download-line"></i>
                                                 </a>
                                             </div>

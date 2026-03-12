@@ -15,10 +15,10 @@
             {% include "partials/page_header.html" with eyebrow="Hasil & Analitik" title=exam.title %}
             <div class="d-flex align-items-center gap-2 cbt-page-header-actions">
                 <div class="d-flex flex-wrap gap-2">
-                                <a href="{% url 'teacher_results' %}" class="btn btn-outline-primary" title="Kembali ke daftar hasil ujian">
+                                <a href="{% url 'teacher_results' %}" class="btn btn-outline-primary" data-bs-toggle="tooltip" data-bs-title="Kembali ke daftar hasil ujian">
                                     <i class="ri-arrow-left-line me-1"></i>Daftar Hasil
                                 </a>
-                                <a href="{{ analytics_url }}" class="btn btn-outline-info" title="Buka dashboard analitik">
+                                <a href="{{ analytics_url }}" class="btn btn-outline-info" data-bs-toggle="tooltip" data-bs-title="Buka dashboard analitik">
                                     <i class="ri-line-chart-line me-1"></i>Analitik
                                 </a>
                             </div>
@@ -124,10 +124,10 @@
                                 <option value="export_excel">Ekspor Excel</option>
                                 <option value="issue_certificates">Issue Sertifikat Manual</option>
                             </select>
-                            <button type="submit" class="btn btn-sm btn-outline-primary" title="Terapkan aksi bulk ke hasil siswa terpilih">
+                            <button type="submit" class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip" data-bs-title="Terapkan aksi bulk ke hasil siswa terpilih">
                                 <i class="ri-check-line me-1"></i>Terapkan
                             </button>
-                            <button type="button" class="btn btn-sm btn-outline-secondary" id="toggle-select-all" title="Pilih semua siswa">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" id="toggle-select-all" data-bs-toggle="tooltip" data-bs-title="Pilih semua siswa">
                                 <i class="ri-check-double-line me-1"></i><span class="toggle-select-all-label">Pilih Semua</span>
                             </button>
                             <select id="result-sort-option" class="form-select form-select-sm" style="width: 230px;" title="Urutkan hasil siswa">
@@ -137,10 +137,10 @@
                             </select>
                         </div>
                         <div class="d-flex flex-wrap gap-2 justify-content-end">
-                            <a href="{{ export_csv_url }}" class="btn btn-sm btn-outline-success" title="Ekspor semua hasil ke CSV">
+                            <a href="{{ export_csv_url }}" class="btn btn-sm btn-outline-success" data-bs-toggle="tooltip" data-bs-title="Ekspor semua hasil ke CSV">
                                 <i class="ri-download-line me-1"></i>CSV
                             </a>
-                            <a href="{{ export_xlsx_url }}" class="btn btn-sm btn-outline-success" title="Ekspor semua hasil ke Excel">
+                            <a href="{{ export_xlsx_url }}" class="btn btn-sm btn-outline-success" data-bs-toggle="tooltip" data-bs-title="Ekspor semua hasil ke Excel">
                                 <i class="ri-download-line me-1"></i>Excel
                             </a>
                         </div>
@@ -195,7 +195,7 @@
                                     <td>{{ row.time_taken_human }}</td>
                                     <td>
                                         {% if row.allow_retake %}
-                                        <a href="{% url 'retake_history' exam.id row.result.student_id %}" class="btn btn-sm btn-outline-secondary" title="Buka riwayat attempt siswa ini">
+                                        <a href="{% url 'retake_history' exam.id row.result.student_id %}" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" data-bs-title="Buka riwayat attempt siswa ini">
                                             {{ row.attempts_label }}
                                         </a>
                                         {% else %}
@@ -218,11 +218,11 @@
                                                 data-violations="{{ row.total_violations }}"
                                                 data-class="{{ row.class_label }}"
                                                 data-review-url="{% url 'answer_review' row.id %}?next={{ request.get_full_path|urlencode }}"
-                                                title="Lihat ringkasan detail hasil siswa"
+                                                data-bs-toggle="tooltip" data-bs-title="Lihat ringkasan detail hasil siswa"
                                             >
                                                 <i class="ri-eye-line"></i>
                                             </button>
-                                            <a href="{% url 'answer_review' row.id %}?next={{ request.get_full_path|urlencode }}" class="btn btn-sm btn-outline-primary" title="Review jawaban lengkap siswa">
+                                            <a href="{% url 'answer_review' row.id %}?next={{ request.get_full_path|urlencode }}" class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip" data-bs-title="Review jawaban lengkap siswa">
                                                 <i class="ri-file-list-3-line"></i>
                                             </a>
                                         </div>
@@ -359,7 +359,7 @@
                     <p class="mb-0"><span class="text-muted">Pelanggaran:</span> <strong id="detailStudentViolations">-</strong></p>
                 </div>
                 <div class="modal-footer">
-                    <a id="detailReviewLink" href="#" class="btn btn-primary" title="Buka halaman review jawaban lengkap">Review Jawaban Lengkap</a>
+                    <a id="detailReviewLink" href="#" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-title="Buka halaman review jawaban lengkap">Review Jawaban Lengkap</a>
                 </div>
             </div>
         </div>

@@ -87,10 +87,10 @@
                     {% csrf_token %}
                     <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-3">
                         <div class="d-flex flex-wrap gap-2">
-                            <button type="submit" class="btn btn-sm btn-primary" title="Simpan anggota kelas terpilih">
+                            <button type="submit" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" data-bs-title="Simpan anggota kelas terpilih">
                                 <i class="ri-save-line me-1"></i>Simpan Anggota
                             </button>
-                            <button type="button" class="btn btn-sm btn-outline-secondary" id="toggle-select-all-members" title="Pilih semua siswa pada daftar ini">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" id="toggle-select-all-members" data-bs-toggle="tooltip" data-bs-title="Pilih semua siswa pada daftar ini">
                                 <i class="ri-check-double-line me-1"></i><span class="toggle-select-members-label">Pilih Semua</span>
                             </button>
                         </div>

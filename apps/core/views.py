@@ -31,6 +31,7 @@ from apps.core.services import (
     invalidate_branding_cache,
     invalidate_certificate_feature_cache,
 )
+from apps.core.utils import render_error_page
 from apps.notifications.models import SystemSetting
 
 
@@ -748,4 +749,16 @@ class SettingsBackupDownloadView(RoleRequiredMixin, View):
 
 
 def permission_denied_view(request, exception=None):
-    return render(request, "errors/403.html", status=403)
+    return render_error_page(request, 403)
+
+
+def bad_request_view(request, exception=None):
+    return render_error_page(request, 400)
+
+
+def not_found_view(request, exception=None):
+    return render_error_page(request, 404)
+
+
+def server_error_view(request):
+    return render_error_page(request, 500)

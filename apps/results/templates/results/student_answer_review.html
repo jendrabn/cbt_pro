@@ -58,10 +58,10 @@
             {% include "partials/page_header.html" with eyebrow="Review Jawaban Ujian" title=exam.title subtitle="Pelajari penjelasan per soal dan bandingkan dengan kunci jawaban." %}
             <div class="d-flex align-items-center gap-2 cbt-page-header-actions">
                 <div class="d-flex flex-wrap gap-2">
-                                <a href="{{ back_url }}" class="btn btn-outline-primary" title="Kembali ke detail hasil ujian">
+                                <a href="{{ back_url }}" class="btn btn-outline-primary" data-bs-toggle="tooltip" data-bs-title="Kembali ke detail hasil ujian">
                                     <i class="ri-arrow-left-line me-1"></i>Kembali
                                 </a>
-                                <a href="{{ result_detail_url }}" class="btn btn-outline-secondary" title="Buka halaman detail hasil ujian">
+                                <a href="{{ result_detail_url }}" class="btn btn-outline-secondary" data-bs-toggle="tooltip" data-bs-title="Buka halaman detail hasil ujian">
                                     <i class="ri-file-chart-line me-1"></i>Detail Hasil
                                 </a>
                                 {% if certificate_state != "hidden" %}
@@ -71,7 +71,7 @@
                                     class="btn {% if certificate_state == 'active' %}btn-outline-success{% elif certificate_state == 'revoked' %}btn-outline-danger disabled{% else %}btn-outline-warning disabled{% endif %}"
                                     data-certificate-state="{{ certificate_state }}"
                                     data-certificate-status-url="{{ certificate_status_url }}"
-                                    title="Status sertifikat hasil ujian"
+                                    data-bs-toggle="tooltip" data-bs-title="Status sertifikat hasil ujian"
                                 >
                                     <i class="{% if certificate_state == 'active' %}ri-award-line{% elif certificate_state == 'revoked' %}ri-close-circle-line{% else %}ri-loader-4-line{% endif %} me-1"></i>
                                     <span id="studentReviewCertificateLabel">

@@ -6,9 +6,11 @@ from uuid import uuid4
 from django.conf import settings
 from django.core.management import call_command
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.http import HttpResponse
 from django.template import Context, Template
-from django.test import TestCase, override_settings
-from django.urls import reverse
+from django.test import SimpleTestCase, TestCase, override_settings
+from django.urls import path as url_path, reverse
+from django.views import View
 
 from apps.accounts.models import User
 from apps.attempts.models import ExamViolation
@@ -17,6 +19,26 @@ from apps.core.services import invalidate_branding_cache
 from apps.exams.models import Exam
 from apps.notifications.models import SystemSetting
 from apps.questions.models import Question
+
+
+def too_many_requests_view(request):
+    return HttpResponse("Terlalu banyak permintaan.", status=429)
+
+
+def crash_view(request):
+    raise RuntimeError("boom")
+
+
+class GetOnlyView(View):
+    def get(self, request):
+        return HttpResponse("OK")
+
+
+urlpatterns = [
+    url_path("return-429/", too_many_requests_view),
+    url_path("crash/", crash_view),
+    url_path("get-only/", GetOnlyView.as_view()),
+]
 
 
 class SystemSettingsViewTests(TestCase):
@@ -169,6 +191,33 @@ class SystemSettingsViewTests(TestCase):
         response = self.client.get(reverse("landing"))
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, reverse("login"))
+
+
+class ErrorPageMiddlewareTests(SimpleTestCase):
+    @override_settings(DEBUG=True)
+    def test_unknown_route_uses_custom_404_page_in_debug(self):
+        response = self.client.get("/student/dashboard/sss")
+        self.assertEqual(response.status_code, 404)
+        self.assertContains(response, "404 - Halaman Tidak Ditemukan", status_code=404)
+
+    @override_settings(DEBUG=True, ROOT_URLCONF="apps.core.tests")
+    def test_generic_4xx_response_uses_family_template(self):
+        response = self.client.get("/return-429/")
+        self.assertEqual(response.status_code, 429)
+        self.assertContains(response, "429 - Permintaan Tidak Dapat Diproses", status_code=429)
+
+    @override_settings(DEBUG=True, ROOT_URLCONF="apps.core.tests")
+    def test_method_not_allowed_uses_family_template(self):
+        response = self.client.post("/get-only/")
+        self.assertEqual(response.status_code, 405)
+        self.assertContains(response, "405 - Permintaan Tidak Dapat Diproses", status_code=405)
+
+    @override_settings(DEBUG=True, ROOT_URLCONF="apps.core.tests")
+    def test_unhandled_exception_uses_custom_500_page(self):
+        client = self.client_class(raise_request_exception=False)
+        response = client.get("/crash/")
+        self.assertEqual(response.status_code, 500)
+        self.assertContains(response, "500 - Terjadi Gangguan Server", status_code=500)
 
 
 class EnumBadgeHelpersTests(TestCase):

@@ -690,10 +690,10 @@
                         <div class="order-num">${index + 1}</div>
                         <span class="order-text richtext-content">${item.text}</span>
                         <div class="order-arrows">
-                            <button type="button" class="btn-arrow" data-direction="up" ${index === 0 ? "disabled" : ""} title="Naikkan urutan">
+                            <button type="button" class="btn-arrow" data-direction="up" ${index === 0 ? "disabled" : ""} data-bs-toggle="tooltip" data-bs-title="Naikkan urutan">
                                 <i class="ri-arrow-up-s-line" aria-hidden="true"></i>
                             </button>
-                            <button type="button" class="btn-arrow" data-direction="down" ${index === orderingItems.length - 1 ? "disabled" : ""} title="Turunkan urutan">
+                            <button type="button" class="btn-arrow" data-direction="down" ${index === orderingItems.length - 1 ? "disabled" : ""} data-bs-toggle="tooltip" data-bs-title="Turunkan urutan">
                                 <i class="ri-arrow-down-s-line" aria-hidden="true"></i>
                             </button>
                         </div>

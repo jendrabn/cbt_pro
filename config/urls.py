@@ -15,10 +15,13 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
+import re
+
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import include, path
+from django.contrib.staticfiles.views import serve as staticfiles_serve
+from django.urls import include, path, re_path
 
 urlpatterns = [
     path("", include("apps.accounts.urls")),
@@ -38,6 +41,16 @@ urlpatterns = [
 ]
 
 handler403 = "apps.core.views.permission_denied_view"
+handler400 = "apps.core.views.bad_request_view"
+handler404 = "apps.core.views.not_found_view"
+handler500 = "apps.core.views.server_error_view"
 
-if settings.DEBUG:
+if settings.DEBUG or getattr(settings, "SERVE_STATIC_WITH_DJANGO", False):
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += [
+        re_path(
+            rf"^{re.escape(settings.STATIC_URL.lstrip('/'))}(?P<path>.*)$",
+            staticfiles_serve,
+            {"insecure": True},
+        )
+    ]

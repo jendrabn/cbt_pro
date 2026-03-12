@@ -15,10 +15,10 @@
             {% include "partials/page_header.html" with eyebrow="Admin Panel" title="Manajemen Pengguna" subtitle="Kelola semua akun pengguna sistem." %}
             <div class="d-flex align-items-center gap-2 cbt-page-header-actions">
                 <div class="d-flex align-items-center gap-2">
-                                <a href="{% url 'user_create' %}" class="btn btn-primary" title="Tambah pengguna baru">
+                                <a href="{% url 'user_create' %}" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-title="Tambah pengguna baru">
                                     <i class="ri-user-add-line me-1"></i>Tambah Pengguna
                                 </a>
-                                <a href="{% url 'user_import' %}" class="btn btn-outline-secondary" title="Impor pengguna">
+                                <a href="{% url 'user_import' %}" class="btn btn-outline-secondary" data-bs-toggle="tooltip" data-bs-title="Impor pengguna">
                                     <i class="ri-upload-2-line me-1"></i>Impor Pengguna
                                 </a>
                             </div>
@@ -93,10 +93,10 @@
                             <input type="date" name="date_to" value="{{ filters.date_to }}" class="form-control">
                         </div>
                     </div>
-                    <button type="submit" class="btn btn-primary" title="Terapkan filter">
+                    <button type="submit" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-title="Terapkan filter">
                         <i class="ri-filter-3-line me-1"></i>Terapkan
                     </button>
-                    <a href="{% url 'user_list' %}" class="btn btn-outline-secondary cbt-inline-filter-reset" title="Reset semua filter">
+                    <a href="{% url 'user_list' %}" class="btn btn-outline-secondary cbt-inline-filter-reset" data-bs-toggle="tooltip" data-bs-title="Reset semua filter">
                         <i class="ri-refresh-line me-1"></i>Reset
                     </a>
                 </form>
@@ -118,18 +118,18 @@
                                 <option value="export_csv">Ekspor CSV</option>
                                 <option value="export_excel">Ekspor Excel</option>
                             </select>
-                            <button type="submit" class="btn btn-sm btn-outline-primary" title="Terapkan aksi bulk ke pengguna terpilih">
+                    <button type="submit" class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip" data-bs-title="Terapkan aksi bulk ke pengguna terpilih">
                                 <i class="ri-check-line me-1"></i>Terapkan
                             </button>
-                            <button type="button" class="btn btn-sm btn-outline-secondary" id="toggle-select-all" title="Pilih semua pengguna">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" id="toggle-select-all" data-bs-toggle="tooltip" data-bs-title="Pilih semua pengguna">
                                 <i class="ri-check-double-line me-1"></i><span class="toggle-select-all-label">Pilih Semua</span>
                             </button>
                         </div>
                         <div class="d-flex flex-wrap gap-2">
-                            <a href="{% url 'user_export' %}?format=csv{% if querystring %}&{{ querystring }}{% endif %}" class="btn btn-sm btn-outline-success" title="Ekspor semua data pengguna ke CSV">
+                            <a href="{% url 'user_export' %}?format=csv{% if querystring %}&{{ querystring }}{% endif %}" class="btn btn-sm btn-outline-success" data-bs-toggle="tooltip" data-bs-title="Ekspor semua data pengguna ke CSV">
                                 <i class="ri-download-line me-1"></i>CSV
                             </a>
-                            <a href="{% url 'user_export' %}?format=xlsx{% if querystring %}&{{ querystring }}{% endif %}" class="btn btn-sm btn-outline-success" title="Ekspor semua data pengguna ke Excel">
+                            <a href="{% url 'user_export' %}?format=xlsx{% if querystring %}&{{ querystring }}{% endif %}" class="btn btn-sm btn-outline-success" data-bs-toggle="tooltip" data-bs-title="Ekspor semua data pengguna ke Excel">
                                 <i class="ri-download-line me-1"></i>Excel
                             </a>
                         </div>
@@ -181,10 +181,10 @@
                                     <td>{{ user.last_login|date:"d M Y H:i"|default:"-" }}</td>
                                     <td class="text-end pe-3">
                                         <div class="d-flex justify-content-end gap-1">
-                                            <a href="{% url 'user_detail' user.id %}" class="btn btn-sm btn-outline-primary" title="Lihat detail pengguna">
+                                            <a href="{% url 'user_detail' user.id %}" class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip" data-bs-title="Lihat detail pengguna">
                                                 <i class="ri-eye-line"></i>
                                             </a>
-                                            <a href="{% url 'user_edit' user.id %}" class="btn btn-sm btn-outline-secondary" title="Edit data pengguna">
+                                            <a href="{% url 'user_edit' user.id %}" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" data-bs-title="Edit data pengguna">
                                                 <i class="ri-edit-line"></i>
                                             </a>
                                             <button
@@ -192,7 +192,7 @@
                                                 formaction="{% url 'user_toggle_status' user.id %}"
                                                 formmethod="post"
                                                 class="btn btn-sm {% if user.is_active %}btn-outline-dark{% else %}btn-outline-success{% endif %}"
-                                                title="{% if user.is_active %}Nonaktifkan pengguna{% else %}Aktifkan pengguna{% endif %}">
+                                                data-bs-toggle="tooltip" data-bs-title="{% if user.is_active %}Nonaktifkan pengguna{% else %}Aktifkan pengguna{% endif %}">
                                                 {% if user.is_active %}
                                                 <i class="ri-user-unfollow-line"></i>
                                                 {% else %}
@@ -204,7 +204,7 @@
                                                 formaction="{% url 'user_delete' user.id %}"
                                                 formmethod="post"
                                                 class="btn btn-sm btn-outline-danger"
-                                                title="Hapus pengguna"
+                                                data-bs-toggle="tooltip" data-bs-title="Hapus pengguna"
                                                 onclick="return confirm('Hapus pengguna ini?');">
                                                 <i class="ri-delete-bin-line"></i>
                                             </button>

@@ -14,7 +14,7 @@
         <div class="cbt-page-header-body">
             {% include "partials/page_header.html" with eyebrow="Panel Guru" title=student_user.get_full_name|default:student_user.username subtitle=student_user.email %}
             <div class="d-flex align-items-center gap-2 cbt-page-header-actions">
-                <a href="{% url 'teacher_student_list' %}{% if back_querystring %}?{{ back_querystring }}{% endif %}" class="btn btn-outline-primary" title="Kembali ke daftar siswa">
+                <a href="{% url 'teacher_student_list' %}{% if back_querystring %}?{{ back_querystring }}{% endif %}" class="btn btn-outline-primary" data-bs-toggle="tooltip" data-bs-title="Kembali ke daftar siswa">
                     <i class="ri-arrow-left-line me-1"></i>Kembali ke List
                 </a>
             </div>
