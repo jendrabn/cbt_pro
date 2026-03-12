@@ -157,13 +157,13 @@
                         </div>
                     </div>
                 </div>
-                <div id="selectedQuestionList" class="list-group question-picker-list question-picker-list--selected" aria-live="polite"></div>
+                <div id="selectedQuestionList" class="list-group" aria-live="polite"></div>
                 <div class="d-none">
                     <span id="selectedQuestionCount">0</span>
                     <span id="selectedQuestionTotalPoints">0</span>
                 </div>
 
-                <div class="modal fade question-picker-modal" id="availableQuestionModal" tabindex="-1" aria-labelledby="availableQuestionModalLabel" aria-hidden="true" data-bs-backdrop="static">
+                <div class="modal fade" id="availableQuestionModal" tabindex="-1" aria-labelledby="availableQuestionModalLabel" aria-hidden="true" data-bs-backdrop="static">
                     <div class="modal-dialog modal-xl modal-dialog-scrollable">
                         <div class="modal-content">
                             <div class="modal-header">
@@ -235,7 +235,7 @@
                                     </div>
                                 </div>
 
-                                <div class="list-group question-picker-list" id="availableQuestionList" aria-live="polite">
+                                <div class="list-group" id="availableQuestionList" aria-live="polite">
                                     <div class="list-group-item text-muted small">Memuat daftar soal...</div>
                                 </div>
                                 <div class="d-flex justify-content-center mt-2">
@@ -494,7 +494,7 @@
                         <h3 class="h6 mb-0">Pilih Kelas</h3>
                         <span class="cbt-status-badge is-secondary">Total Kelas: {{ form.available_classes|length }}</span>
                     </div>
-                    <div class="list-group" id="classAssignmentList" style="max-height: 22rem; overflow:auto;">
+                    <div class="list-group overflow-auto max-h-22rem" id="classAssignmentList">
                         {% for class_obj in form.available_classes %}
                         <div class="list-group-item">
                             <div class="form-check mb-0">
@@ -517,7 +517,7 @@
                             </button>
                         </div>
                     </div>
-                    <div class="list-group" id="studentAssignmentList" style="max-height: 22rem; overflow:auto;">
+                    <div class="list-group overflow-auto max-h-22rem" id="studentAssignmentList">
                         {% for student in form.available_students %}
                         <div class="list-group-item">
                             <div class="form-check mb-0">
@@ -531,9 +531,11 @@
                     </div>
                 </div>
             </div>
-            <div class="border rounded p-3 bg-light mt-3">
-                <h4 class="h6 mb-2">Penugasan Terpilih</h4>
-                <ul id="assignmentSummaryList" class="small mb-0"></ul>
+            <div class="card bg-light-subtle mt-3">
+                <div class="card-body py-3">
+                    <h4 class="h6 mb-2">Penugasan Terpilih</h4>
+                    <ul id="assignmentSummaryList" class="list-unstyled small mb-0"></ul>
+                </div>
             </div>
         </div>
     </section>

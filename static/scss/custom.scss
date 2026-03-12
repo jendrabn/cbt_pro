@@ -799,104 +799,19 @@ body.dashboard-body.cbt-sidebar-collapsed .cbt-sidebar-link {
     margin-left: 0;
 }
 
-.question-picker-list {
-    border: 1px solid var(--dash-border);
-    border-radius: 0.85rem;
-    background: #fff;
-    overflow: hidden;
+.max-h-22rem {
+    max-height: 22rem;
 }
 
-.question-picker-modal .modal-content {
-    border: 1px solid var(--dash-border);
-    border-radius: 0.95rem;
-}
-
-.question-picker-modal .modal-footer {
-    background: #fff;
-}
-
-.question-picker-list--selected {
-    min-height: 14rem;
-}
-
-.question-picker-list .list-group-item {
-    padding: 1rem 1.1rem;
-    border-left: 0;
-    border-right: 0;
-}
-
-.question-picker-list .list-group-item:first-child {
-    border-top: 0;
-}
-
-.question-picker-item {
-    transition: background-color 0.18s ease, box-shadow 0.18s ease;
-}
-
-.question-picker-item:hover {
-    background: #f8fafc;
-}
-
-.question-picker-item.is-selected,
-.selected-question-item.is-bulk-selected {
-    background: #f8fbff;
-    box-shadow: inset 3px 0 0 rgba(var(--bs-primary-rgb), 0.55);
-}
-
-.question-picker-check {
-    min-height: 0;
-    padding-left: 0;
-    margin-top: 0;
-    flex-shrink: 0;
-    display: inline-flex;
-    align-items: center;
-}
-
-.question-picker-check .form-check-input {
-    float: none;
-    margin: 0;
-}
-
-.question-picker-content,
-.question-picker-copy {
+.min-w-0 {
     min-width: 0;
 }
 
-.question-picker-copy {
-    flex: 1 1 18rem;
-}
-
 .question-picker-title {
-    color: var(--dash-ink);
-    font-size: 1.02rem;
-    line-height: 1.45;
     display: -webkit-box;
     -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
+    -webkit-line-clamp: 3;
     overflow: hidden;
-    word-break: break-word;
-}
-
-.question-picker-meta {
-    margin-bottom: 0;
-}
-
-.question-picker-meta > span {
-    white-space: nowrap;
-}
-
-.question-picker-actions {
-    flex-shrink: 0;
-    align-self: center;
-    justify-content: flex-end;
-}
-
-.question-picker-actions .drag-handle {
-    cursor: grab;
-}
-
-.question-picker-actions .drag-handle:active {
-    cursor: grabbing;
 }
 
 .icon-only-btn {
@@ -931,11 +846,12 @@ body.dashboard-body.cbt-sidebar-collapsed .cbt-sidebar-link {
     color: #a02537;
 }
 
-.question-picker-inline-check {
-    min-height: 100%;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
+.drag-handle {
+    cursor: grab;
+}
+
+.drag-handle:active {
+    cursor: grabbing;
 }
 
 .health-row {
@@ -1049,10 +965,6 @@ body.dashboard-body.cbt-sidebar-collapsed .cbt-sidebar-link {
         min-width: 0;
     }
 
-    .question-picker-actions {
-        width: auto;
-        justify-content: flex-end;
-    }
 }
 
 

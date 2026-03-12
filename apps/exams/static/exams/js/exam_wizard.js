@@ -258,16 +258,16 @@
             var badges = [];
 
             if (subjectName) {
-                badges.push('<span class="badge-soft-info">' + escapeHTML(subjectName) + "</span>");
+                badges.push('<span class="badge-soft-info text-nowrap">' + escapeHTML(subjectName) + "</span>");
             }
 
             if (categoryName) {
-                badges.push('<span class="badge-soft-secondary">' + escapeHTML(categoryName) + "</span>");
+                badges.push('<span class="badge-soft-secondary text-nowrap">' + escapeHTML(categoryName) + "</span>");
             }
 
-            badges.push('<span class="badge-soft-warning">' + escapeHTML(formatPointsValue(pointsValue)) + " poin</span>");
+            badges.push('<span class="badge-soft-warning text-nowrap">' + escapeHTML(formatPointsValue(pointsValue)) + " poin</span>");
             badges.push(
-                '<span class="' + questionTypeBadgeClass(questionType) + '">'
+                '<span class="' + questionTypeBadgeClass(questionType) + ' text-nowrap">'
                 + escapeHTML(questionTypeLabel(questionType))
                 + "</span>"
             );
@@ -334,16 +334,14 @@
                     item.question_type || ""
                 );
                 return (
-                    '<div class="list-group-item question-picker-item" data-question-id="' + item.id + '" data-category-id="' + escapeHTML(item.category_id || "") + '">' +
+                    '<div class="list-group-item list-group-item-action question-picker-item" data-question-id="' + item.id + '" data-category-id="' + escapeHTML(item.category_id || "") + '">' +
                         '<div class="d-flex align-items-center gap-3">' +
-                            '<div class="question-picker-check">' +
-                                '<input type="checkbox" class="form-check-input question-picker-checkbox" id="' + checkboxId + '" value="' + item.id + '" title="Pilih soal" aria-label="Pilih soal: ' + safeText + '" aria-labelledby="' + titleId + '">' +
+                            '<div class="form-check m-0 d-flex align-items-center flex-shrink-0">' +
+                                '<input type="checkbox" class="form-check-input question-picker-checkbox m-0" id="' + checkboxId + '" value="' + item.id + '" title="Pilih soal" aria-label="Pilih soal: ' + safeText + '" aria-labelledby="' + titleId + '">' +
                             "</div>" +
-                            '<div class="question-picker-content flex-grow-1">' +
-                                '<div class="question-picker-copy">' +
-                                    '<p class="question-picker-title mb-2 fw-semibold" id="' + titleId + '">' + safeText + "</p>" +
-                                    '<div class="d-flex flex-wrap gap-2 question-picker-meta">' + metaBadges + "</div>" +
-                                "</div>" +
+                            '<div class="flex-grow-1 min-w-0">' +
+                                '<p class="question-picker-title mb-2 fw-semibold" id="' + titleId + '">' + safeText + "</p>" +
+                                '<div class="d-flex flex-wrap gap-2 mb-0">' + metaBadges + "</div>" +
                             '</div>' +
                         '</div>' +
                     "</div>"
@@ -447,7 +445,7 @@
                 checkbox.checked = !!selectedQuestions[checkbox.value];
                 var item = checkbox.closest(".question-picker-item");
                 if (item) {
-                    item.classList.toggle("is-selected", checkbox.checked);
+                    item.classList.toggle("list-group-item-primary", checkbox.checked);
                 }
             });
             syncAvailableToggleState();
@@ -530,16 +528,14 @@
                     item.question_type || ""
                 );
                 return (
-                    '<div class="selected-question-item question-picker-item list-group-item" data-question-id="' + item.question_id + '">' +
+                    '<div class="selected-question-item list-group-item" data-question-id="' + item.question_id + '">' +
                         '<div class="d-flex align-items-center gap-3">' +
-                            '<div class="question-picker-check">' +
-                                '<input type="checkbox" class="form-check-input selected-question-bulk-check" id="' + bulkCheckId + '" title="Pilih untuk bulk action" aria-labelledby="' + titleId + '">' +
+                            '<div class="form-check m-0 d-flex align-items-center flex-shrink-0">' +
+                                '<input type="checkbox" class="form-check-input selected-question-bulk-check m-0" id="' + bulkCheckId + '" title="Pilih untuk bulk action" aria-labelledby="' + titleId + '">' +
                             "</div>" +
-                            '<div class="question-picker-content flex-grow-1">' +
-                                '<div class="question-picker-copy">' +
-                                    '<p class="question-picker-title mb-2 fw-semibold" id="' + titleId + '">' + safeQuestionText + '</p>' +
-                                    '<div class="d-flex flex-wrap gap-2 question-picker-meta">' + metaBadges + "</div>" +
-                                '</div>' +
+                            '<div class="flex-grow-1 min-w-0">' +
+                                '<p class="question-picker-title mb-2 fw-semibold" id="' + titleId + '">' + safeQuestionText + '</p>' +
+                                '<div class="d-flex flex-wrap gap-2 mb-0">' + metaBadges + "</div>" +
                                 '<div class="row g-2 mt-1 question-picker-controls">' +
                                     '<div class="col-12 col-md-4 col-xl-2">' +
                                         '<input type="number" min="0.01" step="0.01" class="form-control form-control-sm selected-question-points" value="' + safePointsOverride + '" placeholder="Poin (' + safeDefaultPoints + ')" aria-label="Timpa poin untuk soal ini">' +
@@ -567,7 +563,7 @@
                                     "</div>" +
                                 "</div>" +
                             "</div>" +
-                            '<div class="question-picker-actions d-flex align-items-center gap-2">' +
+                            '<div class="d-flex align-items-center gap-2 flex-shrink-0 ms-auto">' +
                                 '<button type="button" class="icon-only-btn drag-handle" title="Geser untuk ubah urutan" aria-label="Geser untuk ubah urutan: ' + safeQuestionText + '">' +
                                     '<i class="ri-draggable fs-5"></i>' +
                                 "</button>" +
@@ -611,7 +607,7 @@
             bulkChecks.forEach(function (checkbox) {
                 var item = checkbox.closest(".selected-question-item");
                 if (item) {
-                    item.classList.toggle("is-bulk-selected", checkbox.checked);
+                    item.classList.toggle("list-group-item-primary", checkbox.checked);
                 }
             });
             var allChecked = !!bulkChecks.length && bulkChecks.every(function (checkbox) { return checkbox.checked; });
