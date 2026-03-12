@@ -340,7 +340,6 @@ class LandingPageView(MarketingPageMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        screenshot_url = _marketing_static_image_url("og-image.png")
         context.update(
             {
                 "proof_points": HOME_PROOF_POINTS,
@@ -349,10 +348,6 @@ class LandingPageView(MarketingPageMixin, TemplateView):
                 "implementation_steps": IMPLEMENTATION_STEPS,
                 "faq_preview": FAQ_PREVIEW,
                 "pricing_plan": PRICING_PLAN,
-                "landing_screenshot_dashboard_url": screenshot_url,
-                "landing_screenshot_exam_url": screenshot_url,
-                "landing_screenshot_bank_soal_url": screenshot_url,
-                "landing_screenshot_certificate_url": screenshot_url,
             }
         )
         return context

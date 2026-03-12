@@ -17,7 +17,7 @@ class MarketingPagesTests(TestCase):
         self.assertContains(response, 'content="index, follow', html=False)
         self.assertContains(response, "https://cbtpro.web.id/static/images/favicon.ico")
         self.assertContains(response, "https://cbtpro.web.id/static/images/og-image.png")
-        self.assertNotContains(response, "images.unsplash.com")
+        self.assertContains(response, "images.unsplash.com/photo-1551288049-bebda4e38f71", html=False)
 
     def test_secondary_pages_show_coming_soon_state(self):
         for route_name in (
