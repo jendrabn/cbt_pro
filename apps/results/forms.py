@@ -25,10 +25,10 @@ def _bootstrap_widget(field):
 
 
 class CertificateTemplateForm(forms.ModelForm):
-    background_image = forms.FileField(required=False)
-    signatory_signature = forms.FileField(required=False)
-    remove_background_image = forms.BooleanField(required=False)
-    remove_signatory_signature = forms.BooleanField(required=False)
+    background_image = forms.FileField(label="Gambar Latar", required=False)
+    signatory_signature = forms.FileField(label="Tanda Tangan", required=False)
+    remove_background_image = forms.BooleanField(label="Hapus gambar latar saat ini", required=False)
+    remove_signatory_signature = forms.BooleanField(label="Hapus tanda tangan saat ini", required=False)
 
     class Meta:
         model = CertificateTemplate
@@ -51,6 +51,25 @@ class CertificateTemplateForm(forms.ModelForm):
             "signatory_name",
             "signatory_title",
         ]
+        labels = {
+            "template_name": "Nama Template",
+            "layout_preset": "Preset Layout",
+            "layout_type": "Orientasi",
+            "paper_size": "Ukuran Kertas",
+            "primary_color": "Warna Utama",
+            "secondary_color": "Warna Sekunder",
+            "show_logo": "Tampilkan Logo",
+            "show_score": "Tampilkan Nilai",
+            "show_grade": "Tampilkan Predikat",
+            "show_rank": "Tampilkan Peringkat",
+            "show_qr_code": "Tampilkan QR Code",
+            "qr_code_size": "Ukuran QR Code",
+            "header_text": "Teks Header",
+            "body_text_template": "Template Isi Sertifikat",
+            "footer_text": "Teks Footer",
+            "signatory_name": "Nama Penanda Tangan",
+            "signatory_title": "Jabatan Penanda Tangan",
+        }
         widgets = {
             "layout_preset": forms.Select(),
             "header_text": forms.Textarea(attrs={"rows": 2}),
@@ -85,17 +104,29 @@ class CertificateTemplateForm(forms.ModelForm):
             "placeholder",
             "Gunakan placeholder seperti {{ student_full_name }}, {{ exam_title }}, {{ final_score }}",
         )
+        self.fields["layout_preset"].choices = [
+            (value, self._translate_layout_preset_label(label))
+            for value, label in self.fields["layout_preset"].choices
+        ]
+        self.fields["layout_type"].choices = [
+            (value, self._translate_layout_type_label(label))
+            for value, label in self.fields["layout_type"].choices
+        ]
+        self.fields["qr_code_size"].choices = [
+            (value, self._translate_qr_code_size_label(label))
+            for value, label in self.fields["qr_code_size"].choices
+        ]
 
     def clean_primary_color(self):
         value = (self.cleaned_data.get("primary_color") or "").strip()
         if not HEX_COLOR_PATTERN.match(value):
-            raise forms.ValidationError("Primary color harus format HEX, contoh: #1A56DB")
+            raise forms.ValidationError("Warna utama harus berformat HEX, contoh: #1A56DB")
         return value
 
     def clean_secondary_color(self):
         value = (self.cleaned_data.get("secondary_color") or "").strip()
         if not HEX_COLOR_PATTERN.match(value):
-            raise forms.ValidationError("Secondary color harus format HEX, contoh: #0E9F6E")
+            raise forms.ValidationError("Warna sekunder harus berformat HEX, contoh: #0E9F6E")
         return value
 
     def clean_background_image(self):
@@ -126,6 +157,32 @@ class CertificateTemplateForm(forms.ModelForm):
         if int(getattr(file_obj, "size", 0) or 0) > max_size:
             raise forms.ValidationError("Ukuran file melebihi batas yang diizinkan.")
         return file_obj
+
+    @staticmethod
+    def _translate_layout_preset_label(label):
+        mapping = {
+            "Classic Formal": "Klasik Formal",
+            "Modern Minimalist": "Modern Minimalis",
+            "Portrait Achievement": "Potret Prestasi",
+        }
+        return mapping.get(label, label)
+
+    @staticmethod
+    def _translate_layout_type_label(label):
+        mapping = {
+            "Landscape": "Lanskap",
+            "Portrait": "Potret",
+        }
+        return mapping.get(label, label)
+
+    @staticmethod
+    def _translate_qr_code_size_label(label):
+        mapping = {
+            "Small": "Kecil",
+            "Medium": "Sedang",
+            "Large": "Besar",
+        }
+        return mapping.get(label, label)
 
 
 class EssayManualGradingForm(forms.Form):

@@ -145,53 +145,53 @@
                             <div class="row g-3 mb-4">
                                 <div class="col-md-6">
                                     <label class="form-label">{{ branding_form.institution_logo_url.label }}</label>
-                                    {{ branding_form.institution_logo_url }}
-                                    <small class="text-muted d-block">PNG/JPG/SVG, maksimum 2 MB.</small>
+                                    <div class="input-group">
+                                        {{ branding_form.institution_logo_url }}
+                                        {% if branding_logo_url %}
+                                        <a href="{{ branding_logo_url }}" target="_blank" rel="noopener noreferrer" class="input-group-text text-decoration-none" title="Buka logo utama asli">
+                                            <i class="ri-image-line"></i>
+                                        </a>
+                                        {% else %}
+                                        <span class="input-group-text text-muted"><i class="ri-image-line"></i></span>
+                                        {% endif %}
+                                    </div>
+                                    <div id="institutionLogoHelp" class="form-text">PNG/JPG/SVG, maksimum 2 MB.</div>
                                     {% for error in branding_form.institution_logo_url.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
                                 </div>
-                                <div class="col-md-6 d-flex align-items-end">
-                                    {% if branding_logo_url %}
-                                    <img src="{{ branding_logo_url }}" alt="Logo Utama" class="logo-preview">
-                                    {% else %}
-                                    <div class="logo-preview d-flex align-items-center justify-content-center text-muted"><i class="ri-image-line"></i></div>
-                                    {% endif %}
-                                </div>
-
                                 <div class="col-md-6">
                                     <label class="form-label">{{ branding_form.institution_logo_dark_url.label }}</label>
-                                    {{ branding_form.institution_logo_dark_url }}
+                                    <div class="input-group">
+                                        {{ branding_form.institution_logo_dark_url }}
+                                        {% if branding_logo_dark_url %}
+                                        <a href="{{ branding_logo_dark_url }}" target="_blank" rel="noopener noreferrer" class="input-group-text text-decoration-none" title="Buka logo dark asli">
+                                            <i class="ri-image-line"></i>
+                                        </a>
+                                        {% else %}
+                                        <span class="input-group-text text-muted"><i class="ri-image-line"></i></span>
+                                        {% endif %}
+                                    </div>
                                     {% for error in branding_form.institution_logo_dark_url.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
                                 </div>
-                                <div class="col-md-6 d-flex align-items-end">
-                                    {% if branding_logo_dark_url %}
-                                    <img src="{{ branding_logo_dark_url }}" alt="Logo Dark" class="logo-preview">
-                                    {% else %}
-                                    <div class="logo-preview d-flex align-items-center justify-content-center text-muted"><i class="ri-image-line"></i></div>
-                                    {% endif %}
-                                </div>
-
                                 <div class="col-md-6">
                                     <label class="form-label">{{ branding_form.institution_favicon_url.label }}</label>
-                                    {{ branding_form.institution_favicon_url }}
-                                    <small class="text-muted d-block">ICO/PNG, disarankan 32x32 px.</small>
+                                    <div class="input-group">
+                                        {{ branding_form.institution_favicon_url }}
+                                        {% if branding_favicon_url %}
+                                        <a href="{{ branding_favicon_url }}" target="_blank" rel="noopener noreferrer" class="input-group-text text-decoration-none" title="Buka favicon asli">
+                                            <i class="ri-image-line"></i>
+                                        </a>
+                                        {% else %}
+                                        <span class="input-group-text text-muted"><i class="ri-image-line"></i></span>
+                                        {% endif %}
+                                    </div>
+                                    <div id="institutionFaviconHelp" class="form-text">ICO/PNG, disarankan 32x32 px.</div>
                                     {% for error in branding_form.institution_favicon_url.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
                                 </div>
-                                <div class="col-md-6 d-flex align-items-end">
-                                    {% if branding_favicon_url %}
-                                    <img src="{{ branding_favicon_url }}" alt="Favicon" class="logo-preview">
-                                    {% else %}
-                                    <div class="logo-preview d-flex align-items-center justify-content-center text-muted"><i class="ri-image-line"></i></div>
-                                    {% endif %}
-                                </div>
-
                                 <div class="col-md-6">
                                     <label class="form-label">{{ branding_form.primary_color.label }}</label>
                                     {{ branding_form.primary_color }}
+                                    <div id="primaryColorHelp" class="form-text">Gunakan format HEX, contoh: #0d6efd.</div>
                                     {% for error in branding_form.primary_color.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
-                                </div>
-                                <div class="col-md-6 d-flex align-items-end gap-2">
-                                    <div style="width:40px;height:40px;border-radius:8px;border:1px solid #ced4da;background:{{ branding_form.primary_color.value|default:'#0d6efd' }};"></div>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary" id="resetPrimaryColor">Reset ke #0d6efd</button>
                                 </div>
                             </div>
 
@@ -207,18 +207,20 @@
                                     {{ branding_form.login_page_subheadline }}
                                     {% for error in branding_form.login_page_subheadline.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
                                 </div>
-                                <div class="col-md-6">
+                                <div class="col-md-12">
                                     <label class="form-label">{{ branding_form.login_page_background_url.label }}</label>
-                                    {{ branding_form.login_page_background_url }}
-                                    <small class="text-muted d-block">JPG/PNG, maksimum 5 MB.</small>
+                                    <div class="input-group">
+                                        {{ branding_form.login_page_background_url }}
+                                        {% if branding_login_background_url %}
+                                        <a href="{{ branding_login_background_url }}" target="_blank" rel="noopener noreferrer" class="input-group-text text-decoration-none" title="Buka background login asli">
+                                            <i class="ri-image-line"></i>
+                                        </a>
+                                        {% else %}
+                                        <span class="input-group-text text-muted"><i class="ri-image-line"></i></span>
+                                        {% endif %}
+                                    </div>
+                                    <div id="loginBackgroundHelp" class="form-text">JPG/PNG, maksimum 5 MB.</div>
                                     {% for error in branding_form.login_page_background_url.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
-                                </div>
-                                <div class="col-md-6 d-flex align-items-end">
-                                    {% if branding_login_background_url %}
-                                    <img src="{{ branding_login_background_url }}" alt="Background Login" class="logo-preview">
-                                    {% else %}
-                                    <div class="logo-preview d-flex align-items-center justify-content-center text-muted"><i class="ri-image-line"></i></div>
-                                    {% endif %}
                                 </div>
                             </div>
 
@@ -648,14 +650,6 @@
 {% block vendor_js %}
 <script>
         (function () {
-            const resetBtn = document.getElementById("resetPrimaryColor");
-            const primaryInput = document.getElementById("id_primary_color");
-            if (resetBtn && primaryInput) {
-                resetBtn.addEventListener("click", function () {
-                    primaryInput.value = "#0d6efd";
-                });
-            }
-
             const brandingForm = document.getElementById("brandingForm");
             if (!brandingForm) {
                 return;

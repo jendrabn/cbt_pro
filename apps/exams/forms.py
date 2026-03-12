@@ -7,6 +7,7 @@ from decimal import Decimal
 from django import forms
 from django.core.exceptions import ValidationError
 from django.db.models import Q
+from django.utils.html import strip_tags
 from django.utils import timezone
 
 from apps.accounts.models import User
@@ -77,6 +78,23 @@ class ClassForm(forms.ModelForm):
 
 
 class ExamWizardForm(forms.ModelForm):
+    HELPER_TEXT_IDS = {
+        "passing_score": "examPassingScoreHelp",
+        "allow_retake": "examRetakeHelp",
+        "max_retake_attempts": "examRetakeAttemptsHelp",
+        "retake_cooldown_minutes": "examRetakeCooldownHelp",
+        "certificate_enabled": "examCertificateHelp",
+        "certificate_template": "examCertificateTemplateHelp",
+        "override_question_navigation": "examNavigationOverrideHelp",
+        "global_force_sequential": "examSequentialHelp",
+        "require_camera": "examCameraHelp",
+        "require_microphone": "examMicrophoneHelp",
+        "disable_right_click": "examRightClickHelp",
+        "enable_screenshot_proctoring": "examScreenshotHelp",
+        "screenshot_interval_seconds": "examScreenshotIntervalHelp",
+        "max_violations_allowed": "examViolationsHelp",
+    }
+
     selected_questions_payload = forms.CharField(
         required=False,
         widget=forms.HiddenInput(),
@@ -122,6 +140,7 @@ class ExamWizardForm(forms.ModelForm):
             "require_camera",
             "require_microphone",
             "detect_tab_switch",
+            "disable_right_click",
             "enable_screenshot_proctoring",
             "screenshot_interval_seconds",
             "max_violations_allowed",
@@ -154,6 +173,7 @@ class ExamWizardForm(forms.ModelForm):
             "require_camera": "Wajib izinkan kamera",
             "require_microphone": "Wajib izinkan mikrofon",
             "detect_tab_switch": "Deteksi perpindahan tab",
+            "disable_right_click": "Blokir klik kanan",
             "enable_screenshot_proctoring": "Aktifkan screenshot proctoring",
             "screenshot_interval_seconds": "Interval screenshot (detik)",
             "max_violations_allowed": "Maksimal pelanggaran",
@@ -161,8 +181,8 @@ class ExamWizardForm(forms.ModelForm):
         widgets = {
             "description": forms.Textarea(attrs={"rows": 3}),
             "instructions": forms.Textarea(attrs={"rows": 4}),
-            "start_time": forms.DateTimeInput(attrs={"type": "datetime-local"}),
-            "end_time": forms.DateTimeInput(attrs={"type": "datetime-local"}),
+            "start_time": forms.DateTimeInput(format="%Y-%m-%dT%H:%M", attrs={"type": "datetime-local"}),
+            "end_time": forms.DateTimeInput(format="%Y-%m-%dT%H:%M", attrs={"type": "datetime-local"}),
             "retake_score_policy": forms.RadioSelect(),
         }
 
@@ -177,27 +197,8 @@ class ExamWizardForm(forms.ModelForm):
 
         for field in self.fields.values():
             _bootstrap_widget(field)
-
-        switch_fields = [
-            "randomize_questions",
-            "randomize_options",
-            "show_results_immediately",
-            "allow_review",
-            "allow_retake",
-            "retake_show_review",
-            "certificate_enabled",
-            "override_question_navigation",
-            "global_allow_previous",
-            "global_allow_next",
-            "global_force_sequential",
-            "require_fullscreen",
-            "require_camera",
-            "require_microphone",
-            "detect_tab_switch",
-            "enable_screenshot_proctoring",
-        ]
-        for field_name in switch_fields:
-            self.fields[field_name].widget.attrs["role"] = "switch"
+        for field_name, help_id in self.HELPER_TEXT_IDS.items():
+            self.fields[field_name].widget.attrs["aria-describedby"] = help_id
 
         # default safer values for anti-cheat
         self.fields["screenshot_interval_seconds"].initial = self.fields["screenshot_interval_seconds"].initial or 300
@@ -270,8 +271,8 @@ class ExamWizardForm(forms.ModelForm):
         if self.instance and self.instance.pk:
             start_local = timezone.localtime(self.instance.start_time).strftime("%Y-%m-%dT%H:%M")
             end_local = timezone.localtime(self.instance.end_time).strftime("%Y-%m-%dT%H:%M")
-            self.initial.setdefault("start_time", start_local)
-            self.initial.setdefault("end_time", end_local)
+            self.initial["start_time"] = start_local
+            self.initial["end_time"] = end_local
 
             questions_payload = []
             exam_questions = (
@@ -289,7 +290,7 @@ class ExamWizardForm(forms.ModelForm):
                         "allow_previous_override": item.allow_previous_override,
                         "allow_next_override": item.allow_next_override,
                         "force_sequential_override": item.force_sequential_override,
-                        "question_text": question.question_text,
+                        "question_text": strip_tags(question.question_text or ""),
                         "question_type": question.question_type,
                         "subject_name": question.subject.name if question.subject_id else "",
                         "category_name": question.category.name if question.category_id else "",

@@ -261,7 +261,7 @@ def build_exam_list_rows(exams_qs):
                 "participant_count": _participant_count_for_exam(exam),
                 "question_count": exam.exam_questions.count(),
                 "status_label": STATUS_LABELS.get(exam.status, exam.status),
-                "retake_badge": f"🔁 {exam.max_retake_attempts}x" if exam.allow_retake else "",
+                "retake_badge": f"{exam.max_retake_attempts}x" if exam.allow_retake else "",
             }
         )
     return rows
@@ -371,7 +371,10 @@ def duplicate_exam(exam, teacher):
         global_allow_next=exam.global_allow_next,
         global_force_sequential=exam.global_force_sequential,
         require_fullscreen=exam.require_fullscreen,
+        require_camera=exam.require_camera,
+        require_microphone=exam.require_microphone,
         detect_tab_switch=exam.detect_tab_switch,
+        disable_right_click=exam.disable_right_click,
         enable_screenshot_proctoring=exam.enable_screenshot_proctoring,
         screenshot_interval_seconds=exam.screenshot_interval_seconds,
         max_violations_allowed=exam.max_violations_allowed,

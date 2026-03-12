@@ -43,6 +43,7 @@
     function installGuards({
         detectTabSwitch = true,
         requireFullscreen = true,
+        disableRightClick = true,
         onViolation = () => {},
         onFullscreenStateChange = () => {},
     }) {
@@ -80,12 +81,14 @@
             }
         });
 
-        bind(documentObj, "contextmenu", (event) => {
-            event.preventDefault();
-            if (shouldReport("right_click")) {
-                onViolation("right_click", "Klik kanan diblokir selama ujian.");
-            }
-        });
+        if (disableRightClick) {
+            bind(documentObj, "contextmenu", (event) => {
+                event.preventDefault();
+                if (shouldReport("right_click")) {
+                    onViolation("right_click", "Klik kanan diblokir selama ujian.");
+                }
+            });
+        }
 
         if (requireFullscreen) {
             bind(documentObj, "fullscreenchange", () => {

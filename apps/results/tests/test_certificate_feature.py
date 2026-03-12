@@ -199,6 +199,49 @@ class CertificateTemplateManagementTests(TestCase):
         self.assertFalse(template.is_default)
         self.assertEqual(template.layout_preset, CertificateTemplate.LayoutPreset.CLASSIC_FORMAL)
 
+    def test_certificate_template_create_form_uses_indonesian_labels(self):
+        self.client.force_login(self.teacher)
+        response = self.client.get(reverse("teacher_certificate_template_create"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Nama Template")
+        self.assertContains(response, "Preset Layout")
+        self.assertContains(response, "Orientasi")
+        self.assertContains(response, "Warna Utama")
+        self.assertContains(response, "Gambar Latar")
+        self.assertContains(response, "Tanda Tangan")
+        self.assertContains(response, "Klasik Formal")
+        self.assertContains(response, "Lanskap")
+        self.assertContains(response, "Potret")
+        self.assertContains(response, "Sedang")
+        self.assertContains(response, "Variabel yang tersedia:")
+        self.assertNotContains(response, "Classic Formal")
+        self.assertNotContains(response, "Landscape")
+
+    def test_certificate_template_edit_form_uses_indonesian_labels(self):
+        template_obj = CertificateTemplate.objects.create(
+            template_name="Template Edit",
+            created_by=self.teacher,
+            background_image_url="certificates/backgrounds/template-edit.png",
+            signatory_signature_url="certificates/signatures/template-edit.png",
+        )
+
+        self.client.force_login(self.teacher)
+        response = self.client.get(
+            reverse("teacher_certificate_template_detail", kwargs={"pk": template_obj.id})
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Edit Template Sertifikat")
+        self.assertContains(response, "Warna Sekunder")
+        self.assertContains(response, "Nama Penanda Tangan")
+        self.assertContains(response, "Jabatan Penanda Tangan")
+        self.assertContains(response, "Pratinjau")
+        self.assertContains(response, "Hapus gambar latar saat ini")
+        self.assertContains(response, "Hapus tanda tangan saat ini")
+        self.assertNotContains(response, "Background image")
+        self.assertNotContains(response, "Signatory signature")
+
     def test_portrait_preset_forces_portrait_layout(self):
         self.client.force_login(self.teacher)
         response = self.client.post(
@@ -550,6 +593,28 @@ class TeacherCertificateManagementPolishTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, "CERT-MANAGE-001")
         self.assertContains(response, "CERT-MANAGE-002")
+
+    def test_teacher_certificate_list_renders_revoke_reason_in_separate_column(self):
+        self.active_certificate.revoked_at = timezone.now()
+        self.active_certificate.is_valid = False
+        self.active_certificate.revoked_reason = "Dokumen pengganti diterbitkan"
+        self.active_certificate.save(update_fields=["revoked_at", "is_valid", "revoked_reason", "updated_at"])
+
+        self.client.force_login(self.teacher)
+        response = self.client.get(reverse("teacher_certificate_list"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "<th>Alasan</th>", html=True)
+        self.assertContains(
+            response,
+            '<td><span class="cbt-status-badge is-danger">Dicabut</span></td>',
+            html=True,
+        )
+        self.assertContains(
+            response,
+            '<td><div class="small text-muted mb-0" title="Dokumen pengganti diterbitkan">Dokumen pengganti diterbitkan</div></td>',
+            html=True,
+        )
 
     def test_teacher_revoke_certificate_respects_next_url(self):
         self.client.force_login(self.teacher)

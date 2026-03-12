@@ -42,6 +42,15 @@
         return null;
     }
 
+    function hasNavigationOverride(model) {
+        if (!model) {
+            return false;
+        }
+        return model.allow_previous_override !== null
+            || model.allow_next_override !== null
+            || model.force_sequential_override !== null;
+    }
+
     document.addEventListener("DOMContentLoaded", function () {
         var form = document.getElementById("examWizardForm");
         if (!form) {
@@ -62,9 +71,11 @@
         var selectedPointsEl = document.getElementById("selectedQuestionTotalPoints");
         var selectedCountTopEl = document.getElementById("selectedQuestionCountTop");
         var selectedPointsTopEl = document.getElementById("selectedQuestionTotalPointsTop");
-        var availableVisibleCountEl = document.getElementById("availableQuestionVisibleCount");
+        var selectedCountModalEl = document.getElementById("selectedQuestionCountModal");
+        var selectedPointsModalEl = document.getElementById("selectedQuestionTotalPointsModal");
         var availableListEl = document.getElementById("availableQuestionList");
         var availableLoadMoreBtn = document.getElementById("availableQuestionLoadMoreBtn");
+        var availableModalEl = document.getElementById("availableQuestionModal");
         var assignmentSummaryEl = document.getElementById("assignmentSummaryList");
         var reviewSummaryEl = document.getElementById("reviewSummary");
         var studentAssignmentListEl = document.getElementById("studentAssignmentList");
@@ -172,10 +183,10 @@
 
                 base.display_order = parseInt(item.display_order || index + 1, 10);
                 base.points_override = item.points_override !== null && item.points_override !== undefined ? String(item.points_override) : "";
-                base.override_navigation = !!item.override_navigation;
                 base.allow_previous_override = boolFromOverride(item.allow_previous_override);
                 base.allow_next_override = boolFromOverride(item.allow_next_override);
                 base.force_sequential_override = boolFromOverride(item.force_sequential_override);
+                base.override_navigation = hasNavigationOverride(base);
 
                 selectedQuestions[questionId] = base;
             });
@@ -220,6 +231,48 @@
                 short_answer: "Jawaban Singkat"
             };
             return labels[value] || value || "-";
+        }
+
+        function questionTypeBadgeClass(value) {
+            var classes = {
+                multiple_choice: "badge-soft-primary",
+                checkbox: "badge-soft-success",
+                ordering: "badge-soft-warning",
+                matching: "badge-soft-warning",
+                fill_in_blank: "badge-soft-secondary",
+                essay: "badge-soft-info",
+                short_answer: "badge-soft-primary"
+            };
+            return classes[value] || "badge-soft-secondary";
+        }
+
+        function formatPointsValue(value) {
+            var parsed = parseFloat(value);
+            if (isNaN(parsed)) {
+                parsed = 0;
+            }
+            return parsed.toFixed(2);
+        }
+
+        function buildQuestionMetaBadges(subjectName, categoryName, pointsValue, questionType) {
+            var badges = [];
+
+            if (subjectName) {
+                badges.push('<span class="badge-soft-info">' + escapeHTML(subjectName) + "</span>");
+            }
+
+            if (categoryName) {
+                badges.push('<span class="badge-soft-secondary">' + escapeHTML(categoryName) + "</span>");
+            }
+
+            badges.push('<span class="badge-soft-warning">' + escapeHTML(formatPointsValue(pointsValue)) + " poin</span>");
+            badges.push(
+                '<span class="' + questionTypeBadgeClass(questionType) + '">'
+                + escapeHTML(questionTypeLabel(questionType))
+                + "</span>"
+            );
+
+            return badges.join("");
         }
 
         function buildQuestionQueryParams(page, extraFilters) {
@@ -272,17 +325,25 @@
 
             var rowsHTML = items.map(function (item) {
                 var safeText = escapeHTML(item.text || "");
-                var safeSubject = escapeHTML(item.subject_name || "");
-                var safeCategory = escapeHTML(item.category_name || "Tanpa kategori");
-                var safePoints = escapeHTML(item.points || "0");
                 var checkboxId = buildSafeDomId("available-question-", item.id);
+                var titleId = buildSafeDomId("available-question-title-", item.id);
+                var metaBadges = buildQuestionMetaBadges(
+                    item.subject_name || "",
+                    item.category_name || "Tanpa kategori",
+                    item.points || 0,
+                    item.question_type || ""
+                );
                 return (
-                    '<div class="list-group-item list-group-item-action question-picker-item py-3" data-question-id="' + item.id + '" data-category-id="' + escapeHTML(item.category_id || "") + '">' +
-                        '<div class="form-check d-flex align-items-center gap-2 mb-0">' +
-                            '<input type="checkbox" class="form-check-input question-picker-checkbox mt-0" id="' + checkboxId + '" value="' + item.id + '" title="Pilih soal">' +
-                            '<div class="flex-grow-1">' +
-                                '<label class="form-check-label d-block fw-semibold mb-1" for="' + checkboxId + '">' + safeText + '</label>' +
-                                '<p class="small text-muted mb-0">' + safeSubject + ' &bull; ' + safeCategory + ' &bull; ' + safePoints + ' poin &bull; ' + questionTypeLabel(item.question_type) + '</p>' +
+                    '<div class="list-group-item question-picker-item" data-question-id="' + item.id + '" data-category-id="' + escapeHTML(item.category_id || "") + '">' +
+                        '<div class="d-flex align-items-center gap-3">' +
+                            '<div class="question-picker-check">' +
+                                '<input type="checkbox" class="form-check-input question-picker-checkbox" id="' + checkboxId + '" value="' + item.id + '" title="Pilih soal" aria-label="Pilih soal: ' + safeText + '" aria-labelledby="' + titleId + '">' +
+                            "</div>" +
+                            '<div class="question-picker-content flex-grow-1">' +
+                                '<div class="question-picker-copy">' +
+                                    '<p class="question-picker-title mb-2 fw-semibold" id="' + titleId + '">' + safeText + "</p>" +
+                                    '<div class="d-flex flex-wrap gap-2 question-picker-meta">' + metaBadges + "</div>" +
+                                "</div>" +
                             '</div>' +
                         '</div>' +
                     "</div>"
@@ -298,9 +359,6 @@
         }
 
         function updateAvailablePaginationUI() {
-            if (availableVisibleCountEl) {
-                availableVisibleCountEl.textContent = String(availableState.totalItems || 0);
-            }
             if (availableLoadMoreBtn) {
                 availableLoadMoreBtn.classList.toggle("d-none", !availableState.hasNext);
                 availableLoadMoreBtn.disabled = !!availableState.isLoading;
@@ -387,6 +445,10 @@
             }
             availableListEl.querySelectorAll(".question-picker-checkbox").forEach(function (checkbox) {
                 checkbox.checked = !!selectedQuestions[checkbox.value];
+                var item = checkbox.closest(".question-picker-item");
+                if (item) {
+                    item.classList.toggle("is-selected", checkbox.checked);
+                }
             });
             syncAvailableToggleState();
         }
@@ -402,11 +464,13 @@
                     return null;
                 }
                 item.display_order = index + 1;
+                var overrideNavigation = hasNavigationOverride(item);
+                item.override_navigation = overrideNavigation;
                 return {
                     question_id: item.question_id,
                     display_order: item.display_order,
                     points_override: item.points_override === "" ? "" : Number(item.points_override),
-                    override_navigation: !!item.override_navigation,
+                    override_navigation: overrideNavigation,
                     allow_previous_override: item.allow_previous_override,
                     allow_next_override: item.allow_next_override,
                     force_sequential_override: item.force_sequential_override
@@ -432,6 +496,12 @@
                 if (selectedPointsTopEl) {
                     selectedPointsTopEl.textContent = "0";
                 }
+                if (selectedCountModalEl) {
+                    selectedCountModalEl.textContent = "0";
+                }
+                if (selectedPointsModalEl) {
+                    selectedPointsModalEl.textContent = "0.00";
+                }
                 selectedPayloadInput.value = "[]";
                 syncSelectedBulkCheckAllState();
                 return;
@@ -448,56 +518,63 @@
                     return "inherit";
                 }
                 var safeQuestionText = escapeHTML(item.question_text || "");
-                var safeSubjectName = escapeHTML(item.subject_name || "");
-                var safeCategoryName = escapeHTML(item.category_name || "");
-                var safeDefaultPoints = escapeHTML(item.default_points || "");
+                var safeDefaultPoints = escapeHTML(formatPointsValue(item.default_points || 0));
                 var safePointsOverride = escapeHTML(item.points_override || "");
-                var questionTypeLabels = {
-                    multiple_choice: "Pilihan Ganda",
-                    checkbox: "Checkbox",
-                    ordering: "Ordering",
-                    matching: "Matching",
-                    fill_in_blank: "Fill In Blank",
-                    essay: "Esai",
-                    short_answer: "Jawaban Singkat"
-                };
-                var overrideNavId = buildSafeDomId("selected-question-override-nav-", item.question_id);
                 var bulkCheckId = buildSafeDomId("selected-question-bulk-", item.question_id);
                 var titleId = buildSafeDomId("selected-question-title-", item.question_id);
+                var effectivePoints = item.points_override !== "" ? item.points_override : item.default_points;
+                var metaBadges = buildQuestionMetaBadges(
+                    item.subject_name || "",
+                    item.category_name || "Tanpa kategori",
+                    effectivePoints,
+                    item.question_type || ""
+                );
                 return (
-                    '<div class="selected-question-item list-group-item mb-2 rounded" data-question-id="' + item.question_id + '">' +
-                        '<div class="d-flex align-items-center gap-2">' +
-                            '<i class="ri-draggable drag-handle fs-5 text-secondary px-1" title="Geser untuk ubah urutan" style="cursor: grab;"></i>' +
-                            '<input type="checkbox" class="form-check-input selected-question-bulk-check m-0" id="' + bulkCheckId + '" title="Pilih untuk bulk action" aria-label="Pilih soal untuk aksi massal: ' + safeQuestionText + '">' +
-                            '<div class="flex-grow-1">' +
-                                '<p class="mb-1 fw-semibold" id="' + titleId + '">' + safeQuestionText + '</p>' +
-                                '<p class="small text-muted mb-0">' + safeSubjectName + ' &bull; ' + safeCategoryName + ' &bull; ' + (questionTypeLabels[item.question_type] || item.question_type || "-") + '</p>' +
-                                '<div class="d-flex flex-wrap align-items-center gap-2 mt-2">' +
-                                    '<input type="number" min="0.01" step="0.01" class="form-control form-control-sm selected-question-points" value="' + safePointsOverride + '" placeholder="Poin (' + safeDefaultPoints + ')" style="width: 140px;" aria-label="Timpa poin untuk soal ini">' +
-                                    '<div class="form-check mb-0 small">' +
-                                        '<input type="checkbox" class="form-check-input selected-question-override-nav" id="' + overrideNavId + '" ' + (item.override_navigation ? "checked" : "") + '>' +
-                                        '<label class="form-check-label" for="' + overrideNavId + '">Timpa Navigasi</label>' +
-                                    '</div>' +
-                                    '<select class="form-select form-select-sm selected-question-allow-prev" style="width: 150px;" aria-label="Override navigasi sebelumnya">' +
-                                        '<option value="inherit" ' + (selectValue(item.allow_previous_override) === "inherit" ? "selected" : "") + '>Prev: Ikuti</option>' +
-                                        '<option value="true" ' + (selectValue(item.allow_previous_override) === "true" ? "selected" : "") + '>Prev: Ya</option>' +
-                                        '<option value="false" ' + (selectValue(item.allow_previous_override) === "false" ? "selected" : "") + '>Prev: Tidak</option>' +
-                                    '</select>' +
-                                    '<select class="form-select form-select-sm selected-question-allow-next" style="width: 150px;" aria-label="Override navigasi berikutnya">' +
-                                        '<option value="inherit" ' + (selectValue(item.allow_next_override) === "inherit" ? "selected" : "") + '>Next: Ikuti</option>' +
-                                        '<option value="true" ' + (selectValue(item.allow_next_override) === "true" ? "selected" : "") + '>Next: Ya</option>' +
-                                        '<option value="false" ' + (selectValue(item.allow_next_override) === "false" ? "selected" : "") + '>Next: Tidak</option>' +
-                                    '</select>' +
-                                    '<select class="form-select form-select-sm selected-question-force-seq" style="width: 170px;" aria-label="Override aturan berurutan">' +
-                                        '<option value="inherit" ' + (selectValue(item.force_sequential_override) === "inherit" ? "selected" : "") + '>Berurutan: Ikuti</option>' +
-                                        '<option value="true" ' + (selectValue(item.force_sequential_override) === "true" ? "selected" : "") + '>Berurutan: Ya</option>' +
-                                        '<option value="false" ' + (selectValue(item.force_sequential_override) === "false" ? "selected" : "") + '>Berurutan: Tidak</option>' +
-                                    '</select>' +
+                    '<div class="selected-question-item question-picker-item list-group-item" data-question-id="' + item.question_id + '">' +
+                        '<div class="d-flex align-items-center gap-3">' +
+                            '<div class="question-picker-check">' +
+                                '<input type="checkbox" class="form-check-input selected-question-bulk-check" id="' + bulkCheckId + '" title="Pilih untuk bulk action" aria-labelledby="' + titleId + '">' +
+                            "</div>" +
+                            '<div class="question-picker-content flex-grow-1">' +
+                                '<div class="question-picker-copy">' +
+                                    '<p class="question-picker-title mb-2 fw-semibold" id="' + titleId + '">' + safeQuestionText + '</p>' +
+                                    '<div class="d-flex flex-wrap gap-2 question-picker-meta">' + metaBadges + "</div>" +
                                 '</div>' +
-                            '</div>' +
-                            '<button type="button" class="btn btn-sm btn-outline-danger remove-selected-question-btn" title="Hapus soal dari pilihan" aria-label="Hapus soal dari pilihan: ' + safeQuestionText + '">' +
-                                '<i class="ri-delete-bin-line"></i>' +
-                            '</button>' +
+                                '<div class="row g-2 mt-1 question-picker-controls">' +
+                                    '<div class="col-12 col-md-4 col-xl-2">' +
+                                        '<input type="number" min="0.01" step="0.01" class="form-control form-control-sm selected-question-points" value="' + safePointsOverride + '" placeholder="Poin (' + safeDefaultPoints + ')" aria-label="Timpa poin untuk soal ini">' +
+                                    "</div>" +
+                                    '<div class="col-12 col-md-4 col-xl-2">' +
+                                        '<select class="form-select form-select-sm selected-question-allow-prev" aria-label="Override navigasi sebelumnya">' +
+                                            '<option value="inherit" ' + (selectValue(item.allow_previous_override) === "inherit" ? "selected" : "") + '>Prev: Ikuti</option>' +
+                                            '<option value="true" ' + (selectValue(item.allow_previous_override) === "true" ? "selected" : "") + '>Prev: Ya</option>' +
+                                            '<option value="false" ' + (selectValue(item.allow_previous_override) === "false" ? "selected" : "") + '>Prev: Tidak</option>' +
+                                        '</select>' +
+                                    "</div>" +
+                                    '<div class="col-12 col-md-4 col-xl-2">' +
+                                        '<select class="form-select form-select-sm selected-question-allow-next" aria-label="Override navigasi berikutnya">' +
+                                            '<option value="inherit" ' + (selectValue(item.allow_next_override) === "inherit" ? "selected" : "") + '>Next: Ikuti</option>' +
+                                            '<option value="true" ' + (selectValue(item.allow_next_override) === "true" ? "selected" : "") + '>Next: Ya</option>' +
+                                            '<option value="false" ' + (selectValue(item.allow_next_override) === "false" ? "selected" : "") + '>Next: Tidak</option>' +
+                                        '</select>' +
+                                    "</div>" +
+                                    '<div class="col-12 col-md-4 col-xl-3">' +
+                                        '<select class="form-select form-select-sm selected-question-force-seq" aria-label="Override aturan berurutan">' +
+                                            '<option value="inherit" ' + (selectValue(item.force_sequential_override) === "inherit" ? "selected" : "") + '>Berurutan: Ikuti</option>' +
+                                            '<option value="true" ' + (selectValue(item.force_sequential_override) === "true" ? "selected" : "") + '>Berurutan: Ya</option>' +
+                                            '<option value="false" ' + (selectValue(item.force_sequential_override) === "false" ? "selected" : "") + '>Berurutan: Tidak</option>' +
+                                        '</select>' +
+                                    "</div>" +
+                                "</div>" +
+                            "</div>" +
+                            '<div class="question-picker-actions d-flex align-items-center gap-2">' +
+                                '<button type="button" class="icon-only-btn drag-handle" title="Geser untuk ubah urutan" aria-label="Geser untuk ubah urutan: ' + safeQuestionText + '">' +
+                                    '<i class="ri-draggable fs-5"></i>' +
+                                "</button>" +
+                                '<button type="button" class="icon-only-btn is-danger remove-selected-question-btn" title="Hapus soal dari pilihan" aria-label="Hapus soal dari pilihan: ' + safeQuestionText + '">' +
+                                    '<i class="ri-delete-bin-line"></i>' +
+                                "</button>" +
+                            "</div>" +
                         '</div>' +
                     '</div>'
                 );
@@ -516,6 +593,12 @@
             if (selectedPointsTopEl) {
                 selectedPointsTopEl.textContent = totalPoints.toFixed(2);
             }
+            if (selectedCountModalEl) {
+                selectedCountModalEl.textContent = String(items.length);
+            }
+            if (selectedPointsModalEl) {
+                selectedPointsModalEl.textContent = totalPoints.toFixed(2);
+            }
             serializeSelectedQuestions();
             bindSelectedQuestionEvents();
         }
@@ -525,6 +608,12 @@
                 return;
             }
             var bulkChecks = Array.from(selectedListEl.querySelectorAll(".selected-question-bulk-check"));
+            bulkChecks.forEach(function (checkbox) {
+                var item = checkbox.closest(".selected-question-item");
+                if (item) {
+                    item.classList.toggle("is-bulk-selected", checkbox.checked);
+                }
+            });
             var allChecked = !!bulkChecks.length && bulkChecks.every(function (checkbox) { return checkbox.checked; });
             selectedToggleSelectLabel.textContent = allChecked ? "Batal Pilih" : "Pilih Semua";
         }
@@ -538,6 +627,7 @@
                 .map(function (item) { return item.getAttribute("data-question-id"); })
                 .filter(Boolean);
         }
+
         function bindSelectedQuestionEvents() {
             selectedListEl.querySelectorAll(".selected-question-item").forEach(function (card) {
                 var questionId = card.getAttribute("data-question-id");
@@ -545,6 +635,10 @@
                 if (!model) {
                     return;
                 }
+                var allowPrevSelect = card.querySelector(".selected-question-allow-prev");
+                var allowNextSelect = card.querySelector(".selected-question-allow-next");
+                var forceSeqSelect = card.querySelector(".selected-question-force-seq");
+                model.override_navigation = hasNavigationOverride(model);
 
                 card.querySelector(".remove-selected-question-btn").addEventListener("click", function () {
                     delete selectedQuestions[questionId];
@@ -564,23 +658,21 @@
                     renderReviewSummary();
                 });
 
-                card.querySelector(".selected-question-override-nav").addEventListener("change", function (event) {
-                    model.override_navigation = event.target.checked;
-                    serializeSelectedQuestions();
-                });
-
-                card.querySelector(".selected-question-allow-prev").addEventListener("change", function (event) {
+                allowPrevSelect.addEventListener("change", function (event) {
                     model.allow_previous_override = boolFromOverride(event.target.value);
+                    model.override_navigation = hasNavigationOverride(model);
                     serializeSelectedQuestions();
                 });
 
-                card.querySelector(".selected-question-allow-next").addEventListener("change", function (event) {
+                allowNextSelect.addEventListener("change", function (event) {
                     model.allow_next_override = boolFromOverride(event.target.value);
+                    model.override_navigation = hasNavigationOverride(model);
                     serializeSelectedQuestions();
                 });
 
-                card.querySelector(".selected-question-force-seq").addEventListener("change", function (event) {
+                forceSeqSelect.addEventListener("change", function (event) {
                     model.force_sequential_override = boolFromOverride(event.target.value);
+                    model.override_navigation = hasNavigationOverride(model);
                     serializeSelectedQuestions();
                 });
             });
@@ -976,6 +1068,17 @@
             });
         }
 
+        if (availableModalEl) {
+            availableModalEl.addEventListener("shown.bs.modal", function () {
+                if (!availableState.totalItems && !availableState.isLoading) {
+                    fetchAvailableQuestions({ append: false });
+                }
+                if (filterSearchInput) {
+                    filterSearchInput.focus();
+                }
+            });
+        }
+
         if (selectedToggleSelectBtn) {
             selectedToggleSelectBtn.addEventListener("click", function () {
                 var bulkChecks = Array.from(selectedListEl.querySelectorAll(".selected-question-bulk-check"));
@@ -1009,7 +1112,7 @@
                     item.allow_previous_override = boolFromOverride(bulkAllowPrevSelect && bulkAllowPrevSelect.value);
                     item.allow_next_override = boolFromOverride(bulkAllowNextSelect && bulkAllowNextSelect.value);
                     item.force_sequential_override = boolFromOverride(bulkForceSeqSelect && bulkForceSeqSelect.value);
-                    item.override_navigation = true;
+                    item.override_navigation = hasNavigationOverride(item);
                 });
 
                 renderSelectedQuestions();

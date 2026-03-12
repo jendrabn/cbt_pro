@@ -81,28 +81,25 @@
             </div>
         </section>
 
-        <section class="card border-0 shadow-sm mb-4">
-            <div class="card-body d-flex justify-content-end">
-                <div class="btn-group btn-group-sm" role="group" aria-label="Ubah tampilan daftar ujian">
-                    <a
-                        href="?{% if querystring_without_view %}{{ querystring_without_view }}&{% endif %}view=table"
-                        class="btn {% if view_mode == 'table' %}btn-primary{% else %}btn-outline-primary{% endif %}"
-                        title="Tampilan tabel"
-                    >
-                        <i class="ri-table-line me-1"></i>Tabel
-                    </a>
-                    <a
-                        href="?{% if querystring_without_view %}{{ querystring_without_view }}&{% endif %}view=cards"
-                        class="btn {% if view_mode == 'cards' %}btn-primary{% else %}btn-outline-primary{% endif %}"
-                        title="Tampilan kartu"
-                    >
-                        <i class="ri-layout-grid-line me-1"></i>Kartu
-                    </a>
-                </div>
-            </div>
-        </section>
-
         <div class="exam-list-wrapper">
+        <div class="d-flex justify-content-end mb-3">
+            <div class="btn-group btn-group-sm" role="group" aria-label="Ubah tampilan daftar ujian">
+                <a
+                    href="?{% if querystring_without_view %}{{ querystring_without_view }}&{% endif %}view=table"
+                    class="btn {% if view_mode == 'table' %}btn-primary{% else %}btn-outline-primary{% endif %}"
+                    title="Tampilan tabel"
+                >
+                    <i class="ri-table-line me-1" aria-hidden="true"></i>Tabel
+                </a>
+                <a
+                    href="?{% if querystring_without_view %}{{ querystring_without_view }}&{% endif %}view=cards"
+                    class="btn {% if view_mode == 'cards' %}btn-primary{% else %}btn-outline-primary{% endif %}"
+                    title="Tampilan kartu"
+                >
+                    <i class="ri-layout-grid-line me-1" aria-hidden="true"></i>Kartu
+                </a>
+            </div>
+        </div>
         {% if view_mode == 'cards' %}
         <section class="row g-3">
             {% for row in exam_rows %}
@@ -113,7 +110,7 @@
                             <div>
                                 <h2 class="h6 mb-1">{{ row.exam.title }}</h2>
                                 {% if row.retake_badge %}
-                                <span class="cbt-status-badge is-secondary">{{ row.retake_badge }}</span>
+                                <span class="cbt-status-badge is-secondary"><i class="ri-repeat-line me-1" aria-hidden="true"></i>{{ row.retake_badge }}</span>
                                 {% endif %}
                             </div>
                             {% enum_badge "exam_status" row.exam.status %}
@@ -175,7 +172,7 @@
                                     <p class="mb-1 fw-semibold">
                                         {{ row.exam.title }}
                                         {% if row.retake_badge %}
-                                        <span class="cbt-status-badge is-secondary ms-1">{{ row.retake_badge }}</span>
+                                        <span class="cbt-status-badge is-secondary ms-1"><i class="ri-repeat-line me-1" aria-hidden="true"></i>{{ row.retake_badge }}</span>
                                         {% endif %}
                                     </p>
                                     <p class="small text-muted mb-0">Soal: {{ row.question_count }}</p>

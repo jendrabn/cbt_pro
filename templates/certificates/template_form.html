@@ -18,7 +18,7 @@
             </a>
             {% if preview_url %}
             <a href="{{ preview_url }}" target="_blank" class="btn btn-outline-info">
-                <i class="ri-eye-line me-1"></i>Preview
+                <i class="ri-eye-line me-1"></i>Pratinjau
             </a>
             {% endif %}
         </div>
@@ -84,7 +84,7 @@
                     <label class="form-label">{{ form.body_text_template.label }}</label>
                     {{ form.body_text_template }}
                     <div class="form-text">
-                        Placeholder:
+                        Variabel yang tersedia:
                         {% templatetag openvariable %} student_full_name {% templatetag closevariable %},
                         {% templatetag openvariable %} class_grade {% templatetag closevariable %},
                         {% templatetag openvariable %} exam_title {% templatetag closevariable %},
@@ -113,7 +113,7 @@
                     <div class="small text-muted mt-1">Saat ini: {{ template_obj.background_image_url }}</div>
                     <div class="form-check mt-1">
                         {{ form.remove_background_image }}
-                        <label class="form-check-label" for="{{ form.remove_background_image.id_for_label }}">Hapus background saat ini</label>
+                        <label class="form-check-label" for="{{ form.remove_background_image.id_for_label }}">{{ form.remove_background_image.label }}</label>
                     </div>
                     {% endif %}
                 </div>
@@ -124,7 +124,7 @@
                     <div class="small text-muted mt-1">Saat ini: {{ template_obj.signatory_signature_url }}</div>
                     <div class="form-check mt-1">
                         {{ form.remove_signatory_signature }}
-                        <label class="form-check-label" for="{{ form.remove_signatory_signature.id_for_label }}">Hapus tanda tangan saat ini</label>
+                        <label class="form-check-label" for="{{ form.remove_signatory_signature.id_for_label }}">{{ form.remove_signatory_signature.label }}</label>
                     </div>
                     {% endif %}
                 </div>

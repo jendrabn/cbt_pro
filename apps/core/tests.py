@@ -135,6 +135,71 @@ class SystemSettingsViewTests(TestCase):
             SystemSetting.objects.get(setting_key="institution_logo_url").setting_value.startswith("branding/logo/")
         )
 
+    def test_branding_tab_uses_file_input_groups_with_asset_links(self):
+        SystemSetting.objects.update_or_create(
+            setting_key="institution_logo_url",
+            defaults={
+                "setting_value": "branding/logo/logo.png",
+                "setting_type": "string",
+                "category": "branding",
+            },
+        )
+        SystemSetting.objects.update_or_create(
+            setting_key="institution_logo_dark_url",
+            defaults={
+                "setting_value": "branding/logo_dark/logo-dark.png",
+                "setting_type": "string",
+                "category": "branding",
+            },
+        )
+        SystemSetting.objects.update_or_create(
+            setting_key="institution_favicon_url",
+            defaults={
+                "setting_value": "branding/favicon/favicon.png",
+                "setting_type": "string",
+                "category": "branding",
+            },
+        )
+        SystemSetting.objects.update_or_create(
+            setting_key="login_page_background_url",
+            defaults={
+                "setting_value": "branding/login_bg/login-bg.png",
+                "setting_type": "string",
+                "category": "branding",
+            },
+        )
+
+        self.client.force_login(self.admin)
+        response = self.client.get(reverse("system_settings"), {"tab": "branding"})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "logo-preview")
+        self.assertNotContains(response, "URL Aktif")
+        self.assertContains(response, 'class="input-group"', html=False)
+        self.assertContains(response, 'title="Buka logo utama asli"')
+        self.assertContains(response, 'title="Buka logo dark asli"')
+        self.assertContains(response, 'title="Buka favicon asli"')
+        self.assertContains(response, 'title="Buka background login asli"')
+        self.assertContains(response, '/media/branding/logo/logo.png')
+        self.assertContains(response, '/media/branding/logo_dark/logo-dark.png')
+        self.assertContains(response, '/media/branding/favicon/favicon.png')
+        self.assertContains(response, '/media/branding/login_bg/login-bg.png')
+
+    def test_branding_tab_uses_hex_input_for_theme_color(self):
+        self.client.force_login(self.admin)
+        response = self.client.get(reverse("system_settings"), {"tab": "branding"})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'name="primary_color"', html=False)
+        self.assertContains(response, 'placeholder="#0d6efd"', html=False)
+        self.assertContains(response, 'aria-describedby="primaryColorHelp"', html=False)
+        self.assertContains(response, 'id="primaryColorHelp"', html=False)
+        self.assertContains(response, 'class="form-text"', html=False)
+        self.assertContains(response, "Gunakan format HEX, contoh: #0d6efd.")
+        self.assertNotContains(response, 'type="color"', html=False)
+        self.assertNotContains(response, "primaryColorPreview")
+        self.assertNotContains(response, "text-muted d-block")
+
     def test_create_backup_file(self):
         SystemSetting.objects.update_or_create(
             setting_key="timezone",

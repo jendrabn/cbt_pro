@@ -325,7 +325,7 @@ class SystemSettingsView(RoleRequiredMixin, TemplateView):
         self._upsert_setting("institution_phone", cleaned.get("institution_phone", ""))
         self._upsert_setting("institution_email", cleaned.get("institution_email", ""))
         self._upsert_setting("institution_website", cleaned.get("institution_website", ""))
-        self._upsert_setting("primary_color", cleaned.get("primary_color", "#0d6efd"))
+        self._upsert_setting("primary_color", cleaned.get("primary_color", "#1B3A6B"))
         self._upsert_setting("login_page_headline", cleaned.get("login_page_headline", ""))
         self._upsert_setting("login_page_subheadline", cleaned.get("login_page_subheadline", ""))
         self._upsert_setting("landing_page_enabled", cleaned.get("landing_page_enabled", False))

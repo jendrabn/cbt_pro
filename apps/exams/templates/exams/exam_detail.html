@@ -116,6 +116,7 @@
                             <li>Wajib Kamera: {% if exam.require_camera %}Ya{% else %}Tidak{% endif %}</li>
                             <li>Wajib Mikrofon: {% if exam.require_microphone %}Ya{% else %}Tidak{% endif %}</li>
                             <li>Deteksi Pindah Tab: {% if exam.detect_tab_switch %}Ya{% else %}Tidak{% endif %}</li>
+                            <li>Blokir Klik Kanan: {% if exam.disable_right_click %}Ya{% else %}Tidak{% endif %}</li>
                             <li>Screenshot Proctoring: {% if exam.enable_screenshot_proctoring %}Ya{% else %}Tidak{% endif %}</li>
                             <li>Interval Screenshot: {{ exam.screenshot_interval_seconds }} detik</li>
                             <li>Maksimal Pelanggaran: {{ exam.max_violations_allowed }}</li>

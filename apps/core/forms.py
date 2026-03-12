@@ -57,7 +57,19 @@ class BrandingSettingsForm(SettingsForm):
     institution_logo_dark_url = forms.FileField(label="Logo Dark", required=False)
     institution_favicon_url = forms.FileField(label="Favicon", required=False)
 
-    primary_color = forms.CharField(label="Primary Color (HEX)", max_length=7, required=False)
+    primary_color = forms.CharField(
+        label="Color Theme",
+        max_length=7,
+        required=False,
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": "#0d6efd",
+                "maxlength": "7",
+                "spellcheck": "false",
+                "autocomplete": "off",
+            }
+        ),
+    )
 
     login_page_headline = forms.CharField(label="Headline Halaman Login", max_length=255, required=False)
     login_page_subheadline = forms.CharField(label="Subheadline Halaman Login", max_length=255, required=False)
@@ -65,10 +77,22 @@ class BrandingSettingsForm(SettingsForm):
 
     landing_page_enabled = forms.BooleanField(label="Aktifkan Landing Page", required=False)
 
+    HELPER_TEXT_IDS = {
+        "institution_logo_url": "institutionLogoHelp",
+        "institution_favicon_url": "institutionFaviconHelp",
+        "primary_color": "primaryColorHelp",
+        "login_page_background_url": "loginBackgroundHelp",
+    }
+
     LOGO_EXTENSIONS = {"png", "jpg", "jpeg", "svg"}
     FAVICON_EXTENSIONS = {"ico", "png"}
     LOGIN_BG_EXTENSIONS = {"png", "jpg", "jpeg"}
     HEX_COLOR_PATTERN = re.compile(r"^#[0-9A-Fa-f]{6}$")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field_name, help_id in self.HELPER_TEXT_IDS.items():
+            self.fields[field_name].widget.attrs["aria-describedby"] = help_id
 
     def clean_primary_color(self):
         value = (self.cleaned_data.get("primary_color") or "").strip()

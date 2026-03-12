@@ -68,7 +68,7 @@ class ExamManagementViewTests(TestCase):
             is_active=True,
         )
 
-    def _create_exam(self, status="draft"):
+    def _create_exam(self, status="draft", allow_retake=False, max_retake_attempts=1):
         now = timezone.now()
         exam = Exam.objects.create(
             created_by=self.teacher,
@@ -80,6 +80,8 @@ class ExamManagementViewTests(TestCase):
             passing_score=70,
             total_points=10,
             status=status,
+            allow_retake=allow_retake,
+            max_retake_attempts=max_retake_attempts,
         )
         exam.exam_questions.create(question=self.question, display_order=1, points_override=10)
         exam.assignments.create(assigned_to_type="class", class_obj=self.class_obj)
@@ -90,6 +92,28 @@ class ExamManagementViewTests(TestCase):
         response = self.client.get(reverse("exam_list"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Manajemen Ujian")
+
+    def test_exam_list_uses_remix_icon_for_retake_badge(self):
+        self._create_exam(status="draft", allow_retake=True, max_retake_attempts=2)
+        self.client.force_login(self.teacher)
+
+        response = self.client.get(reverse("exam_list"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "ri-repeat-line")
+        self.assertContains(response, "2x")
+        self.assertNotContains(response, "🔁")
+
+    def test_exam_list_uses_bootstrap_view_switch(self):
+        self._create_exam(status="draft")
+        self.client.force_login(self.teacher)
+
+        response = self.client.get(reverse("exam_list"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'btn-group btn-group-sm')
+        self.assertNotContains(response, "Mode Tampilan")
+        self.assertNotContains(response, "Menampilkan 1 ujian pada halaman ini.")
 
     def test_non_teacher_forbidden_exam_list(self):
         self.client.force_login(self.student)
@@ -140,6 +164,7 @@ class ExamManagementViewTests(TestCase):
                 "require_camera": "on",
                 "require_microphone": "on",
                 "detect_tab_switch": "on",
+                "disable_right_click": "on",
                 "enable_screenshot_proctoring": "on",
                 "screenshot_interval_seconds": 300,
                 "max_violations_allowed": 3,
@@ -170,6 +195,63 @@ class ExamManagementViewTests(TestCase):
         self.assertContains(response, '<option value="fill_in_blank">Fill In Blank</option>', html=True)
         self.assertContains(response, '<option value="essay">Esai</option>', html=True)
         self.assertContains(response, '<option value="short_answer">Jawaban Singkat</option>', html=True)
+
+    def test_exam_create_form_uses_standard_checkboxes_in_settings_and_anticheat(self):
+        self.client.force_login(self.teacher)
+
+        response = self.client.get(reverse("exam_create"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Pengaturan Retake")
+        self.assertContains(response, "Aturan Navigasi Global")
+        self.assertContains(response, "Persyaratan Perangkat & Fokus")
+        self.assertContains(response, "Pemantauan")
+        self.assertContains(response, "Blokir klik kanan")
+        self.assertContains(response, "question-picker-list question-picker-list--scroll")
+        self.assertContains(response, "question-picker-list question-picker-list--selected")
+        self.assertContains(response, 'class="form-check"', html=False)
+        self.assertNotContains(response, "form-switch")
+        self.assertNotContains(response, 'role="switch"', html=False)
+        self.assertNotContains(response, "Kelola Template")
+        self.assertNotContains(response, "Buat Template Baru")
+
+    def test_exam_edit_form_uses_standard_checkboxes_in_settings_and_anticheat(self):
+        exam = self._create_exam(status="draft")
+        self.client.force_login(self.teacher)
+
+        response = self.client.get(reverse("exam_edit", kwargs={"pk": exam.pk}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Pengaturan Retake")
+        self.assertContains(response, "Persyaratan Perangkat & Fokus")
+        self.assertContains(response, "Pemantauan")
+        self.assertContains(response, "Blokir klik kanan")
+        self.assertNotContains(response, "form-switch")
+        self.assertNotContains(response, 'role="switch"', html=False)
+        self.assertNotContains(response, "Kelola Template")
+        self.assertNotContains(response, "Buat Template Baru")
+
+    def test_exam_edit_form_prefills_saved_start_and_end_time(self):
+        exam = self._create_exam(status="draft")
+        self.client.force_login(self.teacher)
+
+        response = self.client.get(reverse("exam_edit", kwargs={"pk": exam.pk}))
+
+        expected_start = timezone.localtime(exam.start_time).strftime("%Y-%m-%dT%H:%M")
+        expected_end = timezone.localtime(exam.end_time).strftime("%Y-%m-%dT%H:%M")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, f'value="{expected_start}"', html=False)
+        self.assertContains(response, f'value="{expected_end}"', html=False)
+
+    def test_exam_detail_shows_right_click_anticheat_setting(self):
+        exam = self._create_exam(status="draft")
+        self.client.force_login(self.teacher)
+
+        response = self.client.get(reverse("exam_detail", kwargs={"pk": exam.pk}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Blokir Klik Kanan: Ya")
 
     def test_teacher_can_publish_and_unpublish_exam(self):
         exam = self._create_exam(status="draft")
@@ -213,6 +295,33 @@ class ExamManagementViewTests(TestCase):
         self.assertEqual(payload["pagination"]["page_size"], 20)
         self.assertEqual(len(payload["items"]), 1)
         self.assertEqual(payload["items"][0]["id"], str(self.question.id))
+
+    def test_question_picker_strips_html_from_richtext_question_text(self):
+        rich_question = Question.objects.create(
+            created_by=self.teacher,
+            subject=self.subject,
+            question_type="multiple_choice",
+            question_text="<p>Hitung <strong>gaya</strong> gesek.</p>",
+            points=10,
+            difficulty_level="easy",
+            allow_previous=True,
+            allow_next=True,
+            force_sequential=False,
+            is_active=True,
+        )
+        self.client.force_login(self.teacher)
+
+        response = self.client.get(
+            reverse("exam_question_picker"),
+            {"q": "gaya", "page_size": 20, "page": 1},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        item = next(row for row in payload["items"] if row["id"] == str(rich_question.id))
+        self.assertEqual(item["text"], "Hitung gaya gesek.")
+        self.assertNotIn("<p>", item["text"])
+        self.assertNotIn("<strong>", item["text"])
 
     def test_question_picker_only_returns_teacher_questions(self):
         self.client.force_login(self.teacher)

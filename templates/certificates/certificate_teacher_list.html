@@ -107,6 +107,7 @@
                         <th>Skor</th>
                         <th>Terbit</th>
                         <th>Status</th>
+                        <th>Alasan</th>
                         <th class="text-end">Aksi</th>
                     </tr>
                 </thead>
@@ -121,13 +122,17 @@
                         <td>
                             {% if cert.is_revoked %}
                             {% soft_badge "Dicabut" "danger" %}
-                            {% if cert.revoked_reason %}
-                            <div class="small text-muted mt-1" title="{{ cert.revoked_reason }}">{{ cert.revoked_reason|truncatechars:54 }}</div>
-                            {% endif %}
                             {% elif cert.is_pdf_ready %}
                             {% soft_badge "Siap" "success" %}
                             {% else %}
                             {% soft_badge "Diproses" "warning" %}
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if cert.is_revoked and cert.revoked_reason %}
+                            <div class="small text-muted mb-0" title="{{ cert.revoked_reason }}">{{ cert.revoked_reason|truncatechars:54 }}</div>
+                            {% else %}
+                            <span class="text-muted">-</span>
                             {% endif %}
                         </td>
                         <td class="text-end">
@@ -154,7 +159,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="7" class="text-center text-muted py-4">Belum ada sertifikat.</td>
+                        <td colspan="8" class="text-center text-muted py-4">Belum ada sertifikat.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
