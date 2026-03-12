@@ -121,6 +121,7 @@ class MarketingPageMixin:
     breadcrumb_label = ""
     body_class = ""
     show_marketing_chrome = True
+    use_minimal_main = None
     is_indexable = True
 
     def dispatch(self, request, *args, **kwargs):
@@ -198,6 +199,9 @@ class MarketingPageMixin:
     def get_common_context(self) -> dict[str, object]:
         whatsapp_number = self.get_contact_phone()
         pricing_data = self.get_marketing_pricing_data()
+        use_minimal_main = self.use_minimal_main
+        if use_minimal_main is None:
+            use_minimal_main = not self.show_marketing_chrome
         phone_display = f"+{whatsapp_number}" if whatsapp_number.startswith("62") else whatsapp_number
         breadcrumbs = self.get_breadcrumbs()
         extra_schema = list(self.get_extra_schema())
@@ -276,6 +280,7 @@ class MarketingPageMixin:
             "robots_meta_content": self.get_robots_meta_content(),
             "body_class": self.body_class,
             "show_marketing_chrome": self.show_marketing_chrome,
+            "use_minimal_main": use_minimal_main,
             "breadcrumbs": breadcrumbs,
             "organization_schema_json": _json_ld(organization_schema),
             "website_schema_json": _json_ld(website_schema),
@@ -311,6 +316,7 @@ class LandingPageView(MarketingPageMixin, TemplateView):
     page_name = "CBT Pro landing page"
     body_class = "page-landing"
     show_marketing_chrome = False
+    use_minimal_main = False
 
     def get_extra_schema(self) -> list[dict]:
         pricing_data = self.get_marketing_pricing_data()
