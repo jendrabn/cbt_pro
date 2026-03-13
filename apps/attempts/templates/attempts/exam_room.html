@@ -12,23 +12,23 @@
         <div class="t-sub">{{ exam.subject.name }}</div>
     </div>
 
-    <div class="badge-timer timer-chip">
+    <div class="badge text-bg-light badge-timer timer-chip">
         <i class="ri-time-line" aria-hidden="true"></i>
         <span id="timer">00:00:00</span>
     </div>
 
     <div class="topbar-extras">
-        <div class="badge-violation">
+        <div class="badge text-bg-danger badge-violation">
             <i class="ri-error-warning-line" aria-hidden="true"></i>
             <span id="violationCounterChip">0 Pelanggaran</span>
         </div>
-        <a href="{{ back_url }}" class="btn-daftar" title="Kembali ke daftar ujian">
+        <a href="{{ back_url }}" class="btn btn-outline-light btn-daftar" title="Kembali ke daftar ujian">
             <i class="ri-list-check-3" aria-hidden="true"></i>
             <span>Daftar Ujian</span>
         </a>
     </div>
 
-    <button type="button" class="btn-kirim" id="openSubmitModalBtn" title="Buka konfirmasi kirim ujian">
+    <button type="button" class="btn btn-success btn-kirim" id="openSubmitModalBtn" title="Buka konfirmasi kirim ujian">
         <i class="ri-send-plane-line" aria-hidden="true"></i>
         <span class="lbl">Kirim Ujian</span>
     </button>
@@ -41,31 +41,32 @@
 
 {% block content %}
 <h1 class="visually-hidden">Ruang Ujian Siswa</h1>
-{% if messages %}
-<div class="mb-3">
-    {% for message in messages %}
-    <div class="alert alert-{{ message.tags|default:'info' }} py-2 mb-2">{{ message }}</div>
-    {% endfor %}
-</div>
-{% endif %}
-
+<div class="exam-room-shell container-fluid px-3 px-lg-4">
 <div id="examRoomAlertHost" class="exam-room-alert-host"></div>
 <div id="navigationRestriction" class="alert alert-warning py-2 px-3 border-0 shadow-sm d-none"></div>
 
 <div class="exam-wrapper">
     <div class="question-area">
+        {% if messages %}
+        <div class="mb-3">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags|default:'info' }} py-2 mb-2">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
         <div class="q-header">
             <div class="q-meta">
                 <div class="q-number" id="qNum">1</div>
-                <div class="q-type-badge" id="qType">Memuat soal</div>
+                <div class="badge text-bg-primary q-type-badge" id="qType">Memuat soal</div>
                 <div class="q-points" id="qPoints">0 poin</div>
             </div>
             <div class="q-actions">
-                <button type="button" class="btn-flag" id="flagQuestionBtn" title="Tandai soal ini untuk review">
+                <button type="button" class="btn btn-outline-secondary btn-flag" id="flagQuestionBtn" title="Tandai soal ini untuk review">
                     <i class="ri-flag-line" aria-hidden="true"></i>
                     <span class="lbl">Tandai</span>
                 </button>
-                <button type="button" class="btn-clear" id="clearAnswerBtn" title="Kosongkan jawaban soal saat ini">
+                <button type="button" class="btn btn-outline-secondary btn-clear" id="clearAnswerBtn" title="Kosongkan jawaban soal saat ini">
                     <i class="ri-eraser-line" aria-hidden="true"></i>
                     <span class="lbl">Kosongkan</span>
                 </button>
@@ -88,16 +89,16 @@
         <div class="nav-grid" id="navGrid"></div>
 
         <div class="divider"></div>
-        <div class="sidebar-title" style="font-size:.8rem; margin-bottom:10px;">Status</div>
+        <div class="sidebar-title sidebar-title--sub">Status</div>
         <div class="legend-item"><div class="legend-dot dot-current"></div> Saat ini</div>
         <div class="legend-item"><div class="legend-dot dot-answered"></div> Terjawab</div>
         <div class="legend-item"><div class="legend-dot dot-flagged"></div> Ditandai</div>
         <div class="legend-item"><div class="legend-dot dot-empty"></div> Belum dijawab</div>
 
         <div class="divider"></div>
-        <div class="sidebar-title" style="font-size:.8rem; margin-bottom:10px;">Progres</div>
+        <div class="sidebar-title sidebar-title--sub">Progres</div>
         <div class="progress-label"><span>Terjawab</span><span id="progLabel">0/0</span></div>
-        <div class="progress-bar-wrap"><div class="progress-fill" id="progBar" style="width:0%"></div></div>
+        <div class="progress-bar-wrap"><div class="progress-fill" id="progBar"></div></div>
         <div class="progress-stats">
             <div class="stat-row"><span class="stat-lbl">Terjawab</span><span class="stat-val sv-green" id="statAns">0</span></div>
             <div class="stat-row"><span class="stat-lbl">Belum dijawab</span><span class="stat-val sv-red" id="statUnans">0</span></div>
@@ -114,19 +115,20 @@
         <div class="monitor-item"><i class="ri-error-warning-line ic-orange" aria-hidden="true"></i><span id="antiCheatLimitRule">Batas pelanggaran: -</span></div>
     </aside>
 </div>
+</div>
 
 <div class="footer-bar">
-    <button type="button" class="btn-prev" id="prevQuestionBtn" title="Ke soal sebelumnya">
+    <button type="button" class="btn btn-outline-secondary btn-prev" id="prevQuestionBtn" title="Ke soal sebelumnya">
         <i class="ri-arrow-left-s-line" aria-hidden="true"></i><span class="lbl">Sebelumnya</span>
     </button>
 
     <div class="q-counter" id="footerCounter">0 dari 0</div>
 
-    <button type="button" class="btn-nav-mob" id="openMobileNavBtn" title="Buka navigasi soal">
+    <button type="button" class="btn btn-outline-primary btn-nav-mob" id="openMobileNavBtn" title="Buka navigasi soal">
         <i class="ri-grid-fill" aria-hidden="true"></i> Nav
     </button>
 
-    <button type="button" class="btn-next" id="nextQuestionBtn" title="Ke soal berikutnya">
+    <button type="button" class="btn btn-primary btn-next" id="nextQuestionBtn" title="Ke soal berikutnya">
         <span class="lbl">Selanjutnya</span><i class="ri-arrow-right-s-line" aria-hidden="true"></i>
     </button>
 </div>
@@ -149,11 +151,11 @@
                 <div class="pill pill-orange"><span id="mFlag">0</span><small>Ditandai</small></div>
             </div>
 
-            <div class="progress-label" style="font-size:.75rem; margin-bottom:6px;">
+            <div class="progress-label progress-label-mobile">
                 <span>Progres</span><span id="mProg">0/0</span>
             </div>
-            <div class="progress-bar-wrap" style="margin-bottom:14px;">
-                <div class="progress-fill" id="mProgBar" style="width:0%"></div>
+            <div class="progress-bar-wrap progress-bar-wrap-mobile">
+                <div class="progress-fill" id="mProgBar"></div>
             </div>
 
             <div class="leg-row">
@@ -165,7 +167,7 @@
 
             <div class="nav-grid-mob" id="navGridMob"></div>
 
-            <div style="font-size:.82rem; font-weight:800; margin-bottom:10px;">Pengawasan Ujian</div>
+            <div class="monitor-title monitor-title-mobile">Pengawasan Ujian</div>
             <div class="mon-grid">
                 <div class="mon-item"><i class="ri-shield-check-line ic-green" aria-hidden="true"></i><span id="antiCheatMediaRuleMobile">Perangkat pengawasan: -</span></div>
                 <div class="mon-item"><i class="ri-fullscreen-line ic-green" aria-hidden="true"></i><span id="antiCheatFullscreenRuleMobile">Mode fullscreen: -</span></div>
@@ -175,7 +177,7 @@
                 <div class="mon-item"><i class="ri-error-warning-line ic-orange" aria-hidden="true"></i><span id="antiCheatLimitRuleMobile">Batas: -</span></div>
             </div>
 
-            <button type="button" class="btn-submit-sheet" id="openSubmitModalBtnMobile">
+            <button type="button" class="btn btn-primary btn-submit-sheet" id="openSubmitModalBtnMobile">
                 <i class="ri-send-plane-line" aria-hidden="true"></i> Kirim Ujian
             </button>
         </div>
@@ -257,7 +259,10 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 class="h6 mb-0"><i class="ri-error-warning-line text-danger me-1" aria-hidden="true"></i>Peringatan Pelanggaran</h2>
+                <h2 class="modal-title h6 mb-0 d-flex align-items-center gap-2">
+                    <span class="badge text-bg-danger"><i class="ri-error-warning-line" aria-hidden="true"></i></span>
+                    <span>Peringatan Pelanggaran</span>
+                </h2>
             </div>
             <div class="modal-body">
                 <p class="mb-2" id="violationMessage">Pelanggaran terdeteksi.</p>
@@ -274,34 +279,40 @@
 
 <div class="modal fade" id="submitModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius:16px; border:none; overflow:hidden;">
-            <div class="modal-header" style="background:var(--primary); border:none; padding:18px 22px;">
-                <h2 class="modal-title text-white fw-bold h5 mb-0">
-                    <i class="ri-send-plane-fill me-2" aria-hidden="true"></i>Kirim Ujian
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title h5 mb-0 d-flex align-items-center gap-2">
+                  Kirim Ujian
                 </h2>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
             </div>
-            <div class="modal-body p-4">
-                <p class="mb-3" style="font-size:.92rem; color:var(--text);">Apakah Anda yakin ingin mengirim ujian sekarang?</p>
+            <div class="modal-body">
+                <p class="mb-3">Apakah Anda yakin ingin mengirim ujian sekarang?</p>
                 <div class="row g-2 text-center">
-                    <div class="col-4"><div style="background:#f0fdf4; border-radius:10px; padding:12px 6px;">
-                        <div style="font-size:1.4rem; font-weight:800; color:var(--green);" id="modalAns">0</div>
-                        <div style="font-size:.78rem; color:var(--muted);">Terjawab</div>
-                    </div></div>
-                    <div class="col-4"><div style="background:#fef2f2; border-radius:10px; padding:12px 6px;">
-                        <div style="font-size:1.4rem; font-weight:800; color:var(--red);" id="modalUnans">0</div>
-                        <div style="font-size:.78rem; color:var(--muted);">Belum</div>
-                    </div></div>
-                    <div class="col-4"><div style="background:#fffbeb; border-radius:10px; padding:12px 6px;">
-                        <div style="font-size:1.4rem; font-weight:800; color:var(--orange);" id="modalFlag">0</div>
-                        <div style="font-size:.78rem; color:var(--muted);">Ditandai</div>
-                    </div></div>
+                    <div class="col-4">
+                        <div class="border rounded-3 bg-light h-100 p-3">
+                            <div class="h4 fw-bold text-success mb-1" id="modalAns">0</div>
+                            <div class="small text-secondary">Terjawab</div>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="border rounded-3 bg-light h-100 p-3">
+                            <div class="h4 fw-bold text-danger mb-1" id="modalUnans">0</div>
+                            <div class="small text-secondary">Belum</div>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="border rounded-3 bg-light h-100 p-3">
+                            <div class="h4 fw-bold text-warning mb-1" id="modalFlag">0</div>
+                            <div class="small text-secondary">Ditandai</div>
+                        </div>
+                    </div>
                 </div>
                 <p id="submitRetakeInfo" class="small text-muted mt-3 mb-0 d-none"></p>
             </div>
-            <div class="modal-footer border-0 px-4 pb-4 gap-2">
-                <button type="button" class="btn btn-outline-secondary rounded-3" data-bs-dismiss="modal">Batal</button>
-                <button type="button" class="btn fw-bold rounded-3" id="confirmSubmitBtn" style="background:var(--primary); color:#fff; padding:10px 22px;">
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-primary" id="confirmSubmitBtn">
                     <i class="ri-send-plane-fill me-1" aria-hidden="true"></i>Kirim Sekarang
                 </button>
             </div>
