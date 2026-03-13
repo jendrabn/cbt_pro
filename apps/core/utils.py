@@ -19,7 +19,7 @@ ERROR_FALLBACKS = {
 
 
 def _asset_version():
-    css_path = Path(settings.BASE_DIR) / "static" / "css" / "main.css"
+    css_path = Path(settings.BASE_DIR) / "static" / "css" / "custom.css"
     try:
         return str(int(css_path.stat().st_mtime))
     except OSError:

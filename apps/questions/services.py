@@ -119,6 +119,22 @@ def parse_tags(tags_value):
     return unique
 
 
+def _get_richtext_owner_segment(owner) -> str:
+    owner_id = getattr(owner, "pk", None)
+    if owner_id in (None, ""):
+        raise ValidationError("Pemilik media editor tidak valid.")
+    return str(owner_id).replace("\\", "_").replace("/", "_")
+
+
+def _get_richtext_owner_folder(owner) -> Path:
+    return Path(settings.MEDIA_ROOT) / RICHTEXT_UPLOAD_DIRECTORY / _get_richtext_owner_segment(owner)
+
+
+def _get_richtext_owner_base_url(owner) -> str:
+    owner_segment = _get_richtext_owner_segment(owner)
+    return f"{settings.MEDIA_URL.rstrip('/')}/{RICHTEXT_UPLOAD_DIRECTORY}/{owner_segment}/"
+
+
 def _delete_local_image_if_exists(image_url):
     if not image_url:
         return
@@ -172,7 +188,7 @@ def _detect_richtext_media_kind(uploaded_file):
     raise ValidationError("Format file tidak didukung. Gunakan gambar, audio, atau video yang valid.")
 
 
-def save_question_richtext_media(uploaded_file):
+def save_question_richtext_media(uploaded_file, owner):
     if not uploaded_file:
         raise ValidationError("File media tidak ditemukan.")
 
@@ -184,11 +200,11 @@ def save_question_richtext_media(uploaded_file):
             raise ValidationError("Ukuran gambar maksimal 5MB.")
         raise ValidationError("Ukuran file audio/video maksimal 25MB.")
 
-    folder = Path(settings.MEDIA_ROOT) / RICHTEXT_UPLOAD_DIRECTORY
+    folder = _get_richtext_owner_folder(owner)
     folder.mkdir(parents=True, exist_ok=True)
     storage = FileSystemStorage(
         location=str(folder),
-        base_url=f"{settings.MEDIA_URL.rstrip('/')}/{RICHTEXT_UPLOAD_DIRECTORY}/",
+        base_url=_get_richtext_owner_base_url(owner),
     )
     filename = f"{uuid.uuid4().hex}{extension}"
     stored_file = optimize_uploaded_image(uploaded_file) if media_kind == "image" else uploaded_file
@@ -215,8 +231,8 @@ def _resolve_richtext_media_kind(path_obj: Path):
     return ""
 
 
-def list_question_richtext_media(media_kind="all", limit=120):
-    folder = Path(settings.MEDIA_ROOT) / RICHTEXT_UPLOAD_DIRECTORY
+def list_question_richtext_media(owner, media_kind="all", limit=120):
+    folder = _get_richtext_owner_folder(owner)
     if not folder.exists():
         return []
 
@@ -324,8 +340,8 @@ def sync_question_answer(question, cleaned_data):
     defaults = {
         "answer_text": (cleaned_data.get("answer_text") or "").strip(),
         "keywords": keywords,
-        "is_case_sensitive": bool(cleaned_data.get("is_case_sensitive")) if question_type == Question.QuestionType.SHORT_ANSWER else False,
-        "max_word_count": cleaned_data.get("max_word_count"),
+        "is_case_sensitive": False,
+        "max_word_count": None,
     }
     QuestionAnswer.objects.update_or_create(question=question, defaults=defaults)
 
@@ -394,7 +410,7 @@ def sync_question_blank_answers(question, cleaned_data):
                 question=question,
                 blank_number=int(blank.get("blank_number") or (len(blank_answers) + 1)),
                 accepted_answers=accepted_answers,
-                is_case_sensitive=bool(blank.get("is_case_sensitive")),
+                is_case_sensitive=False,
                 blank_points=blank.get("blank_points"),
             )
         )
@@ -476,8 +492,8 @@ def duplicate_question(source_question, teacher):
             question=copy_question,
             answer_text=source_answer.answer_text,
             keywords=source_answer.keywords,
-            is_case_sensitive=source_answer.is_case_sensitive,
-            max_word_count=source_answer.max_word_count,
+            is_case_sensitive=False,
+            max_word_count=None,
         )
 
     source_ordering_items = source_question.ordering_items.all().order_by("correct_order")
@@ -515,7 +531,7 @@ def duplicate_question(source_question, teacher):
                     question=copy_question,
                     blank_number=blank.blank_number,
                     accepted_answers=blank.accepted_answers,
-                    is_case_sensitive=blank.is_case_sensitive,
+                    is_case_sensitive=False,
                     blank_points=blank.blank_points,
                 )
                 for blank in source_blank_answers

@@ -3,48 +3,6 @@
 
 {% block title %}{{ page_title }} - CBT{% endblock %}
 
-{% block extra_css %}
-<style>
-    .answer-option-badge {
-        width: 2.5rem;
-        height: 2.5rem;
-        min-width: 2.5rem;
-    }
-
-    .answer-option-item {
-        transition: border-color 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .answer-option-item:focus-within {
-        border-color: rgba(var(--bs-primary-rgb), 0.35) !important;
-        box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.08);
-    }
-
-    .answer-option-editor {
-        min-width: 0;
-    }
-
-    .answer-option-editor .tox,
-    .answer-option-editor .tox-tinymce {
-        border-radius: 0.75rem;
-    }
-
-    .answer-option-actions .form-check-input {
-        float: none;
-        margin: 0;
-    }
-
-    .answer-option-remove {
-        width: 2.5rem;
-        height: 2.5rem;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 0.75rem;
-    }
-</style>
-{% endblock %}
-
 {% block topbar %}
     {% include "partials/topbar_teacher.html" with parent_label="Bank Soal" parent_url="/teacher/question-bank/" current_label=page_title %}
 {% endblock %}
@@ -58,7 +16,7 @@
             <div class="d-flex align-items-center gap-2 cbt-page-header-actions">
                 <div class="d-flex gap-2">
                                 <a
-                                    href="{% if request.GET.next %}{{ request.GET.next }}{% else %}{% url 'question_list' %}{% endif %}"
+                                    href="{{ safe_next_url }}"
                                     class="btn btn-outline-primary"
                                     title="Kembali ke daftar soal"
                                 >
@@ -89,7 +47,7 @@
 
         <form method="post" enctype="multipart/form-data" id="questionForm">
             {% csrf_token %}
-            <input type="hidden" name="next" value="{% if request.GET.next %}{{ request.GET.next }}{% else %}{% url 'question_list' %}{% endif %}">
+            <input type="hidden" name="next" value="{{ safe_next_url }}">
 
             <section class="row g-4 mb-4">
                 <div class="col-xl-8">
@@ -100,12 +58,12 @@
                         <div class="card-body">
                             <div class="row g-3">
                                 <div class="col-md-6">
-                                    <label class="form-label required">{{ form.subject.label }}</label>
+                                    <label class="form-label">{{ form.subject.label }}</label>
                                     {{ form.subject }}
                                     {% if form.subject.errors %}<div class="text-danger small mt-1">{{ form.subject.errors|join:", " }}</div>{% endif %}
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label required">{{ form.question_type.label }}</label>
+                                    <label class="form-label">{{ form.question_type.label }}</label>
                                     {{ form.question_type }}
                                     {% if form.question_type.errors %}<div class="text-danger small mt-1">{{ form.question_type.errors|join:", " }}</div>{% endif %}
                                 </div>
@@ -122,13 +80,13 @@
                                     {% if form.category_name.errors %}<div class="text-danger small mt-1">{{ form.category_name.errors|join:", " }}</div>{% endif %}
                                 </div>
                                 <div class="col-12">
-                                    <label class="form-label required">{{ form.question_text.label }}</label>
+                                    <label class="form-label">{{ form.question_text.label }}</label>
                                     {{ form.question_text }}
                                     <div class="form-text">Mendukung gambar upload/URL, tabel, video, dan audio. Ukuran media bisa diatur dari dialog editor.</div>
                                     {% if form.question_text.errors %}<div class="text-danger small mt-1">{{ form.question_text.errors|join:", " }}</div>{% endif %}
                                 </div>
                                 <div class="col-md-4">
-                                    <label class="form-label required">{{ form.points.label }}</label>
+                                    <label class="form-label">{{ form.points.label }}</label>
                                     {{ form.points }}
                                     {% if form.points.errors %}<div class="text-danger small mt-1">{{ form.points.errors|join:", " }}</div>{% endif %}
                                 </div>
@@ -152,70 +110,80 @@
                         </div>
                     </div>
 
-                    <div class="card border-0 shadow-sm mb-4" id="multipleChoiceCard">
+                    <div class="card border-0 shadow-sm mb-4" id="multipleChoiceCard" data-choice-mode="{% if form.question_type.value == 'checkbox' %}checkbox{% else %}multiple_choice{% endif %}">
                         <div class="card-header bg-white border-0 pt-3 d-flex justify-content-between align-items-center">
-                            <h2 class="h6 mb-0">Bagian Opsi Jawaban</h2>
-                            <button type="button" id="addOptionBtn" class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip" data-bs-title="Tambah opsi jawaban hingga J">
-                                <i class="ri-add-line me-1"></i>Tambah Opsi
-                            </button>
+                            <h2 class="h6 mb-0">
+                                <span class="choice-mode-multiple-only">Opsi Jawaban Pilihan Ganda</span>
+                                <span class="choice-mode-checkbox-only">Opsi Jawaban Checkbox</span>
+                            </h2>
+                            <div class="d-flex align-items-center gap-2 flex-wrap">
+                                <button type="button" id="addOptionBtn" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" data-bs-title="Tambah opsi jawaban hingga J">
+                                    <i class="ri-add-line me-1"></i>Tambah Opsi
+                                </button>
+                            </div>
                         </div>
+
                         <div class="card-body">
+                            <div class="form-text mb-2 choice-mode-multiple-only">
+                            Tambahkan opsi jawaban A-J. Tandai <strong>satu</strong> opsi sebagai jawaban yang benar.
+                            </div>
+                            <div class="form-text mb-2 choice-mode-checkbox-only">
+                            Tambahkan opsi jawaban A-J. Tandai <strong>satu atau lebih</strong> opsi yang benar.
+                            </div>
                             <div class="form-text mb-3">Setiap opsi mendukung konten rich text seperti gambar, tabel, audio, dan video. Sistem mendukung hingga 10 opsi jawaban (A-J).</div>
-                            <div class="row g-3">
+                            <div class="d-flex flex-column gap-3">
                                 {% for row in form.option_field_rows %}
-                                <div class="col-12 option-item-row{% if row.removable %} optional-option-row{% endif %}{% if not row.default_visible %} d-none{% endif %}" data-letter="{{ row.letter }}" data-default-visible="{% if row.default_visible %}1{% else %}0{% endif %}">
-                                    <div class="answer-option-item border rounded-4 bg-body shadow-sm p-3 p-md-4 h-100">
-                                        <div class="vstack gap-3">
-                                            <div class="d-flex flex-column flex-md-row align-items-md-start justify-content-between gap-3">
-                                                <div class="d-flex align-items-center gap-3">
-                                                    <div class="answer-option-badge rounded-circle bg-primary-subtle text-primary-emphasis fw-semibold d-inline-flex align-items-center justify-content-center">{{ row.letter }}</div>
-                                                    <div>
-                                                        <label class="form-label{% if row.required_label %} required{% endif %} mb-0 fw-semibold">Opsi {{ row.letter }}</label>
-                                                    </div>
-                                                </div>
-                                                <div class="answer-option-actions d-flex flex-wrap align-items-center gap-3 justify-content-md-end">
-                                                    <div class="form-check form-check-inline m-0 correct-option-single-wrap">
-                                                        <input
-                                                            class="form-check-input option-correct-radio"
-                                                            type="radio"
-                                                            id="correctOption{{ row.letter }}"
-                                                            name="correct_option"
-                                                            value="{{ row.letter }}"
-                                                            {% if form.correct_option.value == row.letter %}checked{% endif %}
-                                                            title="Set jawaban benar opsi {{ row.letter }}"
-                                                        >
-                                                        <label class="form-check-label small text-body-secondary" for="correctOption{{ row.letter }}">Benar</label>
-                                                    </div>
-                                                    <div class="form-check form-check-inline m-0 d-none correct-option-multi-wrap">
-                                                        <input
-                                                            class="form-check-input option-correct-checkbox"
-                                                            type="checkbox"
-                                                            id="correctOptions{{ row.letter }}"
-                                                            name="correct_options"
-                                                            value="{{ row.letter }}"
-                                                            {% if form.correct_options.value and row.letter in form.correct_options.value %}checked{% endif %}
-                                                            title="Tandai jawaban benar opsi {{ row.letter }}"
-                                                        >
-                                                        <label class="form-check-label small text-body-secondary" for="correctOptions{{ row.letter }}">Benar</label>
-                                                    </div>
-                                                    {% if row.removable %}
-                                                    <button type="button" class="btn btn-outline-danger btn-sm remove-option-btn answer-option-remove" data-bs-toggle="tooltip" data-bs-title="Hapus opsi {{ row.letter }}">
-                                                        <i class="ri-delete-bin-line"></i>
-                                                    </button>
-                                                    {% endif %}
-                                                </div>
+                                <div class="option-item-row{% if row.removable %} optional-option-row{% endif %}{% if not row.default_visible %} d-none{% endif %}" data-letter="{{ row.letter }}" data-default-visible="{% if row.default_visible %}1{% else %}0{% endif %}">
+                                    <div class="card cbt-choice-option-card">
+                                        <div class="card-header bg-white d-flex align-items-center gap-2 flex-wrap py-2 px-3 cbt-choice-option-card__header">
+                                            <span class="cbt-choice-option-card__badge rounded-1 cbt-letter-badge--{{ forloop.counter0 }}">{{ row.letter }}</span>
+                                            <span class="small fw-bold text-uppercase text-secondary flex-grow-1 cbt-qtype-label">Opsi {{ row.letter }}</span>
+
+                                            <div class="correct-option-single-wrap form-check form-check-inline mb-0 ms-auto">
+                                                <input
+                                                    class="form-check-input option-correct-radio"
+                                                    type="radio"
+                                                    id="correctOption{{ row.letter }}"
+                                                    name="correct_option"
+                                                    value="{{ row.letter }}"
+                                                    {% if form.correct_option.value == row.letter %}checked{% endif %}
+                                                    title="Set jawaban benar opsi {{ row.letter }}"
+                                                >
+                                                <label class="form-check-label" for="correctOption{{ row.letter }}">Benar</label>
                                             </div>
-                                            <div class="answer-option-editor">
-                                                {{ row.field }}
-                                                {% if row.field.errors %}<div class="text-danger small mt-1">{{ row.field.errors|join:", " }}</div>{% endif %}
+
+                                            <div class="correct-option-multi-wrap form-check form-check-inline mb-0 ms-auto d-none">
+                                                <input
+                                                    class="form-check-input option-correct-checkbox"
+                                                    type="checkbox"
+                                                    id="correctOptions{{ row.letter }}"
+                                                    name="correct_options"
+                                                    value="{{ row.letter }}"
+                                                    {% if form.correct_options.value and row.letter in form.correct_options.value %}checked{% endif %}
+                                                    title="Tandai jawaban benar opsi {{ row.letter }}"
+                                                >
+                                                <label class="form-check-label" for="correctOptions{{ row.letter }}">Benar</label>
                                             </div>
+
+                                            {% if row.removable %}
+                                            <button type="button" class="icon-only-btn is-danger remove-option-btn" data-bs-toggle="tooltip" data-bs-title="Hapus opsi {{ row.letter }}">
+                                                <i class="ri-delete-bin-line"></i>
+                                            </button>
+                                            {% endif %}
+                                        </div>
+
+                                        <div class="card-body answer-option-editor cbt-choice-option-card__body">
+                                            {{ row.field }}
+                                            {% if row.field.errors %}<div class="text-danger small mt-2">{{ row.field.errors|join:", " }}</div>{% endif %}
                                         </div>
                                     </div>
                                 </div>
                                 {% endfor %}
                             </div>
+
                             {% if form.correct_option.errors %}<div class="text-danger small mt-2">{{ form.correct_option.errors|join:", " }}</div>{% endif %}
                             {% if form.correct_options.errors %}<div class="text-danger small mt-2">{{ form.correct_options.errors|join:", " }}</div>{% endif %}
+
                             <div id="checkboxScoringWrap" class="mt-3 d-none">
                                 <label class="form-label">{{ form.checkbox_scoring.label }}</label>
                                 {{ form.checkbox_scoring }}
@@ -234,23 +202,23 @@
                         </div>
                         <div class="card-body">
                             <div class="form-text mb-3">Isi item sesuai urutan jawaban yang benar. Siswa akan menyusun ulang item-item ini saat ujian.</div>
-                            <div class="row g-3">
+                            <div class="d-flex flex-column gap-3">
                                 {% for row in form.ordering_field_rows %}
-                                <div class="col-12 ordering-item-row{% if row.removable %} optional-ordering-row{% endif %}{% if not row.default_visible %} d-none{% endif %}" data-order-index="{{ row.index }}" data-default-visible="{% if row.default_visible %}1{% else %}0{% endif %}">
-                                    <div class="d-flex align-items-start gap-2">
-                                        <div class="rounded-circle bg-warning-subtle text-warning-emphasis fw-semibold d-flex align-items-center justify-content-center mt-2" style="width: 34px; height: 34px;">
-                                            {{ row.index }}
+                                <div class="ordering-item-row{% if row.removable %} optional-ordering-row{% endif %}{% if not row.default_visible %} d-none{% endif %}" data-order-index="{{ row.index }}" data-default-visible="{% if row.default_visible %}1{% else %}0{% endif %}">
+                                    <div class="card cbt-structured-card">
+                                        <div class="card-header bg-white d-flex align-items-center gap-2 py-2 px-3 cbt-structured-card__header">
+                                            <span class="cbt-choice-option-card__badge rounded-1">{{ row.index }}</span>
+                                            <span class="small fw-bold text-uppercase text-secondary flex-grow-1 cbt-qtype-label">Item {{ row.index }}</span>
+                                            {% if row.removable %}
+                                            <button type="button" class="icon-only-btn is-danger remove-ordering-item-btn ms-auto" data-bs-toggle="tooltip" data-bs-title="Hapus item {{ row.index }}">
+                                                <i class="ri-delete-bin-line"></i>
+                                            </button>
+                                            {% endif %}
                                         </div>
-                                        <div class="flex-grow-1">
-                                            <label class="form-label{% if row.required_label %} required{% endif %} mb-1">Item {{ row.index }}</label>
+                                        <div class="card-body cbt-structured-card__body">
                                             {{ row.field }}
-                                            {% if row.field.errors %}<div class="text-danger small mt-1">{{ row.field.errors|join:", " }}</div>{% endif %}
+                                            {% if row.field.errors %}<div class="text-danger small mt-2">{{ row.field.errors|join:", " }}</div>{% endif %}
                                         </div>
-                                        {% if row.removable %}
-                                        <button type="button" class="btn btn-outline-danger btn-sm remove-ordering-item-btn mt-4" data-bs-toggle="tooltip" data-bs-title="Hapus item {{ row.index }}">
-                                            <i class="ri-delete-bin-line"></i>
-                                        </button>
-                                        {% endif %}
                                     </div>
                                 </div>
                                 {% endfor %}
@@ -267,28 +235,31 @@
                         </div>
                         <div class="card-body">
                             <div class="form-text mb-3">Isi pasangan prompt di kolom kiri dan jawaban yang cocok di kolom kanan. Saat ujian, kolom jawaban akan diacak.</div>
-                            <div class="row g-3">
+                            <div class="d-flex flex-column gap-3">
                                 {% for row in form.matching_field_rows %}
-                                <div class="col-12 matching-pair-row{% if row.removable %} optional-matching-row{% endif %}{% if not row.default_visible %} d-none{% endif %}" data-pair-index="{{ row.index }}" data-default-visible="{% if row.default_visible %}1{% else %}0{% endif %}">
-                                    <div class="border rounded-3 p-3">
-                                        <div class="d-flex align-items-center justify-content-between gap-2 mb-3">
-                                            <h3 class="h6 mb-0">Pasangan {{ row.index }}</h3>
+                                <div class="matching-pair-row{% if row.removable %} optional-matching-row{% endif %}{% if not row.default_visible %} d-none{% endif %}" data-pair-index="{{ row.index }}" data-default-visible="{% if row.default_visible %}1{% else %}0{% endif %}">
+                                    <div class="card cbt-structured-card">
+                                        <div class="card-header bg-white d-flex align-items-center gap-2 py-2 px-3 cbt-structured-card__header">
+                                            <span class="badge-soft-primary">Pasangan {{ row.index }}</span>
                                             {% if row.removable %}
-                                            <button type="button" class="btn btn-outline-danger btn-sm remove-matching-pair-btn" data-bs-toggle="tooltip" data-bs-title="Hapus pasangan {{ row.index }}">
+                                            <button type="button" class="icon-only-btn is-danger remove-matching-pair-btn ms-auto" data-bs-toggle="tooltip" data-bs-title="Hapus pasangan {{ row.index }}">
                                                 <i class="ri-delete-bin-line"></i>
                                             </button>
                                             {% endif %}
                                         </div>
-                                        <div class="row g-3">
-                                            <div class="col-lg-6">
-                                                <label class="form-label{% if row.required_label %} required{% endif %}">Prompt</label>
-                                                {{ row.prompt_field }}
-                                                {% if row.prompt_field.errors %}<div class="text-danger small mt-1">{{ row.prompt_field.errors|join:", " }}</div>{% endif %}
-                                            </div>
-                                            <div class="col-lg-6">
-                                                <label class="form-label{% if row.required_label %} required{% endif %}">Jawaban</label>
-                                                {{ row.answer_field }}
-                                                {% if row.answer_field.errors %}<div class="text-danger small mt-1">{{ row.answer_field.errors|join:", " }}</div>{% endif %}
+                                        <div class="card-body cbt-structured-card__body">
+                                            <div class="match-grid cbt-match-grid">
+                                                <div class="cbt-match-grid__cell">
+                                                    {{ row.prompt_field }}
+                                                    {% if row.prompt_field.errors %}<div class="text-danger small mt-2">{{ row.prompt_field.errors|join:", " }}</div>{% endif %}
+                                                </div>
+                                                <div class="match-arrow cbt-match-grid__arrow">
+                                                    <i class="ri-arrow-right-line"></i>
+                                                </div>
+                                                <div class="cbt-match-grid__cell">
+                                                    {{ row.answer_field }}
+                                                    {% if row.answer_field.errors %}<div class="text-danger small mt-2">{{ row.answer_field.errors|join:", " }}</div>{% endif %}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -300,38 +271,36 @@
 
                     <div class="card border-0 shadow-sm mb-4 d-none" id="fillBlankCard">
                         <div class="card-header bg-white border-0 pt-3">
-                            <h2 class="h6 mb-0">Bagian Fill In Blank</h2>
+                            <h2 class="h6 mb-0">Opsi Jawaban Fill In Blank</h2>
                         </div>
+
                         <div class="card-body">
-                            <div class="alert alert-info py-2 small">
+                            <div class="form-text mb-3">
                                 Gunakan placeholder seperti <code>{% templatetag openvariable %}1{% templatetag closevariable %}</code>, <code>{% templatetag openvariable %}2{% templatetag closevariable %}</code>, dan seterusnya pada teks soal. Definisi blank yang sesuai akan muncul otomatis di bawah.
                             </div>
-                            <div class="row g-3" id="fillBlankRows">
+
+                            <div class="d-flex flex-column gap-3" id="fillBlankRows">
                                 {% for row in form.blank_answer_rows %}
-                                <div class="col-12 fill-blank-row{% if not row.default_visible %} d-none{% endif %}" data-blank-number="{{ row.index }}" data-default-visible="{% if row.default_visible %}1{% else %}0{% endif %}">
-                                    <div class="border rounded-3 p-3">
-                                        <div class="d-flex align-items-center justify-content-between gap-2 mb-3">
-                                            <h3 class="h6 mb-0">Blank <code>{% templatetag openvariable %}{{ row.index }}{% templatetag closevariable %}</code></h3>
+                                <div class="fill-blank-row{% if not row.default_visible %} d-none{% endif %}" data-blank-number="{{ row.index }}" data-default-visible="{% if row.default_visible %}1{% else %}0{% endif %}">
+                                    <div class="card cbt-structured-card">
+                                        <div class="card-header bg-white d-flex align-items-center gap-2 py-2 px-3 cbt-structured-card__header">
+                                            <span class="small fw-semibold flex-grow-1">
+                                                Blank <code class="font-monospace">{% templatetag openvariable %}{{ row.index }}{% templatetag closevariable %}</code>
+                                            </span>
                                         </div>
-                                        <div class="row g-3">
-                                            <div class="col-lg-7">
-                                                <label class="form-label required">Jawaban yang diterima</label>
+
+                                        <div class="cbt-fib-row">
+                                            <div class="cbt-fib-row__panel">
+                                                <label class="form-label">Jawaban yang diterima</label>
                                                 {{ row.accepted_field }}
                                                 <div class="form-text">Pisahkan beberapa variasi jawaban dengan koma.</div>
                                                 {% if row.accepted_field.errors %}<div class="text-danger small mt-1">{{ row.accepted_field.errors|join:", " }}</div>{% endif %}
                                             </div>
-                                            <div class="col-lg-3">
+                                            <div class="cbt-fib-row__sep"></div>
+                                            <div class="cbt-fib-row__panel">
                                                 <label class="form-label">Poin Blank</label>
                                                 {{ row.points_field }}
                                                 {% if row.points_field.errors %}<div class="text-danger small mt-1">{{ row.points_field.errors|join:", " }}</div>{% endif %}
-                                            </div>
-                                            <div class="col-lg-2 d-flex align-items-center">
-                                                <div class="form-check mt-4">
-                                                    {{ row.case_field }}
-                                                    <label class="form-check-label" for="{{ row.case_field.id_for_label }}">
-                                                        Case Sensitive
-                                                    </label>
-                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -345,31 +314,19 @@
                         <div class="card-header bg-white border-0 pt-3">
                             <h2 class="h6 mb-0">Bagian Jawaban Soal</h2>
                         </div>
+
                         <div class="card-body">
-                            <div class="row g-3">
+                            <div class="mb-4">
+                                <label class="form-label">{{ form.answer_text.label }}</label>
+                                {{ form.answer_text }}
+                                {% if form.answer_text.errors %}<div class="text-danger small mt-1">{{ form.answer_text.errors|join:", " }}</div>{% endif %}
+                            </div>
+                            <div class="row g-3 align-items-end cbt-qtype-compact-row">
                                 <div class="col-12">
-                                    <label class="form-label required">{{ form.answer_text.label }}</label>
-                                    {{ form.answer_text }}
-                                    {% if form.answer_text.errors %}<div class="text-danger small mt-1">{{ form.answer_text.errors|join:", " }}</div>{% endif %}
-                                </div>
-                                <div class="col-md-6">
                                     <label class="form-label">{{ form.keywords.label }}</label>
                                     {{ form.keywords }}
                                     {% if form.keywords.help_text %}<div class="form-text">{{ form.keywords.help_text }}</div>{% endif %}
                                     {% if form.keywords.errors %}<div class="text-danger small mt-1">{{ form.keywords.errors|join:", " }}</div>{% endif %}
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label">{{ form.max_word_count.label }}</label>
-                                    {{ form.max_word_count }}
-                                    {% if form.max_word_count.errors %}<div class="text-danger small mt-1">{{ form.max_word_count.errors|join:", " }}</div>{% endif %}
-                                </div>
-                                <div class="col-md-3 d-flex align-items-center">
-                                    <div class="form-check mt-3">
-                                        {{ form.is_case_sensitive }}
-                                        <label class="form-check-label" for="{{ form.is_case_sensitive.id_for_label }}">
-                                            {{ form.is_case_sensitive.label }}
-                                        </label>
-                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -459,7 +416,7 @@
                                     Simpan & Tambah Lagi
                                 </button>
                                 {% endif %}
-                                <a href="{% if request.GET.next %}{{ request.GET.next }}{% else %}{% url 'question_list' %}{% endif %}" class="btn btn-outline-secondary" data-bs-toggle="tooltip" data-bs-title="Batalkan pengisian">
+                                <a href="{{ safe_next_url }}" class="btn btn-outline-secondary" data-bs-toggle="tooltip" data-bs-title="Batalkan pengisian">
                                     Batal
                                 </a>
                             </div>
@@ -473,5 +430,5 @@
 {% block vendor_js %}
     {{ question_editor_config|json_script:"question-editor-config" }}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.10.9/tinymce.min.js" referrerpolicy="origin"></script>
-    <script src="{% static 'questions/js/question_form.js' %}?v={{ asset_version }}-qf-richtext-3"></script>
+    <script src="{% static 'questions/js/question_form.js' %}?v={{ asset_version }}-qf-richtext-10"></script>
 {% endblock %}

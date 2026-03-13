@@ -31,6 +31,15 @@ class QuestionBankViewTests(TestCase):
             role="teacher",
             is_active=True,
         )
+        cls.other_teacher = User.objects.create_user(
+            username="teacher_qb_other",
+            email="teacher.other@cbt.com",
+            password="TeacherPass123!",
+            first_name="Guru",
+            last_name="Lain",
+            role="teacher",
+            is_active=True,
+        )
         cls.student = User.objects.create_user(
             username="student_qb",
             email="student.qb@cbt.com",
@@ -256,7 +265,6 @@ class QuestionBankViewTests(TestCase):
                 "blank_accepted_answers_1": "100, 100.0",
                 "blank_points_1": "5",
                 "blank_accepted_answers_2": "Celsius, celcius",
-                "blank_case_sensitive_2": "on",
                 "blank_points_2": "4",
             },
         )
@@ -266,7 +274,33 @@ class QuestionBankViewTests(TestCase):
         self.assertEqual(created.question_type, "fill_in_blank")
         self.assertEqual(created.blank_answers.count(), 2)
         self.assertEqual(created.blank_answers.get(blank_number=1).accepted_answers, ["100", "100.0"])
-        self.assertTrue(created.blank_answers.get(blank_number=2).is_case_sensitive)
+        self.assertFalse(created.blank_answers.get(blank_number=2).is_case_sensitive)
+
+    def test_teacher_can_create_short_answer_question_without_case_sensitive_or_max_words(self):
+        self.client.force_login(self.teacher)
+        response = self.client.post(
+            reverse("question_create"),
+            data={
+                "subject": str(self.subject.id),
+                "category": str(self.category.id),
+                "question_type": "short_answer",
+                "question_text": "Ibu kota Indonesia adalah ...",
+                "points": "5",
+                "difficulty_level": "easy",
+                "allow_previous": "on",
+                "allow_next": "on",
+                "is_active": "on",
+                "answer_text": "Jakarta",
+                "keywords": "jakarta, ibu kota",
+                "is_case_sensitive": "on",
+                "max_word_count": "3",
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        created = Question.objects.get(created_by=self.teacher, question_type="short_answer", points=5)
+        self.assertFalse(created.correct_answer.is_case_sensitive)
+        self.assertIsNone(created.correct_answer.max_word_count)
 
     def test_teacher_can_create_multiple_choice_question_with_image_only_richtext(self):
         self.client.force_login(self.teacher)
@@ -382,7 +416,7 @@ class QuestionBankViewTests(TestCase):
             )
             self.assertEqual(upload_response.status_code, 200)
 
-            richtext_dir = Path(temp_media_root) / "questions" / "richtext"
+            richtext_dir = Path(temp_media_root) / "questions" / "richtext" / str(self.teacher.pk)
             richtext_dir.mkdir(parents=True, exist_ok=True)
             audio_path = richtext_dir / "sample-audio.mp3"
             audio_path.write_bytes(b"ID3test-audio")
@@ -398,6 +432,84 @@ class QuestionBankViewTests(TestCase):
         self.assertTrue(image_payload["items"])
         self.assertIn("image", {item["kind"] for item in image_payload["items"]})
         self.assertIn("audio", {item["kind"] for item in media_payload["items"]})
+
+    def test_richtext_media_browser_is_scoped_per_teacher(self):
+        temp_media_root = tempfile.mkdtemp(prefix="cbt_question_browser_scope_")
+        self.addCleanup(lambda: shutil.rmtree(temp_media_root, ignore_errors=True))
+
+        with override_settings(MEDIA_ROOT=temp_media_root):
+            self.client.force_login(self.teacher)
+            first_upload = self.client.post(
+                reverse("question_richtext_upload"),
+                data={"file": self._build_image_upload(name="teacher-one.png", size=(640, 320))},
+            )
+            self.assertEqual(first_upload.status_code, 200)
+            self.assertIn(f"/{self.teacher.pk}/", first_upload.json()["location"])
+
+            self.client.force_login(self.other_teacher)
+            second_upload = self.client.post(
+                reverse("question_richtext_upload"),
+                data={"file": self._build_image_upload(name="teacher-two.png", size=(640, 320), color="#0f766e")},
+            )
+            self.assertEqual(second_upload.status_code, 200)
+            self.assertIn(f"/{self.other_teacher.pk}/", second_upload.json()["location"])
+
+            browser_response = self.client.get(reverse("question_richtext_browser"), data={"kind": "image"})
+
+        self.assertEqual(browser_response.status_code, 200)
+        items = browser_response.json()["items"]
+        self.assertTrue(items)
+        self.assertTrue(all(f"/{self.other_teacher.pk}/" in item["url"] for item in items))
+        self.assertTrue(all(f"/{self.teacher.pk}/" not in item["url"] for item in items))
+
+    def test_question_create_ignores_external_next_url(self):
+        self.client.force_login(self.teacher)
+        response = self.client.post(
+            reverse("question_create"),
+            data={
+                "subject": str(self.subject.id),
+                "category": str(self.category.id),
+                "question_type": "multiple_choice",
+                "question_text": "Planet terbesar adalah ...",
+                "points": "5",
+                "difficulty_level": "easy",
+                "allow_previous": "on",
+                "allow_next": "on",
+                "is_active": "on",
+                "option_a": "Bumi",
+                "option_b": "Jupiter",
+                "correct_option": "B",
+                "next": "https://evil.example/phishing",
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("question_list"))
+
+    def test_question_edit_ignores_external_next_url(self):
+        question = self._create_sample_question()
+        self.client.force_login(self.teacher)
+        response = self.client.post(
+            reverse("question_edit", kwargs={"pk": question.pk}),
+            data={
+                "subject": str(self.subject.id),
+                "category": str(self.category.id),
+                "question_type": "multiple_choice",
+                "question_text": "2 + 2 = ...",
+                "points": "5",
+                "difficulty_level": "easy",
+                "allow_previous": "on",
+                "allow_next": "on",
+                "is_active": "on",
+                "option_a": "3",
+                "option_b": "4",
+                "correct_option": "B",
+                "next": "https://evil.example/phishing",
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("question_list"))
 
     def test_question_preview_sanitizes_legacy_richtext(self):
         question = self._create_sample_question()
@@ -417,6 +529,32 @@ class QuestionBankViewTests(TestCase):
         self.assertContains(response, "Legacy opsi")
         self.assertNotContains(response, 'alert("x")', html=False)
         self.assertNotContains(response, "onerror", html=False)
+
+    def test_question_edit_matching_legacy_richtext_is_rendered_as_plain_text(self):
+        question = Question.objects.create(
+            created_by=self.teacher,
+            subject=self.subject,
+            category=self.category,
+            question_type="matching",
+            question_text="Pasangkan istilah dengan maknanya.",
+            points=5,
+            difficulty_level="easy",
+            allow_previous=True,
+            allow_next=True,
+            force_sequential=False,
+            is_active=True,
+        )
+        question.matching_pairs.create(prompt_text="<p>Massa</p>", answer_text="<div>Jumlah<br>materi</div>", pair_order=1)
+        question.matching_pairs.create(prompt_text="<p>Gaya</p>", answer_text="<div>Tarikan</div>", pair_order=2)
+
+        self.client.force_login(self.teacher)
+        response = self.client.get(reverse("question_edit", kwargs={"pk": question.pk}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Massa")
+        self.assertContains(response, "Jumlah")
+        self.assertNotContains(response, "&lt;p&gt;Massa&lt;/p&gt;", html=False)
+        self.assertNotContains(response, "&lt;div&gt;Jumlah&lt;br&gt;materi&lt;/div&gt;", html=False)
 
     def test_teacher_can_duplicate_question(self):
         question = self._create_sample_question()

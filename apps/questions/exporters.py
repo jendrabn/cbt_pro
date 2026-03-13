@@ -39,10 +39,9 @@ def _question_to_export_row(question):
     blank_answers = {}
     for blank in question.blank_answers.all().order_by("blank_number"):
         payload = blank.accepted_answers or []
-        if blank.is_case_sensitive or blank.blank_points is not None:
+        if blank.blank_points is not None:
             payload = {
                 "accepted_answers": blank.accepted_answers or [],
-                "is_case_sensitive": bool(blank.is_case_sensitive),
                 "blank_points": float(blank.blank_points) if blank.blank_points is not None else None,
             }
         blank_answers[str(blank.blank_number)] = payload
@@ -85,8 +84,8 @@ def _question_to_export_row(question):
         "correct_options": ",".join(correct_options) if question.question_type == "checkbox" else "",
         "answer_text": answer.answer_text if answer else "",
         "keywords": ", ".join(answer.keywords or []) if answer else "",
-        "is_case_sensitive": bool(answer.is_case_sensitive) if answer else False,
-        "max_word_count": answer.max_word_count if answer and answer.max_word_count else "",
+        "is_case_sensitive": False,
+        "max_word_count": "",
         "tags": ", ".join(tags),
         "is_active": question.is_active,
         "created_at": timezone.localtime(question.created_at).isoformat() if isinstance(question.created_at, datetime) else "",
@@ -192,7 +191,6 @@ def export_import_template_excel():
         ("allow_previous", "TIDAK", "TRUE atau FALSE"),
         ("allow_next", "TIDAK", "TRUE atau FALSE"),
         ("force_sequential", "TIDAK", "TRUE atau FALSE"),
-        ("is_case_sensitive", "TIDAK", "TRUE atau FALSE (khusus short_answer)"),
         ("correct_option", "KONDISIONAL", "A sampai J untuk multiple_choice atau A,C untuk checkbox"),
         ("correct_options", "TIDAK", "Alternatif field checkbox: A,C"),
         ("answer_text", "KONDISIONAL", "Wajib untuk essay/short_answer"),

@@ -336,7 +336,7 @@
                 return (
                     '<div class="list-group-item list-group-item-action question-picker-item" data-question-id="' + item.id + '" data-category-id="' + escapeHTML(item.category_id || "") + '">' +
                         '<div class="d-flex align-items-center gap-3">' +
-                            '<div class="form-check m-0 d-flex align-items-center flex-shrink-0">' +
+                            '<div class="question-picker-check d-flex align-items-center flex-shrink-0">' +
                                 '<input type="checkbox" class="form-check-input question-picker-checkbox m-0" id="' + checkboxId + '" value="' + item.id + '" title="Pilih soal" aria-label="Pilih soal: ' + safeText + '" aria-labelledby="' + titleId + '">' +
                             "</div>" +
                             '<div class="flex-grow-1 min-w-0">' +
@@ -530,7 +530,7 @@
                 return (
                     '<div class="selected-question-item list-group-item" data-question-id="' + item.question_id + '">' +
                         '<div class="d-flex align-items-center gap-3">' +
-                            '<div class="form-check m-0 d-flex align-items-center flex-shrink-0">' +
+                            '<div class="question-picker-check d-flex align-items-center flex-shrink-0">' +
                                 '<input type="checkbox" class="form-check-input selected-question-bulk-check m-0" id="' + bulkCheckId + '" title="Pilih untuk bulk action" aria-labelledby="' + titleId + '">' +
                             "</div>" +
                             '<div class="flex-grow-1 min-w-0">' +

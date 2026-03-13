@@ -1273,7 +1273,7 @@ def _evaluate_short_answer(question, answer_text):
     if not correct_answer:
         return None
 
-    case_sensitive = bool(correct_answer.is_case_sensitive)
+    case_sensitive = False
     normalized_student = _normalize_text(answer_text, case_sensitive=case_sensitive)
     normalized_expected = _normalize_text(correct_answer.answer_text, case_sensitive=case_sensitive)
 
@@ -1381,9 +1381,9 @@ def _evaluate_fill_in_blank_answer(question, answer, points_possible):
         if not accepted_answers:
             continue
 
-        normalized_value = _normalize_text(raw_value, case_sensitive=blank_def.is_case_sensitive)
+        normalized_value = _normalize_text(raw_value, case_sensitive=False)
         matched = normalized_value in {
-            _normalize_text(item, case_sensitive=blank_def.is_case_sensitive)
+            _normalize_text(item, case_sensitive=False)
             for item in accepted_answers
         }
 

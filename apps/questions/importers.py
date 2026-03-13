@@ -411,8 +411,8 @@ def _extract_cleaned_payload(payload, question_type):
         "blank_answers": blank_answers,
         "answer_text": (payload.get("answer_text") or "").strip(),
         "keywords": (payload.get("keywords") or "").strip(),
-        "is_case_sensitive": _parse_bool(payload.get("is_case_sensitive"), default=False),
-        "max_word_count": _parse_int(payload.get("max_word_count"), "Batas kata"),
+        "is_case_sensitive": False,
+        "max_word_count": None,
         "tags": (payload.get("tags") or "").strip(),
     }
     for letter in OPTION_LETTERS:
@@ -611,8 +611,8 @@ def _prepare_question_row(row_index, row_values, headers, subject_by_code, subje
         answer_payload = {
             "answer_text": cleaned_data.get("answer_text", ""),
             "keywords": parse_tags(cleaned_data.get("keywords")),
-            "is_case_sensitive": bool(cleaned_data.get("is_case_sensitive")) if question_type == "short_answer" else False,
-            "max_word_count": cleaned_data.get("max_word_count"),
+            "is_case_sensitive": False,
+            "max_word_count": None,
         }
 
     return PreparedQuestionRow(
@@ -724,7 +724,7 @@ def _process_question_chunk(
                             question_id=row.question_id,
                             blank_number=blank_answer["blank_number"],
                             accepted_answers=blank_answer["accepted_answers"],
-                            is_case_sensitive=blank_answer.get("is_case_sensitive", False),
+                            is_case_sensitive=False,
                             blank_points=blank_answer.get("blank_points"),
                         )
                     )
@@ -734,8 +734,8 @@ def _process_question_chunk(
                             question_id=row.question_id,
                             answer_text=row.answer_payload["answer_text"],
                             keywords=row.answer_payload["keywords"],
-                            is_case_sensitive=row.answer_payload["is_case_sensitive"],
-                            max_word_count=row.answer_payload["max_word_count"],
+                            is_case_sensitive=False,
+                            max_word_count=None,
                         )
                     )
                 for tag_name in row.tag_names:

@@ -122,7 +122,7 @@
 {% block after_main %}
     {% if can_start_now and exam.require_camera or can_start_now and exam.require_microphone or can_start_now and exam.require_fullscreen %}
     <div class="modal fade" id="permissionPreflightModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-dialog modal-dialog-centered modal-lg exam-start-preflight-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <h2 class="h5 mb-0">Pemeriksaan Perangkat Sebelum Ujian</h2>
@@ -171,7 +171,7 @@
                         </ul>
                     </div>
                 </div>
-                <div class="modal-footer flex-wrap">
+                <div class="modal-footer exam-start-preflight-footer">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Nanti Saja</button>
                     {% if exam.require_camera or exam.require_microphone %}
                     <button type="button" class="btn btn-outline-primary" id="checkMediaPermissionBtn">

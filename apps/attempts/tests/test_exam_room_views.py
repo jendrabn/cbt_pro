@@ -12,7 +12,7 @@ from django.utils import timezone
 from apps.accounts.models import User
 from apps.attempts.models import ExamAttempt, ProctoringScreenshot, StudentAnswer
 from apps.exams.models import Exam, ExamAssignment, ExamQuestion
-from apps.questions.models import Question
+from apps.questions.models import Question, QuestionAnswer
 from apps.results.models import ExamResult
 from apps.subjects.models import Subject
 
@@ -611,6 +611,91 @@ class StudentExamRoomViewTests(TestCase):
         answer = StudentAnswer.objects.get(attempt=self.attempt, question=question_fill_blank)
         self.assertEqual(float(answer.points_earned), 5.0)
         self.assertFalse(answer.is_correct)
+
+    def test_submit_attempt_grades_fill_in_blank_case_insensitively(self):
+        question_fill_blank = Question.objects.create(
+            created_by=self.teacher,
+            subject=self.subject,
+            question_type="fill_in_blank",
+            question_text="Planet terbesar adalah {{1}}.",
+            points=5,
+            is_active=True,
+        )
+        question_fill_blank.blank_answers.create(
+            blank_number=1,
+            accepted_answers=["Jupiter"],
+            is_case_sensitive=True,
+            blank_points=5,
+        )
+        ExamQuestion.objects.create(exam=self.exam, question=question_fill_blank, display_order=3, points_override=5)
+
+        self.client.force_login(self.student)
+        save_response = self.client.post(
+            reverse("attempt_save_answer_api", kwargs={"attempt_id": self.attempt.id}),
+            data=json.dumps(
+                {
+                    "question_number": 3,
+                    "answer_blanks_json": {"1": "jupiter"},
+                    "is_marked_for_review": False,
+                }
+            ),
+            content_type="application/json",
+        )
+        self.assertEqual(save_response.status_code, 200)
+
+        submit_response = self.client.post(
+            reverse("attempt_submit_api", kwargs={"attempt_id": self.attempt.id}),
+            data=json.dumps({}),
+            content_type="application/json",
+        )
+
+        self.assertEqual(submit_response.status_code, 200)
+        answer = StudentAnswer.objects.get(attempt=self.attempt, question=question_fill_blank)
+        self.assertEqual(float(answer.points_earned), 5.0)
+        self.assertTrue(answer.is_correct)
+
+    def test_submit_attempt_grades_short_answer_case_insensitively(self):
+        question_short_answer = Question.objects.create(
+            created_by=self.teacher,
+            subject=self.subject,
+            question_type="short_answer",
+            question_text="Ibu kota Indonesia adalah ...",
+            points=5,
+            is_active=True,
+        )
+        QuestionAnswer.objects.create(
+            question=question_short_answer,
+            answer_text="Jakarta",
+            keywords=["jakarta"],
+            is_case_sensitive=True,
+            max_word_count=2,
+        )
+        ExamQuestion.objects.create(exam=self.exam, question=question_short_answer, display_order=3, points_override=5)
+
+        self.client.force_login(self.student)
+        save_response = self.client.post(
+            reverse("attempt_save_answer_api", kwargs={"attempt_id": self.attempt.id}),
+            data=json.dumps(
+                {
+                    "question_number": 3,
+                    "answer_text": "jakarta",
+                    "is_marked_for_review": False,
+                }
+            ),
+            content_type="application/json",
+        )
+        self.assertEqual(save_response.status_code, 200)
+
+        submit_response = self.client.post(
+            reverse("attempt_submit_api", kwargs={"attempt_id": self.attempt.id}),
+            data=json.dumps({}),
+            content_type="application/json",
+        )
+
+        self.assertEqual(submit_response.status_code, 200)
+        answer = StudentAnswer.objects.get(attempt=self.attempt, question=question_short_answer)
+        self.assertEqual(float(answer.points_earned), 5.0)
+        self.assertTrue(answer.is_correct)
 
     @patch("apps.attempts.views.save_attempt_answer")
     def test_save_answer_api_handles_lock_timeout_gracefully(self, save_mock):

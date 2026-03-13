@@ -470,6 +470,16 @@
         }
     }
 
+    function syncOptionSelectionState() {
+        Array.prototype.slice.call(document.querySelectorAll(".option-item-row")).forEach(function (row) {
+            var card = row.querySelector(".cbt-choice-option-card");
+            var isSelected = Boolean((getOptionRadio(row) && getOptionRadio(row).checked) || (getOptionCheckbox(row) && getOptionCheckbox(row).checked));
+            if (card) {
+                card.classList.toggle("is-correct", isSelected);
+            }
+        });
+    }
+
     function buildTinyMceConfig(options) {
         var editorConfig = options.editorConfig || {};
         return {
@@ -601,6 +611,9 @@
     document.addEventListener("DOMContentLoaded", function () {
         var editorConfig = parseEditorConfig();
         var typeSelect = document.getElementById("id_question_type");
+        if (typeSelect && !typeSelect.value) {
+            typeSelect.value = "multiple_choice";
+        }
         var questionTextInput = document.getElementById("id_question_text");
         var multipleChoiceCard = document.getElementById("multipleChoiceCard");
         var orderingCard = document.getElementById("orderingCard");
@@ -608,6 +621,7 @@
         var fillBlankCard = document.getElementById("fillBlankCard");
         var answerCard = document.getElementById("answerCard");
         var checkboxScoringWrap = document.getElementById("checkboxScoringWrap");
+        var shortAnswerCaseWrap = document.getElementById("shortAnswerCaseWrap");
         var addOptionBtn = document.getElementById("addOptionBtn");
         var optionRows = Array.prototype.slice.call(document.querySelectorAll(".option-item-row"));
         var addOrderingItemBtn = document.getElementById("addOrderingItemBtn");
@@ -620,6 +634,21 @@
         var questionForm = document.getElementById("questionForm");
         var forceSequentialInput = document.getElementById("id_force_sequential");
         var allowPreviousInput = document.getElementById("id_allow_previous");
+        var caseSensitiveInput = document.getElementById("id_is_case_sensitive");
+        var lastQuestionType = typeSelect ? (typeSelect.value || "") : "";
+
+        function resetCorrectSelections() {
+            optionRows.forEach(function (row) {
+                var radio = getOptionRadio(row);
+                var checkbox = getOptionCheckbox(row);
+                if (radio) {
+                    radio.checked = false;
+                }
+                if (checkbox) {
+                    checkbox.checked = false;
+                }
+            });
+        }
 
         function focusOptionInput(row) {
             var input = getOptionInput(row);
@@ -682,32 +711,7 @@
             if (!input) {
                 return;
             }
-            if (typeof window.tinymce !== "undefined") {
-                var editor = window.tinymce.get(input.id);
-                if (editor) {
-                    editor.focus();
-                    return;
-                }
-            }
             input.focus();
-        }
-
-        function initVisibleMatchingEditors() {
-            matchingRows.forEach(function (row) {
-                if (row.classList.contains("d-none")) {
-                    return;
-                }
-                initRichTextEditor(getMatchingPromptInput(row), {
-                    height: 180,
-                    editorConfig: editorConfig,
-                    onContentChange: syncMatchingVisibility
-                });
-                initRichTextEditor(getMatchingAnswerInput(row), {
-                    height: 180,
-                    editorConfig: editorConfig,
-                    onContentChange: syncMatchingVisibility
-                });
-            });
         }
 
         function syncOptionVisibility() {
@@ -718,6 +722,8 @@
                 var shouldShow = defaultVisible || isOptionOpened(row) || rowHasValue(row) || (radio && radio.checked) || (checkbox && checkbox.checked);
                 setRowVisible(row, shouldShow);
             });
+
+            syncOptionSelectionState();
 
             if (multipleChoiceCard && !multipleChoiceCard.classList.contains("d-none")) {
                 initVisibleOptionEditors();
@@ -769,10 +775,6 @@
                 }
             });
 
-            if (matchingCard && !matchingCard.classList.contains("d-none")) {
-                initVisibleMatchingEditors();
-            }
-
             var hiddenOptional = matchingRows.filter(function (row) {
                 return row.getAttribute("data-default-visible") !== "1" && row.classList.contains("d-none");
             });
@@ -808,11 +810,13 @@
             var isOrdering = typeSelect.value === "ordering";
             var isMatching = typeSelect.value === "matching";
             var isFillInBlank = typeSelect.value === "fill_in_blank";
+            var isShortAnswer = typeSelect.value === "short_answer";
             var isChoiceType = isMultipleChoice || isCheckbox;
             var isTextAnswerType = typeSelect.value === "essay" || typeSelect.value === "short_answer";
 
             if (multipleChoiceCard) {
                 multipleChoiceCard.classList.toggle("d-none", !isChoiceType);
+                multipleChoiceCard.setAttribute("data-choice-mode", isCheckbox ? "checkbox" : "multiple_choice");
             }
             if (orderingCard) {
                 orderingCard.classList.toggle("d-none", !isOrdering);
@@ -828,6 +832,15 @@
             }
             if (checkboxScoringWrap) {
                 checkboxScoringWrap.classList.toggle("d-none", !isCheckbox);
+            }
+            if (shortAnswerCaseWrap) {
+                shortAnswerCaseWrap.classList.toggle("d-none", !isShortAnswer);
+            }
+            if (caseSensitiveInput) {
+                caseSensitiveInput.disabled = !isShortAnswer;
+                if (!isShortAnswer) {
+                    caseSensitiveInput.checked = false;
+                }
             }
 
             optionRows.forEach(function (row) {
@@ -851,7 +864,6 @@
             }
             if (isMatching) {
                 syncMatchingVisibility();
-                initVisibleMatchingEditors();
             }
             if (isFillInBlank) {
                 syncBlankDefinitionVisibility();
@@ -859,13 +871,27 @@
         }
 
         if (typeSelect) {
-            typeSelect.addEventListener("change", toggleTypeSections);
+            typeSelect.addEventListener("change", function () {
+                if ((typeSelect.value || "") !== lastQuestionType) {
+                    resetCorrectSelections();
+                    lastQuestionType = typeSelect.value || "";
+                }
+                toggleTypeSections();
+            });
         }
 
         optionRows.forEach(function (row) {
             var input = getOptionInput(row);
+            var radio = getOptionRadio(row);
+            var checkbox = getOptionCheckbox(row);
             if (input) {
                 input.addEventListener("input", syncOptionVisibility);
+            }
+            if (radio) {
+                radio.addEventListener("change", syncOptionVisibility);
+            }
+            if (checkbox) {
+                checkbox.addEventListener("change", syncOptionVisibility);
             }
         });
 
@@ -1014,13 +1040,6 @@
                     if (!input) {
                         return;
                     }
-                    if (typeof window.tinymce !== "undefined") {
-                        var editor = window.tinymce.get(input.id);
-                        if (editor) {
-                            editor.setContent("");
-                            editor.save();
-                        }
-                    }
                     input.value = "";
                 });
                 setMatchingOpened(row, false);
@@ -1043,16 +1062,6 @@
                     if (input) {
                         input.disabled = false;
                     }
-                });
-                initRichTextEditor(getMatchingPromptInput(hiddenOptional), {
-                    height: 180,
-                    editorConfig: editorConfig,
-                    onContentChange: syncMatchingVisibility
-                });
-                initRichTextEditor(getMatchingAnswerInput(hiddenOptional), {
-                    height: 180,
-                    editorConfig: editorConfig,
-                    onContentChange: syncMatchingVisibility
                 });
                 window.setTimeout(function () {
                     focusMatchingInput(hiddenOptional);

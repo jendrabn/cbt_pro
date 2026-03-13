@@ -13,7 +13,7 @@ def branding_context(request):
 
 
 def asset_version_context(request):
-    css_path = Path(settings.BASE_DIR) / "static" / "css" / "main.css"
+    css_path = Path(settings.BASE_DIR) / "static" / "css" / "custom.css"
     try:
         version = str(int(css_path.stat().st_mtime))
     except OSError:

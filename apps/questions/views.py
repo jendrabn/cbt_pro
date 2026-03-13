@@ -7,6 +7,7 @@ from django.core.exceptions import ValidationError
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views import View
@@ -42,6 +43,17 @@ def _querystring_without_page(request):
     querydict = request.GET.copy()
     querydict.pop("page", None)
     return querydict.urlencode()
+
+
+def _safe_next_url(request, candidate, fallback):
+    next_url = (candidate or "").strip()
+    if next_url and url_has_allowed_host_and_scheme(
+        url=next_url,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    ):
+        return next_url
+    return fallback
 
 
 class TeacherQuestionBaseView(RoleRequiredMixin):
@@ -135,10 +147,8 @@ class QuestionCreateView(TeacherQuestionBaseView, CreateView):
         messages.success(self.request, "Soal berhasil dibuat.")
         if "save_and_add" in self.request.POST:
             return redirect("question_create")
-        next_url = (self.request.POST.get("next") or "").strip()
-        if next_url:
-            return redirect(next_url)
-        return redirect("question_list")
+        next_url = _safe_next_url(self.request, self.request.POST.get("next"), reverse("question_list"))
+        return redirect(next_url)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -147,6 +157,7 @@ class QuestionCreateView(TeacherQuestionBaseView, CreateView):
                 "page_title": "Tambah Soal Baru",
                 "submit_label": "Simpan Soal",
                 "is_create": True,
+                "safe_next_url": _safe_next_url(self.request, self.request.GET.get("next"), reverse("question_list")),
                 "question_editor_config": {
                     "uploadUrl": reverse("question_richtext_upload"),
                     "browserUrl": reverse("question_richtext_browser"),
@@ -168,8 +179,12 @@ class QuestionUpdateView(TeacherQuestionBaseView, UpdateView):
     def form_valid(self, form):
         save_question_from_form(form, self.request.user, question=self.object)
         messages.success(self.request, "Soal berhasil diperbarui.")
-        next_url = (self.request.POST.get("next") or self.request.GET.get("next") or "").strip()
-        return redirect(next_url or reverse("question_list"))
+        next_url = _safe_next_url(
+            self.request,
+            self.request.POST.get("next") or self.request.GET.get("next"),
+            reverse("question_list"),
+        )
+        return redirect(next_url)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -178,6 +193,7 @@ class QuestionUpdateView(TeacherQuestionBaseView, UpdateView):
                 "page_title": "Edit Soal",
                 "submit_label": "Simpan Perubahan",
                 "is_create": False,
+                "safe_next_url": _safe_next_url(self.request, self.request.GET.get("next"), reverse("question_list")),
                 "question_editor_config": {
                     "uploadUrl": reverse("question_richtext_upload"),
                     "browserUrl": reverse("question_richtext_browser"),
@@ -194,7 +210,7 @@ class QuestionRichTextUploadView(TeacherQuestionBaseView, View):
             return JsonResponse({"error": "File media wajib diunggah."}, status=400)
 
         try:
-            payload = save_question_richtext_media(uploaded_file)
+            payload = save_question_richtext_media(uploaded_file, request.user)
         except ValidationError as exc:
             message = exc.messages[0] if getattr(exc, "messages", None) else str(exc)
             return JsonResponse({"error": message}, status=400)
@@ -205,6 +221,7 @@ class QuestionRichTextUploadView(TeacherQuestionBaseView, View):
 class QuestionRichTextBrowserView(TeacherQuestionBaseView, View):
     def get(self, request, *args, **kwargs):
         items = list_question_richtext_media(
+            request.user,
             media_kind=(request.GET.get("kind") or "all"),
             limit=120,
         )
@@ -220,8 +237,8 @@ class QuestionDeleteView(TeacherQuestionBaseView, View):
         question.is_deleted = True
         question.save(update_fields=["is_deleted"])
         messages.success(request, "Soal berhasil dihapus.")
-        next_url = (request.POST.get("next") or reverse("question_list")).strip()
-        return redirect(next_url or reverse("question_list"))
+        next_url = _safe_next_url(request, request.POST.get("next"), reverse("question_list"))
+        return redirect(next_url)
 
 
 class QuestionDuplicateView(TeacherQuestionBaseView, View):
@@ -233,8 +250,8 @@ class QuestionDuplicateView(TeacherQuestionBaseView, View):
         )
         duplicated = duplicate_question(source, request.user)
         messages.success(request, f"Soal berhasil diduplikasi (ID: {duplicated.id}).")
-        next_url = (request.POST.get("next") or reverse("question_list")).strip()
-        return redirect(next_url or reverse("question_list"))
+        next_url = _safe_next_url(request, request.POST.get("next"), reverse("question_list"))
+        return redirect(next_url)
 
 
 @method_decorator(xframe_options_sameorigin, name="dispatch")

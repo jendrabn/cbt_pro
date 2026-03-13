@@ -1289,9 +1289,9 @@ def build_answer_review_context(result):
                 blank_key = str(blank_def.blank_number)
                 accepted_answers = [str(item).strip() for item in (blank_def.accepted_answers or []) if str(item).strip()]
                 selected_value = str(student_map.get(blank_key, "") or "")
-                normalized_value = _normalize_fill_blank_text(selected_value, case_sensitive=blank_def.is_case_sensitive)
+                normalized_value = _normalize_fill_blank_text(selected_value, case_sensitive=False)
                 normalized_answers = {
-                    _normalize_fill_blank_text(item, case_sensitive=blank_def.is_case_sensitive)
+                    _normalize_fill_blank_text(item, case_sensitive=False)
                     for item in accepted_answers
                 }
                 is_correct = bool(selected_value.strip()) and normalized_value in normalized_answers
@@ -1308,7 +1308,7 @@ def build_answer_review_context(result):
                     {
                         "blank_number": blank_def.blank_number,
                         "accepted_answers": accepted_answers,
-                        "is_case_sensitive": bool(blank_def.is_case_sensitive),
+                        "is_case_sensitive": False,
                         "blank_points": _to_float(blank_def.blank_points) if blank_def.blank_points is not None else None,
                     }
                 )

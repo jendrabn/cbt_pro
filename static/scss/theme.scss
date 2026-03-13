@@ -1,6 +1,12 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+
 /* ========================================================================== */
 /* Bootstrap color overrides */
 /* ========================================================================== */
+$font-family-sans-serif: "Inter", sans-serif;
+$font-family-base: $font-family-sans-serif;
+$headings-font-family: $font-family-sans-serif;
+
 $primary: #1B3A6B;
 $secondary: #4A6080;
 $success: #1E6B4A;
@@ -56,64 +62,23 @@ $badge-soft-light-bg: #f8fafc;
 $badge-soft-light-border: #e4e7ec;
 $badge-soft-light-text: #475467;
 
-/* ==========================================================================
-   Form controls
-   ========================================================================== */
-$input-bg: #f9fbff;
-$input-color: #12243b;
-$input-border-color: #c7d5e7;
-$input-placeholder-color: #8ea0b7;
-$input-focus-bg: #ffffff;
-$input-focus-border-color: #486f9d;
-$input-btn-focus-color: rgba($primary, .16);
-
-$form-label-font-size: .84rem;
-$form-label-font-weight: 650;
-$form-label-color: #24364f;
-$form-text-color: #5e7089;
-
-$form-select-bg: #f9fbff;
-$form-select-indicator-color: #4a6080;
-$form-select-border-color: $input-border-color;
-$form-select-focus-border-color: $input-focus-border-color;
-
-$input-group-addon-color: #51647e;
-$input-group-addon-bg: #f3f7fc;
-$input-group-addon-border-color: $input-border-color;
-
-$form-check-input-border: var(--bs-border-width) solid #9db1c9;
-$form-check-input-focus-border: $input-focus-border-color;
-$form-check-input-focus-box-shadow: 0 0 0 .2rem rgba($primary, .16);
-$form-check-input-checked-bg-color: $primary;
-$form-check-input-checked-border-color: $primary;
-$form-check-input-indeterminate-bg-color: $primary;
-$form-check-input-indeterminate-border-color: $primary;
-$form-check-label-color: #2b3f5a;
-
 @import "bootstrap/scss/bootstrap";
 
 .form-label,
-.col-form-label {
-  font-size: .84rem;
-  text-transform: uppercase;
-  letter-spacing: .055em;
-}
-
-fieldset > legend {
-  font-size: .84rem;
-  text-transform: uppercase;
-  letter-spacing: .055em;
-}
-
+.col-form-label,
+fieldset > legend,
 .form-floating > label {
+  font-size: .84rem;
+  color: $gray-800;
   text-transform: uppercase;
-  letter-spacing: .045em;
+  letter-spacing: .055em;
 }
 
-// .form-check-label {
-//   text-transform: uppercase;
-//   letter-spacing: .04em;
-// }
+.form-check-label {
+  color: $gray-800;
+  text-transform: none;
+  letter-spacing: normal;
+}
 
 // Unify header/footer surfaces with body in cards and modals.
 .card-header,
@@ -192,6 +157,107 @@ body.dashboard-body .modal {
 
 .settings-nav .nav-link {
   border-radius: 10px;
+}
+
+/* ==========================================================================
+   Shared Utility Classes
+   ========================================================================== */
+.required::after {
+  content: " *";
+  color: var(--bs-danger);
+}
+
+[x-cloak] {
+  display: none !important;
+}
+
+.max-h-22rem {
+  max-height: 22rem;
+}
+
+.min-w-0 {
+  min-width: 0;
+}
+
+.letter-spacing-wide {
+  letter-spacing: 0.08em;
+}
+
+.action-cell {
+  min-width: 250px;
+}
+
+.warning-title {
+  color: #b42318;
+}
+
+.table-card {
+  border-radius: 14px;
+}
+
+.section-card {
+  border-radius: 14px;
+}
+
+.icon-only-btn {
+  border: 0;
+  background: transparent;
+  padding: 0.2rem;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.45rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  line-height: 1;
+  box-shadow: none;
+}
+
+.icon-only-btn:hover,
+.icon-only-btn:focus-visible {
+  background: rgba(var(--bs-primary-rgb), 0.08);
+  color: #64748b;
+  outline: none;
+}
+
+.icon-only-btn.is-danger {
+  color: var(--bs-danger);
+}
+
+.icon-only-btn.is-danger:hover,
+.icon-only-btn.is-danger:focus-visible {
+  background: rgba(var(--bs-danger-rgb), 0.12);
+  color: #a02537;
+}
+
+.drag-handle {
+  cursor: grab;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+.avatar-preview {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #dee2e6;
+}
+
+.avatar-placeholder {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 2.5rem;
+  font-weight: 600;
 }
 
 // Bootstrap badge soft override for existing text-bg-* usages.

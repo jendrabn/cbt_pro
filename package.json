@@ -8,8 +8,8 @@
     "test": "tests"
   },
   "scripts": {
-    "build:css": "sass --no-source-map --style=compressed --load-path=node_modules static/scss/main.scss:static/css/main.css static/scss/marketing.scss:static/css/marketing.css static/scss/exam-room.scss:static/css/exam-room.css",
-    "watch:css": "sass --watch --load-path=node_modules static/scss/main.scss:static/css/main.css static/scss/marketing.scss:static/css/marketing.css static/scss/exam-room.scss:static/css/exam-room.css",
+    "build:css": "sass --no-source-map --style=compressed --load-path=node_modules static/scss/custom.scss:static/css/custom.css static/scss/marketing.scss:static/css/marketing.css static/scss/exam-room.scss:static/css/exam-room.css",
+    "watch:css": "sass --watch --load-path=node_modules static/scss/custom.scss:static/css/custom.css static/scss/marketing.scss:static/css/marketing.css static/scss/exam-room.scss:static/css/exam-room.css",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

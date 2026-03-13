@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pratinjau Soal</title>
-    <link href="{% static 'css/main.css' %}" rel="stylesheet">
+    <link href="{% static 'css/custom.css' %}?v={{ asset_version }}" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.0.0/fonts/remixicon.css" rel="stylesheet">
 </head>
 <body class="bg-light">
@@ -115,7 +115,6 @@
                                 <tr>
                                     <th>Blank</th>
                                     <th>Jawaban Diterima</th>
-                                    <th>Case Sensitive</th>
                                     <th>Poin</th>
                                 </tr>
                             </thead>
@@ -124,7 +123,6 @@
                                 <tr>
                                     <td><code>{% templatetag openvariable %}{{ blank.blank_number }}{% templatetag closevariable %}</code></td>
                                     <td>{{ blank.accepted_answers|join:", " }}</td>
-                                    <td>{% if blank.is_case_sensitive %}Ya{% else %}Tidak{% endif %}</td>
                                     <td>{{ blank.blank_points|default:"Dibagi rata" }}</td>
                                 </tr>
                                 {% endfor %}
@@ -142,13 +140,7 @@
                     <div class="p-3 border rounded bg-white">
                         <div class="mb-2">{{ answer.answer_text|linebreaksbr }}</div>
                         {% if answer.keywords %}
-                        <p class="small text-muted mb-1">Kata kunci: {{ answer.keywords|join:", " }}</p>
-                        {% endif %}
-                        {% if question.question_type == 'short_answer' %}
-                        <p class="small text-muted mb-1">Peka huruf besar/kecil: {% if answer.is_case_sensitive %}Ya{% else %}Tidak{% endif %}</p>
-                        {% endif %}
-                        {% if answer.max_word_count %}
-                        <p class="small text-muted mb-0">Batas kata: {{ answer.max_word_count }}</p>
+                        <p class="small text-muted mb-0">Kata kunci: {{ answer.keywords|join:", " }}</p>
                         {% endif %}
                     </div>
                     {% else %}

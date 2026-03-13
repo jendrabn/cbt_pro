@@ -84,6 +84,20 @@ def _parse_blank_answer_aliases(value):
     return normalized
 
 
+def _richtext_to_plain_text(value):
+    raw_value = str(value or "").strip()
+    if not raw_value:
+        return ""
+    raw_value = re.sub(r"<\s*br\s*/?\s*>", "\n", raw_value, flags=re.IGNORECASE)
+    raw_value = re.sub(r"<\s*/\s*(p|div|li|tr|h[1-6])\s*>", "\n", raw_value, flags=re.IGNORECASE)
+    plain_text = strip_tags(raw_value)
+    plain_text = unescape(plain_text).replace("\xa0", " ")
+    plain_text = re.sub(r"\r\n?", "\n", plain_text)
+    plain_text = re.sub(r"[ \t]+\n", "\n", plain_text)
+    plain_text = re.sub(r"\n{3,}", "\n\n", plain_text)
+    return plain_text.strip()
+
+
 class QuestionForm(forms.ModelForm):
     category_name = forms.CharField(
         label="Kategori Baru",
@@ -211,6 +225,9 @@ class QuestionForm(forms.ModelForm):
             ("essay", "Esai"),
             ("short_answer", "Jawaban Singkat"),
         ]
+        if not self.is_bound and not (self.instance and self.instance.pk):
+            self.initial.setdefault("question_type", Question.QuestionType.MULTIPLE_CHOICE)
+            self.fields["question_type"].initial = Question.QuestionType.MULTIPLE_CHOICE
         self.fields["difficulty_level"].choices = [
             ("", "---------"),
             ("easy", "Mudah"),
@@ -285,7 +302,6 @@ class QuestionForm(forms.ModelForm):
                 attrs={
                     "rows": 3,
                     "class": "form-control matching-prompt-input",
-                    "data-tinymce": "true",
                     "placeholder": f"Tulis prompt pasangan {index}...",
                 }
             )
@@ -293,7 +309,6 @@ class QuestionForm(forms.ModelForm):
                 attrs={
                     "rows": 3,
                     "class": "form-control matching-answer-input",
-                    "data-tinymce": "true",
                     "placeholder": f"Tulis jawaban pasangan {index}...",
                 }
             )
@@ -359,8 +374,8 @@ class QuestionForm(forms.ModelForm):
                 prompt_name = f"matching_prompt_{index}"
                 answer_name = f"matching_answer_{index}"
                 if len(matching_pairs) >= index:
-                    self.fields[prompt_name].initial = matching_pairs[index - 1].prompt_text
-                    self.fields[answer_name].initial = matching_pairs[index - 1].answer_text
+                    self.fields[prompt_name].initial = _richtext_to_plain_text(matching_pairs[index - 1].prompt_text)
+                    self.fields[answer_name].initial = _richtext_to_plain_text(matching_pairs[index - 1].answer_text)
                 else:
                     self.fields[prompt_name].initial = ""
                     self.fields[answer_name].initial = ""
@@ -512,8 +527,8 @@ class QuestionForm(forms.ModelForm):
         }
         matching_values = {
             index: {
-                "prompt": (cleaned_data.get(f"matching_prompt_{index}") or "").strip(),
-                "answer": (cleaned_data.get(f"matching_answer_{index}") or "").strip(),
+                "prompt": _richtext_to_plain_text(cleaned_data.get(f"matching_prompt_{index}")),
+                "answer": _richtext_to_plain_text(cleaned_data.get(f"matching_answer_{index}")),
             }
             for index in MATCHING_PAIR_INDEXES
         }
@@ -570,7 +585,7 @@ class QuestionForm(forms.ModelForm):
                         {
                             "blank_number": index,
                             "accepted_answers": accepted_aliases,
-                            "is_case_sensitive": bool(cleaned_data.get(case_name)),
+                            "is_case_sensitive": False,
                             "blank_points": cleaned_data.get(points_name),
                         }
                     )
@@ -682,6 +697,8 @@ class QuestionForm(forms.ModelForm):
             cleaned_data["correct_option"] = ""
             cleaned_data["correct_options"] = []
             cleaned_data["checkbox_scoring"] = Question.CheckboxScoring.ALL_OR_NOTHING
+            cleaned_data["is_case_sensitive"] = False
+            cleaned_data["max_word_count"] = None
             cleaned_data["ordering_items"] = []
             cleaned_data["matching_pairs"] = []
             cleaned_data["blank_answers"] = []
