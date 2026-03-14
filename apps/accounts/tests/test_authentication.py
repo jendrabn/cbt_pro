@@ -51,6 +51,11 @@ class AuthenticationFlowTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Email/username atau password salah")
 
+    def test_login_page_does_not_show_has_validation_class_without_errors(self):
+        response = self.client.get(reverse("login"))
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "has-validation")
+
     def test_empty_login_submission_marks_input_groups_invalid(self):
         response = self.client.post(reverse("login"), {"username": "", "password": ""})
 
@@ -58,6 +63,11 @@ class AuthenticationFlowTests(TestCase):
         self.assertContains(response, "has-validation is-invalid-group", count=2)
         self.assertContains(response, 'aria-describedby="id_username_feedback"', html=False)
         self.assertContains(response, 'aria-describedby="id_password_feedback"', html=False)
+
+    def test_forgot_password_page_does_not_show_has_validation_class_without_errors(self):
+        response = self.client.get(reverse("password_reset"))
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "has-validation")
 
     def test_forgot_password_invalid_submission_marks_input_group_invalid(self):
         response = self.client.post(reverse("password_reset"), {"email": ""})

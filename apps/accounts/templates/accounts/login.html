@@ -150,7 +150,7 @@
 
             <div class="mb-3">
                 <label for="id_username" class="form-label fw-semibold required">Email/Username</label>
-                <div class="input-group has-validation{% if form.username.errors %} is-invalid-group{% endif %}">
+                <div class="input-group{% if form.username.errors %} has-validation is-invalid-group{% endif %}">
                     <span class="input-group-text">
                         <i class="ri-user-line"></i>
                     </span>
@@ -174,7 +174,7 @@
 
             <div class="mb-2">
                 <label for="id_password" class="form-label fw-semibold required">Password</label>
-                <div class="input-group has-validation{% if form.password.errors %} is-invalid-group{% endif %}" x-data="{ show: false }">
+                <div class="input-group{% if form.password.errors %} has-validation is-invalid-group{% endif %}" x-data="{ show: false }">
                     <span class="input-group-text">
                         <i class="ri-lock-line"></i>
                     </span>
