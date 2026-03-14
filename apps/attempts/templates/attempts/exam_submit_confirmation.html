@@ -33,29 +33,29 @@
                     Jawaban untuk ujian <strong>{{ exam.title }}</strong> telah dikirim dengan status <strong>{{ summary.status_label }}</strong>.
                 </div>
 
-                <div class="row row-cols-2 row-cols-md-4 g-3 mb-3 cbt-stats-grid">
-                    <div class="col">
+                <div class="row g-3 mb-3 cbt-stats-grid">
+                    <div class="col-6 col-md-3">
                         {% include "partials/stats_card.html" with title="Total Soal" value=summary.total_questions icon="ri-list-check-3" tone="primary" card_class="cbt-stat-card--compact" %}
                     </div>
-                    <div class="col">
+                    <div class="col-6 col-md-3">
                         {% include "partials/stats_card.html" with title="Terjawab" value=summary.answered_count icon="ri-checkbox-circle-line" tone="success" card_class="cbt-stat-card--compact" %}
                     </div>
-                    <div class="col">
+                    <div class="col-6 col-md-3">
                         {% include "partials/stats_card.html" with title="Belum Dijawab" value=summary.unanswered_count icon="ri-question-line" tone="danger" card_class="cbt-stat-card--compact" %}
                     </div>
-                    <div class="col">
+                    <div class="col-6 col-md-3">
                         {% include "partials/stats_card.html" with title="Ditandai" value=summary.marked_count icon="ri-bookmark-line" tone="warning" card_class="cbt-stat-card--compact" %}
                     </div>
                 </div>
 
-                <div class="row row-cols-1 row-cols-md-3 g-3 mb-3 cbt-stats-grid">
-                    <div class="col">
+                <div class="row g-3 mb-3 cbt-stats-grid">
+                    <div class="col-12 col-md-4">
                         {% include "partials/stats_card.html" with title="Waktu Mulai" value=summary.start_time_label icon="ri-time-line" tone="info" card_class="cbt-stat-card--compact" %}
                     </div>
-                    <div class="col">
+                    <div class="col-12 col-md-4">
                         {% include "partials/stats_card.html" with title="Waktu Submit" value=summary.submit_time_label icon="ri-timer-flash-line" tone="primary" card_class="cbt-stat-card--compact" %}
                     </div>
-                    <div class="col">
+                    <div class="col-12 col-md-4">
                         {% include "partials/stats_card.html" with title="Durasi Pengerjaan" value=summary.duration_used_label icon="ri-hourglass-2-line" tone="success" card_class="cbt-stat-card--compact" %}
                     </div>
                 </div>

@@ -28,17 +28,17 @@
 {% endblock %}
 
 {% block content %}
-        <section class="row row-cols-2 row-cols-xl-4 g-3 mb-4 cbt-stats-grid">
-            <div class="col">
+        <section class="row g-3 mb-4 cbt-stats-grid">
+            <div class="col-6 col-xl-3">
                 {% include "partials/stats_card.html" with title="Total Ujian Diikuti" value=total_exam_taken icon="ri-file-list-3-line" tone="primary" %}
             </div>
-            <div class="col">
+            <div class="col-6 col-xl-3">
                 {% include "partials/stats_card.html" with title="Attempt Selesai" value=completed_attempts icon="ri-check-double-line" tone="success" %}
             </div>
-            <div class="col">
+            <div class="col-6 col-xl-3">
                 {% include "partials/stats_card.html" with title="Rata-rata Nilai" value=average_score value_suffix="%" icon="ri-line-chart-line" tone="info" %}
             </div>
-            <div class="col">
+            <div class="col-6 col-xl-3">
                 {% include "partials/stats_card.html" with title="Nilai Terbaik" value=best_score value_suffix="%" icon="ri-award-line" tone="warning" %}
             </div>
         </section>

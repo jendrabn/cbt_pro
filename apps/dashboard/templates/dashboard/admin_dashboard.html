@@ -20,20 +20,20 @@
 {% endblock %}
 
 {% block content %}
-        <section class="row row-cols-2 row-cols-md-3 row-cols-xl-5 g-3 mb-4 cbt-stats-grid">
-            <div class="col">
+        <section class="row g-3 mb-4 cbt-stats-grid">
+            <div class="col-6 col-md-4 col-xl-3 col-xxl-2">
                 {% include "partials/stats_card.html" with title="Total Pengguna Aktif" value=total_users icon="ri-group-line" tone="primary" %}
             </div>
-            <div class="col">
+            <div class="col-6 col-md-4 col-xl-3 col-xxl-2">
                 {% include "partials/stats_card.html" with title="Total Soal" value=total_questions icon="ri-questionnaire-line" tone="info" %}
             </div>
-            <div class="col">
+            <div class="col-6 col-md-4 col-xl-3 col-xxl-2">
                 {% include "partials/stats_card.html" with title="Total Mapel" value=total_subjects icon="ri-book-open-line" tone="success" %}
             </div>
-            <div class="col">
+            <div class="col-6 col-md-4 col-xl-3 col-xxl-2">
                 {% include "partials/stats_card.html" with title="Ujian Aktif" value=active_exams icon="ri-timer-line" tone="warning" %}
             </div>
-            <div class="col">
+            <div class="col-6 col-md-4 col-xl-3 col-xxl-2">
                 {% include "partials/stats_card.html" with title="Ujian Selesai" value=completed_exams icon="ri-check-double-line" tone="secondary" %}
             </div>
         </section>

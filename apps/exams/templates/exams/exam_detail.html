@@ -49,17 +49,17 @@
             </div>
         {% endif %}
 
-        <section class="row row-cols-2 row-cols-md-4 g-3 mb-4 cbt-stats-grid">
-            <div class="col">
+        <section class="row g-3 mb-4 cbt-stats-grid">
+            <div class="col-6 col-md-3">
                 {% include "partials/stats_card.html" with title="Status" value=exam_status_label icon="ri-information-line" tone="primary" card_class="cbt-stat-card--compact" %}
             </div>
-            <div class="col">
+            <div class="col-6 col-md-3">
                 {% include "partials/stats_card.html" with title="Status Waktu" value=timing_status icon="ri-time-line" tone="warning" card_class="cbt-stat-card--compact" %}
             </div>
-            <div class="col">
+            <div class="col-6 col-md-3">
                 {% include "partials/stats_card.html" with title="Jumlah Soal" value=exam_questions|length icon="ri-list-check-3" tone="info" card_class="cbt-stat-card--compact" %}
             </div>
-            <div class="col">
+            <div class="col-6 col-md-3">
                 {% include "partials/stats_card.html" with title="Total Poin" value=exam.total_points icon="ri-star-line" tone="success" card_class="cbt-stat-card--compact" %}
             </div>
         </section>

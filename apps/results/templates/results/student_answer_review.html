@@ -103,17 +103,17 @@
                         </p>
                     </div>
                     <div class="col-md-6">
-                        <div class="row row-cols-2 g-2 cbt-stats-grid">
-                            <div class="col">
+                        <div class="row g-2 cbt-stats-grid">
+                            <div class="col-6">
                                 {% include "partials/stats_card.html" with title="Benar" value=result.correct_answers icon="ri-checkbox-circle-line" tone="success" card_class="cbt-stat-card--compact" %}
                             </div>
-                            <div class="col">
+                            <div class="col-6">
                                 {% include "partials/stats_card.html" with title="Salah" value=result.wrong_answers icon="ri-close-circle-line" tone="danger" card_class="cbt-stat-card--compact" %}
                             </div>
-                            <div class="col">
+                            <div class="col-6">
                                 {% include "partials/stats_card.html" with title="Tidak Dijawab" value=result.unanswered icon="ri-question-line" tone="secondary" card_class="cbt-stat-card--compact" %}
                             </div>
-                            <div class="col">
+                            <div class="col-6">
                                 {% include "partials/stats_card.html" with title="Waktu" value=result.time_taken_seconds value_suffix=" detik" icon="ri-time-line" tone="info" card_class="cbt-stat-card--compact" %}
                             </div>
                         </div>

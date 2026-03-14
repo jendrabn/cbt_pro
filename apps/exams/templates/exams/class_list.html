@@ -40,14 +40,14 @@
             </div>
         {% endif %}
 
-        <section class="row row-cols-2 row-cols-md-3 g-3 mb-4 cbt-stats-grid">
-            <div class="col">
+        <section class="row g-3 mb-4 cbt-stats-grid">
+            <div class="col-6 col-md-4">
                 {% include "partials/stats_card.html" with title="Total Kelas" value=summary.total icon="ri-community-line" tone="primary" %}
             </div>
-            <div class="col">
+            <div class="col-6 col-md-4">
                 {% include "partials/stats_card.html" with title="Total Keanggotaan" value=summary.memberships icon="ri-team-line" tone="info" %}
             </div>
-            <div class="col">
+            <div class="col-6 col-md-4">
                 {% include "partials/stats_card.html" with title="Penugasan Ujian" value=summary.assignments icon="ri-file-list-3-line" tone="warning" %}
             </div>
         </section>

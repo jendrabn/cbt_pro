@@ -81,39 +81,39 @@
             </div>
         </section>
 
-        <section class="row row-cols-2 row-cols-xl-4 g-3 mb-4 cbt-stats-grid">
-            <div class="col">
+        <section class="row g-3 mb-4 cbt-stats-grid">
+            <div class="col-6 col-xl-3">
                 {% if comparison.total_exams_change >= 0 %}
                     {% include "partials/stats_card.html" with title="Total Ujian Berlangsung" value=summary.total_exams icon="ri-file-list-3-line" tone="primary" delta_value=comparison.total_exams_change delta_prefix="+" delta_suffix="%" delta_tone="success" %}
                 {% else %}
                     {% include "partials/stats_card.html" with title="Total Ujian Berlangsung" value=summary.total_exams icon="ri-file-list-3-line" tone="primary" delta_value=comparison.total_exams_change delta_suffix="%" delta_tone="danger" %}
                 {% endif %}
             </div>
-            <div class="col">
+            <div class="col-6 col-xl-3">
                 {% if comparison.total_participants_change >= 0 %}
                     {% include "partials/stats_card.html" with title="Total Peserta" value=summary.total_participants icon="ri-group-line" tone="info" delta_value=comparison.total_participants_change delta_prefix="+" delta_suffix="%" delta_tone="success" %}
                 {% else %}
                     {% include "partials/stats_card.html" with title="Total Peserta" value=summary.total_participants icon="ri-group-line" tone="info" delta_value=comparison.total_participants_change delta_suffix="%" delta_tone="danger" %}
                 {% endif %}
             </div>
-            <div class="col">
+            <div class="col-6 col-xl-3">
                 {% if comparison.average_score_change >= 0 %}
                     {% include "partials/stats_card.html" with title="Rata-rata Nilai" value=summary.average_score value_suffix="%" icon="ri-line-chart-line" tone="success" delta_value=comparison.average_score_change delta_prefix="+" delta_suffix="%" delta_tone="success" %}
                 {% else %}
                     {% include "partials/stats_card.html" with title="Rata-rata Nilai" value=summary.average_score value_suffix="%" icon="ri-line-chart-line" tone="success" delta_value=comparison.average_score_change delta_suffix="%" delta_tone="danger" %}
                 {% endif %}
             </div>
-            <div class="col">
+            <div class="col-6 col-xl-3">
                 {% if comparison.completion_rate_change >= 0 %}
                     {% include "partials/stats_card.html" with title="Tingkat Penyelesaian" value=summary.completion_rate value_suffix="%" icon="ri-timer-flash-line" tone="warning" delta_value=comparison.completion_rate_change delta_prefix="+" delta_suffix="%" delta_tone="success" %}
                 {% else %}
                     {% include "partials/stats_card.html" with title="Tingkat Penyelesaian" value=summary.completion_rate value_suffix="%" icon="ri-timer-flash-line" tone="warning" delta_value=comparison.completion_rate_change delta_suffix="%" delta_tone="danger" %}
                 {% endif %}
             </div>
-            <div class="col">
+            <div class="col-6 col-xl-3">
                 {% include "partials/stats_card.html" with title="Sertifikat Terbit" value=summary.certificates_total icon="ri-award-line" tone="primary" %}
             </div>
-            <div class="col">
+            <div class="col-6 col-xl-3">
                 {% include "partials/stats_card.html" with title="Cakupan Sertifikat" value=summary.certificate_coverage value_suffix="%" icon="ri-bar-chart-box-line" tone="info" %}
             </div>
         </section>

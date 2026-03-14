@@ -9,17 +9,17 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
             </div>
             <div class="modal-body">
-                <section class="row row-cols-2 row-cols-md-4 g-3 mb-4 cbt-stats-grid">
-                    <div class="col">
+                <section class="row g-3 mb-4 cbt-stats-grid">
+                    <div class="col-6 col-md-3">
                         {% include "partials/stats_card.html" with title="Status Attempt" value="-" value_id="detailAttemptStatus" icon="ri-pulse-line" tone="primary" card_class="cbt-stat-card--compact" %}
                     </div>
-                    <div class="col">
+                    <div class="col-6 col-md-3">
                         {% include "partials/stats_card.html" with title="Progress" value="-" value_id="detailProgress" icon="ri-progress-5-line" tone="info" card_class="cbt-stat-card--compact" %}
                     </div>
-                    <div class="col">
+                    <div class="col-6 col-md-3">
                         {% include "partials/stats_card.html" with title="Sisa Waktu" value="-" value_id="detailTimeRemaining" icon="ri-time-line" tone="warning" card_class="cbt-stat-card--compact" %}
                     </div>
-                    <div class="col">
+                    <div class="col-6 col-md-3">
                         {% include "partials/stats_card.html" with title="Pelanggaran" value="-" value_id="detailViolationsCount" icon="ri-alarm-warning-line" tone="danger" card_class="cbt-stat-card--compact" %}
                     </div>
                 </section>

@@ -33,11 +33,11 @@
             </div>
         {% endif %}
 
-        <section class="row row-cols-1 row-cols-md-2 g-3 mb-4 cbt-stats-grid">
-            <div class="col">
+        <section class="row g-3 mb-4 cbt-stats-grid">
+            <div class="col-12 col-md-6 col-xl-4">
                 {% include "partials/stats_card.html" with title="Total Mata Pelajaran" value=summary.total icon="ri-book-open-line" tone="primary" %}
             </div>
-            <div class="col">
+            <div class="col-12 col-md-6 col-xl-4">
                 {% include "partials/stats_card.html" with title="Mapel Ditampilkan" value=subject_rows|length icon="ri-list-check-2" tone="info" %}
             </div>
         </section>
