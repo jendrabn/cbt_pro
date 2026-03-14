@@ -22,7 +22,7 @@
             return;
         }
 
-        var self = this;
+        const self = this;
         this.socket.onopen = function () {
             self.onStatus("connected");
         };
@@ -39,7 +39,7 @@
     };
 
     MonitoringWebSocket.prototype.scheduleReconnect = function () {
-        var self = this;
+        const self = this;
         if (this.retryTimer) {
             window.clearTimeout(this.retryTimer);
         }

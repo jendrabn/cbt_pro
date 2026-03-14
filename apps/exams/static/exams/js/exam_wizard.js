@@ -1,6 +1,6 @@
 (function () {
     function parseJSONScript(id, fallback) {
-        var node = document.getElementById(id);
+        const node = document.getElementById(id);
         if (!node) {
             return fallback;
         }
@@ -20,7 +20,7 @@
         }
         if (typeof value === "string") {
             try {
-                var parsed = JSON.parse(value);
+                const parsed = JSON.parse(value);
                 return Array.isArray(parsed) ? parsed : [];
             } catch (err) {
                 return [];
@@ -52,89 +52,89 @@
     }
 
     document.addEventListener("DOMContentLoaded", function () {
-        var form = document.getElementById("examWizardForm");
+        const form = document.getElementById("examWizardForm");
         if (!form) {
             return;
         }
 
-        var questionPickerConfig = parseJSONScript("question-picker-config", {});
-        var assignmentData = parseJSONScript("available-assignment-data", { classes: [], students: [] });
-        var initialSelected = normalizeArrayPayload(parseJSONScript("initial-selected-questions", []));
-        var initialAssignments = normalizeArrayPayload(parseJSONScript("initial-assignment-payload", []));
+        const questionPickerConfig = parseJSONScript("question-picker-config", {});
+        const assignmentData = parseJSONScript("available-assignment-data", { classes: [], students: [] });
+        let initialSelected = normalizeArrayPayload(parseJSONScript("initial-selected-questions", []));
+        const initialAssignments = normalizeArrayPayload(parseJSONScript("initial-assignment-payload", []));
 
-        var selectedPayloadInput = document.getElementById("id_selected_questions_payload");
-        var assignmentPayloadInput = document.getElementById("id_assignment_payload");
-        var statusActionInput = document.getElementById("id_status_action");
+        const selectedPayloadInput = document.getElementById("id_selected_questions_payload");
+        const assignmentPayloadInput = document.getElementById("id_assignment_payload");
+        const statusActionInput = document.getElementById("id_status_action");
 
-        var selectedListEl = document.getElementById("selectedQuestionList");
-        var selectedCountEl = document.getElementById("selectedQuestionCount");
-        var selectedPointsEl = document.getElementById("selectedQuestionTotalPoints");
-        var selectedCountTopEl = document.getElementById("selectedQuestionCountTop");
-        var selectedPointsTopEl = document.getElementById("selectedQuestionTotalPointsTop");
-        var selectedCountModalEl = document.getElementById("selectedQuestionCountModal");
-        var selectedPointsModalEl = document.getElementById("selectedQuestionTotalPointsModal");
-        var availableListEl = document.getElementById("availableQuestionList");
-        var availableLoadMoreBtn = document.getElementById("availableQuestionLoadMoreBtn");
-        var availableModalEl = document.getElementById("availableQuestionModal");
-        var assignmentSummaryEl = document.getElementById("assignmentSummaryList");
-        var reviewSummaryEl = document.getElementById("reviewSummary");
-        var studentAssignmentListEl = document.getElementById("studentAssignmentList");
-        var studentAssignmentToggleBtn = document.getElementById("studentAssignmentToggleSelectBtn");
-        var studentAssignmentToggleLabel = studentAssignmentToggleBtn ? studentAssignmentToggleBtn.querySelector(".student-toggle-select-label") : null;
+        const selectedListEl = document.getElementById("selectedQuestionList");
+        const selectedCountEl = document.getElementById("selectedQuestionCount");
+        const selectedPointsEl = document.getElementById("selectedQuestionTotalPoints");
+        const selectedCountTopEl = document.getElementById("selectedQuestionCountTop");
+        const selectedPointsTopEl = document.getElementById("selectedQuestionTotalPointsTop");
+        const selectedCountModalEl = document.getElementById("selectedQuestionCountModal");
+        const selectedPointsModalEl = document.getElementById("selectedQuestionTotalPointsModal");
+        const availableListEl = document.getElementById("availableQuestionList");
+        const availableLoadMoreBtn = document.getElementById("availableQuestionLoadMoreBtn");
+        const availableModalEl = document.getElementById("availableQuestionModal");
+        const assignmentSummaryEl = document.getElementById("assignmentSummaryList");
+        const reviewSummaryEl = document.getElementById("reviewSummary");
+        const studentAssignmentListEl = document.getElementById("studentAssignmentList");
+        const studentAssignmentToggleBtn = document.getElementById("studentAssignmentToggleSelectBtn");
+        const studentAssignmentToggleLabel = studentAssignmentToggleBtn ? studentAssignmentToggleBtn.querySelector(".student-toggle-select-label") : null;
 
-        var addCategoryBtn = document.getElementById("addCategoryQuestionsBtn");
-        var categorySelector = document.getElementById("bulkCategorySelector");
-        var filterSearchInput = document.getElementById("questionFilterSearch");
-        var filterSubjectSelect = document.getElementById("questionFilterSubject");
-        var filterTypeSelect = document.getElementById("questionFilterType");
-        var filterCategorySelect = document.getElementById("questionFilterCategory");
-        var filterResetBtn = document.getElementById("questionFilterResetBtn");
+        const addCategoryBtn = document.getElementById("addCategoryQuestionsBtn");
+        const categorySelector = document.getElementById("bulkCategorySelector");
+        const filterSearchInput = document.getElementById("questionFilterSearch");
+        const filterSubjectSelect = document.getElementById("questionFilterSubject");
+        const filterTypeSelect = document.getElementById("questionFilterType");
+        const filterCategorySelect = document.getElementById("questionFilterCategory");
+        const filterResetBtn = document.getElementById("questionFilterResetBtn");
 
-        var availableToggleSelectBtn = document.getElementById("availableToggleSelectBtn");
-        var selectedToggleSelectBtn = document.getElementById("selectedToggleSelectBtn");
-        var bulkPointsInput = document.getElementById("bulkPointsOverride");
-        var bulkAllowPrevSelect = document.getElementById("bulkAllowPrevious");
-        var bulkAllowNextSelect = document.getElementById("bulkAllowNext");
-        var bulkForceSeqSelect = document.getElementById("bulkForceSequential");
-        var applyBulkSelectedBtn = document.getElementById("applyBulkSelectedBtn");
-        var deleteBulkSelectedBtn = document.getElementById("deleteBulkSelectedBtn");
-        var availableToggleSelectLabel = availableToggleSelectBtn ? availableToggleSelectBtn.querySelector(".available-toggle-select-label") : null;
-        var selectedToggleSelectLabel = selectedToggleSelectBtn ? selectedToggleSelectBtn.querySelector(".selected-toggle-select-label") : null;
+        const availableToggleSelectBtn = document.getElementById("availableToggleSelectBtn");
+        const selectedToggleSelectBtn = document.getElementById("selectedToggleSelectBtn");
+        const bulkPointsInput = document.getElementById("bulkPointsOverride");
+        const bulkAllowPrevSelect = document.getElementById("bulkAllowPrevious");
+        const bulkAllowNextSelect = document.getElementById("bulkAllowNext");
+        const bulkForceSeqSelect = document.getElementById("bulkForceSequential");
+        const applyBulkSelectedBtn = document.getElementById("applyBulkSelectedBtn");
+        const deleteBulkSelectedBtn = document.getElementById("deleteBulkSelectedBtn");
+        const availableToggleSelectLabel = availableToggleSelectBtn ? availableToggleSelectBtn.querySelector(".available-toggle-select-label") : null;
+        const selectedToggleSelectLabel = selectedToggleSelectBtn ? selectedToggleSelectBtn.querySelector(".selected-toggle-select-label") : null;
 
-        var stepIndicators = Array.from(document.querySelectorAll("[data-step-indicator]"));
-        var stepCards = Array.from(document.querySelectorAll("[data-step]"));
-        var prevBtn = document.getElementById("wizardPrevBtn");
-        var nextBtn = document.getElementById("wizardNextBtn");
-        var submitButtons = Array.from(document.querySelectorAll(".wizard-submit-btn"));
-        var currentStep = 1;
-        var allowRetakeField = document.getElementById("id_allow_retake");
-        var retakeSettingsFields = document.getElementById("retakeSettingsFields");
-        var maxRetakeAttemptsField = document.getElementById("id_max_retake_attempts");
-        var retakeCooldownField = document.getElementById("id_retake_cooldown_minutes");
-        var retakeShowReviewField = document.getElementById("id_retake_show_review");
-        var certificateEnabledField = document.getElementById("id_certificate_enabled");
-        var certificateSettingsFields = document.getElementById("certificateSettingsFields");
-        var certificateTemplateField = document.getElementById("id_certificate_template");
+        const stepIndicators = Array.from(document.querySelectorAll("[data-step-indicator]"));
+        const stepCards = Array.from(document.querySelectorAll("[data-step]"));
+        const prevBtn = document.getElementById("wizardPrevBtn");
+        const nextBtn = document.getElementById("wizardNextBtn");
+        const submitButtons = Array.from(document.querySelectorAll(".wizard-submit-btn"));
+        let currentStep = 1;
+        const allowRetakeField = document.getElementById("id_allow_retake");
+        const retakeSettingsFields = document.getElementById("retakeSettingsFields");
+        const maxRetakeAttemptsField = document.getElementById("id_max_retake_attempts");
+        const retakeCooldownField = document.getElementById("id_retake_cooldown_minutes");
+        const retakeShowReviewField = document.getElementById("id_retake_show_review");
+        const certificateEnabledField = document.getElementById("id_certificate_enabled");
+        const certificateSettingsFields = document.getElementById("certificateSettingsFields");
+        const certificateTemplateField = document.getElementById("id_certificate_template");
 
         if (!initialSelected.length && selectedPayloadInput && selectedPayloadInput.value) {
             initialSelected = normalizeArrayPayload(selectedPayloadInput.value);
         }
 
-        var questionSearchUrl = questionPickerConfig.search_url || "";
-        var questionPageSize = parseInt(questionPickerConfig.page_size || 50, 10);
+        const questionSearchUrl = questionPickerConfig.search_url || "";
+        let questionPageSize = parseInt(questionPickerConfig.page_size || 50, 10);
         if (isNaN(questionPageSize) || questionPageSize < 10) {
             questionPageSize = 50;
         }
-        var availableState = {
+        const availableState = {
             page: 1,
             hasNext: false,
             totalItems: 0,
             isLoading: false
         };
-        var filterDebounceTimer = null;
+        let filterDebounceTimer = null;
 
-        var availableById = {};
-        var selectedQuestions = {};
+        const availableById = {};
+        const selectedQuestions = {};
 
         function normalizeQuestionFromAvailable(item) {
             return {
@@ -158,12 +158,12 @@
 
         function loadInitialSelected() {
             initialSelected.forEach(function (item, index) {
-                var questionId = item.question_id || item.id;
+                const questionId = item.question_id || item.id;
                 if (!questionId) {
                     return;
                 }
-                var fromAvailable = availableById[questionId];
-                var base = fromAvailable ? normalizeQuestionFromAvailable(fromAvailable) : {
+                const fromAvailable = availableById[questionId];
+                const base = fromAvailable ? normalizeQuestionFromAvailable(fromAvailable) : {
                     question_id: questionId,
                     question_text: item.question_text || item.text || "Soal tidak ditemukan",
                     subject_name: item.subject_name || "",
@@ -200,7 +200,7 @@
             if (!modalEl || !window.bootstrap || !window.bootstrap.Modal) {
                 return;
             }
-            var modalInstance = window.bootstrap.Modal.getInstance(modalEl);
+            let modalInstance = window.bootstrap.Modal.getInstance(modalEl);
             if (!modalInstance) {
                 modalInstance = new window.bootstrap.Modal(modalEl);
             }
@@ -221,7 +221,7 @@
         }
 
         function questionTypeLabel(value) {
-            var labels = {
+            const labels = {
                 multiple_choice: "Pilihan Ganda",
                 checkbox: "Checkbox",
                 ordering: "Ordering",
@@ -234,7 +234,7 @@
         }
 
         function questionTypeBadgeClass(value) {
-            var classes = {
+            const classes = {
                 multiple_choice: "badge-soft-primary",
                 checkbox: "badge-soft-success",
                 ordering: "badge-soft-warning",
@@ -247,7 +247,7 @@
         }
 
         function formatPointsValue(value) {
-            var parsed = parseFloat(value);
+            let parsed = parseFloat(value);
             if (isNaN(parsed)) {
                 parsed = 0;
             }
@@ -255,35 +255,33 @@
         }
 
         function buildQuestionMetaBadges(subjectName, categoryName, pointsValue, questionType) {
-            var badges = [];
+            const badges = [];
 
             if (subjectName) {
-                badges.push('<span class="badge-soft-info text-nowrap">' + escapeHTML(subjectName) + "</span>");
+                badges.push(`<span class="badge-soft-info text-nowrap">${escapeHTML(subjectName)}</span>`);
             }
 
             if (categoryName) {
-                badges.push('<span class="badge-soft-secondary text-nowrap">' + escapeHTML(categoryName) + "</span>");
+                badges.push(`<span class="badge-soft-secondary text-nowrap">${escapeHTML(categoryName)}</span>`);
             }
 
-            badges.push('<span class="badge-soft-warning text-nowrap">' + escapeHTML(formatPointsValue(pointsValue)) + " poin</span>");
+            badges.push(`<span class="badge-soft-warning text-nowrap">${escapeHTML(formatPointsValue(pointsValue))} poin</span>`);
             badges.push(
-                '<span class="' + questionTypeBadgeClass(questionType) + ' text-nowrap">'
-                + escapeHTML(questionTypeLabel(questionType))
-                + "</span>"
+                `<span class="${questionTypeBadgeClass(questionType)} text-nowrap">${escapeHTML(questionTypeLabel(questionType))}</span>`
             );
 
             return badges.join("");
         }
 
         function buildQuestionQueryParams(page, extraFilters) {
-            var params = new URLSearchParams();
+            const params = new URLSearchParams();
             params.set("page", String(page || 1));
             params.set("page_size", String(questionPageSize));
 
-            var keyword = normalizeFilterText(filterSearchInput && filterSearchInput.value);
-            var subject = String((filterSubjectSelect && filterSubjectSelect.value) || "").trim();
-            var questionType = String((filterTypeSelect && filterTypeSelect.value) || "").trim();
-            var category = String((filterCategorySelect && filterCategorySelect.value) || "").trim();
+            const keyword = normalizeFilterText(filterSearchInput && filterSearchInput.value);
+            const subject = String((filterSubjectSelect && filterSubjectSelect.value) || "").trim();
+            const questionType = String((filterTypeSelect && filterTypeSelect.value) || "").trim();
+            const category = String((filterCategorySelect && filterCategorySelect.value) || "").trim();
 
             if (keyword) {
                 params.set("q", keyword);
@@ -300,7 +298,7 @@
 
             if (extraFilters) {
                 Object.keys(extraFilters).forEach(function (key) {
-                    var val = extraFilters[key];
+                    const val = extraFilters[key];
                     if (val === null || val === undefined || val === "") {
                         return;
                     }
@@ -323,29 +321,17 @@
                 return;
             }
 
-            var rowsHTML = items.map(function (item) {
-                var safeText = escapeHTML(item.text || "");
-                var checkboxId = buildSafeDomId("available-question-", item.id);
-                var titleId = buildSafeDomId("available-question-title-", item.id);
-                var metaBadges = buildQuestionMetaBadges(
+            const rowsHTML = items.map(function (item) {
+                const safeText = escapeHTML(item.text || "");
+                const checkboxId = buildSafeDomId("available-question-", item.id);
+                const titleId = buildSafeDomId("available-question-title-", item.id);
+                const metaBadges = buildQuestionMetaBadges(
                     item.subject_name || "",
                     item.category_name || "Tanpa kategori",
                     item.points || 0,
                     item.question_type || ""
                 );
-                return (
-                    '<div class="list-group-item list-group-item-action question-picker-item" data-question-id="' + item.id + '" data-category-id="' + escapeHTML(item.category_id || "") + '">' +
-                        '<div class="d-flex align-items-center gap-3">' +
-                            '<div class="question-picker-check d-flex align-items-center flex-shrink-0">' +
-                                '<input type="checkbox" class="form-check-input question-picker-checkbox m-0" id="' + checkboxId + '" value="' + item.id + '" title="Pilih soal" aria-label="Pilih soal: ' + safeText + '" aria-labelledby="' + titleId + '">' +
-                            "</div>" +
-                            '<div class="flex-grow-1 min-w-0">' +
-                                '<p class="question-picker-title mb-2 fw-semibold" id="' + titleId + '">' + safeText + "</p>" +
-                                '<div class="d-flex flex-wrap gap-2 mb-0">' + metaBadges + "</div>" +
-                            '</div>' +
-                        '</div>' +
-                    "</div>"
-                );
+                return `<div class="list-group-item list-group-item-action question-picker-item" data-question-id="${item.id}" data-category-id="${escapeHTML(item.category_id || "")}"><div class="d-flex align-items-center gap-3"><div class="question-picker-check d-flex align-items-center flex-shrink-0"><input type="checkbox" class="form-check-input question-picker-checkbox m-0" id="${checkboxId}" value="${item.id}" title="Pilih soal" aria-label="Pilih soal: ${safeText}" aria-labelledby="${titleId}"></div><div class="flex-grow-1 min-w-0"><p class="question-picker-title mb-2 fw-semibold" id="${titleId}">${safeText}</p><div class="d-flex flex-wrap gap-2 mb-0">${metaBadges}</div></div></div></div>`;
             }).join("");
 
             if (appendMode) {
@@ -369,7 +355,7 @@
                 return;
             }
             options = options || {};
-            var appendMode = !!options.append;
+            const appendMode = !!options.append;
             if (availableState.isLoading) {
                 return;
             }
@@ -377,8 +363,8 @@
                 return;
             }
 
-            var page = appendMode ? (availableState.page + 1) : 1;
-            var params = buildQuestionQueryParams(page, options.extraFilters || null);
+            const page = appendMode ? (availableState.page + 1) : 1;
+            const params = buildQuestionQueryParams(page, options.extraFilters || null);
             availableState.isLoading = true;
             updateAvailablePaginationUI();
 
@@ -386,7 +372,7 @@
                 availableListEl.innerHTML = '<div class="list-group-item text-muted small">Memuat daftar soal...</div>';
             }
 
-            fetch(questionSearchUrl + "?" + params.toString(), {
+            fetch(`${questionSearchUrl}?${params.toString()}`, {
                 method: "GET",
                 headers: { "X-Requested-With": "XMLHttpRequest" }
             })
@@ -397,12 +383,12 @@
                     return response.json();
                 })
                 .then(function (payload) {
-                    var items = Array.isArray(payload.items) ? payload.items : [];
+                    const items = Array.isArray(payload.items) ? payload.items : [];
                     items.forEach(function (item) {
                         availableById[item.id] = item;
                     });
                     renderAvailableQuestionItems(items, appendMode);
-                    var pagination = payload.pagination || {};
+                    const pagination = payload.pagination || {};
                     availableState.page = pagination.page || page;
                     availableState.hasNext = !!pagination.has_next;
                     availableState.totalItems = parseInt(pagination.total_items || 0, 10) || 0;
@@ -432,8 +418,8 @@
             if (!availableToggleSelectLabel || !availableListEl) {
                 return;
             }
-            var checkboxes = Array.from(availableListEl.querySelectorAll(".question-picker-checkbox"));
-            var allChecked = !!checkboxes.length && checkboxes.every(function (checkbox) { return checkbox.checked; });
+            const checkboxes = Array.from(availableListEl.querySelectorAll(".question-picker-checkbox"));
+            const allChecked = !!checkboxes.length && checkboxes.every(function (checkbox) { return checkbox.checked; });
             availableToggleSelectLabel.textContent = allChecked ? "Batal Pilih" : "Pilih Semua";
         }
 
@@ -443,7 +429,7 @@
             }
             availableListEl.querySelectorAll(".question-picker-checkbox").forEach(function (checkbox) {
                 checkbox.checked = !!selectedQuestions[checkbox.value];
-                var item = checkbox.closest(".question-picker-item");
+                const item = checkbox.closest(".question-picker-item");
                 if (item) {
                     item.classList.toggle("list-group-item-primary", checkbox.checked);
                 }
@@ -452,17 +438,17 @@
         }
 
         function serializeSelectedQuestions() {
-            var idsInOrder = Array.from(selectedListEl.querySelectorAll(".selected-question-item"))
+            const idsInOrder = Array.from(selectedListEl.querySelectorAll(".selected-question-item"))
                 .map(function (el) { return el.getAttribute("data-question-id"); })
                 .filter(Boolean);
 
-            var payload = idsInOrder.map(function (questionId, index) {
-                var item = selectedQuestions[questionId];
+            const payload = idsInOrder.map(function (questionId, index) {
+                const item = selectedQuestions[questionId];
                 if (!item) {
                     return null;
                 }
                 item.display_order = index + 1;
-                var overrideNavigation = hasNavigationOverride(item);
+                const overrideNavigation = hasNavigationOverride(item);
                 item.override_navigation = overrideNavigation;
                 return {
                     question_id: item.question_id,
@@ -480,7 +466,7 @@
         }
 
         function renderSelectedQuestions() {
-            var items = Object.values(selectedQuestions).sort(function (a, b) {
+            const items = Object.values(selectedQuestions).sort(function (a, b) {
                 return a.display_order - b.display_order;
             });
 
@@ -515,70 +501,24 @@
                     }
                     return "inherit";
                 }
-                var safeQuestionText = escapeHTML(item.question_text || "");
-                var safeDefaultPoints = escapeHTML(formatPointsValue(item.default_points || 0));
-                var safePointsOverride = escapeHTML(item.points_override || "");
-                var bulkCheckId = buildSafeDomId("selected-question-bulk-", item.question_id);
-                var titleId = buildSafeDomId("selected-question-title-", item.question_id);
-                var effectivePoints = item.points_override !== "" ? item.points_override : item.default_points;
-                var metaBadges = buildQuestionMetaBadges(
+                const safeQuestionText = escapeHTML(item.question_text || "");
+                const safeDefaultPoints = escapeHTML(formatPointsValue(item.default_points || 0));
+                const safePointsOverride = escapeHTML(item.points_override || "");
+                const bulkCheckId = buildSafeDomId("selected-question-bulk-", item.question_id);
+                const titleId = buildSafeDomId("selected-question-title-", item.question_id);
+                const effectivePoints = item.points_override !== "" ? item.points_override : item.default_points;
+                const metaBadges = buildQuestionMetaBadges(
                     item.subject_name || "",
                     item.category_name || "Tanpa kategori",
                     effectivePoints,
                     item.question_type || ""
                 );
-                return (
-                    '<div class="selected-question-item list-group-item" data-question-id="' + item.question_id + '">' +
-                        '<div class="d-flex align-items-center gap-3">' +
-                            '<div class="question-picker-check d-flex align-items-center flex-shrink-0">' +
-                                '<input type="checkbox" class="form-check-input selected-question-bulk-check m-0" id="' + bulkCheckId + '" title="Pilih untuk bulk action" aria-labelledby="' + titleId + '">' +
-                            "</div>" +
-                            '<div class="flex-grow-1 min-w-0">' +
-                                '<p class="question-picker-title mb-2 fw-semibold" id="' + titleId + '">' + safeQuestionText + '</p>' +
-                                '<div class="d-flex flex-wrap gap-2 mb-0">' + metaBadges + "</div>" +
-                                '<div class="row g-2 mt-1 question-picker-controls">' +
-                                    '<div class="col-12 col-md-4 col-xl-2">' +
-                                        '<input type="number" min="0.01" step="0.01" class="form-control form-control-sm selected-question-points" value="' + safePointsOverride + '" placeholder="Poin (' + safeDefaultPoints + ')" aria-label="Timpa poin untuk soal ini">' +
-                                    "</div>" +
-                                    '<div class="col-12 col-md-4 col-xl-2">' +
-                                        '<select class="form-select form-select-sm selected-question-allow-prev" aria-label="Override navigasi sebelumnya">' +
-                                            '<option value="inherit" ' + (selectValue(item.allow_previous_override) === "inherit" ? "selected" : "") + '>Prev: Ikuti</option>' +
-                                            '<option value="true" ' + (selectValue(item.allow_previous_override) === "true" ? "selected" : "") + '>Prev: Ya</option>' +
-                                            '<option value="false" ' + (selectValue(item.allow_previous_override) === "false" ? "selected" : "") + '>Prev: Tidak</option>' +
-                                        '</select>' +
-                                    "</div>" +
-                                    '<div class="col-12 col-md-4 col-xl-2">' +
-                                        '<select class="form-select form-select-sm selected-question-allow-next" aria-label="Override navigasi berikutnya">' +
-                                            '<option value="inherit" ' + (selectValue(item.allow_next_override) === "inherit" ? "selected" : "") + '>Next: Ikuti</option>' +
-                                            '<option value="true" ' + (selectValue(item.allow_next_override) === "true" ? "selected" : "") + '>Next: Ya</option>' +
-                                            '<option value="false" ' + (selectValue(item.allow_next_override) === "false" ? "selected" : "") + '>Next: Tidak</option>' +
-                                        '</select>' +
-                                    "</div>" +
-                                    '<div class="col-12 col-md-4 col-xl-3">' +
-                                        '<select class="form-select form-select-sm selected-question-force-seq" aria-label="Override aturan berurutan">' +
-                                            '<option value="inherit" ' + (selectValue(item.force_sequential_override) === "inherit" ? "selected" : "") + '>Berurutan: Ikuti</option>' +
-                                            '<option value="true" ' + (selectValue(item.force_sequential_override) === "true" ? "selected" : "") + '>Berurutan: Ya</option>' +
-                                            '<option value="false" ' + (selectValue(item.force_sequential_override) === "false" ? "selected" : "") + '>Berurutan: Tidak</option>' +
-                                        '</select>' +
-                                    "</div>" +
-                                "</div>" +
-                            "</div>" +
-                            '<div class="d-flex align-items-center gap-2 flex-shrink-0 ms-auto">' +
-                                '<button type="button" class="icon-only-btn drag-handle" title="Geser untuk ubah urutan" aria-label="Geser untuk ubah urutan: ' + safeQuestionText + '">' +
-                                    '<i class="ri-draggable fs-5"></i>' +
-                                "</button>" +
-                                '<button type="button" class="icon-only-btn is-danger remove-selected-question-btn" title="Hapus soal dari pilihan" aria-label="Hapus soal dari pilihan: ' + safeQuestionText + '">' +
-                                    '<i class="ri-delete-bin-line"></i>' +
-                                "</button>" +
-                            "</div>" +
-                        '</div>' +
-                    '</div>'
-                );
+                return `<div class="selected-question-item list-group-item" data-question-id="${item.question_id}"><div class="d-flex align-items-center gap-3"><div class="question-picker-check d-flex align-items-center flex-shrink-0"><input type="checkbox" class="form-check-input selected-question-bulk-check m-0" id="${bulkCheckId}" title="Pilih untuk bulk action" aria-labelledby="${titleId}"></div><div class="flex-grow-1 min-w-0"><p class="question-picker-title mb-2 fw-semibold" id="${titleId}">${safeQuestionText}</p><div class="d-flex flex-wrap gap-2 mb-0">${metaBadges}</div><div class="row g-2 mt-1 question-picker-controls"><div class="col-12 col-md-4 col-xl-2"><input type="number" min="0.01" step="0.01" class="form-control form-control-sm selected-question-points" value="${safePointsOverride}" placeholder="Poin (${safeDefaultPoints})" aria-label="Timpa poin untuk soal ini"></div><div class="col-12 col-md-4 col-xl-2"><select class="form-select form-select-sm selected-question-allow-prev" aria-label="Override navigasi sebelumnya"><option value="inherit" ${selectValue(item.allow_previous_override) === "inherit" ? "selected" : ""}>Prev: Ikuti</option><option value="true" ${selectValue(item.allow_previous_override) === "true" ? "selected" : ""}>Prev: Ya</option><option value="false" ${selectValue(item.allow_previous_override) === "false" ? "selected" : ""}>Prev: Tidak</option></select></div><div class="col-12 col-md-4 col-xl-2"><select class="form-select form-select-sm selected-question-allow-next" aria-label="Override navigasi berikutnya"><option value="inherit" ${selectValue(item.allow_next_override) === "inherit" ? "selected" : ""}>Next: Ikuti</option><option value="true" ${selectValue(item.allow_next_override) === "true" ? "selected" : ""}>Next: Ya</option><option value="false" ${selectValue(item.allow_next_override) === "false" ? "selected" : ""}>Next: Tidak</option></select></div><div class="col-12 col-md-4 col-xl-3"><select class="form-select form-select-sm selected-question-force-seq" aria-label="Override aturan berurutan"><option value="inherit" ${selectValue(item.force_sequential_override) === "inherit" ? "selected" : ""}>Berurutan: Ikuti</option><option value="true" ${selectValue(item.force_sequential_override) === "true" ? "selected" : ""}>Berurutan: Ya</option><option value="false" ${selectValue(item.force_sequential_override) === "false" ? "selected" : ""}>Berurutan: Tidak</option></select></div></div></div><div class="d-flex align-items-center gap-2 flex-shrink-0 ms-auto"><button type="button" class="icon-only-btn drag-handle" title="Geser untuk ubah urutan" aria-label="Geser untuk ubah urutan: ${safeQuestionText}"><i class="ri-draggable fs-5"></i></button><button type="button" class="icon-only-btn is-danger remove-selected-question-btn" title="Hapus soal dari pilihan" aria-label="Hapus soal dari pilihan: ${safeQuestionText}"><i class="ri-delete-bin-line"></i></button></div></div></div>`;
             }).join("");
 
-            var totalPoints = 0;
+            let totalPoints = 0;
             items.forEach(function (item) {
-                var points = item.points_override !== "" ? parseFloat(item.points_override) : parseFloat(item.default_points || 0);
+                const points = item.points_override !== "" ? parseFloat(item.points_override) : parseFloat(item.default_points || 0);
                 totalPoints += isNaN(points) ? 0 : points;
             });
             selectedCountEl.textContent = String(items.length);
@@ -603,21 +543,21 @@
             if (!selectedToggleSelectLabel) {
                 return;
             }
-            var bulkChecks = Array.from(selectedListEl.querySelectorAll(".selected-question-bulk-check"));
+            const bulkChecks = Array.from(selectedListEl.querySelectorAll(".selected-question-bulk-check"));
             bulkChecks.forEach(function (checkbox) {
-                var item = checkbox.closest(".selected-question-item");
+                const item = checkbox.closest(".selected-question-item");
                 if (item) {
                     item.classList.toggle("list-group-item-primary", checkbox.checked);
                 }
             });
-            var allChecked = !!bulkChecks.length && bulkChecks.every(function (checkbox) { return checkbox.checked; });
+            const allChecked = !!bulkChecks.length && bulkChecks.every(function (checkbox) { return checkbox.checked; });
             selectedToggleSelectLabel.textContent = allChecked ? "Batal Pilih" : "Pilih Semua";
         }
 
         function getSelectedBulkQuestionIds() {
             return Array.from(selectedListEl.querySelectorAll(".selected-question-item"))
                 .filter(function (item) {
-                    var bulkCheck = item.querySelector(".selected-question-bulk-check");
+                    const bulkCheck = item.querySelector(".selected-question-bulk-check");
                     return bulkCheck && bulkCheck.checked;
                 })
                 .map(function (item) { return item.getAttribute("data-question-id"); })
@@ -626,14 +566,14 @@
 
         function bindSelectedQuestionEvents() {
             selectedListEl.querySelectorAll(".selected-question-item").forEach(function (card) {
-                var questionId = card.getAttribute("data-question-id");
-                var model = selectedQuestions[questionId];
+                const questionId = card.getAttribute("data-question-id");
+                const model = selectedQuestions[questionId];
                 if (!model) {
                     return;
                 }
-                var allowPrevSelect = card.querySelector(".selected-question-allow-prev");
-                var allowNextSelect = card.querySelector(".selected-question-allow-next");
-                var forceSeqSelect = card.querySelector(".selected-question-force-seq");
+                const allowPrevSelect = card.querySelector(".selected-question-allow-prev");
+                const allowNextSelect = card.querySelector(".selected-question-allow-next");
+                const forceSeqSelect = card.querySelector(".selected-question-force-seq");
                 model.override_navigation = hasNavigationOverride(model);
 
                 card.querySelector(".remove-selected-question-btn").addEventListener("click", function () {
@@ -643,7 +583,7 @@
                     renderReviewSummary();
                 });
 
-                var bulkCheck = card.querySelector(".selected-question-bulk-check");
+                const bulkCheck = card.querySelector(".selected-question-bulk-check");
                 if (bulkCheck) {
                     bulkCheck.addEventListener("change", syncSelectedBulkCheckAllState);
                 }
@@ -687,7 +627,7 @@
         }
 
         function syncAssignmentPayload() {
-            var payload = getCheckedAssignments();
+            const payload = getCheckedAssignments();
             assignmentPayloadInput.value = JSON.stringify(payload);
             renderAssignmentSummary(payload);
             syncStudentAssignmentToggleState();
@@ -699,14 +639,14 @@
                 assignmentSummaryEl.innerHTML = '<li class="text-muted">Belum ada penugasan dipilih.</li>';
                 return;
             }
-            var classMap = {};
+            const classMap = {};
             assignmentData.classes.forEach(function (c) { classMap[c.id] = c.name; });
-            var studentMap = {};
-            assignmentData.students.forEach(function (s) { studentMap[s.id] = s.name + " (" + s.username + ")"; });
+            const studentMap = {};
+            assignmentData.students.forEach(function (s) { studentMap[s.id] = `${s.name} (${s.username})`; });
 
             assignmentSummaryEl.innerHTML = payload.map(function (item) {
-                var label = item.type === "class" ? (classMap[item.id] || item.id) : (studentMap[item.id] || item.id);
-                return "<li>" + (item.type === "class" ? "Kelas: " : "Siswa: ") + label + "</li>";
+                const label = item.type === "class" ? (classMap[item.id] || item.id) : (studentMap[item.id] || item.id);
+                return `<li>${item.type === "class" ? "Kelas: " : "Siswa: "}${label}</li>`;
             }).join("");
         }
 
@@ -721,9 +661,9 @@
             if (!studentAssignmentToggleBtn || !studentAssignmentToggleLabel) {
                 return;
             }
-            var checkboxes = getStudentAssignmentCheckboxes();
-            var hasStudents = checkboxes.length > 0;
-            var allChecked = hasStudents && checkboxes.every(function (checkbox) { return checkbox.checked; });
+            const checkboxes = getStudentAssignmentCheckboxes();
+            const hasStudents = checkboxes.length > 0;
+            const allChecked = hasStudents && checkboxes.every(function (checkbox) { return checkbox.checked; });
             studentAssignmentToggleBtn.disabled = !hasStudents;
             studentAssignmentToggleLabel.textContent = allChecked ? "Batal Pilih" : "Pilih Semua";
         }
@@ -731,15 +671,15 @@
         function setStep(stepNumber) {
             currentStep = Math.max(1, Math.min(7, stepNumber));
             stepCards.forEach(function (card) {
-                var step = parseInt(card.getAttribute("data-step"), 10);
-                var isActive = step === currentStep;
+                const step = parseInt(card.getAttribute("data-step"), 10);
+                const isActive = step === currentStep;
                 card.classList.toggle("d-none", !isActive);
                 card.toggleAttribute("hidden", !isActive);
                 card.setAttribute("aria-hidden", isActive ? "false" : "true");
             });
             stepIndicators.forEach(function (indicator) {
-                var step = parseInt(indicator.getAttribute("data-step-indicator"), 10);
-                var isActive = step === currentStep;
+                const step = parseInt(indicator.getAttribute("data-step-indicator"), 10);
+                const isActive = step === currentStep;
                 indicator.classList.toggle("active", isActive);
                 indicator.setAttribute("aria-selected", isActive ? "true" : "false");
                 indicator.setAttribute("tabindex", isActive ? "0" : "-1");
@@ -760,18 +700,18 @@
         }
 
         function canMoveToStep(targetStep) {
-            var desiredStep = Math.max(1, Math.min(7, targetStep));
+            const desiredStep = Math.max(1, Math.min(7, targetStep));
             if (desiredStep <= currentStep) {
                 return true;
             }
 
-            for (var step = currentStep; step < desiredStep; step += 1) {
+            for (let step = currentStep; step < desiredStep; step += 1) {
                 if (step === 3 && Object.keys(selectedQuestions).length === 0) {
                     window.alert("Pilih minimal satu soal sebelum lanjut.");
                     return false;
                 }
                 if (step === 4 && allowRetakeField && allowRetakeField.checked) {
-                    var attemptsValue = parseInt((maxRetakeAttemptsField && maxRetakeAttemptsField.value) || "0", 10);
+                    const attemptsValue = parseInt((maxRetakeAttemptsField && maxRetakeAttemptsField.value) || "0", 10);
                     if (isNaN(attemptsValue) || attemptsValue < 2 || attemptsValue > 10) {
                         window.alert("Maksimal percobaan retake harus berada di rentang 2 sampai 10.");
                         return false;
@@ -787,13 +727,13 @@
         }
 
         function findInitialStepFromErrors() {
-            var stepWithError = stepCards.find(function (card) {
+            const stepWithError = stepCards.find(function (card) {
                 return !!card.querySelector(".text-danger, .alert-danger");
             });
             if (!stepWithError) {
                 return 1;
             }
-            var parsed = parseInt(stepWithError.getAttribute("data-step"), 10);
+            const parsed = parseInt(stepWithError.getAttribute("data-step"), 10);
             return isNaN(parsed) ? 1 : parsed;
         }
 
@@ -801,38 +741,36 @@
             if (!reviewSummaryEl) {
                 return;
             }
-            var selectedCount = Object.keys(selectedQuestions).length;
-            var assignments = getCheckedAssignments();
-            var title = (document.getElementById("id_title") || {}).value || "-";
-            var subjectText = (document.getElementById("id_subject") || {}).selectedOptions;
+            const selectedCount = Object.keys(selectedQuestions).length;
+            const assignments = getCheckedAssignments();
+            const title = (document.getElementById("id_title") || {}).value || "-";
+            let subjectText = (document.getElementById("id_subject") || {}).selectedOptions;
             subjectText = subjectText && subjectText.length ? subjectText[0].textContent : "-";
-            var startTime = (document.getElementById("id_start_time") || {}).value || "-";
-            var endTime = (document.getElementById("id_end_time") || {}).value || "-";
-            var passingScore = (document.getElementById("id_passing_score") || {}).value || "-";
-            var randomizeQ = (document.getElementById("id_randomize_questions") || {}).checked ? "Ya" : "Tidak";
-            var randomizeOpt = (document.getElementById("id_randomize_options") || {}).checked ? "Ya" : "Tidak";
-            var overrideGlobal = (document.getElementById("id_override_question_navigation") || {}).checked ? "Ya" : "Tidak";
-            var certificateEnabled = !!(certificateEnabledField && certificateEnabledField.checked);
-            var certificateTemplateText = "-";
+            const startTime = (document.getElementById("id_start_time") || {}).value || "-";
+            const endTime = (document.getElementById("id_end_time") || {}).value || "-";
+            const passingScore = (document.getElementById("id_passing_score") || {}).value || "-";
+            const randomizeQ = (document.getElementById("id_randomize_questions") || {}).checked ? "Ya" : "Tidak";
+            const randomizeOpt = (document.getElementById("id_randomize_options") || {}).checked ? "Ya" : "Tidak";
+            const overrideGlobal = (document.getElementById("id_override_question_navigation") || {}).checked ? "Ya" : "Tidak";
+            const certificateEnabled = !!(certificateEnabledField && certificateEnabledField.checked);
+            let certificateTemplateText = "-";
             if (certificateTemplateField && certificateTemplateField.selectedOptions && certificateTemplateField.selectedOptions.length) {
                 certificateTemplateText = certificateTemplateField.selectedOptions[0].textContent || "-";
             }
-            var allowRetake = !!(allowRetakeField && allowRetakeField.checked);
-            var retakePolicy = (document.querySelector('input[name="retake_score_policy"]:checked') || {}).value || "highest";
-            var retakePolicyLabelMap = {
+            const allowRetake = !!(allowRetakeField && allowRetakeField.checked);
+            const retakePolicy = (document.querySelector('input[name="retake_score_policy"]:checked') || {}).value || "highest";
+            const retakePolicyLabelMap = {
                 highest: "Nilai Tertinggi",
                 latest: "Nilai Terbaru",
                 average: "Nilai Rata-rata"
             };
-            var retakeSummary = "Nonaktif";
+            let retakeSummary = "Nonaktif";
             if (allowRetake) {
-                var maxAttemptsValue = (maxRetakeAttemptsField && maxRetakeAttemptsField.value) || "2";
-                var cooldownValue = (retakeCooldownField && retakeCooldownField.value) || "0";
-                var reviewBeforeRetake = (retakeShowReviewField && retakeShowReviewField.checked) ? "Ya" : "Tidak";
+                const maxAttemptsValue = (maxRetakeAttemptsField && maxRetakeAttemptsField.value) || "2";
+                const cooldownValue = (retakeCooldownField && retakeCooldownField.value) || "0";
+                const reviewBeforeRetake = (retakeShowReviewField && retakeShowReviewField.checked) ? "Ya" : "Tidak";
                 retakeSummary =
-                    "Aktif | Maks. " + maxAttemptsValue + " percobaan | Nilai: "
-                    + (retakePolicyLabelMap[retakePolicy] || "Nilai Tertinggi")
-                    + " | Jeda: " + cooldownValue + " menit | Review sebelum retake: " + reviewBeforeRetake;
+                    `Aktif | Maks. ${maxAttemptsValue} percobaan | Nilai: ${retakePolicyLabelMap[retakePolicy] || "Nilai Tertinggi"} | Jeda: ${cooldownValue} menit | Review sebelum retake: ${reviewBeforeRetake}`;
             }
 
             reviewSummaryEl.innerHTML = [
@@ -842,14 +780,14 @@
                 ["Waktu Selesai", endTime],
                 ["Jumlah Soal Dipilih", String(selectedCount)],
                 ["Jumlah Penugasan", String(assignments.length)],
-                ["Nilai Kelulusan", passingScore + "%"],
+                ["Nilai Kelulusan", `${passingScore}%`],
                 ["Acak Soal", randomizeQ],
                 ["Acak Opsi", randomizeOpt],
                 ["Timpa Navigasi Global", overrideGlobal],
-                ["Sertifikat", certificateEnabled ? ("Aktif | " + certificateTemplateText) : "Nonaktif"],
+                ["Sertifikat", certificateEnabled ? (`Aktif | ${certificateTemplateText}`) : "Nonaktif"],
                 ["Retake", retakeSummary]
             ].map(function (row) {
-                return '<div class="list-group-item d-flex justify-content-between gap-2"><span>' + row[0] + '</span><strong class="text-end">' + row[1] + '</strong></div>';
+                return `<div class="list-group-item d-flex justify-content-between gap-2"><span>${row[0]}</span><strong class="text-end">${row[1]}</strong></div>`;
             }).join("");
         }
 
@@ -857,7 +795,7 @@
             if (!retakeSettingsFields || !allowRetakeField) {
                 return;
             }
-            var enabled = !!allowRetakeField.checked;
+            const enabled = !!allowRetakeField.checked;
             retakeSettingsFields.classList.toggle("d-none", !enabled);
             retakeSettingsFields.toggleAttribute("hidden", !enabled);
             if (!enabled && maxRetakeAttemptsField && maxRetakeAttemptsField.value === "") {
@@ -875,7 +813,7 @@
             if (!certificateSettingsFields || !certificateEnabledField) {
                 return;
             }
-            var enabled = !!certificateEnabledField.checked;
+            const enabled = !!certificateEnabledField.checked;
             certificateSettingsFields.classList.toggle("d-none", !enabled);
             certificateSettingsFields.toggleAttribute("hidden", !enabled);
             if (!enabled && certificateTemplateField) {
@@ -885,7 +823,7 @@
 
         function addQuestionToSelection(questionId) {
             if (!selectedQuestions[questionId] && availableById[questionId]) {
-                var item = normalizeQuestionFromAvailable(availableById[questionId]);
+                const item = normalizeQuestionFromAvailable(availableById[questionId]);
                 item.display_order = Object.keys(selectedQuestions).length + 1;
                 selectedQuestions[questionId] = item;
             }
@@ -899,10 +837,10 @@
             if (!questionSearchUrl || !categoryId) {
                 return;
             }
-            var page = 1;
-            var hasNext = true;
-            var addedCount = 0;
-            var hasFailed = false;
+            let page = 1;
+            let hasNext = true;
+            let addedCount = 0;
+            let hasFailed = false;
 
             function finishCategoryLoad() {
                 if (addCategoryBtn) {
@@ -925,12 +863,12 @@
                     finishCategoryLoad();
                     return;
                 }
-                var params = new URLSearchParams();
+                const params = new URLSearchParams();
                 params.set("page", String(page));
                 params.set("page_size", String(Math.max(questionPageSize, 100)));
                 params.set("category", categoryId);
 
-                fetch(questionSearchUrl + "?" + params.toString(), {
+                fetch(`${questionSearchUrl}?${params.toString()}`, {
                     method: "GET",
                     headers: { "X-Requested-With": "XMLHttpRequest" }
                 })
@@ -941,7 +879,7 @@
                         return response.json();
                     })
                     .then(function (payload) {
-                        var items = Array.isArray(payload.items) ? payload.items : [];
+                        const items = Array.isArray(payload.items) ? payload.items : [];
                         items.forEach(function (item) {
                             availableById[item.id] = item;
                             if (!selectedQuestions[item.id]) {
@@ -949,7 +887,7 @@
                                 addedCount += 1;
                             }
                         });
-                        var pagination = payload.pagination || {};
+                        const pagination = payload.pagination || {};
                         hasNext = !!pagination.has_next;
                         page += 1;
                         loadNextPage();
@@ -971,11 +909,11 @@
 
         if (availableListEl) {
             availableListEl.addEventListener("change", function (event) {
-                var checkbox = event.target;
+                const checkbox = event.target;
                 if (!checkbox || !checkbox.classList.contains("question-picker-checkbox")) {
                     return;
                 }
-                var questionId = checkbox.value;
+                const questionId = checkbox.value;
                 if (checkbox.checked) {
                     addQuestionToSelection(questionId);
                 } else {
@@ -992,11 +930,11 @@
                 if (!availableListEl) {
                     return;
                 }
-                var checkboxes = Array.from(availableListEl.querySelectorAll(".question-picker-checkbox"));
+                const checkboxes = Array.from(availableListEl.querySelectorAll(".question-picker-checkbox"));
                 if (!checkboxes.length) {
                     return;
                 }
-                var shouldSelectAll = checkboxes.some(function (checkbox) { return !checkbox.checked; });
+                const shouldSelectAll = checkboxes.some(function (checkbox) { return !checkbox.checked; });
                 checkboxes.forEach(function (checkbox) {
                     checkbox.checked = shouldSelectAll;
                     if (shouldSelectAll) {
@@ -1019,7 +957,7 @@
 
         if (addCategoryBtn && categorySelector) {
             addCategoryBtn.addEventListener("click", function () {
-                var categoryId = categorySelector.value;
+                const categoryId = categorySelector.value;
                 if (!categoryId) {
                     window.alert("Pilih kategori terlebih dahulu.");
                     return;
@@ -1077,11 +1015,11 @@
 
         if (selectedToggleSelectBtn) {
             selectedToggleSelectBtn.addEventListener("click", function () {
-                var bulkChecks = Array.from(selectedListEl.querySelectorAll(".selected-question-bulk-check"));
+                const bulkChecks = Array.from(selectedListEl.querySelectorAll(".selected-question-bulk-check"));
                 if (!bulkChecks.length) {
                     return;
                 }
-                var shouldSelectAll = bulkChecks.some(function (checkbox) { return !checkbox.checked; });
+                const shouldSelectAll = bulkChecks.some(function (checkbox) { return !checkbox.checked; });
                 bulkChecks.forEach(function (checkbox) {
                     checkbox.checked = shouldSelectAll;
                 });
@@ -1091,14 +1029,14 @@
 
         if (applyBulkSelectedBtn) {
             applyBulkSelectedBtn.addEventListener("click", function () {
-                var targetIds = getSelectedBulkQuestionIds();
+                const targetIds = getSelectedBulkQuestionIds();
                 if (!targetIds.length) {
                     window.alert("Pilih minimal satu soal pada daftar soal terpilih.");
                     return;
                 }
 
                 targetIds.forEach(function (questionId) {
-                    var item = selectedQuestions[questionId];
+                    const item = selectedQuestions[questionId];
                     if (!item) {
                         return;
                     }
@@ -1118,7 +1056,7 @@
 
         if (deleteBulkSelectedBtn) {
             deleteBulkSelectedBtn.addEventListener("click", function () {
-                var targetIds = getSelectedBulkQuestionIds();
+                const targetIds = getSelectedBulkQuestionIds();
                 if (!targetIds.length) {
                     window.alert("Pilih minimal satu soal untuk dihapus.");
                     return;
@@ -1141,11 +1079,11 @@
 
         if (studentAssignmentToggleBtn) {
             studentAssignmentToggleBtn.addEventListener("click", function () {
-                var checkboxes = getStudentAssignmentCheckboxes();
+                const checkboxes = getStudentAssignmentCheckboxes();
                 if (!checkboxes.length) {
                     return;
                 }
-                var shouldSelectAll = checkboxes.some(function (checkbox) { return !checkbox.checked; });
+                const shouldSelectAll = checkboxes.some(function (checkbox) { return !checkbox.checked; });
                 checkboxes.forEach(function (checkbox) {
                     checkbox.checked = shouldSelectAll;
                 });
@@ -1170,14 +1108,14 @@
 
         stepIndicators.forEach(function (indicator, index) {
             indicator.addEventListener("click", function () {
-                var step = parseInt(indicator.getAttribute("data-step-indicator"), 10);
+                const step = parseInt(indicator.getAttribute("data-step-indicator"), 10);
                 if (!isNaN(step) && canMoveToStep(step)) {
                     setStep(step);
                 }
             });
 
             indicator.addEventListener("keydown", function (event) {
-                var targetIndex = index;
+                let targetIndex = index;
                 if (event.key === "ArrowRight") {
                     targetIndex = (index + 1) % stepIndicators.length;
                 } else if (event.key === "ArrowLeft") {
@@ -1203,8 +1141,8 @@
             });
         });
 
-        var globalForceSequential = document.getElementById("id_global_force_sequential");
-        var globalAllowPrevious = document.getElementById("id_global_allow_previous");
+        const globalForceSequential = document.getElementById("id_global_force_sequential");
+        const globalAllowPrevious = document.getElementById("id_global_allow_previous");
         if (globalForceSequential && globalAllowPrevious) {
             globalForceSequential.addEventListener("change", function () {
                 if (globalForceSequential.checked) {
@@ -1247,8 +1185,8 @@
 
         if (Array.isArray(initialAssignments)) {
             initialAssignments.forEach(function (item) {
-                var selector = '.assignment-checkbox[data-type="' + item.type + '"][value="' + item.id + '"]';
-                var checkbox = document.querySelector(selector);
+                const selector = `.assignment-checkbox[data-type="${item.type}"][value="${item.id}"]`;
+                const checkbox = document.querySelector(selector);
                 if (checkbox) {
                     checkbox.checked = true;
                 }
@@ -1264,7 +1202,7 @@
             window.Sortable.create(selectedListEl, {
                 animation: 150,
                 handle: ".drag-handle",
-                onEnd: function () {
+                onEnd() {
                     serializeSelectedQuestions();
                     renderSelectedQuestions();
                     renderReviewSummary();

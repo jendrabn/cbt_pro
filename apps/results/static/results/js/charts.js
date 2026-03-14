@@ -1,6 +1,6 @@
 (function () {
     function parseData(id) {
-        var el = document.getElementById(id);
+        const el = document.getElementById(id);
         if (!el) {
             return null;
         }
@@ -20,12 +20,12 @@
             return;
         }
 
-        var distributionData = parseData("result-score-distribution-data");
-        var passFailData = parseData("result-pass-fail-data");
-        var examComparisonData = parseData("result-exam-comparison-data");
-        var classComparisonData = parseData("result-class-comparison-data");
+        const distributionData = parseData("result-score-distribution-data");
+        const passFailData = parseData("result-pass-fail-data");
+        const examComparisonData = parseData("result-exam-comparison-data");
+        const classComparisonData = parseData("result-class-comparison-data");
 
-        var distributionCanvas = document.getElementById("scoreDistributionChart");
+        const distributionCanvas = document.getElementById("scoreDistributionChart");
         if (distributionCanvas && distributionData) {
             new window.Chart(distributionCanvas, {
                 type: "bar",
@@ -49,7 +49,7 @@
             });
         }
 
-        var passFailCanvas = document.getElementById("passFailChart");
+        const passFailCanvas = document.getElementById("passFailChart");
         if (passFailCanvas && passFailData) {
             new window.Chart(passFailCanvas, {
                 type: "doughnut",
@@ -70,7 +70,7 @@
             });
         }
 
-        var examComparisonCanvas = document.getElementById("examComparisonChart");
+        const examComparisonCanvas = document.getElementById("examComparisonChart");
         if (examComparisonCanvas && examComparisonData) {
             new window.Chart(examComparisonCanvas, {
                 type: "bar",
@@ -96,7 +96,7 @@
             });
         }
 
-        var classComparisonCanvas = document.getElementById("classComparisonChart");
+        const classComparisonCanvas = document.getElementById("classComparisonChart");
         if (classComparisonCanvas && classComparisonData) {
             new window.Chart(classComparisonCanvas, {
                 type: "bar",
@@ -122,11 +122,11 @@
             });
         }
 
-        var analyticsTrendData = parseData("analytics-trend-data");
-        var analyticsPassData = parseData("analytics-pass-rate-data");
-        var analyticsClassData = parseData("analytics-class-average-data");
+        const analyticsTrendData = parseData("analytics-trend-data");
+        const analyticsPassData = parseData("analytics-pass-rate-data");
+        const analyticsClassData = parseData("analytics-class-average-data");
 
-        var analyticsTrendCanvas = document.getElementById("analyticsTrendChart");
+        const analyticsTrendCanvas = document.getElementById("analyticsTrendChart");
         if (analyticsTrendCanvas && analyticsTrendData) {
             new window.Chart(analyticsTrendCanvas, {
                 type: "line",
@@ -150,7 +150,7 @@
             });
         }
 
-        var analyticsPassCanvas = document.getElementById("analyticsPassChart");
+        const analyticsPassCanvas = document.getElementById("analyticsPassChart");
         if (analyticsPassCanvas && analyticsPassData) {
             new window.Chart(analyticsPassCanvas, {
                 type: "line",
@@ -174,7 +174,7 @@
             });
         }
 
-        var analyticsClassCanvas = document.getElementById("analyticsClassChart");
+        const analyticsClassCanvas = document.getElementById("analyticsClassChart");
         if (analyticsClassCanvas && analyticsClassData) {
             new window.Chart(analyticsClassCanvas, {
                 type: "bar",

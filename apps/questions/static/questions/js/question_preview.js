@@ -1,16 +1,16 @@
 (function () {
     document.addEventListener("DOMContentLoaded", function () {
-        var previewModal = document.getElementById("previewModal");
-        var previewFrame = document.getElementById("previewFrame");
-        var deleteModal = document.getElementById("deleteModal");
-        var deleteForm = document.getElementById("deleteQuestionForm");
-        var deleteQuestionText = document.getElementById("deleteQuestionText");
+        const previewModal = document.getElementById("previewModal");
+        const previewFrame = document.getElementById("previewFrame");
+        const deleteModal = document.getElementById("deleteModal");
+        const deleteForm = document.getElementById("deleteQuestionForm");
+        const deleteQuestionText = document.getElementById("deleteQuestionText");
 
         if (previewModal && previewFrame) {
             previewModal.addEventListener("show.bs.modal", function (event) {
-                var trigger = event.relatedTarget;
-                var source = trigger && trigger.closest ? trigger.closest("[data-preview-url]") : null;
-                var url = source ? source.getAttribute("data-preview-url") : "";
+                const trigger = event.relatedTarget;
+                const source = trigger && trigger.closest ? trigger.closest("[data-preview-url]") : null;
+                const url = source ? source.getAttribute("data-preview-url") : "";
                 if (!url) {
                     event.preventDefault();
                     return;
@@ -24,7 +24,7 @@
 
         if (deleteModal && deleteForm && deleteQuestionText) {
             deleteModal.addEventListener("show.bs.modal", function (event) {
-                var trigger = event.relatedTarget;
+                const trigger = event.relatedTarget;
                 if (!trigger) {
                     return;
                 }

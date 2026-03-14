@@ -3,10 +3,10 @@
         if (!document.cookie) {
             return "";
         }
-        var cookies = document.cookie.split(";");
-        for (var index = 0; index < cookies.length; index += 1) {
-            var cookie = cookies[index].trim();
-            if (cookie.indexOf(name + "=") === 0) {
+        const cookies = document.cookie.split(";");
+        for (let index = 0; index < cookies.length; index += 1) {
+            const cookie = cookies[index].trim();
+            if (cookie.indexOf(`${name}=`) === 0) {
                 return decodeURIComponent(cookie.substring(name.length + 1));
             }
         }
@@ -14,7 +14,7 @@
     }
 
     function getCsrfToken() {
-        var csrfInput = document.querySelector("input[name='csrfmiddlewaretoken']");
+        const csrfInput = document.querySelector("input[name='csrfmiddlewaretoken']");
         if (csrfInput && csrfInput.value) {
             return csrfInput.value;
         }
@@ -22,7 +22,7 @@
     }
 
     function parseEditorConfig() {
-        var configNode = document.getElementById("question-editor-config");
+        const configNode = document.getElementById("question-editor-config");
         if (!configNode) {
             return {};
         }
@@ -48,9 +48,9 @@
         if (/<\s*(img|video|audio|iframe|table|embed|object)\b/i.test(value)) {
             return true;
         }
-        var container = document.createElement("div");
+        const container = document.createElement("div");
         container.innerHTML = value;
-        var plainText = (container.textContent || container.innerText || "").replace(/\u00a0/g, " ").trim();
+        const plainText = (container.textContent || container.innerText || "").replace(/\u00a0/g, " ").trim();
         return !!plainText;
     }
 
@@ -61,12 +61,12 @@
                 return;
             }
 
-            var xhr = new XMLHttpRequest();
+            const xhr = new XMLHttpRequest();
             xhr.open("POST", editorConfig.uploadUrl, true);
             xhr.responseType = "json";
             xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
 
-            var csrfToken = getCsrfToken();
+            const csrfToken = getCsrfToken();
             if (csrfToken) {
                 xhr.setRequestHeader("X-CSRFToken", csrfToken);
             }
@@ -81,7 +81,7 @@
             }
 
             xhr.onload = function () {
-                var payload = xhr.response;
+                let payload = xhr.response;
                 if (!payload && xhr.responseText) {
                     try {
                         payload = JSON.parse(xhr.responseText);
@@ -101,7 +101,7 @@
                 reject("Upload media gagal. Periksa koneksi lalu coba lagi.");
             };
 
-            var formData = new FormData();
+            const formData = new FormData();
             formData.append("file", file);
             xhr.send(formData);
         });
@@ -114,18 +114,18 @@
                 return;
             }
 
-            var kindValue = fileType === "image" ? "image" : "media";
-            var browserUrl = editorConfig.browserUrl;
-            browserUrl += browserUrl.indexOf("?") >= 0 ? "&" : "?";
-            browserUrl += "kind=" + encodeURIComponent(kindValue);
+            const kindValue = fileType === "image" ? "image" : "media";
+            let browserUrl = editorConfig.browserUrl;
+            browserUrl += browserUrl.includes("?") ? "&" : "?";
+            browserUrl += `kind=${encodeURIComponent(kindValue)}`;
 
-            var xhr = new XMLHttpRequest();
+            const xhr = new XMLHttpRequest();
             xhr.open("GET", browserUrl, true);
             xhr.responseType = "json";
             xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
 
             xhr.onload = function () {
-                var payload = xhr.response;
+                let payload = xhr.response;
                 if (!payload && xhr.responseText) {
                     try {
                         payload = JSON.parse(xhr.responseText);
@@ -155,11 +155,11 @@
 
     function chooseLocalRichTextFile(meta, editorConfig) {
         return new Promise(function (resolve, reject) {
-            var input = document.createElement("input");
+            const input = document.createElement("input");
             input.type = "file";
             input.accept = buildMediaAcceptValue(meta.filetype);
             input.onchange = function () {
-                var file = input.files && input.files.length ? input.files[0] : null;
+                const file = input.files && input.files.length ? input.files[0] : null;
                 if (!file) {
                     resolve(null);
                     return;
@@ -173,16 +173,16 @@
     }
 
     function buildMediaPreviewHtml(item) {
-        var safeUrl = item && item.url ? item.url : "";
-        var safeName = escapeHtmlValue(item && item.name ? item.name : "Media");
+        const safeUrl = item && item.url ? item.url : "";
+        const safeName = escapeHtmlValue(item && item.name ? item.name : "Media");
         if (item && item.kind === "image") {
-            return '<img src="' + safeUrl + '" alt="' + safeName + '" class="img-fluid rounded border" style="max-height: 160px;">';
+            return `<img src="${safeUrl}" alt="${safeName}" class="img-fluid rounded border" style="max-height: 160px;">`;
         }
         if (item && item.kind === "video") {
-            return '<video src="' + safeUrl + '" controls preload="metadata" class="w-100 rounded border" style="max-height: 160px;"></video>';
+            return `<video src="${safeUrl}" controls preload="metadata" class="w-100 rounded border" style="max-height: 160px;"></video>`;
         }
         if (item && item.kind === "audio") {
-            return '<audio src="' + safeUrl + '" controls preload="metadata" class="w-100"></audio>';
+            return `<audio src="${safeUrl}" controls preload="metadata" class="w-100"></audio>`;
         }
         return '<div class="small text-muted">Preview tidak tersedia.</div>';
     }
@@ -190,19 +190,19 @@
     function openRichTextMediaPicker(editorConfig, meta) {
         return fetchRichTextMediaItems(editorConfig, meta.filetype).then(function (items) {
             return new Promise(function (resolve, reject) {
-                var overlay = document.createElement("div");
+                const overlay = document.createElement("div");
                 overlay.className = "position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center p-3";
                 overlay.style.background = "rgba(15, 23, 42, 0.7)";
                 overlay.style.zIndex = "2000";
 
-                var modal = document.createElement("div");
+                const modal = document.createElement("div");
                 modal.className = "bg-white rounded-4 shadow-lg w-100";
                 modal.style.maxWidth = "920px";
                 modal.style.maxHeight = "85vh";
                 modal.style.overflow = "hidden";
-                var escapeHandler = null;
+                let escapeHandler = null;
 
-                var closePicker = function (value) {
+                const closePicker = function (value) {
                     if (escapeHandler) {
                         document.removeEventListener("keydown", escapeHandler);
                         escapeHandler = null;
@@ -249,9 +249,9 @@
                 };
                 document.addEventListener("keydown", escapeHandler);
 
-                var closeBtn = modal.querySelector("[data-picker-close]");
-                var uploadBtn = modal.querySelector("[data-picker-upload]");
-                var grid = modal.querySelector("[data-picker-grid]");
+                const closeBtn = modal.querySelector("[data-picker-close]");
+                const uploadBtn = modal.querySelector("[data-picker-upload]");
+                const grid = modal.querySelector("[data-picker-grid]");
 
                 if (closeBtn) {
                     closeBtn.addEventListener("click", function () {
@@ -291,10 +291,10 @@
                 }
 
                 items.forEach(function (item) {
-                    var cardWrap = document.createElement("div");
+                    const cardWrap = document.createElement("div");
                     cardWrap.className = "col-md-6 col-xl-4";
 
-                    var sizeLabel = item.size_kb ? item.size_kb + " KB" : "-";
+                    const sizeLabel = item.size_kb ? `${item.size_kb} KB` : "-";
                     cardWrap.innerHTML = `
                         <button type="button" class="btn btn-outline-secondary w-100 text-start h-100 p-0 overflow-hidden" data-picker-select>
                             <div class="p-2 bg-light-subtle border-bottom">
@@ -310,7 +310,7 @@
                         </button>
                     `;
 
-                    var selectBtn = cardWrap.querySelector("[data-picker-select]");
+                    const selectBtn = cardWrap.querySelector("[data-picker-select]");
                     if (selectBtn) {
                         selectBtn.addEventListener("click", function () {
                             closePicker(item);
@@ -327,7 +327,7 @@
         if (!asset) {
             return;
         }
-        var uploadedUrl = asset.location || asset.url || "";
+        const uploadedUrl = asset.location || asset.url || "";
         if (!uploadedUrl) {
             return;
         }
@@ -375,7 +375,7 @@
             return "";
         }
         if (typeof window.tinymce !== "undefined" && input.id) {
-            var editor = window.tinymce.get(input.id);
+            const editor = window.tinymce.get(input.id);
             if (editor) {
                 return editor.getContent();
             }
@@ -425,12 +425,12 @@
     }
 
     function extractBlankNumbers(value) {
-        var numbers = [];
-        var seen = {};
-        var regex = /\{\{\s*(\d+)\s*\}\}/g;
-        var match = regex.exec(value || "");
+        const numbers = [];
+        const seen = {};
+        const regex = /\{\{\s*(\d+)\s*\}\}/g;
+        let match = regex.exec(value || "");
         while (match) {
-            var number = parseInt(match[1], 10);
+            const number = parseInt(match[1], 10);
             if (Number.isFinite(number) && !seen[number]) {
                 seen[number] = true;
                 numbers.push(number);
@@ -450,9 +450,9 @@
 
     function setRowVisible(row, visible) {
         row.classList.toggle("d-none", !visible);
-        var input = getOptionInput(row);
-        var radio = getOptionRadio(row);
-        var checkbox = getOptionCheckbox(row);
+        const input = getOptionInput(row);
+        const radio = getOptionRadio(row);
+        const checkbox = getOptionCheckbox(row);
         if (input) {
             input.disabled = !visible;
         }
@@ -472,8 +472,8 @@
 
     function syncOptionSelectionState() {
         Array.prototype.slice.call(document.querySelectorAll(".option-item-row")).forEach(function (row) {
-            var card = row.querySelector(".cbt-choice-option-card");
-            var isSelected = Boolean((getOptionRadio(row) && getOptionRadio(row).checked) || (getOptionCheckbox(row) && getOptionCheckbox(row).checked));
+            const card = row.querySelector(".cbt-choice-option-card");
+            const isSelected = Boolean((getOptionRadio(row) && getOptionRadio(row).checked) || (getOptionCheckbox(row) && getOptionCheckbox(row).checked));
             if (card) {
                 card.classList.toggle("is-correct", isSelected);
             }
@@ -481,9 +481,9 @@
     }
 
     function buildTinyMceConfig(options) {
-        var editorConfig = options.editorConfig || {};
+        const editorConfig = options.editorConfig || {};
         return {
-            selector: "#" + options.textarea.id,
+            selector: `#${options.textarea.id}`,
             menubar: "edit insert format table view",
             branding: false,
             height: options.height,
@@ -516,11 +516,11 @@
                 "table td, table th { border: 1px solid #cbd5e1; padding: 6px 8px; vertical-align: top; }"
             ].join(" "),
             autoresize_bottom_margin: 18,
-            images_upload_handler: function (blobInfo, successOrProgress, failure, progressCallback) {
-                var isTinyMceFiveCallbackMode = typeof failure === "function";
-                var progress = isTinyMceFiveCallbackMode ? progressCallback : successOrProgress;
+            images_upload_handler(blobInfo, successOrProgress, failure, progressCallback) {
+                const isTinyMceFiveCallbackMode = typeof failure === "function";
+                const progress = isTinyMceFiveCallbackMode ? progressCallback : successOrProgress;
 
-                var uploadPromise = uploadRichTextFile(blobInfo.blob(), progress, editorConfig).then(function (payload) {
+                const uploadPromise = uploadRichTextFile(blobInfo.blob(), progress, editorConfig).then(function (payload) {
                     return payload.location || payload.url;
                 });
 
@@ -530,7 +530,7 @@
                             successOrProgress(location);
                         })
                         .catch(function (error) {
-                            var message = typeof error === "string"
+                            const message = typeof error === "string"
                                 ? error
                                 : (error && error.message) || "Upload gambar gagal.";
                             failure(message);
@@ -540,7 +540,7 @@
 
                 return uploadPromise;
             },
-            file_picker_callback: function (callback, value, meta) {
+            file_picker_callback(callback, value, meta) {
                 if (editorConfig.browserUrl) {
                     openRichTextMediaPicker(editorConfig, meta)
                         .then(function (asset) {
@@ -566,21 +566,17 @@
                         window.alert(message || "Upload media gagal.");
                     });
             },
-            audio_template_callback: function (data) {
-                return '<audio controls="controls" src="' + data.source + '"></audio>';
+            audio_template_callback(data) {
+                return `<audio controls="controls" src="${data.source}"></audio>`;
             },
-            video_template_callback: function (data) {
-                var width = data.width || 640;
-                var height = data.height || 360;
-                var mimeAttr = data.sourcemime ? ' type="' + data.sourcemime + '"' : "";
-                return (
-                    '<video controls="controls" width="' + width + '" height="' + height + '">' +
-                    '<source src="' + data.source + '"' + mimeAttr + ">" +
-                    "</video>"
-                );
+            video_template_callback(data) {
+                const width = data.width || 640;
+                const height = data.height || 360;
+                const mimeAttr = data.sourcemime ? ` type="${data.sourcemime}"` : "";
+                return `<video controls="controls" width="${width}" height="${height}"><source src="${data.source}"${mimeAttr}></video>`;
             },
-            setup: function (editor) {
-                var syncContent = function () {
+            setup(editor) {
+                const syncContent = function () {
                     editor.save();
                     if (typeof options.onContentChange === "function") {
                         options.onContentChange(editor);
@@ -600,7 +596,7 @@
             return;
         }
         window.tinymce.init(buildTinyMceConfig({
-            textarea: textarea,
+            textarea,
             height: options.height,
             minHeight: options.minHeight,
             editorConfig: options.editorConfig,
@@ -609,38 +605,38 @@
     }
 
     document.addEventListener("DOMContentLoaded", function () {
-        var editorConfig = parseEditorConfig();
-        var typeSelect = document.getElementById("id_question_type");
+        const editorConfig = parseEditorConfig();
+        const typeSelect = document.getElementById("id_question_type");
         if (typeSelect && !typeSelect.value) {
             typeSelect.value = "multiple_choice";
         }
-        var questionTextInput = document.getElementById("id_question_text");
-        var multipleChoiceCard = document.getElementById("multipleChoiceCard");
-        var orderingCard = document.getElementById("orderingCard");
-        var matchingCard = document.getElementById("matchingCard");
-        var fillBlankCard = document.getElementById("fillBlankCard");
-        var answerCard = document.getElementById("answerCard");
-        var checkboxScoringWrap = document.getElementById("checkboxScoringWrap");
-        var shortAnswerCaseWrap = document.getElementById("shortAnswerCaseWrap");
-        var addOptionBtn = document.getElementById("addOptionBtn");
-        var optionRows = Array.prototype.slice.call(document.querySelectorAll(".option-item-row"));
-        var addOrderingItemBtn = document.getElementById("addOrderingItemBtn");
-        var orderingRows = Array.prototype.slice.call(document.querySelectorAll(".ordering-item-row"));
-        var addMatchingPairBtn = document.getElementById("addMatchingPairBtn");
-        var matchingRows = Array.prototype.slice.call(document.querySelectorAll(".matching-pair-row"));
-        var blankRows = Array.prototype.slice.call(document.querySelectorAll(".fill-blank-row"));
-        var imageInput = document.getElementById("id_question_image");
-        var uploadedImageName = document.getElementById("uploadedImageName");
-        var questionForm = document.getElementById("questionForm");
-        var forceSequentialInput = document.getElementById("id_force_sequential");
-        var allowPreviousInput = document.getElementById("id_allow_previous");
-        var caseSensitiveInput = document.getElementById("id_is_case_sensitive");
-        var lastQuestionType = typeSelect ? (typeSelect.value || "") : "";
+        const questionTextInput = document.getElementById("id_question_text");
+        const multipleChoiceCard = document.getElementById("multipleChoiceCard");
+        const orderingCard = document.getElementById("orderingCard");
+        const matchingCard = document.getElementById("matchingCard");
+        const fillBlankCard = document.getElementById("fillBlankCard");
+        const answerCard = document.getElementById("answerCard");
+        const checkboxScoringWrap = document.getElementById("checkboxScoringWrap");
+        const shortAnswerCaseWrap = document.getElementById("shortAnswerCaseWrap");
+        const addOptionBtn = document.getElementById("addOptionBtn");
+        const optionRows = Array.prototype.slice.call(document.querySelectorAll(".option-item-row"));
+        const addOrderingItemBtn = document.getElementById("addOrderingItemBtn");
+        const orderingRows = Array.prototype.slice.call(document.querySelectorAll(".ordering-item-row"));
+        const addMatchingPairBtn = document.getElementById("addMatchingPairBtn");
+        const matchingRows = Array.prototype.slice.call(document.querySelectorAll(".matching-pair-row"));
+        const blankRows = Array.prototype.slice.call(document.querySelectorAll(".fill-blank-row"));
+        const imageInput = document.getElementById("id_question_image");
+        const uploadedImageName = document.getElementById("uploadedImageName");
+        const questionForm = document.getElementById("questionForm");
+        const forceSequentialInput = document.getElementById("id_force_sequential");
+        const allowPreviousInput = document.getElementById("id_allow_previous");
+        const caseSensitiveInput = document.getElementById("id_is_case_sensitive");
+        let lastQuestionType = typeSelect ? (typeSelect.value || "") : "";
 
         function resetCorrectSelections() {
             optionRows.forEach(function (row) {
-                var radio = getOptionRadio(row);
-                var checkbox = getOptionCheckbox(row);
+                const radio = getOptionRadio(row);
+                const checkbox = getOptionCheckbox(row);
                 if (radio) {
                     radio.checked = false;
                 }
@@ -651,12 +647,12 @@
         }
 
         function focusOptionInput(row) {
-            var input = getOptionInput(row);
+            const input = getOptionInput(row);
             if (!input) {
                 return;
             }
             if (typeof window.tinymce !== "undefined") {
-                var editor = window.tinymce.get(input.id);
+                const editor = window.tinymce.get(input.id);
                 if (editor) {
                     editor.focus();
                     return;
@@ -672,19 +668,19 @@
                 }
                 initRichTextEditor(getOptionInput(row), {
                     height: 180,
-                    editorConfig: editorConfig,
+                    editorConfig,
                     onContentChange: syncOptionVisibility
                 });
             });
         }
 
         function focusOrderingInput(row) {
-            var input = getOrderingInput(row);
+            const input = getOrderingInput(row);
             if (!input) {
                 return;
             }
             if (typeof window.tinymce !== "undefined") {
-                var editor = window.tinymce.get(input.id);
+                const editor = window.tinymce.get(input.id);
                 if (editor) {
                     editor.focus();
                     return;
@@ -700,14 +696,14 @@
                 }
                 initRichTextEditor(getOrderingInput(row), {
                     height: 180,
-                    editorConfig: editorConfig,
+                    editorConfig,
                     onContentChange: syncOrderingVisibility
                 });
             });
         }
 
         function focusMatchingInput(row) {
-            var input = getMatchingPromptInput(row);
+            const input = getMatchingPromptInput(row);
             if (!input) {
                 return;
             }
@@ -716,10 +712,10 @@
 
         function syncOptionVisibility() {
             optionRows.forEach(function (row) {
-                var defaultVisible = row.getAttribute("data-default-visible") === "1";
-                var radio = getOptionRadio(row);
-                var checkbox = getOptionCheckbox(row);
-                var shouldShow = defaultVisible || isOptionOpened(row) || rowHasValue(row) || (radio && radio.checked) || (checkbox && checkbox.checked);
+                const defaultVisible = row.getAttribute("data-default-visible") === "1";
+                const radio = getOptionRadio(row);
+                const checkbox = getOptionCheckbox(row);
+                const shouldShow = defaultVisible || isOptionOpened(row) || rowHasValue(row) || (radio && radio.checked) || (checkbox && checkbox.checked);
                 setRowVisible(row, shouldShow);
             });
 
@@ -729,7 +725,7 @@
                 initVisibleOptionEditors();
             }
 
-            var hiddenOptional = optionRows.filter(function (row) {
+            const hiddenOptional = optionRows.filter(function (row) {
                 return row.getAttribute("data-default-visible") !== "1" && row.classList.contains("d-none");
             });
             if (addOptionBtn) {
@@ -739,10 +735,10 @@
 
         function syncOrderingVisibility() {
             orderingRows.forEach(function (row) {
-                var defaultVisible = row.getAttribute("data-default-visible") === "1";
-                var shouldShow = defaultVisible || isOrderingOpened(row) || orderingRowHasValue(row);
+                const defaultVisible = row.getAttribute("data-default-visible") === "1";
+                const shouldShow = defaultVisible || isOrderingOpened(row) || orderingRowHasValue(row);
                 row.classList.toggle("d-none", !shouldShow);
-                var input = getOrderingInput(row);
+                const input = getOrderingInput(row);
                 if (input) {
                     input.disabled = !shouldShow;
                 }
@@ -752,7 +748,7 @@
                 initVisibleOrderingEditors();
             }
 
-            var hiddenOptional = orderingRows.filter(function (row) {
+            const hiddenOptional = orderingRows.filter(function (row) {
                 return row.getAttribute("data-default-visible") !== "1" && row.classList.contains("d-none");
             });
             if (addOrderingItemBtn) {
@@ -762,11 +758,11 @@
 
         function syncMatchingVisibility() {
             matchingRows.forEach(function (row) {
-                var defaultVisible = row.getAttribute("data-default-visible") === "1";
-                var shouldShow = defaultVisible || isMatchingOpened(row) || matchingRowHasValue(row);
+                const defaultVisible = row.getAttribute("data-default-visible") === "1";
+                const shouldShow = defaultVisible || isMatchingOpened(row) || matchingRowHasValue(row);
                 row.classList.toggle("d-none", !shouldShow);
-                var promptInput = getMatchingPromptInput(row);
-                var answerInput = getMatchingAnswerInput(row);
+                const promptInput = getMatchingPromptInput(row);
+                const answerInput = getMatchingAnswerInput(row);
                 if (promptInput) {
                     promptInput.disabled = !shouldShow;
                 }
@@ -775,7 +771,7 @@
                 }
             });
 
-            var hiddenOptional = matchingRows.filter(function (row) {
+            const hiddenOptional = matchingRows.filter(function (row) {
                 return row.getAttribute("data-default-visible") !== "1" && row.classList.contains("d-none");
             });
             if (addMatchingPairBtn) {
@@ -784,19 +780,19 @@
         }
 
         function syncBlankDefinitionVisibility() {
-            var questionContent = getEditorContent(questionTextInput);
-            var blankNumbers = extractBlankNumbers(questionContent);
+            const questionContent = getEditorContent(questionTextInput);
+            const blankNumbers = extractBlankNumbers(questionContent);
 
             blankRows.forEach(function (row) {
-                var defaultVisible = row.getAttribute("data-default-visible") === "1";
-                var blankNumber = parseInt(row.getAttribute("data-blank-number") || "0", 10);
-                var acceptedInput = getBlankAcceptedInput(row);
-                var caseInput = getBlankCaseInput(row);
-                var pointsInput = getBlankPointsInput(row);
-                var hasValue = Boolean(acceptedInput && acceptedInput.value && acceptedInput.value.trim())
+                const defaultVisible = row.getAttribute("data-default-visible") === "1";
+                const blankNumber = parseInt(row.getAttribute("data-blank-number") || "0", 10);
+                const acceptedInput = getBlankAcceptedInput(row);
+                const caseInput = getBlankCaseInput(row);
+                const pointsInput = getBlankPointsInput(row);
+                const hasValue = Boolean(acceptedInput && acceptedInput.value && acceptedInput.value.trim())
                     || Boolean(pointsInput && pointsInput.value)
                     || Boolean(caseInput && caseInput.checked);
-                var shouldShow = defaultVisible || hasValue || blankNumbers.indexOf(blankNumber) >= 0;
+                const shouldShow = defaultVisible || hasValue || blankNumbers.includes(blankNumber);
                 row.classList.toggle("d-none", !shouldShow);
             });
         }
@@ -805,14 +801,14 @@
             if (!typeSelect) {
                 return;
             }
-            var isMultipleChoice = typeSelect.value === "multiple_choice";
-            var isCheckbox = typeSelect.value === "checkbox";
-            var isOrdering = typeSelect.value === "ordering";
-            var isMatching = typeSelect.value === "matching";
-            var isFillInBlank = typeSelect.value === "fill_in_blank";
-            var isShortAnswer = typeSelect.value === "short_answer";
-            var isChoiceType = isMultipleChoice || isCheckbox;
-            var isTextAnswerType = typeSelect.value === "essay" || typeSelect.value === "short_answer";
+            const isMultipleChoice = typeSelect.value === "multiple_choice";
+            const isCheckbox = typeSelect.value === "checkbox";
+            const isOrdering = typeSelect.value === "ordering";
+            const isMatching = typeSelect.value === "matching";
+            const isFillInBlank = typeSelect.value === "fill_in_blank";
+            const isShortAnswer = typeSelect.value === "short_answer";
+            const isChoiceType = isMultipleChoice || isCheckbox;
+            const isTextAnswerType = typeSelect.value === "essay" || typeSelect.value === "short_answer";
 
             if (multipleChoiceCard) {
                 multipleChoiceCard.classList.toggle("d-none", !isChoiceType);
@@ -844,8 +840,8 @@
             }
 
             optionRows.forEach(function (row) {
-                var singleWrap = row.querySelector(".correct-option-single-wrap");
-                var multiWrap = row.querySelector(".correct-option-multi-wrap");
+                const singleWrap = row.querySelector(".correct-option-single-wrap");
+                const multiWrap = row.querySelector(".correct-option-multi-wrap");
                 if (singleWrap) {
                     singleWrap.classList.toggle("d-none", !isMultipleChoice);
                 }
@@ -881,9 +877,9 @@
         }
 
         optionRows.forEach(function (row) {
-            var input = getOptionInput(row);
-            var radio = getOptionRadio(row);
-            var checkbox = getOptionCheckbox(row);
+            const input = getOptionInput(row);
+            const radio = getOptionRadio(row);
+            const checkbox = getOptionCheckbox(row);
             if (input) {
                 input.addEventListener("input", syncOptionVisibility);
             }
@@ -896,15 +892,15 @@
         });
 
         orderingRows.forEach(function (row) {
-            var input = getOrderingInput(row);
+            const input = getOrderingInput(row);
             if (input) {
                 input.addEventListener("input", syncOrderingVisibility);
             }
         });
 
         matchingRows.forEach(function (row) {
-            var promptInput = getMatchingPromptInput(row);
-            var answerInput = getMatchingAnswerInput(row);
+            const promptInput = getMatchingPromptInput(row);
+            const answerInput = getMatchingAnswerInput(row);
             if (promptInput) {
                 promptInput.addEventListener("input", syncMatchingVisibility);
             }
@@ -914,9 +910,9 @@
         });
 
         blankRows.forEach(function (row) {
-            var acceptedInput = getBlankAcceptedInput(row);
-            var caseInput = getBlankCaseInput(row);
-            var pointsInput = getBlankPointsInput(row);
+            const acceptedInput = getBlankAcceptedInput(row);
+            const caseInput = getBlankCaseInput(row);
+            const pointsInput = getBlankPointsInput(row);
             if (acceptedInput) {
                 acceptedInput.addEventListener("input", syncBlankDefinitionVisibility);
             }
@@ -930,16 +926,16 @@
 
         document.querySelectorAll(".remove-option-btn").forEach(function (button) {
             button.addEventListener("click", function () {
-                var row = button.closest(".option-item-row");
+                const row = button.closest(".option-item-row");
                 if (!row) {
                     return;
                 }
-                var input = getOptionInput(row);
-                var radio = getOptionRadio(row);
-                var checkbox = getOptionCheckbox(row);
+                const input = getOptionInput(row);
+                const radio = getOptionRadio(row);
+                const checkbox = getOptionCheckbox(row);
                 if (input) {
                     if (typeof window.tinymce !== "undefined") {
-                        var editor = window.tinymce.get(input.id);
+                        const editor = window.tinymce.get(input.id);
                         if (editor) {
                             editor.setContent("");
                             editor.save();
@@ -961,7 +957,7 @@
 
         if (addOptionBtn) {
             addOptionBtn.addEventListener("click", function () {
-                var hiddenOptional = optionRows.find(function (row) {
+                const hiddenOptional = optionRows.find(function (row) {
                     return row.getAttribute("data-default-visible") !== "1" && row.classList.contains("d-none");
                 });
                 if (!hiddenOptional) {
@@ -971,7 +967,7 @@
                 setRowVisible(hiddenOptional, true);
                 initRichTextEditor(getOptionInput(hiddenOptional), {
                     height: 180,
-                    editorConfig: editorConfig,
+                    editorConfig,
                     onContentChange: syncOptionVisibility
                 });
                 window.setTimeout(function () {
@@ -983,14 +979,14 @@
 
         document.querySelectorAll(".remove-ordering-item-btn").forEach(function (button) {
             button.addEventListener("click", function () {
-                var row = button.closest(".ordering-item-row");
+                const row = button.closest(".ordering-item-row");
                 if (!row) {
                     return;
                 }
-                var input = getOrderingInput(row);
+                const input = getOrderingInput(row);
                 if (input) {
                     if (typeof window.tinymce !== "undefined") {
-                        var editor = window.tinymce.get(input.id);
+                        const editor = window.tinymce.get(input.id);
                         if (editor) {
                             editor.setContent("");
                             editor.save();
@@ -1006,7 +1002,7 @@
 
         if (addOrderingItemBtn) {
             addOrderingItemBtn.addEventListener("click", function () {
-                var hiddenOptional = orderingRows.find(function (row) {
+                const hiddenOptional = orderingRows.find(function (row) {
                     return row.getAttribute("data-default-visible") !== "1" && row.classList.contains("d-none");
                 });
                 if (!hiddenOptional) {
@@ -1014,13 +1010,13 @@
                 }
                 setOrderingOpened(hiddenOptional, true);
                 hiddenOptional.classList.remove("d-none");
-                var input = getOrderingInput(hiddenOptional);
+                const input = getOrderingInput(hiddenOptional);
                 if (input) {
                     input.disabled = false;
                 }
                 initRichTextEditor(getOrderingInput(hiddenOptional), {
                     height: 180,
-                    editorConfig: editorConfig,
+                    editorConfig,
                     onContentChange: syncOrderingVisibility
                 });
                 window.setTimeout(function () {
@@ -1032,7 +1028,7 @@
 
         document.querySelectorAll(".remove-matching-pair-btn").forEach(function (button) {
             button.addEventListener("click", function () {
-                var row = button.closest(".matching-pair-row");
+                const row = button.closest(".matching-pair-row");
                 if (!row) {
                     return;
                 }
@@ -1050,7 +1046,7 @@
 
         if (addMatchingPairBtn) {
             addMatchingPairBtn.addEventListener("click", function () {
-                var hiddenOptional = matchingRows.find(function (row) {
+                const hiddenOptional = matchingRows.find(function (row) {
                     return row.getAttribute("data-default-visible") !== "1" && row.classList.contains("d-none");
                 });
                 if (!hiddenOptional) {
@@ -1072,8 +1068,8 @@
 
         if (imageInput && uploadedImageName) {
             imageInput.addEventListener("change", function () {
-                var file = imageInput.files && imageInput.files.length ? imageInput.files[0] : null;
-                uploadedImageName.textContent = file ? ("File dipilih: " + file.name) : "";
+                const file = imageInput.files && imageInput.files.length ? imageInput.files[0] : null;
+                uploadedImageName.textContent = file ? (`File dipilih: ${file.name}`) : "";
             });
         }
 
@@ -1096,13 +1092,13 @@
         initRichTextEditor(document.getElementById("id_question_text"), {
             height: 320,
             minHeight: 320,
-            editorConfig: editorConfig,
+            editorConfig,
             onContentChange: syncBlankDefinitionVisibility
         });
         initRichTextEditor(document.getElementById("id_explanation"), {
             height: 320,
             minHeight: 320,
-            editorConfig: editorConfig
+            editorConfig
         });
 
         toggleTypeSections();

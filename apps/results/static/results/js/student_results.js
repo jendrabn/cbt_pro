@@ -1,6 +1,6 @@
 (function () {
     function parseData(id) {
-        var el = document.getElementById(id);
+        const el = document.getElementById(id);
         if (!el) {
             return null;
         }
@@ -20,11 +20,11 @@
             return;
         }
 
-        var trendData = parseData("student-results-trend-data");
-        var subjectData = parseData("student-results-subject-data");
-        var answerBreakdownData = parseData("student-result-answer-breakdown-data");
+        const trendData = parseData("student-results-trend-data");
+        const subjectData = parseData("student-results-subject-data");
+        const answerBreakdownData = parseData("student-result-answer-breakdown-data");
 
-        var trendCanvas = document.getElementById("studentResultsTrendChart");
+        const trendCanvas = document.getElementById("studentResultsTrendChart");
         if (trendCanvas && trendData) {
             new window.Chart(trendCanvas, {
                 type: "line",
@@ -57,7 +57,7 @@
             });
         }
 
-        var subjectCanvas = document.getElementById("studentResultsSubjectChart");
+        const subjectCanvas = document.getElementById("studentResultsSubjectChart");
         if (subjectCanvas && subjectData) {
             new window.Chart(subjectCanvas, {
                 type: "bar",
@@ -87,7 +87,7 @@
             });
         }
 
-        var breakdownCanvas = document.getElementById("studentResultAnswerBreakdownChart");
+        const breakdownCanvas = document.getElementById("studentResultAnswerBreakdownChart");
         if (breakdownCanvas && answerBreakdownData) {
             new window.Chart(breakdownCanvas, {
                 type: "doughnut",

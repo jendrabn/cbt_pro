@@ -1,6 +1,6 @@
 (function () {
     function parseJSONScript(id, fallback) {
-        var node = document.getElementById(id);
+        const node = document.getElementById(id);
         if (!node) {
             return fallback;
         }
@@ -12,13 +12,13 @@
     }
 
     function getCookie(name) {
-        var cookieValue = null;
+        let cookieValue = null;
         if (!document.cookie) {
             return cookieValue;
         }
         document.cookie.split(";").forEach(function (cookie) {
-            var item = cookie.trim();
-            if (item.substring(0, name.length + 1) === (name + "=")) {
+            const item = cookie.trim();
+            if (item.substring(0, name.length + 1) === (`${name}=`)) {
                 cookieValue = decodeURIComponent(item.substring(name.length + 1));
             }
         });
@@ -26,7 +26,7 @@
     }
 
     function asNumber(value, fallback) {
-        var parsed = parseInt(value, 10);
+        const parsed = parseInt(value, 10);
         return Number.isNaN(parsed) ? fallback : parsed;
     }
 
@@ -56,16 +56,16 @@
     }
 
     function renderSoftBadge(label, tone, extraClasses) {
-        var classes = "cbt-status-badge is-" + (tone || "secondary");
+        let classes = `cbt-status-badge is-${tone || "secondary"}`;
         if (extraClasses) {
-            classes += " " + extraClasses;
+            classes += ` ${extraClasses}`;
         }
-        return '<span class="' + classes + '">' + escapeHtml(label || "-") + "</span>";
+        return `<span class="${classes}">${escapeHtml(label || "-")}</span>`;
     }
 
     document.addEventListener("DOMContentLoaded", function () {
-        var config = parseJSONScript("monitoring-config-data", {});
-        var initialSnapshot = parseJSONScript("monitoring-snapshot-data", {});
+        const config = parseJSONScript("monitoring-config-data", {});
+        const initialSnapshot = parseJSONScript("monitoring-snapshot-data", {});
         if (!config.examId) {
             return;
         }
@@ -75,47 +75,47 @@
             window.axios.defaults.headers.common["X-Requested-With"] = "XMLHttpRequest";
         }
 
-        var alertEl = document.getElementById("monitoringAlert");
-        var totalParticipantsValue = document.getElementById("totalParticipantsValue");
-        var currentlyActiveValue = document.getElementById("currentlyActiveValue");
-        var completedValue = document.getElementById("completedValue");
-        var averageProgressValue = document.getElementById("averageProgressValue");
-        var studentsGridEl = document.getElementById("studentsMonitoringGrid");
-        var violationTypeFilter = document.getElementById("violationTypeFilter");
-        var violationsFeedEl = document.getElementById("violationsFeed");
-        var announcementTargetType = document.getElementById("announcementTargetType");
-        var announcementStudentId = document.getElementById("announcementStudentId");
-        var announcementTitle = document.getElementById("announcementTitle");
-        var announcementMessage = document.getElementById("announcementMessage");
-        var announcementResult = document.getElementById("announcementResult");
-        var announcementForm = document.getElementById("announcementForm");
-        var sendAnnouncementBtn = document.getElementById("sendAnnouncementBtn");
-        var refreshIntervalSelect = document.getElementById("refreshIntervalSelect");
-        var manualRefreshBtn = document.getElementById("manualRefreshBtn");
-        var monitorLastUpdateAt = document.getElementById("monitorLastUpdateAt");
+        const alertEl = document.getElementById("monitoringAlert");
+        const totalParticipantsValue = document.getElementById("totalParticipantsValue");
+        const currentlyActiveValue = document.getElementById("currentlyActiveValue");
+        const completedValue = document.getElementById("completedValue");
+        const averageProgressValue = document.getElementById("averageProgressValue");
+        const studentsGridEl = document.getElementById("studentsMonitoringGrid");
+        const violationTypeFilter = document.getElementById("violationTypeFilter");
+        const violationsFeedEl = document.getElementById("violationsFeed");
+        const announcementTargetType = document.getElementById("announcementTargetType");
+        const announcementStudentId = document.getElementById("announcementStudentId");
+        const announcementTitle = document.getElementById("announcementTitle");
+        const announcementMessage = document.getElementById("announcementMessage");
+        const announcementResult = document.getElementById("announcementResult");
+        const announcementForm = document.getElementById("announcementForm");
+        const sendAnnouncementBtn = document.getElementById("sendAnnouncementBtn");
+        const refreshIntervalSelect = document.getElementById("refreshIntervalSelect");
+        const manualRefreshBtn = document.getElementById("manualRefreshBtn");
+        const monitorLastUpdateAt = document.getElementById("monitorLastUpdateAt");
 
-        var studentDetailModalEl = document.getElementById("studentDetailModal");
-        var studentDetailModal = studentDetailModalEl && window.bootstrap
+        const studentDetailModalEl = document.getElementById("studentDetailModal");
+        const studentDetailModal = studentDetailModalEl && window.bootstrap
             ? new window.bootstrap.Modal(studentDetailModalEl)
             : null;
-        var detailStudentName = document.getElementById("detailStudentName");
-        var detailStudentMeta = document.getElementById("detailStudentMeta");
-        var detailAttemptStatus = document.getElementById("detailAttemptStatus");
-        var detailProgress = document.getElementById("detailProgress");
-        var detailTimeRemaining = document.getElementById("detailTimeRemaining");
-        var detailViolationsCount = document.getElementById("detailViolationsCount");
-        var detailExtendMinutes = document.getElementById("detailExtendMinutes");
-        var detailExtendBtn = document.getElementById("detailExtendBtn");
-        var detailForceSubmitBtn = document.getElementById("detailForceSubmitBtn");
-        var detailActionResult = document.getElementById("detailActionResult");
-        var detailAnswersTableBody = document.getElementById("detailAnswersTableBody");
-        var detailAttemptHistoryTableBody = document.getElementById("detailAttemptHistoryTableBody");
-        var detailScreenshotsGrid = document.getElementById("detailScreenshotsGrid");
-        var detailViolationsList = document.getElementById("detailViolationsList");
+        const detailStudentName = document.getElementById("detailStudentName");
+        const detailStudentMeta = document.getElementById("detailStudentMeta");
+        const detailAttemptStatus = document.getElementById("detailAttemptStatus");
+        const detailProgress = document.getElementById("detailProgress");
+        const detailTimeRemaining = document.getElementById("detailTimeRemaining");
+        const detailViolationsCount = document.getElementById("detailViolationsCount");
+        const detailExtendMinutes = document.getElementById("detailExtendMinutes");
+        const detailExtendBtn = document.getElementById("detailExtendBtn");
+        const detailForceSubmitBtn = document.getElementById("detailForceSubmitBtn");
+        const detailActionResult = document.getElementById("detailActionResult");
+        const detailAnswersTableBody = document.getElementById("detailAnswersTableBody");
+        const detailAttemptHistoryTableBody = document.getElementById("detailAttemptHistoryTableBody");
+        const detailScreenshotsGrid = document.getElementById("detailScreenshotsGrid");
+        const detailViolationsList = document.getElementById("detailViolationsList");
 
-        var currentViolationType = "";
-        var refreshTimer = null;
-        var detailState = {
+        let currentViolationType = "";
+        let refreshTimer = null;
+        const detailState = {
             studentId: "",
             attemptId: "",
             canIntervene: false
@@ -131,7 +131,7 @@
                 return;
             }
             alertEl.classList.remove("d-none");
-            alertEl.innerHTML = '<div class="alert alert-' + type + ' py-2 mb-0">' + escapeHtml(message) + "</div>";
+            alertEl.innerHTML = `<div class="alert alert-${type} py-2 mb-0">${escapeHtml(message)}</div>`;
         }
 
         function setDetailActionResult(type, message) {
@@ -143,7 +143,7 @@
                 detailActionResult.textContent = "";
                 return;
             }
-            detailActionResult.className = "small mt-2 mb-0 text-" + (type === "danger" ? "danger" : "success");
+            detailActionResult.className = `small mt-2 mb-0 text-${type === "danger" ? "danger" : "success"}`;
             detailActionResult.textContent = message;
         }
 
@@ -151,20 +151,20 @@
             if (!monitorLastUpdateAt) {
                 return;
             }
-            var label = snapshot && snapshot.generated_at_label ? snapshot.generated_at_label : "-";
-            monitorLastUpdateAt.textContent = "Update terakhir: " + label;
+            const label = snapshot && snapshot.generated_at_label ? snapshot.generated_at_label : "-";
+            monitorLastUpdateAt.textContent = `Update terakhir: ${label}`;
         }
 
         function renderStats(snapshot) {
-            var stats = snapshot && snapshot.stats ? snapshot.stats : {};
+            const stats = snapshot && snapshot.stats ? snapshot.stats : {};
             totalParticipantsValue.textContent = String(stats.total_participants || 0);
             currentlyActiveValue.textContent = String(stats.currently_active || 0);
             completedValue.textContent = String(stats.completed || 0);
-            averageProgressValue.textContent = String(stats.average_progress_percent || 0) + "%";
+            averageProgressValue.textContent = `${String(stats.average_progress_percent || 0)}%`;
         }
 
         function renderStudents(snapshot) {
-            var students = snapshot && Array.isArray(snapshot.students) ? snapshot.students : [];
+            const students = snapshot && Array.isArray(snapshot.students) ? snapshot.students : [];
             if (!students.length) {
                 studentsGridEl.innerHTML = (
                     '<div class="col-12">' +
@@ -175,82 +175,38 @@
             }
 
             studentsGridEl.innerHTML = students.map(function (student) {
-                var photoHtml = "";
+                let photoHtml = "";
                 if (student.photo_url) {
-                    photoHtml = '<img src="' + escapeHtml(student.photo_url) + '" alt="Foto siswa" class="monitor-student-avatar">';
+                    photoHtml = `<img src="${escapeHtml(student.photo_url)}" alt="Foto siswa" class="monitor-student-avatar">`;
                 } else {
-                    var initial = escapeHtml((student.student_name || "S").charAt(0).toUpperCase());
-                    photoHtml = '<div class="monitor-student-avatar fallback">' + initial + "</div>";
+                    const initial = escapeHtml((student.student_name || "S").charAt(0).toUpperCase());
+                    photoHtml = `<div class="monitor-student-avatar fallback">${initial}</div>`;
                 }
 
-                var progressWidth = Math.max(0, Math.min(100, Number(student.progress_percent || 0)));
-                return (
-                    '<div class="col-md-6">' +
-                        '<article class="monitor-student-card indicator-' + escapeHtml(student.indicator) + ' p-3 h-100">' +
-                            '<div class="d-flex align-items-start justify-content-between gap-2 mb-2">' +
-                                '<div class="d-flex align-items-center gap-2">' +
-                                    photoHtml +
-                                    '<div>' +
-                                        '<p class="fw-semibold mb-0">' + escapeHtml(student.student_name) + "</p>" +
-                                        '<p class="small text-muted mb-0">@' + escapeHtml(student.username) + "</p>" +
-                                    "</div>" +
-                                "</div>" +
-                                renderSoftBadge(student.status_label || "-", badgeToneByIndicator(student.indicator)) +
-                            "</div>" +
-                            '<div class="small text-muted mb-2">Indikator: ' + escapeHtml(student.indicator_label || "-") + "</div>" +
-                            '<div class="small mb-1 d-flex justify-content-between"><span>Progress</span><span>' + escapeHtml(String(student.progress_percent)) + "%</span></div>" +
-                            '<div class="progress mb-2" role="progressbar" aria-label="Progress siswa">' +
-                                '<div class="progress-bar ' + (student.indicator === "danger" ? "bg-danger" : (student.indicator === "warning" ? "bg-warning" : "bg-success")) + '" style="width:' + progressWidth + '%;"></div>' +
-                            "</div>" +
-                            '<ul class="list-unstyled small mb-3">' +
-                                "<li>Soal saat ini: <strong>" + escapeHtml(String(student.current_question || 0)) + "</strong></li>" +
-                                "<li>Sisa waktu: <strong>" + escapeHtml(student.time_remaining_label || "-") + "</strong></li>" +
-                                "<li>Jawaban: <strong>" + escapeHtml(String(student.answered_count || 0)) + " / " + escapeHtml(String(student.total_questions || 0)) + "</strong></li>" +
-                                "<li>Pelanggaran: <strong>" + escapeHtml(String(student.violations_count || 0)) + "</strong></li>" +
-                                "<li>Last seen: <strong>" + escapeHtml(student.last_seen_label || "-") + "</strong></li>" +
-                                (student.show_attempt_badge
-                                    ? ("<li>Attempt: <strong>" + escapeHtml(String(student.attempt_number || 0)) + "/" + escapeHtml(String(student.max_attempts || 1)) + "</strong></li>")
-                                    : "") +
-                            "</ul>" +
-                            '<div class="d-grid">' +
-                                '<button type="button" class="btn btn-sm btn-outline-primary open-student-detail-btn" data-student-id="' + escapeHtml(student.student_id) + '" title="Lihat detail siswa dan intervensi">' +
-                                    '<i class="ri-eye-line me-1"></i>Detail' +
-                                "</button>" +
-                            "</div>" +
-                        "</article>" +
-                    "</div>"
-                );
+                const progressWidth = Math.max(0, Math.min(100, Number(student.progress_percent || 0)));
+                return `<div class="col-md-6"><article class="monitor-student-card indicator-${escapeHtml(student.indicator)} p-3 h-100"><div class="d-flex align-items-start justify-content-between gap-2 mb-2"><div class="d-flex align-items-center gap-2">${photoHtml}<div><p class="fw-semibold mb-0">${escapeHtml(student.student_name)}</p><p class="small text-muted mb-0">@${escapeHtml(student.username)}</p></div></div>${renderSoftBadge(student.status_label || "-", badgeToneByIndicator(student.indicator))}</div><div class="small text-muted mb-2">Indikator: ${escapeHtml(student.indicator_label || "-")}</div><div class="small mb-1 d-flex justify-content-between"><span>Progress</span><span>${escapeHtml(String(student.progress_percent))}%</span></div><div class="progress mb-2" role="progressbar" aria-label="Progress siswa"><div class="progress-bar ${student.indicator === "danger" ? "bg-danger" : (student.indicator === "warning" ? "bg-warning" : "bg-success")}" style="width:${progressWidth}%;"></div></div><ul class="list-unstyled small mb-3"><li>Soal saat ini: <strong>${escapeHtml(String(student.current_question || 0))}</strong></li><li>Sisa waktu: <strong>${escapeHtml(student.time_remaining_label || "-")}</strong></li><li>Jawaban: <strong>${escapeHtml(String(student.answered_count || 0))} / ${escapeHtml(String(student.total_questions || 0))}</strong></li><li>Pelanggaran: <strong>${escapeHtml(String(student.violations_count || 0))}</strong></li><li>Last seen: <strong>${escapeHtml(student.last_seen_label || "-")}</strong></li>${student.show_attempt_badge
+                ? (`<li>Attempt: <strong>${escapeHtml(String(student.attempt_number || 0))}/${escapeHtml(String(student.max_attempts || 1))}</strong></li>`)
+                : ""}</ul><div class="d-grid"><button type="button" class="btn btn-sm btn-outline-primary open-student-detail-btn" data-student-id="${escapeHtml(student.student_id)}" title="Lihat detail siswa dan intervensi"><i class="ri-eye-line me-1"></i>Detail</button></div></article></div>`;
             }).join("");
         }
 
         function renderViolations(snapshot) {
-            var violations = snapshot && Array.isArray(snapshot.violations) ? snapshot.violations : [];
+            const violations = snapshot && Array.isArray(snapshot.violations) ? snapshot.violations : [];
             if (!violations.length) {
                 violationsFeedEl.innerHTML = '<li class="list-group-item px-0 text-muted small">Belum ada pelanggaran.</li>';
                 return;
             }
 
             violationsFeedEl.innerHTML = violations.map(function (item) {
-                return (
-                    '<li class="list-group-item px-0 py-1 border-0">' +
-                        '<div class="violation-feed-item">' +
-                            '<div class="d-flex justify-content-between align-items-center mb-1">' +
-                                '<strong class="small">' + escapeHtml(item.student_name) + "</strong>" +
-                                renderSoftBadge(item.severity_label || "-", item.severity_badge || "secondary") +
-                            "</div>" +
-                            '<p class="small mb-1">' + escapeHtml(item.violation_label || "-") + "</p>" +
-                            '<p class="small text-muted mb-0">' + escapeHtml(item.detected_at_label || "-") + "</p>" +
-                        "</div>" +
-                    "</li>"
-                );
+                return `<li class="list-group-item px-0 py-1 border-0"><div class="violation-feed-item"><div class="d-flex justify-content-between align-items-center mb-1"><strong class="small">${escapeHtml(item.student_name)}</strong>${renderSoftBadge(item.severity_label || "-", item.severity_badge || "secondary")}</div><p class="small mb-1">${escapeHtml(item.violation_label || "-")}</p><p class="small text-muted mb-0">${escapeHtml(item.detected_at_label || "-")}</p></div></li>`;
             }).join("");
         }
 
         function renderAnnouncementTargets(snapshot) {
-            var targets = snapshot && Array.isArray(snapshot.announcement_targets) ? snapshot.announcement_targets : [];
-            announcementStudentId.innerHTML = '<option value="">Pilih siswa...</option>' + targets.map(function (target) {
-                return '<option value="' + escapeHtml(target.id) + '">' + escapeHtml(target.name) + " (" + escapeHtml(target.username) + ")</option>";
-            }).join("");
+            const targets = snapshot && Array.isArray(snapshot.announcement_targets) ? snapshot.announcement_targets : [];
+            announcementStudentId.innerHTML = `<option value="">Pilih siswa...</option>${targets.map(function (target) {
+    return `<option value="${escapeHtml(target.id)}">${escapeHtml(target.name)} (${escapeHtml(target.username)})</option>`;
+}).join("")}`;
         }
 
         function renderSnapshot(snapshot) {
@@ -265,12 +221,12 @@
             if (!currentViolationType) {
                 return config.snapshotUrl;
             }
-            return config.snapshotUrl + "?violation_type=" + encodeURIComponent(currentViolationType);
+            return `${config.snapshotUrl}?violation_type=${encodeURIComponent(currentViolationType)}`;
         }
 
         async function fetchSnapshot(showError) {
             try {
-                var response = await window.axios.get(buildSnapshotUrl());
+                const response = await window.axios.get(buildSnapshotUrl());
                 renderSnapshot(response.data || {});
                 if (showError) {
                     setAlert("", "");
@@ -286,7 +242,7 @@
             if (refreshTimer) {
                 window.clearInterval(refreshTimer);
             }
-            var intervalSeconds = asNumber(refreshIntervalSelect.value, 30);
+            const intervalSeconds = asNumber(refreshIntervalSelect.value, 30);
             if (intervalSeconds <= 0) {
                 refreshTimer = null;
                 return;
@@ -329,18 +285,9 @@
                 return;
             }
             detailAnswersTableBody.innerHTML = answers.map(function (answer) {
-                var markedLabel = answer.is_marked_for_review ? " (Ditandai review)" : "";
-                var truncatedId = answer.id.length > 8 ? answer.id.substring(0, 8) + "..." : answer.id;
-                return (
-                    "<tr>" +
-                        '<td class="ps-3"><small class="text-muted" title="' + escapeHtml(answer.id) + '">' + escapeHtml(truncatedId) + "</small></td>" +
-                        "<td>" + escapeHtml(answer.question_text || "-") + "</td>" +
-                        "<td>" + escapeHtml(answer.answer_value || "-") + markedLabel + "</td>" +
-                        "<td>" + escapeHtml(answer.time_spent_label || "-") + "</td>" +
-                        "<td>" + escapeHtml(String(answer.points_earned || 0)) + " / " + escapeHtml(String(answer.points_possible || 0)) + "</td>" +
-                        '<td class="pe-3">' + escapeHtml(answer.updated_at_label || "-") + "</td>" +
-                    "</tr>"
-                );
+                const markedLabel = answer.is_marked_for_review ? " (Ditandai review)" : "";
+                const truncatedId = answer.id.length > 8 ? `${answer.id.substring(0, 8)}...` : answer.id;
+                return `<tr><td class="ps-3"><small class="text-muted" title="${escapeHtml(answer.id)}">${escapeHtml(truncatedId)}</small></td><td>${escapeHtml(answer.question_text || "-")}</td><td>${escapeHtml(answer.answer_value || "-")}${markedLabel}</td><td>${escapeHtml(answer.time_spent_label || "-")}</td><td>${escapeHtml(String(answer.points_earned || 0))} / ${escapeHtml(String(answer.points_possible || 0))}</td><td class="pe-3">${escapeHtml(answer.updated_at_label || "-")}</td></tr>`;
             }).join("");
         }
 
@@ -350,22 +297,11 @@
                 return;
             }
             detailScreenshotsGrid.innerHTML = items.map(function (item) {
-                var flaggedBadge = item.is_flagged
+                const flaggedBadge = item.is_flagged
                     ? renderSoftBadge("Flagged", "danger")
                     : renderSoftBadge("Normal", "secondary");
-                var reason = item.flag_reason ? '<p class="small text-danger mb-0">Alasan: ' + escapeHtml(item.flag_reason) + "</p>" : "";
-                return (
-                    '<div class="col-md-4">' +
-                        '<div class="screenshot-card">' +
-                            '<img src="' + escapeHtml(item.url) + '" alt="Screenshot proctoring">' +
-                            '<div class="meta">' +
-                                '<p class="small text-muted mb-1">' + escapeHtml(item.capture_time_label || "-") + "</p>" +
-                                flaggedBadge +
-                                reason +
-                            "</div>" +
-                        "</div>" +
-                    "</div>"
-                );
+                const reason = item.flag_reason ? `<p class="small text-danger mb-0">Alasan: ${escapeHtml(item.flag_reason)}</p>` : "";
+                return `<div class="col-md-4"><div class="screenshot-card"><img src="${escapeHtml(item.url)}" alt="Screenshot proctoring"><div class="meta"><p class="small text-muted mb-1">${escapeHtml(item.capture_time_label || "-")}</p>${flaggedBadge}${reason}</div></div></div>`;
             }).join("");
         }
 
@@ -375,16 +311,7 @@
                 return;
             }
             detailViolationsList.innerHTML = items.map(function (item) {
-                return (
-                    '<article class="detail-violation-item">' +
-                        '<div class="d-flex align-items-center justify-content-between mb-1">' +
-                            "<strong>" + escapeHtml(item.violation_label || "-") + "</strong>" +
-                            renderSoftBadge(item.severity_label || "-", item.severity_badge || "secondary") +
-                        "</div>" +
-                        '<p class="small text-muted mb-1">' + escapeHtml(item.detected_at_label || "-") + "</p>" +
-                        '<p class="small mb-0">' + escapeHtml(item.description || "-") + "</p>" +
-                    "</article>"
-                );
+                return `<article class="detail-violation-item"><div class="d-flex align-items-center justify-content-between mb-1"><strong>${escapeHtml(item.violation_label || "-")}</strong>${renderSoftBadge(item.severity_label || "-", item.severity_badge || "secondary")}</div><p class="small text-muted mb-1">${escapeHtml(item.detected_at_label || "-")}</p><p class="small mb-0">${escapeHtml(item.description || "-")}</p></article>`;
             }).join("");
         }
 
@@ -397,26 +324,18 @@
                 return;
             }
             detailAttemptHistoryTableBody.innerHTML = items.map(function (item) {
-                return (
-                    "<tr>" +
-                        '<td class="ps-3">' + escapeHtml(String(item.attempt_number || 0)) + "</td>" +
-                        "<td>" + escapeHtml(item.start_time_label || "-") + "</td>" +
-                        "<td>" + escapeHtml(item.submit_time_label || "-") + "</td>" +
-                        "<td>" + escapeHtml(String(item.total_score || 0)) + "</td>" +
-                        '<td class="pe-3">' + escapeHtml(item.status_label || "-") + "</td>" +
-                    "</tr>"
-                );
+                return `<tr><td class="ps-3">${escapeHtml(String(item.attempt_number || 0))}</td><td>${escapeHtml(item.start_time_label || "-")}</td><td>${escapeHtml(item.submit_time_label || "-")}</td><td>${escapeHtml(String(item.total_score || 0))}</td><td class="pe-3">${escapeHtml(item.status_label || "-")}</td></tr>`;
             }).join("");
         }
 
         function renderDetail(payload) {
-            var student = payload.student || {};
-            var attempt = payload.attempt || null;
-            var summary = payload.summary || {};
+            const student = payload.student || {};
+            const attempt = payload.attempt || null;
+            const summary = payload.summary || {};
             detailStudentName.textContent = student.name || "Detail Siswa";
-            detailStudentMeta.textContent = student.username ? ("@" + student.username) : "-";
+            detailStudentMeta.textContent = student.username ? (`@${student.username}`) : "-";
             detailAttemptStatus.textContent = attempt ? (attempt.status_label || "-") : "Belum ada attempt";
-            detailProgress.textContent = String(summary.progress_percent || 0) + "% (" + String(summary.answered_count || 0) + "/" + String(summary.total_questions || 0) + ")";
+            detailProgress.textContent = `${String(summary.progress_percent || 0)}% (${String(summary.answered_count || 0)}/${String(summary.total_questions || 0)})`;
             detailTimeRemaining.textContent = summary.time_remaining_label || "-";
             detailViolationsCount.textContent = String(summary.violations_count || 0);
             renderDetailAnswers(payload.answers || []);
@@ -434,7 +353,7 @@
         async function openStudentDetail(studentId) {
             try {
                 resetDetailModal();
-                var response = await window.axios.get(studentDetailUrl(studentId));
+                const response = await window.axios.get(studentDetailUrl(studentId));
                 renderDetail(response.data || {});
                 if (studentDetailModal) {
                     studentDetailModal.show();
@@ -448,16 +367,16 @@
             if (!detailState.studentId) {
                 return;
             }
-            var minutes = asNumber(detailExtendMinutes.value, 0);
+            const minutes = asNumber(detailExtendMinutes.value, 0);
             if (minutes <= 0) {
                 setDetailActionResult("danger", "Masukkan jumlah menit yang valid.");
                 return;
             }
             try {
                 detailExtendBtn.disabled = true;
-                var response = await window.axios.post(config.extendTimeUrl, {
+                const response = await window.axios.post(config.extendTimeUrl, {
                     student_id: detailState.studentId,
-                    minutes: minutes
+                    minutes
                 });
                 if (response.data && response.data.success) {
                     setDetailActionResult("success", response.data.message || "Waktu berhasil ditambah.");
@@ -467,7 +386,7 @@
                     setDetailActionResult("danger", "Gagal menambah waktu.");
                 }
             } catch (err) {
-                var message = (err.response && err.response.data && err.response.data.message)
+                const message = (err.response && err.response.data && err.response.data.message)
                     ? err.response.data.message
                     : "Gagal menambah waktu.";
                 setDetailActionResult("danger", message);
@@ -480,13 +399,13 @@
             if (!detailState.attemptId) {
                 return;
             }
-            var confirmed = window.confirm("Paksa submit attempt siswa ini sekarang?");
+            const confirmed = window.confirm("Paksa submit attempt siswa ini sekarang?");
             if (!confirmed) {
                 return;
             }
             try {
                 detailForceSubmitBtn.disabled = true;
-                var response = await window.axios.post(forceSubmitUrl(detailState.attemptId), {});
+                const response = await window.axios.post(forceSubmitUrl(detailState.attemptId), {});
                 if (response.data && response.data.success) {
                     setDetailActionResult("success", response.data.message || "Attempt berhasil dipaksa submit.");
                     await fetchSnapshot(false);
@@ -499,7 +418,7 @@
                     setDetailActionResult("danger", "Gagal memaksa submit attempt.");
                 }
             } catch (err) {
-                var message = (err.response && err.response.data && err.response.data.message)
+                const message = (err.response && err.response.data && err.response.data.message)
                     ? err.response.data.message
                     : "Gagal memaksa submit attempt.";
                 setDetailActionResult("danger", message);
@@ -509,23 +428,23 @@
         }
 
         function toggleAnnouncementTarget() {
-            var target = announcementTargetType.value;
+            const target = announcementTargetType.value;
             announcementStudentId.disabled = target !== "student";
         }
 
         async function handleAnnouncementSubmit(event) {
             event.preventDefault();
-            var target = announcementTargetType.value;
-            var message = (announcementMessage.value || "").trim();
+            const target = announcementTargetType.value;
+            const message = (announcementMessage.value || "").trim();
             if (!message) {
                 announcementResult.className = "small text-danger mt-2 mb-0";
                 announcementResult.textContent = "Isi pesan pengumuman wajib diisi.";
                 return;
             }
-            var payload = {
-                target: target,
+            const payload = {
+                target,
                 title: announcementTitle.value || "",
-                message: message
+                message
             };
             if (target === "student") {
                 if (!announcementStudentId.value) {
@@ -538,7 +457,7 @@
 
             try {
                 sendAnnouncementBtn.disabled = true;
-                var response = await window.axios.post(config.announcementUrl, payload);
+                const response = await window.axios.post(config.announcementUrl, payload);
                 if (response.data && response.data.success) {
                     announcementResult.className = "small text-success mt-2 mb-0";
                     announcementResult.textContent = response.data.message || "Pengumuman berhasil dikirim.";
@@ -549,7 +468,7 @@
                     announcementResult.textContent = "Gagal mengirim pengumuman.";
                 }
             } catch (err) {
-                var messageText = (err.response && err.response.data && err.response.data.message)
+                const messageText = (err.response && err.response.data && err.response.data.message)
                     ? err.response.data.message
                     : "Gagal mengirim pengumuman.";
                 announcementResult.className = "small text-danger mt-2 mb-0";
@@ -573,11 +492,11 @@
         });
 
         studentsGridEl.addEventListener("click", function (event) {
-            var button = event.target.closest(".open-student-detail-btn");
+            const button = event.target.closest(".open-student-detail-btn");
             if (!button) {
                 return;
             }
-            var studentId = button.getAttribute("data-student-id");
+            const studentId = button.getAttribute("data-student-id");
             if (!studentId) {
                 return;
             }

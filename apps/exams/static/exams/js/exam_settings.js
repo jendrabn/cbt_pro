@@ -1,19 +1,19 @@
 (function () {
     document.addEventListener("DOMContentLoaded", function () {
-        var previewModal = document.getElementById("examPreviewModal");
-        var previewFrame = document.getElementById("examPreviewFrame");
-        var duplicateModal = document.getElementById("duplicateModal");
-        var duplicateForm = document.getElementById("duplicateExamForm");
-        var duplicateTitle = document.getElementById("duplicateExamTitle");
-        var deleteModal = document.getElementById("deleteModal");
-        var deleteForm = document.getElementById("deleteExamForm");
-        var deleteTitle = document.getElementById("deleteExamTitle");
+        const previewModal = document.getElementById("examPreviewModal");
+        const previewFrame = document.getElementById("examPreviewFrame");
+        const duplicateModal = document.getElementById("duplicateModal");
+        const duplicateForm = document.getElementById("duplicateExamForm");
+        const duplicateTitle = document.getElementById("duplicateExamTitle");
+        const deleteModal = document.getElementById("deleteModal");
+        const deleteForm = document.getElementById("deleteExamForm");
+        const deleteTitle = document.getElementById("deleteExamTitle");
 
         if (previewModal && previewFrame) {
             previewModal.addEventListener("show.bs.modal", function (event) {
-                var trigger = event.relatedTarget;
-                var source = trigger && trigger.closest ? trigger.closest("[data-preview-url]") : null;
-                var previewUrl = source ? source.getAttribute("data-preview-url") : "";
+                const trigger = event.relatedTarget;
+                const source = trigger && trigger.closest ? trigger.closest("[data-preview-url]") : null;
+                const previewUrl = source ? source.getAttribute("data-preview-url") : "";
                 if (!previewUrl) {
                     event.preventDefault();
                     return;
@@ -27,7 +27,7 @@
 
         if (duplicateModal && duplicateForm && duplicateTitle) {
             duplicateModal.addEventListener("show.bs.modal", function (event) {
-                var trigger = event.relatedTarget;
+                const trigger = event.relatedTarget;
                 if (!trigger) {
                     return;
                 }
@@ -38,7 +38,7 @@
 
         if (deleteModal && deleteForm && deleteTitle) {
             deleteModal.addEventListener("show.bs.modal", function (event) {
-                var trigger = event.relatedTarget;
+                const trigger = event.relatedTarget;
                 if (!trigger) {
                     return;
                 }

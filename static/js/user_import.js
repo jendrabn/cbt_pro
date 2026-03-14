@@ -151,7 +151,7 @@
             } catch (error) {
                 if (spinner) spinner.classList.add('d-none');
                 if (btnNext) btnNext.disabled = false;
-                this.showError('Terjadi kesalahan: ' + error.message);
+                this.showError(`Terjadi kesalahan: ${error.message}`);
             }
         },
 
@@ -247,7 +247,7 @@
             } catch (error) {
                 if (spinner) spinner.classList.add('d-none');
                 if (btnConfirm) btnConfirm.disabled = false;
-                this.showError('Terjadi kesalahan: ' + error.message);
+                this.showError(`Terjadi kesalahan: ${error.message}`);
             }
         },
 

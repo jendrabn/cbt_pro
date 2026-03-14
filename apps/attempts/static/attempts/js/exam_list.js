@@ -3,36 +3,36 @@
         if (!targetIso) {
             return "";
         }
-        var now = new Date();
-        var target = new Date(targetIso);
-        var diff = target.getTime() - now.getTime();
+        const now = new Date();
+        const target = new Date(targetIso);
+        const diff = target.getTime() - now.getTime();
         if (diff <= 0) {
             return "Sudah memasuki waktu ujian.";
         }
-        var totalSeconds = Math.floor(diff / 1000);
-        var days = Math.floor(totalSeconds / 86400);
-        var hours = Math.floor((totalSeconds % 86400) / 3600);
-        var minutes = Math.floor((totalSeconds % 3600) / 60);
-        var seconds = totalSeconds % 60;
+        const totalSeconds = Math.floor(diff / 1000);
+        const days = Math.floor(totalSeconds / 86400);
+        const hours = Math.floor((totalSeconds % 86400) / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
         if (days > 0) {
-            return days + " hari " + hours + " jam lagi";
+            return `${days} hari ${hours} jam lagi`;
         }
-        return hours + "j " + minutes + "m " + seconds + "d lagi";
+        return `${hours}j ${minutes}m ${seconds}d lagi`;
     }
 
     function formatDuration(seconds) {
-        var total = Number(seconds || 0);
+        const total = Number(seconds || 0);
         if (!total) {
             return "0 menit";
         }
-        var hours = Math.floor(total / 3600);
-        var minutes = Math.floor((total % 3600) / 60);
-        var parts = [];
+        const hours = Math.floor(total / 3600);
+        const minutes = Math.floor((total % 3600) / 60);
+        const parts = [];
         if (hours) {
-            parts.push(hours + " jam");
+            parts.push(`${hours} jam`);
         }
         if (minutes) {
-            parts.push(minutes + " menit");
+            parts.push(`${minutes} menit`);
         }
         if (!parts.length) {
             parts.push("kurang dari 1 menit");
@@ -41,11 +41,11 @@
     }
 
     document.addEventListener("DOMContentLoaded", function () {
-        var countdownNodes = Array.prototype.slice.call(document.querySelectorAll("[data-countdown]"));
+        const countdownNodes = Array.prototype.slice.call(document.querySelectorAll("[data-countdown]"));
         if (countdownNodes.length) {
-            var tick = function () {
+            const tick = function () {
                 countdownNodes.forEach(function (node) {
-                    var target = node.getAttribute("data-target");
+                    const target = node.getAttribute("data-target");
                     node.textContent = formatCountdown(target);
                 });
             };
@@ -53,27 +53,27 @@
             window.setInterval(tick, 1000);
         }
 
-        var detailModal = document.getElementById("examDetailModal");
+        const detailModal = document.getElementById("examDetailModal");
         if (detailModal) {
-            var detailTitle = document.getElementById("detailTitle");
-            var detailSubject = document.getElementById("detailSubject");
-            var detailDescription = document.getElementById("detailDescription");
-            var detailSchedule = document.getElementById("detailSchedule");
-            var detailDuration = document.getElementById("detailDuration");
-            var detailQuestionCount = document.getElementById("detailQuestionCount");
-            var detailInstructions = document.getElementById("detailInstructions");
-            var detailNavigation = document.getElementById("detailNavigation");
-            var detailAntiCheat = document.getElementById("detailAntiCheat");
-            var detailStartBtn = document.getElementById("detailStartBtn");
-            var detailRetakeWrap = document.getElementById("detailRetakeWrap");
-            var detailRetakeMax = document.getElementById("detailRetakeMax");
-            var detailRetakeUsed = document.getElementById("detailRetakeUsed");
-            var detailRetakeRemaining = document.getElementById("detailRetakeRemaining");
-            var detailRetakePolicy = document.getElementById("detailRetakePolicy");
-            var detailRetakeCooldown = document.getElementById("detailRetakeCooldown");
+            const detailTitle = document.getElementById("detailTitle");
+            const detailSubject = document.getElementById("detailSubject");
+            const detailDescription = document.getElementById("detailDescription");
+            const detailSchedule = document.getElementById("detailSchedule");
+            const detailDuration = document.getElementById("detailDuration");
+            const detailQuestionCount = document.getElementById("detailQuestionCount");
+            const detailInstructions = document.getElementById("detailInstructions");
+            const detailNavigation = document.getElementById("detailNavigation");
+            const detailAntiCheat = document.getElementById("detailAntiCheat");
+            const detailStartBtn = document.getElementById("detailStartBtn");
+            const detailRetakeWrap = document.getElementById("detailRetakeWrap");
+            const detailRetakeMax = document.getElementById("detailRetakeMax");
+            const detailRetakeUsed = document.getElementById("detailRetakeUsed");
+            const detailRetakeRemaining = document.getElementById("detailRetakeRemaining");
+            const detailRetakePolicy = document.getElementById("detailRetakePolicy");
+            const detailRetakeCooldown = document.getElementById("detailRetakeCooldown");
 
             detailModal.addEventListener("show.bs.modal", function (event) {
-                var trigger = event.relatedTarget;
+                const trigger = event.relatedTarget;
                 if (!trigger) {
                     return;
                 }
@@ -88,7 +88,7 @@
                 detailNavigation.textContent = trigger.getAttribute("data-navigation-rules") || "-";
                 detailAntiCheat.textContent = trigger.getAttribute("data-anti-cheat") || "-";
 
-                var retakeEnabled = (trigger.getAttribute("data-retake-enabled") || "false") === "true";
+                const retakeEnabled = (trigger.getAttribute("data-retake-enabled") || "false") === "true";
                 if (detailRetakeWrap) {
                     detailRetakeWrap.classList.toggle("d-none", !retakeEnabled);
                 }
@@ -106,12 +106,12 @@
                         detailRetakePolicy.textContent = trigger.getAttribute("data-retake-policy") || "-";
                     }
                     if (detailRetakeCooldown) {
-                        var cooldown = trigger.getAttribute("data-retake-cooldown") || "0";
-                        detailRetakeCooldown.textContent = cooldown + " menit";
+                        const cooldown = trigger.getAttribute("data-retake-cooldown") || "0";
+                        detailRetakeCooldown.textContent = `${cooldown} menit`;
                     }
                 }
 
-                var startUrl = trigger.getAttribute("data-start-url") || "";
+                const startUrl = trigger.getAttribute("data-start-url") || "";
                 if (startUrl) {
                     detailStartBtn.classList.remove("d-none");
                     detailStartBtn.setAttribute("href", startUrl);
@@ -122,27 +122,27 @@
             });
         }
 
-        var resultModal = document.getElementById("examResultModal");
+        const resultModal = document.getElementById("examResultModal");
         if (resultModal) {
-            var resultTitle = document.getElementById("resultTitle");
-            var resultScore = document.getElementById("resultScore");
-            var resultPercentage = document.getElementById("resultPercentage");
-            var resultStatus = document.getElementById("resultStatus");
-            var resultCorrect = document.getElementById("resultCorrect");
-            var resultWrong = document.getElementById("resultWrong");
-            var resultUnanswered = document.getElementById("resultUnanswered");
-            var resultTime = document.getElementById("resultTime");
-            var resultDetailLink = document.getElementById("resultDetailLink");
+            const resultTitle = document.getElementById("resultTitle");
+            const resultScore = document.getElementById("resultScore");
+            const resultPercentage = document.getElementById("resultPercentage");
+            const resultStatus = document.getElementById("resultStatus");
+            const resultCorrect = document.getElementById("resultCorrect");
+            const resultWrong = document.getElementById("resultWrong");
+            const resultUnanswered = document.getElementById("resultUnanswered");
+            const resultTime = document.getElementById("resultTime");
+            const resultDetailLink = document.getElementById("resultDetailLink");
 
             resultModal.addEventListener("show.bs.modal", function (event) {
-                var trigger = event.relatedTarget;
+                const trigger = event.relatedTarget;
                 if (!trigger) {
                     return;
                 }
 
                 resultTitle.textContent = trigger.getAttribute("data-title") || "-";
                 resultScore.textContent = trigger.getAttribute("data-score") || "0";
-                resultPercentage.textContent = (trigger.getAttribute("data-percentage") || "0") + "%";
+                resultPercentage.textContent = `${trigger.getAttribute("data-percentage") || "0"}%`;
                 resultStatus.textContent = trigger.getAttribute("data-status") || "-";
                 resultCorrect.textContent = trigger.getAttribute("data-correct") || "0";
                 resultWrong.textContent = trigger.getAttribute("data-wrong") || "0";

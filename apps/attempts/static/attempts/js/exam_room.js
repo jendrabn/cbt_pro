@@ -369,11 +369,11 @@
                 this.elements.questionPanel.classList.add("active");
             }
             if (this.elements.attemptCounterBadge) {
-                var allowRetake = !!this.payload.allow_retake;
-                var maxAttempts = parseInt(this.payload.max_attempts || 1, 10);
-                var attemptNumber = parseInt(this.payload.attempt_number || 1, 10);
+                const allowRetake = !!this.payload.allow_retake;
+                const maxAttempts = parseInt(this.payload.max_attempts || 1, 10);
+                const attemptNumber = parseInt(this.payload.attempt_number || 1, 10);
                 this.elements.attemptCounterBadge.classList.toggle("d-none", !(allowRetake && maxAttempts > 1));
-                this.elements.attemptCounterBadge.textContent = "Attempt " + attemptNumber + " dari " + maxAttempts;
+                this.elements.attemptCounterBadge.textContent = `Attempt ${attemptNumber} dari ${maxAttempts}`;
             }
             this.updateViolationChip();
         }
@@ -450,11 +450,11 @@
         }
 
         buildOptionContentHtml(option) {
-            var optionHtml = option && option.text ? option.text : "";
-            var legacyImageHtml = "";
-            if (option && option.image_url && optionHtml.toLowerCase().indexOf("<img") === -1) {
+            const optionHtml = option && option.text ? option.text : "";
+            let legacyImageHtml = "";
+            if (option && option.image_url && !optionHtml.toLowerCase().includes("<img")) {
                 legacyImageHtml =
-                    '<div class="mt-2"><img src="' + option.image_url + '" alt="Media opsi ' + option.letter + '" class="img-fluid rounded border"></div>';
+                    `<div class="mt-2"><img src="${option.image_url}" alt="Media opsi ${option.letter}" class="img-fluid rounded border"></div>`;
             }
             return optionHtml + legacyImageHtml;
         }
@@ -891,12 +891,7 @@
                 const currentValue = Object.prototype.hasOwnProperty.call(workingAnswers, blankNumber)
                     ? workingAnswers[blankNumber]
                     : "";
-                return (
-                    '<input type="text" class="fib-input fill-blank-input" ' +
-                    `data-blank-number="${blankNumber}" ` +
-                    `value="${this.escapeHtml(currentValue)}" ` +
-                    'placeholder="...">'
-                );
+                return `<input type="text" class="fib-input fill-blank-input" ${`data-blank-number="${blankNumber}" `}${`value="${this.escapeHtml(currentValue)}" `}placeholder="...">`;
             });
 
             if (this.elements.questionText) {
@@ -963,7 +958,7 @@
                         : "mc-option";
                     const isSelected = question.question_type === "multiple_choice"
                         ? (selectedOptionId && selectedOptionId === option.id)
-                        : selectedOptionIds.indexOf(option.id) >= 0;
+                        : selectedOptionIds.includes(option.id);
                     if (isSelected) {
                         optionCard.classList.add(question.question_type === "checkbox" ? "checked" : "selected");
                     }
@@ -1218,14 +1213,14 @@
                 this.elements.submitMarkedCount.textContent = String(summary.marked_count || 0);
             }
             if (this.elements.submitRetakeInfo) {
-                var allowRetake = !!this.payload.allow_retake;
-                var maxAttempts = parseInt(this.payload.max_attempts || 1, 10);
-                var attemptNumber = parseInt(this.payload.attempt_number || 1, 10);
-                var remainingAttempts = Math.max(maxAttempts - attemptNumber, 0);
+                const allowRetake = !!this.payload.allow_retake;
+                const maxAttempts = parseInt(this.payload.max_attempts || 1, 10);
+                const attemptNumber = parseInt(this.payload.attempt_number || 1, 10);
+                const remainingAttempts = Math.max(maxAttempts - attemptNumber, 0);
                 if (allowRetake && remainingAttempts > 0) {
                     this.elements.submitRetakeInfo.classList.remove("d-none");
                     this.elements.submitRetakeInfo.textContent =
-                        "Setelah submit, kamu masih punya " + remainingAttempts + " kesempatan ujian ulang.";
+                        `Setelah submit, kamu masih punya ${remainingAttempts} kesempatan ujian ulang.`;
                 } else {
                     this.elements.submitRetakeInfo.classList.add("d-none");
                     this.elements.submitRetakeInfo.textContent = "";
@@ -1818,9 +1813,9 @@
                 context.fillText("CBT Proctoring Fallback", 20, 48);
                 context.font = "16px Arial";
                 context.fillText("Kamera tidak aktif / izin ditolak", 20, 84);
-                context.fillText("Attempt: " + String(this.config.attemptId || "-"), 20, 116);
-                context.fillText("Label: " + String(label || "capture"), 20, 146);
-                context.fillText("Captured: " + (new Date()).toLocaleString("id-ID", { hour12: false }), 20, 176);
+                context.fillText(`Attempt: ${String(this.config.attemptId || "-")}`, 20, 116);
+                context.fillText(`Label: ${String(label || "capture")}`, 20, 146);
+                context.fillText(`Captured: ${(new Date()).toLocaleString("id-ID", { hour12: false })}`, 20, 176);
             }
 
             try {
