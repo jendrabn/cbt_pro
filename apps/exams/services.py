@@ -375,6 +375,7 @@ def duplicate_exam(exam, teacher):
         require_microphone=exam.require_microphone,
         detect_tab_switch=exam.detect_tab_switch,
         disable_right_click=exam.disable_right_click,
+        block_copy_paste=exam.block_copy_paste,
         enable_screenshot_proctoring=exam.enable_screenshot_proctoring,
         screenshot_interval_seconds=exam.screenshot_interval_seconds,
         max_violations_allowed=exam.max_violations_allowed,

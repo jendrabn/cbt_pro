@@ -310,7 +310,7 @@ class EnumBadgeHelpersTests(TestCase):
 
 
 class SeedCommandTests(TestCase):
-    def test_seed_creates_exactly_ten_questions_for_each_question_type_and_is_idempotent(self):
+    def test_seed_creates_expected_question_bank_and_exams_for_each_teacher(self):
         call_command("seed")
         call_command("seed")
 
@@ -324,14 +324,31 @@ class SeedCommandTests(TestCase):
             Question.QuestionType.SHORT_ANSWER,
         ]
 
+        subjects_per_teacher = 10
+        teachers_count = 3
+        expected_per_type = subjects_per_teacher * teachers_count * 5
+
         for question_type in expected_types:
             with self.subTest(question_type=question_type):
                 self.assertEqual(
                     Question.objects.filter(question_type=question_type, is_deleted=False).count(),
-                    10,
+                    expected_per_type,
                 )
 
         self.assertEqual(
             Question.objects.filter(is_deleted=False).count(),
-            70,
+            subjects_per_teacher * teachers_count * len(expected_types) * 5,
         )
+        self.assertEqual(Exam.objects.filter(is_deleted=False).count(), subjects_per_teacher * teachers_count)
+
+        sample_exam = Exam.objects.filter(is_deleted=False).order_by("title").first()
+        self.assertIsNotNone(sample_exam)
+        self.assertEqual(sample_exam.exam_questions.count(), 35)
+        self.assertTrue(sample_exam.allow_retake)
+        self.assertEqual(sample_exam.max_retake_attempts, 10)
+        self.assertFalse(sample_exam.require_fullscreen)
+        self.assertFalse(sample_exam.require_camera)
+        self.assertFalse(sample_exam.require_microphone)
+        self.assertFalse(sample_exam.detect_tab_switch)
+        self.assertFalse(sample_exam.disable_right_click)
+        self.assertFalse(sample_exam.enable_screenshot_proctoring)

@@ -95,6 +95,7 @@ class ExamWizardFormTests(TestCase):
             "require_microphone",
             "detect_tab_switch",
             "disable_right_click",
+            "block_copy_paste",
             "enable_screenshot_proctoring",
         ]
 

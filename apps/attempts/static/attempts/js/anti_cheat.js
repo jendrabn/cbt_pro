@@ -44,6 +44,7 @@
         detectTabSwitch = true,
         requireFullscreen = true,
         disableRightClick = true,
+        blockCopyPaste = false,
         onViolation = () => {},
         onFullscreenStateChange = () => {},
     }) {
@@ -69,13 +70,29 @@
             });
         }
 
-        bind(documentObj, "copy", () => {
+        bind(documentObj, "copy", (event) => {
+            if (blockCopyPaste) {
+                event.preventDefault();
+            }
             if (shouldReport("copy_attempt")) {
                 onViolation("copy_attempt", "Aksi salin terdeteksi saat ujian berlangsung.");
             }
         });
 
-        bind(documentObj, "paste", () => {
+        bind(documentObj, "cut", (event) => {
+            if (!blockCopyPaste) {
+                return;
+            }
+            event.preventDefault();
+            if (shouldReport("copy_attempt")) {
+                onViolation("copy_attempt", "Aksi potong terdeteksi saat ujian berlangsung.");
+            }
+        });
+
+        bind(documentObj, "paste", (event) => {
+            if (blockCopyPaste) {
+                event.preventDefault();
+            }
             if (shouldReport("paste_attempt")) {
                 onViolation("paste_attempt", "Aksi tempel terdeteksi saat ujian berlangsung.");
             }

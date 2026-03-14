@@ -1,0 +1,52 @@
+[
+  {
+    "code": "TWK",
+    "name": "Tes Wawasan Kebangsaan (TWK)",
+    "description": "Materi simulasi kebangsaan untuk seleksi BUMN dan CPNS."
+  },
+  {
+    "code": "TIU",
+    "name": "Tes Intelegensia Umum (TIU)",
+    "description": "Materi simulasi penalaran umum, numerik, dan verbal untuk CPNS."
+  },
+  {
+    "code": "TKP",
+    "name": "Tes Karakteristik Pribadi (TKP)",
+    "description": "Materi simulasi pengambilan keputusan, pelayanan, dan perilaku kerja."
+  },
+  {
+    "code": "SKB-KOM",
+    "name": "SKB Komputer",
+    "description": "Materi simulasi seleksi bidang komputer dan literasi digital."
+  },
+  {
+    "code": "TKD-VRB",
+    "name": "Tes Kemampuan Dasar Verbal",
+    "description": "Materi TKD verbal untuk persiapan BUMN."
+  },
+  {
+    "code": "TKD-NUM",
+    "name": "Tes Kemampuan Dasar Numerik",
+    "description": "Materi TKD numerik untuk persiapan BUMN."
+  },
+  {
+    "code": "TKD-LOG",
+    "name": "Tes Kemampuan Dasar Logika",
+    "description": "Materi TKD logika untuk persiapan BUMN."
+  },
+  {
+    "code": "AKHLAK",
+    "name": "Core Values AKHLAK BUMN",
+    "description": "Materi nilai Amanah, Kompeten, Harmonis, Loyal, Adaptif, dan Kolaboratif."
+  },
+  {
+    "code": "ENG",
+    "name": "Bahasa Inggris Seleksi",
+    "description": "Materi bahasa Inggris untuk konteks seleksi kerja dan instansi."
+  },
+  {
+    "code": "LAGI",
+    "name": "Learning Agility",
+    "description": "Materi adaptasi belajar, refleksi, dan pemecahan masalah cepat."
+  }
+]

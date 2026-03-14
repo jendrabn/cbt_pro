@@ -66,6 +66,7 @@
                         <li>Mikrofon: {% if exam.require_microphone %}Wajib{% else %}Tidak Wajib{% endif %}</li>
                         <li>Monitoring tab: {% if exam.detect_tab_switch %}Aktif{% else %}Nonaktif{% endif %}</li>
                         <li>Klik kanan: {% if exam.disable_right_click %}Diblokir{% else %}Diizinkan{% endif %}</li>
+                        <li>Copy/cut/paste: {% if exam.block_copy_paste %}Diblokir{% else %}Diizinkan{% endif %}</li>
                         <li>Screenshot berkala: {% if exam.enable_screenshot_proctoring %}Aktif{% else %}Nonaktif{% endif %}</li>
                         <li>Batas pelanggaran: {{ exam.max_violations_allowed }}</li>
                     </ul>

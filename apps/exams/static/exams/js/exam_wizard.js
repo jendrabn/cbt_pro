@@ -752,6 +752,7 @@
             const randomizeQ = (document.getElementById("id_randomize_questions") || {}).checked ? "Ya" : "Tidak";
             const randomizeOpt = (document.getElementById("id_randomize_options") || {}).checked ? "Ya" : "Tidak";
             const overrideGlobal = (document.getElementById("id_override_question_navigation") || {}).checked ? "Ya" : "Tidak";
+            const blockCopyPaste = (document.getElementById("id_block_copy_paste") || {}).checked ? "Ya" : "Tidak";
             const certificateEnabled = !!(certificateEnabledField && certificateEnabledField.checked);
             let certificateTemplateText = "-";
             if (certificateTemplateField && certificateTemplateField.selectedOptions && certificateTemplateField.selectedOptions.length) {
@@ -784,6 +785,7 @@
                 ["Acak Soal", randomizeQ],
                 ["Acak Opsi", randomizeOpt],
                 ["Timpa Navigasi Global", overrideGlobal],
+                ["Blokir Copy/Cut/Paste", blockCopyPaste],
                 ["Sertifikat", certificateEnabled ? (`Aktif | ${certificateTemplateText}`) : "Nonaktif"],
                 ["Retake", retakeSummary]
             ].map(function (row) {

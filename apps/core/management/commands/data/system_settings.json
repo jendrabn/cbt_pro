@@ -1,0 +1,98 @@
+[
+  {
+    "setting_key": "institution_name",
+    "setting_value": "Pusat Simulasi Tes BUMN dan CPNS",
+    "setting_type": "string",
+    "category": "branding",
+    "description": "Nama lembaga simulasi",
+    "is_public": true
+  },
+  {
+    "setting_key": "institution_type",
+    "setting_value": "Lembaga Pelatihan dan Simulasi",
+    "setting_type": "string",
+    "category": "branding",
+    "description": "Jenis lembaga",
+    "is_public": true
+  },
+  {
+    "setting_key": "institution_address",
+    "setting_value": "Jl. Simulasi Nasional No. 45, Jakarta",
+    "setting_type": "string",
+    "category": "branding",
+    "description": "Alamat lembaga",
+    "is_public": false
+  },
+  {
+    "setting_key": "institution_phone",
+    "setting_value": "+62 21 5555 1000",
+    "setting_type": "string",
+    "category": "branding",
+    "description": "Telepon resmi lembaga",
+    "is_public": false
+  },
+  {
+    "setting_key": "institution_email",
+    "setting_value": "halo@simulasi-tes.local",
+    "setting_type": "string",
+    "category": "branding",
+    "description": "Email resmi lembaga",
+    "is_public": false
+  },
+  {
+    "setting_key": "institution_website",
+    "setting_value": "https://simulasi-tes.local",
+    "setting_type": "string",
+    "category": "branding",
+    "description": "Website resmi lembaga",
+    "is_public": true
+  },
+  {
+    "setting_key": "login_page_headline",
+    "setting_value": "Masuk ke Dashboard Simulasi Tes",
+    "setting_type": "string",
+    "category": "branding",
+    "description": "Judul halaman login",
+    "is_public": true
+  },
+  {
+    "setting_key": "login_page_subheadline",
+    "setting_value": "Kelola bank soal, ujian berantai 30 hari, dan sesi peserta BUMN maupun CPNS.",
+    "setting_type": "string",
+    "category": "branding",
+    "description": "Subjudul halaman login",
+    "is_public": true
+  },
+  {
+    "setting_key": "primary_color",
+    "setting_value": "#1f4f46",
+    "setting_type": "string",
+    "category": "branding",
+    "description": "Warna utama antarmuka",
+    "is_public": true
+  },
+  {
+    "setting_key": "landing_page_enabled",
+    "setting_value": "true",
+    "setting_type": "boolean",
+    "category": "general",
+    "description": "Aktifkan landing page",
+    "is_public": true
+  },
+  {
+    "setting_key": "default_exam_duration",
+    "setting_value": "4320",
+    "setting_type": "number",
+    "category": "exam_defaults",
+    "description": "Default durasi ujian dalam menit",
+    "is_public": false
+  },
+  {
+    "setting_key": "default_passing_score",
+    "setting_value": "75",
+    "setting_type": "number",
+    "category": "exam_defaults",
+    "description": "Default passing score",
+    "is_public": false
+  }
+]

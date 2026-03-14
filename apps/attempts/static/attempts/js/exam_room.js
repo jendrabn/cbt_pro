@@ -126,12 +126,14 @@
                 antiCheatMediaRule: byId("antiCheatMediaRule"),
                 antiCheatTabRule: byId("antiCheatTabRule"),
                 antiCheatRightClickRule: byId("antiCheatRightClickRule"),
+                antiCheatCopyPasteRule: byId("antiCheatCopyPasteRule"),
                 antiCheatScreenshotRule: byId("antiCheatScreenshotRule"),
                 antiCheatLimitRule: byId("antiCheatLimitRule"),
                 antiCheatFullscreenRuleMobile: byId("antiCheatFullscreenRuleMobile"),
                 antiCheatMediaRuleMobile: byId("antiCheatMediaRuleMobile"),
                 antiCheatTabRuleMobile: byId("antiCheatTabRuleMobile"),
                 antiCheatRightClickRuleMobile: byId("antiCheatRightClickRuleMobile"),
+                antiCheatCopyPasteRuleMobile: byId("antiCheatCopyPasteRuleMobile"),
                 antiCheatScreenshotRuleMobile: byId("antiCheatScreenshotRuleMobile"),
                 antiCheatLimitRuleMobile: byId("antiCheatLimitRuleMobile"),
                 permissionOverlay: byId("permissionOverlay"),
@@ -1241,6 +1243,7 @@
             const fullscreenRuleText = `Mode fullscreen: ${antiCheat.require_fullscreen ? "Wajib" : "Tidak wajib"}`;
             const tabRuleText = `Deteksi perpindahan tab: ${antiCheat.detect_tab_switch ? "Aktif" : "Tidak aktif"}`;
             const rightClickRuleText = `Klik kanan: ${antiCheat.disable_right_click ? "Diblokir" : "Diizinkan"}`;
+            const copyPasteRuleText = `Copy/cut/paste: ${antiCheat.block_copy_paste ? "Diblokir" : "Diizinkan"}`;
             const screenshotRuleText = antiCheat.enable_screenshot_proctoring
                 ? `Screenshot berkala: Aktif setiap ${antiCheat.screenshot_interval_seconds} detik`
                 : "Screenshot berkala: Tidak aktif";
@@ -1269,6 +1272,12 @@
                 this.elements.antiCheatRightClickRuleMobile,
             ].filter(Boolean).forEach((element) => {
                 element.textContent = rightClickRuleText;
+            });
+            [
+                this.elements.antiCheatCopyPasteRule,
+                this.elements.antiCheatCopyPasteRuleMobile,
+            ].filter(Boolean).forEach((element) => {
+                element.textContent = copyPasteRuleText;
             });
             [
                 this.elements.antiCheatScreenshotRule,
@@ -1557,6 +1566,7 @@
                 detectTabSwitch: Boolean(anti.detect_tab_switch),
                 requireFullscreen: Boolean(anti.require_fullscreen),
                 disableRightClick: Boolean(anti.disable_right_click),
+                blockCopyPaste: Boolean(anti.block_copy_paste),
                 onViolation: (type, description) => this.reportViolation(type, description),
                 onFullscreenStateChange: (active) => this.onFullscreenStateChange(active),
             });

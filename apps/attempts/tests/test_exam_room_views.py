@@ -69,6 +69,7 @@ class StudentExamRoomViewTests(TestCase):
             max_violations_allowed=2,
             detect_tab_switch=True,
             disable_right_click=True,
+            block_copy_paste=True,
             require_fullscreen=True,
             enable_screenshot_proctoring=True,
             screenshot_interval_seconds=120,
@@ -127,7 +128,9 @@ class StudentExamRoomViewTests(TestCase):
         self.assertContains(response, "Persyaratan Perangkat Ujian")
         self.assertContains(response, "antiCheatMediaRule")
         self.assertContains(response, "antiCheatRightClickRule")
+        self.assertContains(response, "antiCheatCopyPasteRule")
         self.assertContains(response, '"disable_right_click": true', html=False)
+        self.assertContains(response, '"block_copy_paste": true', html=False)
 
     def test_non_student_cannot_open_exam_room(self):
         self.client.force_login(self.other_teacher)

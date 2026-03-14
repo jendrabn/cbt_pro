@@ -1,1075 +1,3654 @@
 {
-  "multiple_choice": [
+  "subjects": [
     {
-      "subject_code": "ALG2",
-      "teacher_username": "olivia.carter",
-      "category": "Linear Equations",
-      "question_text": "<p>Selesaikan persamaan berikut: <strong>2x + 5 = 17</strong>.</p>",
-      "difficulty_level": "easy",
-      "points": 5,
-      "explanation": "Kurangi 5 dari kedua ruas, lalu bagi 2 sehingga x = 6.",
-      "tags": ["algebra", "linear-equations", "plain"],
-      "options": [
-        {"text": "4", "is_correct": false},
-        {"text": "5", "is_correct": false},
-        {"text": "6", "is_correct": true},
-        {"text": "7", "is_correct": false}
+      "subject_code": "AKHLAK",
+      "topics": [
+        {
+          "title": "Amanah",
+          "difficulty": "easy",
+          "summary": "Amanah berarti dapat dipercaya, menjaga titipan organisasi, dan bertanggung jawab atas hasil kerja.",
+          "key_term": "Amanah",
+          "multiple_choice": {
+            "question": "Perilaku yang paling mencerminkan Amanah adalah ...",
+            "correct_option": "Menjaga kepercayaan dan menyelesaikan tugas sesuai komitmen",
+            "wrong_options": [
+              "Mengalihkan tanggung jawab",
+              "Mengubah laporan tanpa izin",
+              "Menutupi kesalahan tim"
+            ]
+          },
+          "checkbox": {
+            "question": "Pilih perilaku yang selaras dengan Amanah.",
+            "correct_options": [
+              "Menepati janji kerja",
+              "Menjaga kerahasiaan data",
+              "Bertanggung jawab atas tugas"
+            ],
+            "wrong_options": [
+              "Menggunakan fasilitas kantor untuk kepentingan pribadi"
+            ]
+          },
+          "ordering": {
+            "question": "Urutkan perilaku amanah saat menerima penugasan.",
+            "items": [
+              "Memahami tugas",
+              "Menyepakati target",
+              "Mengerjakan dengan bertanggung jawab",
+              "Melaporkan hasil secara jujur"
+            ]
+          },
+          "matching": {
+            "question": "Pasangkan perilaku dengan nilai Amanah.",
+            "pairs": [
+              {
+                "prompt": "Menjaga janji",
+                "answer": "Dapat dipercaya"
+              },
+              {
+                "prompt": "Menyampaikan hasil apa adanya",
+                "answer": "Jujur"
+              },
+              {
+                "prompt": "Merawat aset kantor",
+                "answer": "Menjaga titipan organisasi"
+              },
+              {
+                "prompt": "Menyelesaikan tugas tepat waktu",
+                "answer": "Bertanggung jawab"
+              }
+            ]
+          },
+          "fill_in_blank": {
+            "question": "Amanah berarti dapat {{1}} dan bertanggung jawab pada setiap {{2}}.",
+            "answers": [
+              {
+                "blank_number": 1,
+                "accepted_answers": [
+                  "dipercaya"
+                ],
+                "blank_points": 3
+              },
+              {
+                "blank_number": 2,
+                "accepted_answers": [
+                  "tugas",
+                  "amanah"
+                ],
+                "blank_points": 3
+              }
+            ]
+          }
+        },
+        {
+          "title": "Kompeten",
+          "difficulty": "medium",
+          "summary": "Kompeten menuntut insan BUMN terus belajar, meningkatkan kapabilitas, dan mengejar hasil terbaik.",
+          "key_term": "Kompeten",
+          "multiple_choice": {
+            "question": "Perilaku yang mencerminkan Kompeten adalah ...",
+            "correct_option": "Terus belajar untuk meningkatkan kualitas kerja",
+            "wrong_options": [
+              "Menolak pelatihan",
+              "Berhenti belajar setelah diterima kerja",
+              "Menyalahkan sistem tanpa mencoba memahami"
+            ]
+          },
+          "checkbox": {
+            "question": "Pilih tindakan yang menunjukkan nilai Kompeten.",
+            "correct_options": [
+              "Belajar hal baru",
+              "Meningkatkan keterampilan",
+              "Mengejar hasil terbaik"
+            ],
+            "wrong_options": [
+              "Merasa cukup tanpa evaluasi"
+            ]
+          },
+          "ordering": {
+            "question": "Urutkan siklus pengembangan kompetensi.",
+            "items": [
+              "Identifikasi kebutuhan",
+              "Belajar dan berlatih",
+              "Menerapkan dalam kerja",
+              "Mengevaluasi hasil"
+            ]
+          },
+          "matching": {
+            "question": "Pasangkan tindakan dengan dampak kompetensi.",
+            "pairs": [
+              {
+                "prompt": "Pelatihan rutin",
+                "answer": "Kemampuan meningkat"
+              },
+              {
+                "prompt": "Belajar mandiri",
+                "answer": "Wawasan bertambah"
+              },
+              {
+                "prompt": "Menerapkan praktik terbaik",
+                "answer": "Kualitas hasil naik"
+              },
+              {
+                "prompt": "Evaluasi kinerja",
+                "answer": "Area perbaikan terlihat"
+              }
+            ]
+          },
+          "fill_in_blank": {
+            "question": "Nilai Kompeten menuntut insan BUMN untuk terus {{1}} dan mengembangkan {{2}}.",
+            "answers": [
+              {
+                "blank_number": 1,
+                "accepted_answers": [
+                  "belajar"
+                ],
+                "blank_points": 3
+              },
+              {
+                "blank_number": 2,
+                "accepted_answers": [
+                  "kapabilitas",
+                  "kemampuan"
+                ],
+                "blank_points": 3
+              }
+            ]
+          }
+        },
+        {
+          "title": "Harmonis",
+          "difficulty": "easy",
+          "summary": "Harmonis berarti saling menghargai, peduli sesama, dan menciptakan suasana kerja yang kondusif.",
+          "key_term": "Harmonis",
+          "multiple_choice": {
+            "question": "Perilaku yang paling mencerminkan Harmonis adalah ...",
+            "correct_option": "Menghargai perbedaan dan menjaga hubungan baik",
+            "wrong_options": [
+              "Mengutamakan ego pribadi",
+              "Mengabaikan rekan kerja",
+              "Membentuk kubu di kantor"
+            ]
+          },
+          "checkbox": {
+            "question": "Pilih tindakan yang mendukung suasana kerja harmonis.",
+            "correct_options": [
+              "Menghormati perbedaan",
+              "Berkomunikasi sopan",
+              "Membangun kerja sama lintas tim"
+            ],
+            "wrong_options": [
+              "Menyebarkan konflik"
+            ]
+          },
+          "ordering": {
+            "question": "Urutkan langkah menyelesaikan perbedaan pendapat secara harmonis.",
+            "items": [
+              "Mendengar pihak lain",
+              "Mencari titik temu",
+              "Menyepakati solusi",
+              "Menjaga hubungan baik"
+            ]
+          },
+          "matching": {
+            "question": "Pasangkan perilaku dengan nilai Harmonis.",
+            "pairs": [
+              {
+                "prompt": "Menghormati pendapat berbeda",
+                "answer": "Toleransi"
+              },
+              {
+                "prompt": "Berbicara sopan",
+                "answer": "Menjaga relasi"
+              },
+              {
+                "prompt": "Menghindari konflik tidak perlu",
+                "answer": "Menciptakan suasana kondusif"
+              },
+              {
+                "prompt": "Membangun kerja sama",
+                "answer": "Memperkuat kebersamaan"
+              }
+            ]
+          },
+          "fill_in_blank": {
+            "question": "Harmonis berarti saling {{1}} dan peduli pada {{2}}.",
+            "answers": [
+              {
+                "blank_number": 1,
+                "accepted_answers": [
+                  "menghargai"
+                ],
+                "blank_points": 3
+              },
+              {
+                "blank_number": 2,
+                "accepted_answers": [
+                  "sesama",
+                  "orang lain"
+                ],
+                "blank_points": 3
+              }
+            ]
+          }
+        },
+        {
+          "title": "Loyal",
+          "difficulty": "medium",
+          "summary": "Loyal berarti berdedikasi pada organisasi, menjaga nama baik, dan menempatkan kepentingan bersama di atas kepentingan pribadi.",
+          "key_term": "Loyal",
+          "multiple_choice": {
+            "question": "Sikap Loyal paling tepat ditunjukkan dengan ...",
+            "correct_option": "Menjaga nama baik organisasi dan mendukung tujuan bersama",
+            "wrong_options": [
+              "Membocorkan informasi internal",
+              "Mengedepankan kepentingan pribadi",
+              "Menyebar kabar negatif tanpa klarifikasi"
+            ]
+          },
+          "checkbox": {
+            "question": "Pilih tindakan yang menunjukkan Loyal.",
+            "correct_options": [
+              "Menjaga rahasia jabatan",
+              "Mendukung kebijakan yang sah",
+              "Mengutamakan kepentingan organisasi"
+            ],
+            "wrong_options": [
+              "Menggunakan informasi internal untuk keuntungan pribadi"
+            ]
+          },
+          "ordering": {
+            "question": "Urutkan respons loyal saat menerima informasi sensitif organisasi.",
+            "items": [
+              "Memahami tingkat kerahasiaan",
+              "Menyimpan sesuai aturan",
+              "Menggunakan hanya untuk tugas resmi",
+              "Melaporkan jika ada penyalahgunaan"
+            ]
+          },
+          "matching": {
+            "question": "Pasangkan perilaku dengan makna Loyal.",
+            "pairs": [
+              {
+                "prompt": "Menjaga nama baik organisasi",
+                "answer": "Komitmen pada institusi"
+              },
+              {
+                "prompt": "Menjaga informasi sensitif",
+                "answer": "Disiplin kerahasiaan"
+              },
+              {
+                "prompt": "Patuh pada aturan sah",
+                "answer": "Kesetiaan pada tata kelola"
+              },
+              {
+                "prompt": "Mengutamakan tujuan bersama",
+                "answer": "Mendahulukan organisasi"
+              }
+            ]
+          },
+          "fill_in_blank": {
+            "question": "Loyal berarti berdedikasi dan mengutamakan {{1}} organisasi di atas kepentingan {{2}}.",
+            "answers": [
+              {
+                "blank_number": 1,
+                "accepted_answers": [
+                  "kepentingan"
+                ],
+                "blank_points": 3
+              },
+              {
+                "blank_number": 2,
+                "accepted_answers": [
+                  "pribadi"
+                ],
+                "blank_points": 3
+              }
+            ]
+          }
+        },
+        {
+          "title": "Adaptif dan Kolaboratif",
+          "difficulty": "medium",
+          "summary": "Adaptif dan Kolaboratif menuntut insan BUMN terbuka pada perubahan, cepat belajar, dan membangun sinergi lintas pihak.",
+          "key_term": "Kolaboratif",
+          "multiple_choice": {
+            "question": "Saat strategi proyek berubah, tindakan paling tepat adalah ...",
+            "correct_option": "Cepat menyesuaikan diri dan mengajak tim berkolaborasi",
+            "wrong_options": [
+              "Menolak perubahan",
+              "Bekerja sendiri tanpa koordinasi",
+              "Menunggu instruksi tanpa inisiatif"
+            ]
+          },
+          "checkbox": {
+            "question": "Pilih perilaku yang mencerminkan Adaptif dan Kolaboratif.",
+            "correct_options": [
+              "Terbuka pada cara baru",
+              "Mau berbagi pengetahuan",
+              "Bekerja lintas fungsi untuk hasil terbaik"
+            ],
+            "wrong_options": [
+              "Menolak masukan dari tim lain"
+            ]
+          },
+          "ordering": {
+            "question": "Urutkan respons ideal ketika tim menghadapi perubahan target.",
+            "items": [
+              "Memahami perubahan",
+              "Diskusi lintas tim",
+              "Menyusun langkah baru",
+              "Menjalankan dan mengevaluasi"
+            ]
+          },
+          "matching": {
+            "question": "Pasangkan perilaku dengan nilai AKHLAK terkait.",
+            "pairs": [
+              {
+                "prompt": "Terbuka pada perubahan",
+                "answer": "Adaptif"
+              },
+              {
+                "prompt": "Bekerja lintas unit",
+                "answer": "Kolaboratif"
+              },
+              {
+                "prompt": "Belajar dari umpan balik",
+                "answer": "Adaptif"
+              },
+              {
+                "prompt": "Berbagi sumber daya",
+                "answer": "Kolaboratif"
+              }
+            ]
+          },
+          "fill_in_blank": {
+            "question": "Nilai Adaptif mendorong insan BUMN untuk terus {{1}}, sedangkan Kolaboratif mendorong untuk membangun kerja sama {{2}}.",
+            "answers": [
+              {
+                "blank_number": 1,
+                "accepted_answers": [
+                  "berinovasi",
+                  "menyesuaikan diri"
+                ],
+                "blank_points": 3
+              },
+              {
+                "blank_number": 2,
+                "accepted_answers": [
+                  "sinergis",
+                  "efektif"
+                ],
+                "blank_points": 3
+              }
+            ]
+          }
+        }
       ]
     },
     {
-      "subject_code": "GEOM",
-      "teacher_username": "olivia.carter",
-      "category": "Area of Triangles",
-      "question_text": "<p>Gunakan gambar segitiga berikut. Jika alas = 8 cm dan tinggi = 5 cm, berapa luas segitiga itu?</p>",
-      "question_image_url": "https://picsum.photos/seed/cbt-mc-geom-triangle/960/540",
-      "difficulty_level": "easy",
-      "points": 5,
-      "explanation": "Rumus luas segitiga adalah 1/2 x alas x tinggi.",
-      "tags": ["geometry", "area", "image"],
-      "options": [
-        {"text": "13 cm2", "is_correct": false},
-        {"text": "20 cm2", "is_correct": true},
-        {"text": "40 cm2", "is_correct": false},
-        {"text": "80 cm2", "is_correct": false}
+      "subject_code": "ENG",
+      "topics": [
+        {
+          "title": "Grammar Basics",
+          "difficulty": "easy",
+          "summary": "Grammar basics cover agreement, tense, and sentence structure needed for clear professional communication.",
+          "key_term": "works",
+          "multiple_choice": {
+            "question": "Choose the correct sentence.",
+            "correct_option": "She works in the finance division.",
+            "wrong_options": [
+              "She work in the finance division.",
+              "She working in the finance division.",
+              "She worked in the finance division every day."
+            ]
+          },
+          "checkbox": {
+            "question": "Select the sentences that are grammatically correct.",
+            "correct_options": [
+              "They are preparing the report.",
+              "We have finished the task.",
+              "He goes to the office daily."
+            ],
+            "wrong_options": [
+              "She go to the office daily."
+            ]
+          },
+          "ordering": {
+            "question": "Arrange the words into a correct sentence.",
+            "items": [
+              "The team",
+              "is reviewing",
+              "the final document",
+              "today"
+            ]
+          },
+          "matching": {
+            "question": "Match the tense with its example.",
+            "pairs": [
+              {
+                "prompt": "Simple present",
+                "answer": "She works every day"
+              },
+              {
+                "prompt": "Present continuous",
+                "answer": "They are meeting now"
+              },
+              {
+                "prompt": "Simple past",
+                "answer": "He finished yesterday"
+              },
+              {
+                "prompt": "Present perfect",
+                "answer": "We have submitted the file"
+              }
+            ]
+          },
+          "fill_in_blank": {
+            "question": "She {{1}} in the finance division every day.",
+            "answers": [
+              {
+                "blank_number": 1,
+                "accepted_answers": [
+                  "works"
+                ],
+                "blank_points": 6
+              }
+            ]
+          }
+        },
+        {
+          "title": "Vocabulary",
+          "difficulty": "easy",
+          "summary": "Vocabulary mastery helps test takers infer meaning, understand instructions, and choose precise words in context.",
+          "key_term": "Precise",
+          "multiple_choice": {
+            "question": "The word 'increase' is closest in meaning to ...",
+            "correct_option": "Rise",
+            "wrong_options": [
+              "Reduce",
+              "Delay",
+              "Reject"
+            ]
+          },
+          "checkbox": {
+            "question": "Select words related to workplace communication.",
+            "correct_options": [
+              "Meeting",
+              "Report",
+              "Proposal"
+            ],
+            "wrong_options": [
+              "Mountain"
+            ]
+          },
+          "ordering": {
+            "question": "Arrange the words from the most general to the most specific.",
+            "items": [
+              "Communication",
+              "Business communication",
+              "Email communication",
+              "Follow-up email"
+            ]
+          },
+          "matching": {
+            "question": "Match the word with its closest meaning.",
+            "pairs": [
+              {
+                "prompt": "Increase",
+                "answer": "Rise"
+              },
+              {
+                "prompt": "Accurate",
+                "answer": "Precise"
+              },
+              {
+                "prompt": "Delay",
+                "answer": "Postpone"
+              },
+              {
+                "prompt": "Rapid",
+                "answer": "Fast"
+              }
+            ]
+          },
+          "fill_in_blank": {
+            "question": "The closest meaning of 'accurate' is {{1}}.",
+            "answers": [
+              {
+                "blank_number": 1,
+                "accepted_answers": [
+                  "precise",
+                  "Precise"
+                ],
+                "blank_points": 6
+              }
+            ]
+          }
+        },
+        {
+          "title": "Reading Comprehension",
+          "difficulty": "medium",
+          "summary": "Reading comprehension focuses on identifying main ideas, supporting details, and inferences from passages.",
+          "key_term": "Main idea",
+          "multiple_choice": {
+            "question": "In reading comprehension, the main idea is ...",
+            "correct_option": "The central point of the passage",
+            "wrong_options": [
+              "The longest sentence",
+              "A minor detail only",
+              "The author's signature"
+            ]
+          },
+          "checkbox": {
+            "question": "Select useful strategies for reading comprehension.",
+            "correct_options": [
+              "Identify the main idea",
+              "Look for supporting details",
+              "Notice signal words"
+            ],
+            "wrong_options": [
+              "Translate every word before understanding the text"
+            ]
+          },
+          "ordering": {
+            "question": "Arrange the steps for efficient reading comprehension.",
+            "items": [
+              "Skim the passage",
+              "Identify the main idea",
+              "Find key details",
+              "Answer based on the text"
+            ]
+          },
+          "matching": {
+            "question": "Match the reading term with its function.",
+            "pairs": [
+              {
+                "prompt": "Main idea",
+                "answer": "Central message"
+              },
+              {
+                "prompt": "Detail",
+                "answer": "Supporting information"
+              },
+              {
+                "prompt": "Inference",
+                "answer": "Meaning not stated directly"
+              },
+              {
+                "prompt": "Context clue",
+                "answer": "Hint around an unfamiliar word"
+              }
+            ]
+          },
+          "fill_in_blank": {
+            "question": "Information that supports the main idea is called a {{1}}.",
+            "answers": [
+              {
+                "blank_number": 1,
+                "accepted_answers": [
+                  "detail",
+                  "supporting detail"
+                ],
+                "blank_points": 6
+              }
+            ]
+          }
+        },
+        {
+          "title": "Error Recognition",
+          "difficulty": "medium",
+          "summary": "Error recognition requires awareness of agreement, tense, articles, and word form in English sentences.",
+          "key_term": "has",
+          "multiple_choice": {
+            "question": "Identify the incorrect phrase: 'The manager have approved the budget.'",
+            "correct_option": "have approved",
+            "wrong_options": [
+              "The manager",
+              "the budget",
+              "approved the"
+            ]
+          },
+          "checkbox": {
+            "question": "Select common error areas in English tests.",
+            "correct_options": [
+              "Subject-verb agreement",
+              "Tense consistency",
+              "Word choice"
+            ],
+            "wrong_options": [
+              "Paper color"
+            ]
+          },
+          "ordering": {
+            "question": "Arrange the steps to check a sentence for errors.",
+            "items": [
+              "Read the whole sentence",
+              "Check subject and verb",
+              "Check tense and word form",
+              "Confirm the corrected version"
+            ]
+          },
+          "matching": {
+            "question": "Match the error type with its example.",
+            "pairs": [
+              {
+                "prompt": "Subject-verb agreement",
+                "answer": "She go to work"
+              },
+              {
+                "prompt": "Tense",
+                "answer": "Yesterday he goes home"
+              },
+              {
+                "prompt": "Word form",
+                "answer": "He is success in sales"
+              },
+              {
+                "prompt": "Article",
+                "answer": "She bought book"
+              }
+            ]
+          },
+          "fill_in_blank": {
+            "question": "In the sentence 'The manager {{1}} approved the budget,' the correct verb is 'has'.",
+            "answers": [
+              {
+                "blank_number": 1,
+                "accepted_answers": [
+                  "has"
+                ],
+                "blank_points": 6
+              }
+            ]
+          }
+        },
+        {
+          "title": "Business Correspondence",
+          "difficulty": "medium",
+          "summary": "Business correspondence values clarity, concise wording, polite structure, and a professional tone.",
+          "key_term": "Subject line",
+          "multiple_choice": {
+            "question": "A polite closing for a formal email is ...",
+            "correct_option": "Best regards",
+            "wrong_options": [
+              "See ya",
+              "Bye for now",
+              "Later"
+            ]
+          },
+          "checkbox": {
+            "question": "Select elements of a professional email.",
+            "correct_options": [
+              "Clear subject line",
+              "Polite greeting",
+              "Concise closing"
+            ],
+            "wrong_options": [
+              "Random emojis in every line"
+            ]
+          },
+          "ordering": {
+            "question": "Arrange the structure of a simple professional email.",
+            "items": [
+              "Greeting",
+              "Purpose of email",
+              "Supporting details",
+              "Closing"
+            ]
+          },
+          "matching": {
+            "question": "Match the email element with its purpose.",
+            "pairs": [
+              {
+                "prompt": "Subject line",
+                "answer": "Shows the email topic"
+              },
+              {
+                "prompt": "Greeting",
+                "answer": "Opens politely"
+              },
+              {
+                "prompt": "Body",
+                "answer": "Explains the main message"
+              },
+              {
+                "prompt": "Closing",
+                "answer": "Ends professionally"
+              }
+            ]
+          },
+          "fill_in_blank": {
+            "question": "A professional email should have a clear {{1}} line.",
+            "answers": [
+              {
+                "blank_number": 1,
+                "accepted_answers": [
+                  "subject",
+                  "Subject"
+                ],
+                "blank_points": 6
+              }
+            ]
+          }
+        }
       ]
     },
     {
-      "subject_code": "BIO",
-      "teacher_username": "michael.reed",
-      "category": "Cell Biology",
-      "question_text": "<p>Perhatikan ilustrasi sel berikut.</p><p><img src='https://picsum.photos/seed/cbt-mc-cell/960/420' alt='Ilustrasi sel' /></p><p>Organel yang dikenal sebagai pusat kontrol sel adalah ...</p>",
-      "difficulty_level": "easy",
-      "points": 5,
-      "explanation": "Nukleus menyimpan materi genetik dan mengatur aktivitas sel.",
-      "tags": ["biology", "cells", "embedded-image"],
-      "options": [
-        {"text": "Nukleus", "is_correct": true},
-        {"text": "Mitokondria", "is_correct": false},
-        {"text": "Ribosom", "is_correct": false},
-        {"text": "Lisosom", "is_correct": false}
+      "subject_code": "LAGI",
+      "topics": [
+        {
+          "title": "Feedback",
+          "difficulty": "easy",
+          "summary": "Feedback yang diterima dengan tenang dan ditindaklanjuti dengan aksi nyata mempercepat pembelajaran.",
+          "key_term": "Tindak lanjut",
+          "multiple_choice": {
+            "question": "Saat menerima umpan balik yang tajam, sikap paling tepat adalah ...",
+            "correct_option": "Mendengarkan, mencatat, dan memilih tindak lanjut yang relevan",
+            "wrong_options": [
+              "Langsung defensif",
+              "Mengabaikan semua masukan",
+              "Menyalahkan pemberi feedback"
+            ]
+          },
+          "checkbox": {
+            "question": "Pilih perilaku yang menunjukkan kesiapan menerima feedback.",
+            "correct_options": [
+              "Mendengar aktif",
+              "Meminta contoh konkret",
+              "Membuat rencana perbaikan"
+            ],
+            "wrong_options": [
+              "Memotong pembicaraan terus-menerus"
+            ]
+          },
+          "ordering": {
+            "question": "Urutkan respons sehat terhadap feedback.",
+            "items": [
+              "Dengar dengan tenang",
+              "Pahami inti masukan",
+              "Tentukan tindak lanjut",
+              "Evaluasi perubahan"
+            ]
+          },
+          "matching": {
+            "question": "Pasangkan tindakan dengan manfaat feedback.",
+            "pairs": [
+              {
+                "prompt": "Mendengar aktif",
+                "answer": "Memahami pesan dengan jelas"
+              },
+              {
+                "prompt": "Mencatat masukan",
+                "answer": "Mencegah lupa detail penting"
+              },
+              {
+                "prompt": "Membuat rencana",
+                "answer": "Perbaikan lebih terarah"
+              },
+              {
+                "prompt": "Meninjau hasil",
+                "answer": "Mengukur perkembangan"
+              }
+            ]
+          },
+          "fill_in_blank": {
+            "question": "Feedback yang baik harus diikuti dengan {{1}} nyata agar terjadi {{2}}.",
+            "answers": [
+              {
+                "blank_number": 1,
+                "accepted_answers": [
+                  "tindakan",
+                  "langkah"
+                ],
+                "blank_points": 3
+              },
+              {
+                "blank_number": 2,
+                "accepted_answers": [
+                  "perbaikan"
+                ],
+                "blank_points": 3
+              }
+            ]
+          }
+        },
+        {
+          "title": "Problem Solving",
+          "difficulty": "medium",
+          "summary": "Problem solving yang baik dimulai dari definisi masalah yang jelas dan didukung oleh data yang relevan.",
+          "key_term": "Data",
+          "multiple_choice": {
+            "question": "Saat menghadapi masalah baru, langkah paling awal yang tepat adalah ...",
+            "correct_option": "Memahami masalah sebelum memilih solusi",
+            "wrong_options": [
+              "Langsung mencoba semua hal",
+              "Menyalahkan pihak lain",
+              "Menunggu masalah hilang sendiri"
+            ]
+          },
+          "checkbox": {
+            "question": "Pilih kebiasaan yang mendukung problem solving yang baik.",
+            "correct_options": [
+              "Mengumpulkan fakta",
+              "Membandingkan opsi solusi",
+              "Menguji hasil"
+            ],
+            "wrong_options": [
+              "Membuat keputusan tanpa data"
+            ]
+          },
+          "ordering": {
+            "question": "Urutkan tahapan problem solving.",
+            "items": [
+              "Definisikan masalah",
+              "Kumpulkan data",
+              "Pilih solusi",
+              "Evaluasi hasil"
+            ]
+          },
+          "matching": {
+            "question": "Pasangkan langkah problem solving dengan tujuannya.",
+            "pairs": [
+              {
+                "prompt": "Definisikan masalah",
+                "answer": "Menentukan fokus"
+              },
+              {
+                "prompt": "Kumpulkan data",
+                "answer": "Memahami kondisi nyata"
+              },
+              {
+                "prompt": "Pilih solusi",
+                "answer": "Menentukan tindakan terbaik"
+              },
+              {
+                "prompt": "Evaluasi",
+                "answer": "Mengetahui efektivitas hasil"
+              }
+            ]
+          },
+          "fill_in_blank": {
+            "question": "Pemecahan masalah yang baik dimulai dengan memahami {{1}} dan didukung oleh {{2}}.",
+            "answers": [
+              {
+                "blank_number": 1,
+                "accepted_answers": [
+                  "masalah"
+                ],
+                "blank_points": 3
+              },
+              {
+                "blank_number": 2,
+                "accepted_answers": [
+                  "data",
+                  "fakta"
+                ],
+                "blank_points": 3
+              }
+            ]
+          }
+        },
+        {
+          "title": "Resilience",
+          "difficulty": "medium",
+          "summary": "Resilience membantu seseorang bangkit dari tekanan dan kegagalan tanpa kehilangan arah tujuan.",
+          "key_term": "Resilience",
+          "multiple_choice": {
+            "question": "Ketika gagal pada percobaan pertama, sikap yang paling menunjukkan resilience adalah ...",
+            "correct_option": "Belajar dari kegagalan lalu mencoba lagi dengan strategi lebih baik",
+            "wrong_options": [
+              "Langsung menyerah",
+              "Menyalahkan semua keadaan",
+              "Menghindari tantangan berikutnya"
+            ]
+          },
+          "checkbox": {
+            "question": "Pilih ciri individu yang resilien.",
+            "correct_options": [
+              "Mampu bangkit kembali",
+              "Mau belajar dari kegagalan",
+              "Tetap fokus pada tujuan"
+            ],
+            "wrong_options": [
+              "Menghindari semua risiko"
+            ]
+          },
+          "ordering": {
+            "question": "Urutkan respons resilien setelah mengalami kegagalan.",
+            "items": [
+              "Menenangkan diri",
+              "Mengevaluasi penyebab",
+              "Menyusun perbaikan",
+              "Mencoba kembali"
+            ]
+          },
+          "matching": {
+            "question": "Pasangkan sikap dengan dampak resiliensi.",
+            "pairs": [
+              {
+                "prompt": "Bangkit cepat",
+                "answer": "Waktu pemulihan lebih singkat"
+              },
+              {
+                "prompt": "Belajar dari gagal",
+                "answer": "Strategi membaik"
+              },
+              {
+                "prompt": "Menjaga tujuan",
+                "answer": "Motivasi tetap ada"
+              },
+              {
+                "prompt": "Mengelola emosi",
+                "answer": "Keputusan lebih jernih"
+              }
+            ]
+          },
+          "fill_in_blank": {
+            "question": "Resilience adalah kemampuan untuk bangkit kembali setelah mengalami {{1}} atau {{2}}.",
+            "answers": [
+              {
+                "blank_number": 1,
+                "accepted_answers": [
+                  "kegagalan"
+                ],
+                "blank_points": 3
+              },
+              {
+                "blank_number": 2,
+                "accepted_answers": [
+                  "tekanan",
+                  "tantangan"
+                ],
+                "blank_points": 3
+              }
+            ]
+          }
+        },
+        {
+          "title": "Eksperimen Cepat",
+          "difficulty": "medium",
+          "summary": "Eksperimen cepat membantu tim menguji ide kecil dengan risiko terkendali dan pembelajaran yang cepat.",
+          "key_term": "Hipotesis",
+          "multiple_choice": {
+            "question": "Dalam learning agility, eksperimen cepat berarti ...",
+            "correct_option": "Menguji ide kecil lebih dulu untuk belajar cepat",
+            "wrong_options": [
+              "Mengubah semua sistem sekaligus",
+              "Menunda semua percobaan",
+              "Bekerja tanpa tujuan"
+            ]
+          },
+          "checkbox": {
+            "question": "Pilih prinsip eksperimen cepat yang sehat.",
+            "correct_options": [
+              "Skala kecil",
+              "Ada hipotesis",
+              "Ada evaluasi hasil"
+            ],
+            "wrong_options": [
+              "Mengabaikan risiko sepenuhnya"
+            ]
+          },
+          "ordering": {
+            "question": "Urutkan tahapan eksperimen cepat.",
+            "items": [
+              "Tentukan hipotesis",
+              "Uji pada skala kecil",
+              "Amati hasil",
+              "Putuskan lanjut atau revisi"
+            ]
+          },
+          "matching": {
+            "question": "Pasangkan langkah eksperimen dengan tujuannya.",
+            "pairs": [
+              {
+                "prompt": "Hipotesis",
+                "answer": "Menentukan dugaan awal"
+              },
+              {
+                "prompt": "Uji kecil",
+                "answer": "Mengurangi risiko"
+              },
+              {
+                "prompt": "Observasi",
+                "answer": "Mengumpulkan pembelajaran"
+              },
+              {
+                "prompt": "Revisi",
+                "answer": "Memperbaiki pendekatan"
+              }
+            ]
+          },
+          "fill_in_blank": {
+            "question": "Eksperimen cepat membantu tim belajar lebih {{1}} dengan risiko yang lebih {{2}}.",
+            "answers": [
+              {
+                "blank_number": 1,
+                "accepted_answers": [
+                  "cepat"
+                ],
+                "blank_points": 3
+              },
+              {
+                "blank_number": 2,
+                "accepted_answers": [
+                  "terkendali",
+                  "kecil"
+                ],
+                "blank_points": 3
+              }
+            ]
+          }
+        },
+        {
+          "title": "Kolaborasi di Ambiguitas",
+          "difficulty": "medium",
+          "summary": "Kolaborasi di tengah ambiguitas menuntut penyamaan persepsi, berbagi informasi, dan prioritas sementara yang jelas.",
+          "key_term": "Persepsi",
+          "multiple_choice": {
+            "question": "Ketika informasi belum lengkap, cara kerja terbaik adalah ...",
+            "correct_option": "Berkoordinasi, menyepakati asumsi kerja, dan memperbarui informasi secara berkala",
+            "wrong_options": [
+              "Bekerja sendiri tanpa komunikasi",
+              "Menunggu semua sempurna",
+              "Mengambil keputusan tanpa melibatkan tim"
+            ]
+          },
+          "checkbox": {
+            "question": "Pilih perilaku yang membantu kolaborasi saat kondisi ambigu.",
+            "correct_options": [
+              "Menyamakan pemahaman",
+              "Berbagi informasi terbaru",
+              "Menetapkan prioritas sementara"
+            ],
+            "wrong_options": [
+              "Menyimpan informasi penting sendiri"
+            ]
+          },
+          "ordering": {
+            "question": "Urutkan langkah kolaborasi saat situasi belum jelas.",
+            "items": [
+              "Kumpulkan informasi awal",
+              "Samakan persepsi",
+              "Tentukan langkah sementara",
+              "Tinjau ulang saat data bertambah"
+            ]
+          },
+          "matching": {
+            "question": "Pasangkan perilaku dengan manfaat kolaborasi di situasi ambigu.",
+            "pairs": [
+              {
+                "prompt": "Menyamakan persepsi",
+                "answer": "Mengurangi salah arah"
+              },
+              {
+                "prompt": "Update berkala",
+                "answer": "Tim tetap relevan"
+              },
+              {
+                "prompt": "Prioritas sementara",
+                "answer": "Pekerjaan tetap bergerak"
+              },
+              {
+                "prompt": "Berbagi informasi",
+                "answer": "Keputusan lebih kuat"
+              }
+            ]
+          },
+          "fill_in_blank": {
+            "question": "Saat informasi belum lengkap, tim perlu menyamakan {{1}} dan membuat prioritas {{2}}.",
+            "answers": [
+              {
+                "blank_number": 1,
+                "accepted_answers": [
+                  "persepsi",
+                  "pemahaman"
+                ],
+                "blank_points": 3
+              },
+              {
+                "blank_number": 2,
+                "accepted_answers": [
+                  "sementara"
+                ],
+                "blank_points": 3
+              }
+            ]
+          }
+        }
       ]
     },
     {
-      "subject_code": "PHYS",
-      "teacher_username": "michael.reed",
-      "category": "Waves",
-      "question_text": "<p>Dengarkan klip audio contoh berikut untuk uji rich media.</p><p><audio controls src='https://www.w3schools.com/html/horse.mp3'></audio></p><p>Besaran yang menyatakan banyaknya getaran tiap detik disebut ...</p>",
-      "difficulty_level": "medium",
-      "points": 5,
-      "audio_play_limit": 2,
-      "explanation": "Banyaknya getaran tiap detik disebut frekuensi.",
-      "tags": ["physics", "waves", "audio"],
-      "options": [
-        {"text": "Amplitudo", "is_correct": false},
-        {"text": "Frekuensi", "is_correct": true},
-        {"text": "Periode", "is_correct": false},
-        {"text": "Resonansi", "is_correct": false}
+      "subject_code": "SKB-KOM",
+      "topics": [
+        {
+          "title": "Perangkat Keras",
+          "difficulty": "easy",
+          "summary": "Perangkat keras komputer mencakup komponen pemrosesan, input, output, memori, dan penyimpanan.",
+          "key_term": "CPU",
+          "multiple_choice": {
+            "question": "Komponen yang berfungsi memproses instruksi utama komputer adalah ...",
+            "correct_option": "CPU",
+            "wrong_options": [
+              "Monitor",
+              "Keyboard",
+              "Printer"
+            ]
+          },
+          "checkbox": {
+            "question": "Pilih perangkat yang termasuk hardware input.",
+            "correct_options": [
+              "Keyboard",
+              "Mouse",
+              "Scanner"
+            ],
+            "wrong_options": [
+              "Speaker"
+            ]
+          },
+          "ordering": {
+            "question": "Urutkan alur sederhana penggunaan perangkat input sampai hasil tampil di layar.",
+            "items": [
+              "Input diterima",
+              "Data diproses CPU",
+              "Hasil dikirim ke sistem tampilan",
+              "Output tampil di monitor"
+            ]
+          },
+          "matching": {
+            "question": "Pasangkan komponen komputer dengan fungsinya.",
+            "pairs": [
+              {
+                "prompt": "CPU",
+                "answer": "Memproses instruksi"
+              },
+              {
+                "prompt": "RAM",
+                "answer": "Menyimpan data sementara"
+              },
+              {
+                "prompt": "SSD",
+                "answer": "Menyimpan data permanen"
+              },
+              {
+                "prompt": "Monitor",
+                "answer": "Menampilkan output"
+              }
+            ]
+          },
+          "fill_in_blank": {
+            "question": "CPU sering disebut sebagai {{1}} komputer karena menjadi pusat {{2}}.",
+            "answers": [
+              {
+                "blank_number": 1,
+                "accepted_answers": [
+                  "otak"
+                ],
+                "blank_points": 3
+              },
+              {
+                "blank_number": 2,
+                "accepted_answers": [
+                  "pemrosesan",
+                  "proses"
+                ],
+                "blank_points": 3
+              }
+            ]
+          }
+        },
+        {
+          "title": "Jaringan Dasar",
+          "difficulty": "medium",
+          "summary": "Jaringan dasar membahas perangkat LAN, alamat IP, router, switch, dan aliran data ke internet.",
+          "key_term": "Router",
+          "multiple_choice": {
+            "question": "Perangkat yang menghubungkan jaringan lokal dengan internet adalah ...",
+            "correct_option": "Router",
+            "wrong_options": [
+              "UPS",
+              "Webcam",
+              "Keyboard"
+            ]
+          },
+          "checkbox": {
+            "question": "Pilih komponen yang umum dipakai dalam jaringan komputer.",
+            "correct_options": [
+              "Router",
+              "Switch",
+              "Kabel LAN"
+            ],
+            "wrong_options": [
+              "Flashdisk sebagai perangkat jaringan utama"
+            ]
+          },
+          "ordering": {
+            "question": "Urutkan alur sederhana data dari komputer menuju internet.",
+            "items": [
+              "Komputer klien",
+              "Switch/akses lokal",
+              "Router",
+              "Internet"
+            ]
+          },
+          "matching": {
+            "question": "Pasangkan istilah jaringan dengan fungsinya.",
+            "pairs": [
+              {
+                "prompt": "IP address",
+                "answer": "Identitas perangkat di jaringan"
+              },
+              {
+                "prompt": "Router",
+                "answer": "Menghubungkan jaringan berbeda"
+              },
+              {
+                "prompt": "Switch",
+                "answer": "Menghubungkan perangkat dalam LAN"
+              },
+              {
+                "prompt": "Bandwidth",
+                "answer": "Kapasitas aliran data"
+              }
+            ]
+          },
+          "fill_in_blank": {
+            "question": "Setiap perangkat di jaringan memiliki alamat yang disebut {{1}} address.",
+            "answers": [
+              {
+                "blank_number": 1,
+                "accepted_answers": [
+                  "IP",
+                  "ip"
+                ],
+                "blank_points": 6
+              }
+            ]
+          }
+        },
+        {
+          "title": "Sistem Operasi",
+          "difficulty": "easy",
+          "summary": "Sistem operasi mengatur memori, proses, file, dan interaksi antara aplikasi dengan perangkat keras.",
+          "key_term": "Sistem operasi",
+          "multiple_choice": {
+            "question": "Fungsi utama sistem operasi adalah ...",
+            "correct_option": "Mengelola perangkat keras dan menjalankan aplikasi",
+            "wrong_options": [
+              "Menjadi kabel penghubung",
+              "Mencetak dokumen manual",
+              "Menggantikan perangkat input"
+            ]
+          },
+          "checkbox": {
+            "question": "Pilih tugas yang dilakukan sistem operasi.",
+            "correct_options": [
+              "Mengatur memori",
+              "Mengelola file",
+              "Mengendalikan proses"
+            ],
+            "wrong_options": [
+              "Menjadi perangkat fisik penyimpan data"
+            ]
+          },
+          "ordering": {
+            "question": "Urutkan proses dasar ketika aplikasi dijalankan.",
+            "items": [
+              "Pengguna membuka aplikasi",
+              "Sistem operasi memanggil file program",
+              "Memori dan proses dialokasikan",
+              "Aplikasi berjalan"
+            ]
+          },
+          "matching": {
+            "question": "Pasangkan istilah sistem operasi dengan fungsinya.",
+            "pairs": [
+              {
+                "prompt": "File system",
+                "answer": "Mengatur struktur penyimpanan"
+              },
+              {
+                "prompt": "Process",
+                "answer": "Program yang sedang berjalan"
+              },
+              {
+                "prompt": "Memory management",
+                "answer": "Mengatur penggunaan RAM"
+              },
+              {
+                "prompt": "User interface",
+                "answer": "Sarana interaksi pengguna"
+              }
+            ]
+          },
+          "fill_in_blank": {
+            "question": "Windows dan Linux adalah contoh {{1}} operasi.",
+            "answers": [
+              {
+                "blank_number": 1,
+                "accepted_answers": [
+                  "sistem"
+                ],
+                "blank_points": 6
+              }
+            ]
+          }
+        },
+        {
+          "title": "Database Dasar",
+          "difficulty": "medium",
+          "summary": "Database relasional menyimpan data dalam tabel, record, field, dan memakai query untuk mengolah informasi.",
+          "key_term": "Database",
+          "multiple_choice": {
+            "question": "Kumpulan data terstruktur yang dikelola secara sistematis disebut ...",
+            "correct_option": "Database",
+            "wrong_options": [
+              "Browser",
+              "Firewall",
+              "Processor"
+            ]
+          },
+          "checkbox": {
+            "question": "Pilih komponen yang umum ada dalam database relasional.",
+            "correct_options": [
+              "Tabel",
+              "Kolom",
+              "Primary key"
+            ],
+            "wrong_options": [
+              "Speaker"
+            ]
+          },
+          "ordering": {
+            "question": "Urutkan alur sederhana pengolahan data dalam database.",
+            "items": [
+              "Input data",
+              "Simpan ke tabel",
+              "Query saat dibutuhkan",
+              "Tampilkan hasil"
+            ]
+          },
+          "matching": {
+            "question": "Pasangkan istilah database dengan maknanya.",
+            "pairs": [
+              {
+                "prompt": "Record",
+                "answer": "Satu baris data"
+              },
+              {
+                "prompt": "Field",
+                "answer": "Satu kolom informasi"
+              },
+              {
+                "prompt": "Primary key",
+                "answer": "Identitas unik data"
+              },
+              {
+                "prompt": "Query",
+                "answer": "Permintaan pengambilan atau olah data"
+              }
+            ]
+          },
+          "fill_in_blank": {
+            "question": "Perintah SQL untuk mengambil data dari tabel adalah {{1}}.",
+            "answers": [
+              {
+                "blank_number": 1,
+                "accepted_answers": [
+                  "SELECT",
+                  "select"
+                ],
+                "blank_points": 6
+              }
+            ]
+          }
+        },
+        {
+          "title": "Keamanan Informasi",
+          "difficulty": "medium",
+          "summary": "Keamanan informasi menuntut password kuat, autentikasi tambahan, update sistem, dan kewaspadaan terhadap phishing.",
+          "key_term": "Phishing",
+          "multiple_choice": {
+            "question": "Langkah paling dasar untuk menjaga akun tetap aman adalah ...",
+            "correct_option": "Menggunakan kata sandi kuat dan unik",
+            "wrong_options": [
+              "Membagikan password ke rekan",
+              "Menulis password di meja",
+              "Memakai password sama di semua akun"
+            ]
+          },
+          "checkbox": {
+            "question": "Pilih praktik yang mendukung keamanan informasi.",
+            "correct_options": [
+              "Mengaktifkan autentikasi dua faktor",
+              "Memperbarui perangkat lunak",
+              "Waspada terhadap phishing"
+            ],
+            "wrong_options": [
+              "Mengklik tautan asing tanpa verifikasi"
+            ]
+          },
+          "ordering": {
+            "question": "Urutkan respons saat menerima email mencurigakan.",
+            "items": [
+              "Periksa pengirim",
+              "Jangan klik tautan",
+              "Laporkan ke tim IT",
+              "Hapus jika terbukti phishing"
+            ]
+          },
+          "matching": {
+            "question": "Pasangkan istilah keamanan dengan pengertiannya.",
+            "pairs": [
+              {
+                "prompt": "Phishing",
+                "answer": "Upaya menipu agar korban memberi data sensitif"
+              },
+              {
+                "prompt": "2FA",
+                "answer": "Lapisan verifikasi tambahan"
+              },
+              {
+                "prompt": "Malware",
+                "answer": "Perangkat lunak berbahaya"
+              },
+              {
+                "prompt": "Enkripsi",
+                "answer": "Mengubah data agar tidak mudah dibaca pihak lain"
+              }
+            ]
+          },
+          "fill_in_blank": {
+            "question": "Verifikasi tambahan setelah password dikenal sebagai {{1}} faktor authentication.",
+            "answers": [
+              {
+                "blank_number": 1,
+                "accepted_answers": [
+                  "dua",
+                  "2",
+                  "two"
+                ],
+                "blank_points": 6
+              }
+            ]
+          }
+        }
       ]
     },
     {
-      "subject_code": "CS",
-      "teacher_username": "sophia.bennett",
-      "category": "Algorithms",
-      "question_text": "<p>Tonton klip video contoh berikut untuk menguji pemutar video.</p><p><video controls width='480' height='270'><source src='https://www.w3schools.com/html/mov_bbb.mp4' type='video/mp4'></video></p><p>Representasi langkah-langkah logis yang sering divisualkan dengan simbol dan panah disebut ...</p>",
-      "difficulty_level": "easy",
-      "points": 5,
-      "video_play_limit": 1,
-      "explanation": "Diagram alir atau flowchart dipakai untuk memvisualkan langkah algoritmik.",
-      "tags": ["computer-science", "algorithms", "video"],
-      "options": [
-        {"text": "Flowchart", "is_correct": true},
-        {"text": "Compiler", "is_correct": false},
-        {"text": "Database", "is_correct": false},
-        {"text": "Firewall", "is_correct": false}
+      "subject_code": "TIU",
+      "topics": [
+        {
+          "title": "Analogi Verbal",
+          "difficulty": "easy",
+          "summary": "Analogi verbal menilai kemampuan menemukan hubungan setara antar kata atau konsep.",
+          "key_term": "Analogi verbal",
+          "multiple_choice": {
+            "question": "Dokter : pasien = guru : ...",
+            "correct_option": "Murid",
+            "wrong_options": [
+              "Sekolah",
+              "Pelajaran",
+              "Buku"
+            ]
+          },
+          "checkbox": {
+            "question": "Pilih pasangan kata yang memiliki hubungan profesi dengan objek layanan.",
+            "correct_options": [
+              "Dokter - pasien",
+              "Hakim - perkara",
+              "Arsitek - bangunan"
+            ],
+            "wrong_options": [
+              "Meja - kursi"
+            ]
+          },
+          "ordering": {
+            "question": "Urutkan proses memahami soal analogi secara logis.",
+            "items": [
+              "Baca pasangan awal",
+              "Temukan hubungan",
+              "Uji hubungan pada pilihan",
+              "Pilih jawaban paling setara"
+            ]
+          },
+          "matching": {
+            "question": "Pasangkan pasangan kata dengan jenis relasinya.",
+            "pairs": [
+              {
+                "prompt": "Dokter - pasien",
+                "answer": "Profesi dengan objek layanan"
+              },
+              {
+                "prompt": "Pensil - menulis",
+                "answer": "Alat dan fungsi"
+              },
+              {
+                "prompt": "Ayam - unggas",
+                "answer": "Anggota dan kelompok"
+              },
+              {
+                "prompt": "Januari - Februari",
+                "answer": "Urutan waktu"
+              }
+            ]
+          },
+          "fill_in_blank": {
+            "question": "Dalam analogi, kita mencari hubungan antara pasangan awal lalu menerapkannya ke {{1}} jawaban.",
+            "answers": [
+              {
+                "blank_number": 1,
+                "accepted_answers": [
+                  "pilihan"
+                ],
+                "blank_points": 6
+              }
+            ]
+          }
+        },
+        {
+          "title": "Deret Angka",
+          "difficulty": "medium",
+          "summary": "Deret angka menguji kemampuan mengenali pola selisih, rasio, atau pola campuran secara cepat.",
+          "key_term": "Deret angka",
+          "multiple_choice": {
+            "question": "Tentukan angka berikutnya dari deret 2, 4, 8, 16, ...",
+            "correct_option": "32",
+            "wrong_options": [
+              "20",
+              "24",
+              "30"
+            ]
+          },
+          "checkbox": {
+            "question": "Pilih pola yang dapat digunakan untuk membaca deret angka.",
+            "correct_options": [
+              "Penjumlahan tetap",
+              "Perkalian tetap",
+              "Pola selang-seling"
+            ],
+            "wrong_options": [
+              "Menebak tanpa pola"
+            ]
+          },
+          "ordering": {
+            "question": "Urutkan langkah analisis deret angka.",
+            "items": [
+              "Amati selisih",
+              "Amati rasio",
+              "Periksa pola bergantian",
+              "Tentukan suku berikutnya"
+            ]
+          },
+          "matching": {
+            "question": "Pasangkan deret dengan pola utamanya.",
+            "pairs": [
+              {
+                "prompt": "2, 4, 6, 8",
+                "answer": "Tambah 2"
+              },
+              {
+                "prompt": "3, 6, 12, 24",
+                "answer": "Kali 2"
+              },
+              {
+                "prompt": "1, 4, 9, 16",
+                "answer": "Kuadrat bilangan"
+              },
+              {
+                "prompt": "5, 8, 11, 14",
+                "answer": "Tambah 3"
+              }
+            ]
+          },
+          "fill_in_blank": {
+            "question": "Pada deret 3, 6, 12, 24, setiap suku diperoleh dengan mengalikan {{1}}.",
+            "answers": [
+              {
+                "blank_number": 1,
+                "accepted_answers": [
+                  "2",
+                  "dua"
+                ],
+                "blank_points": 6
+              }
+            ]
+          }
+        },
+        {
+          "title": "Silogisme",
+          "difficulty": "medium",
+          "summary": "Silogisme menuntut peserta menarik kesimpulan yang pasti dari premis tanpa menambah asumsi baru.",
+          "key_term": "Silogisme",
+          "multiple_choice": {
+            "question": "Semua pegawai disiplin. Sebagian peserta adalah pegawai. Kesimpulan yang pasti adalah ...",
+            "correct_option": "Sebagian peserta disiplin",
+            "wrong_options": [
+              "Semua peserta disiplin",
+              "Tidak ada peserta disiplin",
+              "Semua pegawai adalah peserta"
+            ]
+          },
+          "checkbox": {
+            "question": "Pilih pernyataan yang perlu diperhatikan saat menyelesaikan silogisme.",
+            "correct_options": [
+              "Premis mayor",
+              "Premis minor",
+              "Kepastian kesimpulan"
+            ],
+            "wrong_options": [
+              "Asumsi di luar premis"
+            ]
+          },
+          "ordering": {
+            "question": "Urutkan langkah menyelesaikan silogisme.",
+            "items": [
+              "Baca semua premis",
+              "Tandai hubungan himpunan",
+              "Uji setiap kesimpulan pada premis",
+              "Pilih kesimpulan yang pasti"
+            ]
+          },
+          "matching": {
+            "question": "Pasangkan istilah silogisme dengan maknanya.",
+            "pairs": [
+              {
+                "prompt": "Premis",
+                "answer": "Pernyataan dasar"
+              },
+              {
+                "prompt": "Kesimpulan",
+                "answer": "Hasil logis dari premis"
+              },
+              {
+                "prompt": "Pasti",
+                "answer": "Harus benar jika premis benar"
+              },
+              {
+                "prompt": "Asumsi",
+                "answer": "Tambahan yang tidak boleh dipakai"
+              }
+            ]
+          },
+          "fill_in_blank": {
+            "question": "Dalam silogisme, kesimpulan yang sah harus didasarkan hanya pada {{1}} yang diberikan.",
+            "answers": [
+              {
+                "blank_number": 1,
+                "accepted_answers": [
+                  "premis"
+                ],
+                "blank_points": 6
+              }
+            ]
+          }
+        },
+        {
+          "title": "Aritmetika Kerja",
+          "difficulty": "medium",
+          "summary": "Soal kerja menguji pemahaman laju kerja, kapasitas gabungan, dan hubungan terbalik antara pekerja dan waktu.",
+          "key_term": "Laju kerja",
+          "multiple_choice": {
+            "question": "Jika 1 tim menyelesaikan 1 paket dalam 5 hari, maka 2 tim dengan kecepatan sama memerlukan ...",
+            "correct_option": "2,5 hari",
+            "wrong_options": [
+              "3 hari",
+              "4 hari",
+              "5 hari"
+            ]
+          },
+          "checkbox": {
+            "question": "Pilih konsep yang relevan untuk soal kerja dan waktu.",
+            "correct_options": [
+              "Laju kerja",
+              "Perbandingan terbalik",
+              "Satuan waktu konsisten"
+            ],
+            "wrong_options": [
+              "Menjumlahkan hari tanpa menghitung kapasitas"
+            ]
+          },
+          "ordering": {
+            "question": "Urutkan cara menyelesaikan soal kerja bersama.",
+            "items": [
+              "Tentukan laju kerja tiap pihak",
+              "Jumlahkan laju kerja",
+              "Hitung total waktu",
+              "Periksa kembali satuan"
+            ]
+          },
+          "matching": {
+            "question": "Pasangkan istilah dengan perannya dalam soal kerja.",
+            "pairs": [
+              {
+                "prompt": "Laju kerja",
+                "answer": "Bagian pekerjaan per satuan waktu"
+              },
+              {
+                "prompt": "Waktu",
+                "answer": "Lamanya proses"
+              },
+              {
+                "prompt": "Pekerjaan total",
+                "answer": "Target yang harus selesai"
+              },
+              {
+                "prompt": "Kerja bersama",
+                "answer": "Penjumlahan kapasitas"
+              }
+            ]
+          },
+          "fill_in_blank": {
+            "question": "Semakin banyak tim dengan kemampuan sama, waktu yang dibutuhkan cenderung semakin {{1}}.",
+            "answers": [
+              {
+                "blank_number": 1,
+                "accepted_answers": [
+                  "singkat",
+                  "cepat"
+                ],
+                "blank_points": 6
+              }
+            ]
+          }
+        },
+        {
+          "title": "Penalaran Diagram",
+          "difficulty": "medium",
+          "summary": "Penalaran diagram menguji kemampuan membaca tabel, grafik, satuan angka, dan menarik kesimpulan numerik.",
+          "key_term": "Diagram",
+          "multiple_choice": {
+            "question": "Jika grafik batang menunjukkan kenaikan peserta dari 120 menjadi 150, maka selisihnya adalah ...",
+            "correct_option": "30",
+            "wrong_options": [
+              "20",
+              "25",
+              "35"
+            ]
+          },
+          "checkbox": {
+            "question": "Pilih hal yang perlu dibaca pada diagram sebelum menyimpulkan jawaban.",
+            "correct_options": [
+              "Judul diagram",
+              "Satuan angka",
+              "Perbandingan antar data"
+            ],
+            "wrong_options": [
+              "Warna favorit pembuat diagram"
+            ]
+          },
+          "ordering": {
+            "question": "Urutkan tahapan membaca diagram secara cepat.",
+            "items": [
+              "Baca judul",
+              "Periksa sumbu atau legenda",
+              "Bandingkan nilai",
+              "Tarik kesimpulan"
+            ]
+          },
+          "matching": {
+            "question": "Pasangkan komponen diagram dengan fungsinya.",
+            "pairs": [
+              {
+                "prompt": "Judul",
+                "answer": "Menjelaskan topik data"
+              },
+              {
+                "prompt": "Legenda",
+                "answer": "Menjelaskan arti simbol atau warna"
+              },
+              {
+                "prompt": "Sumbu",
+                "answer": "Menunjukkan ukuran dan kategori"
+              },
+              {
+                "prompt": "Batang",
+                "answer": "Mewakili besar data"
+              }
+            ]
+          },
+          "fill_in_blank": {
+            "question": "Saat membaca grafik, perhatikan selalu {{1}} angka agar tidak salah menafsirkan data.",
+            "answers": [
+              {
+                "blank_number": 1,
+                "accepted_answers": [
+                  "satuan"
+                ],
+                "blank_points": 6
+              }
+            ]
+          }
+        }
       ]
     },
     {
-      "subject_code": "USHIST",
-      "teacher_username": "sophia.bennett",
-      "category": "Colonial America",
-      "question_text": "<p>Perhatikan tabel berikut.</p><table><tr><th>Act</th><th>Year</th></tr><tr><td>Stamp Act</td><td>1765</td></tr><tr><td>Tea Act</td><td>1773</td></tr><tr><td>Intolerable Acts</td><td>1774</td></tr></table><p>Undang-undang manakah yang muncul paling awal?</p>",
-      "difficulty_level": "easy",
-      "points": 5,
-      "explanation": "Stamp Act dikeluarkan pada tahun 1765, lebih awal daripada dua kebijakan lainnya.",
-      "tags": ["history", "colonial", "table"],
-      "options": [
-        {"text": "Tea Act", "is_correct": false},
-        {"text": "Intolerable Acts", "is_correct": false},
-        {"text": "Stamp Act", "is_correct": true},
-        {"text": "Bill of Rights", "is_correct": false}
+      "subject_code": "TKD-LOG",
+      "topics": [
+        {
+          "title": "Silogisme Dasar",
+          "difficulty": "easy",
+          "summary": "Silogisme dasar menekankan kesimpulan yang sah hanya berasal dari premis yang tersedia.",
+          "key_term": "Premis",
+          "multiple_choice": {
+            "question": "Semua supervisor teliti. Budi adalah supervisor. Maka Budi ...",
+            "correct_option": "Teliti",
+            "wrong_options": [
+              "Tidak teliti",
+              "Belum tentu teliti",
+              "Bukan supervisor"
+            ]
+          },
+          "checkbox": {
+            "question": "Pilih unsur utama pada penalaran logika silogistik.",
+            "correct_options": [
+              "Premis",
+              "Hubungan himpunan",
+              "Kesimpulan pasti"
+            ],
+            "wrong_options": [
+              "Dugaan pribadi"
+            ]
+          },
+          "ordering": {
+            "question": "Urutkan tahapan membaca silogisme.",
+            "items": [
+              "Baca premis",
+              "Petakan hubungan",
+              "Uji kemungkinan kesimpulan",
+              "Ambil yang pasti benar"
+            ]
+          },
+          "matching": {
+            "question": "Pasangkan istilah dengan fungsi dalam silogisme.",
+            "pairs": [
+              {
+                "prompt": "Premis",
+                "answer": "Pernyataan awal"
+              },
+              {
+                "prompt": "Kesimpulan",
+                "answer": "Hasil logis"
+              },
+              {
+                "prompt": "Pasti",
+                "answer": "Harus benar"
+              },
+              {
+                "prompt": "Asumsi",
+                "answer": "Tambahan yang tidak boleh dipakai"
+              }
+            ]
+          },
+          "fill_in_blank": {
+            "question": "Kesimpulan logis harus bersumber dari {{1}} yang tersedia.",
+            "answers": [
+              {
+                "blank_number": 1,
+                "accepted_answers": [
+                  "premis"
+                ],
+                "blank_points": 6
+              }
+            ]
+          }
+        },
+        {
+          "title": "Sebab Akibat",
+          "difficulty": "medium",
+          "summary": "Sebab akibat membantu mengidentifikasi akar masalah dan konsekuensi langsung dari suatu peristiwa.",
+          "key_term": "Penyebab utama",
+          "multiple_choice": {
+            "question": "Jika keterlambatan data menyebabkan laporan terlambat, maka cara mencegahnya adalah ...",
+            "correct_option": "Memastikan data dikirim tepat waktu",
+            "wrong_options": [
+              "Mengabaikan jadwal",
+              "Menunda validasi",
+              "Meniadakan laporan"
+            ]
+          },
+          "checkbox": {
+            "question": "Pilih pernyataan yang menunjukkan hubungan sebab-akibat.",
+            "correct_options": [
+              "Data terlambat membuat analisis tertunda",
+              "Listrik padam menyebabkan server mati",
+              "Kurang koordinasi memicu duplikasi kerja"
+            ],
+            "wrong_options": [
+              "Data dan komputer sama-sama penting"
+            ]
+          },
+          "ordering": {
+            "question": "Urutkan cara menganalisis hubungan sebab-akibat.",
+            "items": [
+              "Identifikasi kejadian",
+              "Cari penyebab utama",
+              "Lihat akibat langsung",
+              "Tentukan tindakan pencegahan"
+            ]
+          },
+          "matching": {
+            "question": "Pasangkan sebab dengan akibat yang paling tepat.",
+            "pairs": [
+              {
+                "prompt": "Server down",
+                "answer": "Akses aplikasi terhenti"
+              },
+              {
+                "prompt": "Data terlambat",
+                "answer": "Laporan mundur"
+              },
+              {
+                "prompt": "Koordinasi lemah",
+                "answer": "Pekerjaan tumpang tindih"
+              },
+              {
+                "prompt": "Instruksi tidak jelas",
+                "answer": "Eksekusi berbeda-beda"
+              }
+            ]
+          },
+          "fill_in_blank": {
+            "question": "Dalam logika sebab-akibat, kita perlu membedakan mana yang menjadi {{1}} dan mana yang menjadi {{2}}.",
+            "answers": [
+              {
+                "blank_number": 1,
+                "accepted_answers": [
+                  "sebab"
+                ],
+                "blank_points": 3
+              },
+              {
+                "blank_number": 2,
+                "accepted_answers": [
+                  "akibat"
+                ],
+                "blank_points": 3
+              }
+            ]
+          }
+        },
+        {
+          "title": "Inferensi",
+          "difficulty": "medium",
+          "summary": "Inferensi yang baik dibangun dari fakta, bukan asumsi liar, dan tetap selaras dengan konteks informasi.",
+          "key_term": "Fakta",
+          "multiple_choice": {
+            "question": "Dari pernyataan 'Seluruh tiket ludes sebelum pukul 10', inferensi yang tepat adalah ...",
+            "correct_option": "Setelah pukul 10 tidak ada tiket tersisa",
+            "wrong_options": [
+              "Semua pembeli datang pagi",
+              "Tiket dijual gratis",
+              "Penjualan dibuka setelah pukul 10"
+            ]
+          },
+          "checkbox": {
+            "question": "Pilih prinsip yang benar saat membuat inferensi.",
+            "correct_options": [
+              "Berdasar informasi tersedia",
+              "Tidak menambah asumsi liar",
+              "Menjaga konsistensi makna"
+            ],
+            "wrong_options": [
+              "Membuat cerita tambahan di luar teks"
+            ]
+          },
+          "ordering": {
+            "question": "Urutkan cara menarik inferensi dari pernyataan.",
+            "items": [
+              "Baca fakta utama",
+              "Pahami makna implisit",
+              "Uji kesimpulan pada fakta",
+              "Pilih inferensi paling wajar"
+            ]
+          },
+          "matching": {
+            "question": "Pasangkan istilah dengan maknanya pada penalaran inferensi.",
+            "pairs": [
+              {
+                "prompt": "Fakta",
+                "answer": "Informasi yang tertulis"
+              },
+              {
+                "prompt": "Inferensi",
+                "answer": "Kesimpulan yang ditarik dari fakta"
+              },
+              {
+                "prompt": "Implisit",
+                "answer": "Tidak tertulis langsung"
+              },
+              {
+                "prompt": "Asumsi",
+                "answer": "Dugaan tambahan"
+              }
+            ]
+          },
+          "fill_in_blank": {
+            "question": "Inferensi yang baik tetap harus selaras dengan {{1}} yang diketahui.",
+            "answers": [
+              {
+                "blank_number": 1,
+                "accepted_answers": [
+                  "fakta"
+                ],
+                "blank_points": 6
+              }
+            ]
+          }
+        },
+        {
+          "title": "Kondisional",
+          "difficulty": "medium",
+          "summary": "Pernyataan kondisional membantu melihat hubungan antara syarat dan konsekuensi secara sistematis.",
+          "key_term": "Syarat",
+          "multiple_choice": {
+            "question": "Jika sistem aktif maka laporan dapat diunduh. Sistem aktif. Kesimpulan yang benar adalah ...",
+            "correct_option": "Laporan dapat diunduh",
+            "wrong_options": [
+              "Laporan pasti gagal diunduh",
+              "Sistem tidak aktif",
+              "Laporan tidak ada"
+            ]
+          },
+          "checkbox": {
+            "question": "Pilih bentuk pernyataan kondisional yang benar.",
+            "correct_options": [
+              "Jika A maka B",
+              "A terjadi sehingga B bisa terjadi",
+              "Bergantung pada syarat tertentu"
+            ],
+            "wrong_options": [
+              "A dan B pasti tidak berhubungan"
+            ]
+          },
+          "ordering": {
+            "question": "Urutkan cara memeriksa logika 'jika-maka'.",
+            "items": [
+              "Identifikasi syarat",
+              "Identifikasi akibat",
+              "Cek apakah syarat terpenuhi",
+              "Tarik kesimpulan"
+            ]
+          },
+          "matching": {
+            "question": "Pasangkan komponen pernyataan kondisional dengan perannya.",
+            "pairs": [
+              {
+                "prompt": "Jika",
+                "answer": "Syarat"
+              },
+              {
+                "prompt": "Maka",
+                "answer": "Akibat"
+              },
+              {
+                "prompt": "Syarat terpenuhi",
+                "answer": "Akibat boleh disimpulkan"
+              },
+              {
+                "prompt": "Syarat tidak terpenuhi",
+                "answer": "Akibat belum tentu terjadi"
+              }
+            ]
+          },
+          "fill_in_blank": {
+            "question": "Pada logika kondisional, bagian sebelum kata 'maka' disebut {{1}}.",
+            "answers": [
+              {
+                "blank_number": 1,
+                "accepted_answers": [
+                  "syarat",
+                  "premis"
+                ],
+                "blank_points": 6
+              }
+            ]
+          }
+        },
+        {
+          "title": "Konsistensi Argumen",
+          "difficulty": "medium",
+          "summary": "Konsistensi argumen terlihat saat alasan, istilah, dan kesimpulan tidak saling bertentangan.",
+          "key_term": "Kontradiksi",
+          "multiple_choice": {
+            "question": "Argumen disebut konsisten jika ...",
+            "correct_option": "Antarpernyataannya tidak saling bertentangan",
+            "wrong_options": [
+              "Memakai kata sulit",
+              "Selalu panjang",
+              "Memiliki banyak opini"
+            ]
+          },
+          "checkbox": {
+            "question": "Pilih ciri argumen yang konsisten.",
+            "correct_options": [
+              "Pernyataan saling mendukung",
+              "Kesimpulan sesuai alasan",
+              "Tidak bertentangan dengan premis"
+            ],
+            "wrong_options": [
+              "Mengubah definisi di tengah pembahasan"
+            ]
+          },
+          "ordering": {
+            "question": "Urutkan langkah memeriksa konsistensi argumen.",
+            "items": [
+              "Baca semua pernyataan",
+              "Cari kemungkinan pertentangan",
+              "Uji hubungan alasan dan kesimpulan",
+              "Putuskan konsisten atau tidak"
+            ]
+          },
+          "matching": {
+            "question": "Pasangkan istilah dengan maknanya pada evaluasi argumen.",
+            "pairs": [
+              {
+                "prompt": "Argumen",
+                "answer": "Rangkaian alasan dan kesimpulan"
+              },
+              {
+                "prompt": "Konsisten",
+                "answer": "Tidak saling bertentangan"
+              },
+              {
+                "prompt": "Premis",
+                "answer": "Alasan yang dipakai"
+              },
+              {
+                "prompt": "Kontradiksi",
+                "answer": "Pertentangan isi pernyataan"
+              }
+            ]
+          },
+          "fill_in_blank": {
+            "question": "Argumen yang baik harus memiliki alasan yang {{1}} dengan kesimpulan.",
+            "answers": [
+              {
+                "blank_number": 1,
+                "accepted_answers": [
+                  "selaras",
+                  "konsisten"
+                ],
+                "blank_points": 6
+              }
+            ]
+          }
+        }
       ]
     },
     {
-      "subject_code": "CHEM",
-      "teacher_username": "michael.reed",
-      "category": "Atomic Structure",
-      "question_text": "<p>Lihat diagram atom sederhana berikut lalu tentukan nomor atom oksigen.</p>",
-      "question_image_url": "https://picsum.photos/seed/cbt-mc-oxygen/960/540",
-      "difficulty_level": "easy",
-      "points": 5,
-      "explanation": "Nomor atom menyatakan jumlah proton. Oksigen memiliki 8 proton.",
-      "tags": ["chemistry", "atoms", "image"],
-      "options": [
-        {"text": "6", "is_correct": false},
-        {"text": "7", "is_correct": false},
-        {"text": "8", "is_correct": true},
-        {"text": "9", "is_correct": false}
+      "subject_code": "TKD-NUM",
+      "topics": [
+        {
+          "title": "Persentase",
+          "difficulty": "easy",
+          "summary": "Persentase menilai kemampuan mengubah persen ke pecahan atau desimal dan menghitung nilai bagiannya.",
+          "key_term": "Persentase",
+          "multiple_choice": {
+            "question": "25% dari 200 adalah ...",
+            "correct_option": "50",
+            "wrong_options": [
+              "25",
+              "40",
+              "75"
+            ]
+          },
+          "checkbox": {
+            "question": "Pilih bentuk lain yang setara dengan 25%.",
+            "correct_options": [
+              "1/4",
+              "0,25",
+              "25 per 100"
+            ],
+            "wrong_options": [
+              "2,5"
+            ]
+          },
+          "ordering": {
+            "question": "Urutkan cara menghitung persentase suatu nilai.",
+            "items": [
+              "Ubah persen ke desimal",
+              "Kalikan dengan nilai dasar",
+              "Hitung hasil",
+              "Periksa kembali kewajaran"
+            ]
+          },
+          "matching": {
+            "question": "Pasangkan persen dengan bentuk desimalnya.",
+            "pairs": [
+              {
+                "prompt": "10%",
+                "answer": "0,10"
+              },
+              {
+                "prompt": "25%",
+                "answer": "0,25"
+              },
+              {
+                "prompt": "50%",
+                "answer": "0,50"
+              },
+              {
+                "prompt": "75%",
+                "answer": "0,75"
+              }
+            ]
+          },
+          "fill_in_blank": {
+            "question": "Lima puluh persen sama dengan {{1}} per dua.",
+            "answers": [
+              {
+                "blank_number": 1,
+                "accepted_answers": [
+                  "1",
+                  "satu"
+                ],
+                "blank_points": 6
+              }
+            ]
+          }
+        },
+        {
+          "title": "Rasio",
+          "difficulty": "medium",
+          "summary": "Rasio menguji kemampuan menyederhanakan, menyetarakan, dan membandingkan dua besaran.",
+          "key_term": "Rasio",
+          "multiple_choice": {
+            "question": "Rasio 2 : 3 setara dengan ...",
+            "correct_option": "4 : 6",
+            "wrong_options": [
+              "3 : 4",
+              "5 : 6",
+              "6 : 4"
+            ]
+          },
+          "checkbox": {
+            "question": "Pilih pasangan rasio yang setara dengan 3 : 5.",
+            "correct_options": [
+              "6 : 10",
+              "9 : 15",
+              "12 : 20"
+            ],
+            "wrong_options": [
+              "8 : 10"
+            ]
+          },
+          "ordering": {
+            "question": "Urutkan langkah menyederhanakan rasio.",
+            "items": [
+              "Temukan faktor persekutuan",
+              "Bagi kedua bilangan",
+              "Tuliskan rasio baru",
+              "Periksa kesetaraan"
+            ]
+          },
+          "matching": {
+            "question": "Pasangkan rasio dengan bentuk sederhananya.",
+            "pairs": [
+              {
+                "prompt": "6 : 8",
+                "answer": "3 : 4"
+              },
+              {
+                "prompt": "10 : 15",
+                "answer": "2 : 3"
+              },
+              {
+                "prompt": "12 : 18",
+                "answer": "2 : 3"
+              },
+              {
+                "prompt": "20 : 30",
+                "answer": "2 : 3"
+              }
+            ]
+          },
+          "fill_in_blank": {
+            "question": "Rasio 8 : 12 dapat disederhanakan menjadi {{1}} : {{2}}.",
+            "answers": [
+              {
+                "blank_number": 1,
+                "accepted_answers": [
+                  "2"
+                ],
+                "blank_points": 3
+              },
+              {
+                "blank_number": 2,
+                "accepted_answers": [
+                  "3"
+                ],
+                "blank_points": 3
+              }
+            ]
+          }
+        },
+        {
+          "title": "Aritmetika Sosial",
+          "difficulty": "medium",
+          "summary": "Aritmetika sosial mencakup diskon, untung-rugi, modal, dan harga jual.",
+          "key_term": "Diskon",
+          "multiple_choice": {
+            "question": "Harga setelah diskon 20% dari Rp100.000 adalah ...",
+            "correct_option": "Rp80.000",
+            "wrong_options": [
+              "Rp75.000",
+              "Rp85.000",
+              "Rp90.000"
+            ]
+          },
+          "checkbox": {
+            "question": "Pilih konsep yang sering muncul pada aritmetika sosial.",
+            "correct_options": [
+              "Diskon",
+              "Untung-rugi",
+              "Persentase"
+            ],
+            "wrong_options": [
+              "Warna kemasan produk"
+            ]
+          },
+          "ordering": {
+            "question": "Urutkan cara menghitung harga setelah diskon.",
+            "items": [
+              "Hitung besar diskon",
+              "Kurangi dari harga awal",
+              "Tulis harga akhir",
+              "Periksa kembali hasil"
+            ]
+          },
+          "matching": {
+            "question": "Pasangkan istilah aritmetika sosial dengan artinya.",
+            "pairs": [
+              {
+                "prompt": "Diskon",
+                "answer": "Potongan harga"
+              },
+              {
+                "prompt": "Untung",
+                "answer": "Harga jual lebih besar dari harga beli"
+              },
+              {
+                "prompt": "Rugi",
+                "answer": "Harga jual lebih kecil dari harga beli"
+              },
+              {
+                "prompt": "Modal",
+                "answer": "Harga beli barang"
+              }
+            ]
+          },
+          "fill_in_blank": {
+            "question": "Jika modal Rp50.000 dan harga jual Rp60.000, maka penjual memperoleh {{1}} sebesar Rp{{2}}.",
+            "answers": [
+              {
+                "blank_number": 1,
+                "accepted_answers": [
+                  "untung",
+                  "keuntungan"
+                ],
+                "blank_points": 3
+              },
+              {
+                "blank_number": 2,
+                "accepted_answers": [
+                  "10000",
+                  "10.000"
+                ],
+                "blank_points": 3
+              }
+            ]
+          }
+        },
+        {
+          "title": "Aljabar Sederhana",
+          "difficulty": "easy",
+          "summary": "Aljabar sederhana menguji kemampuan mencari nilai variabel lewat operasi dasar dan substitusi.",
+          "key_term": "Variabel",
+          "multiple_choice": {
+            "question": "Jika x + 7 = 12, maka x = ...",
+            "correct_option": "5",
+            "wrong_options": [
+              "4",
+              "6",
+              "7"
+            ]
+          },
+          "checkbox": {
+            "question": "Pilih langkah yang benar untuk menyelesaikan x + 7 = 12.",
+            "correct_options": [
+              "Kurangi kedua sisi dengan 7",
+              "Peroleh x = 5",
+              "Periksa dengan substitusi"
+            ],
+            "wrong_options": [
+              "Tambah kedua sisi dengan 12"
+            ]
+          },
+          "ordering": {
+            "question": "Urutkan proses penyelesaian persamaan sederhana.",
+            "items": [
+              "Pindahkan konstanta",
+              "Sederhanakan persamaan",
+              "Dapatkan nilai variabel",
+              "Substitusi untuk mengecek"
+            ]
+          },
+          "matching": {
+            "question": "Pasangkan persamaan dengan nilainya.",
+            "pairs": [
+              {
+                "prompt": "x + 2 = 5",
+                "answer": "x = 3"
+              },
+              {
+                "prompt": "y - 4 = 6",
+                "answer": "y = 10"
+              },
+              {
+                "prompt": "2z = 8",
+                "answer": "z = 4"
+              },
+              {
+                "prompt": "a/3 = 5",
+                "answer": "a = 15"
+              }
+            ]
+          },
+          "fill_in_blank": {
+            "question": "Pada persamaan 2x = 14, nilai x adalah {{1}}.",
+            "answers": [
+              {
+                "blank_number": 1,
+                "accepted_answers": [
+                  "7"
+                ],
+                "blank_points": 6
+              }
+            ]
+          }
+        },
+        {
+          "title": "Interpretasi Data",
+          "difficulty": "medium",
+          "summary": "Interpretasi data menilai kemampuan membaca rata-rata, selisih, median, dan informasi penting dalam tabel.",
+          "key_term": "Median",
+          "multiple_choice": {
+            "question": "Jika tabel menunjukkan nilai 40, 50, dan 60, maka rata-ratanya adalah ...",
+            "correct_option": "50",
+            "wrong_options": [
+              "45",
+              "55",
+              "60"
+            ]
+          },
+          "checkbox": {
+            "question": "Pilih informasi yang biasa dicari pada tabel data numerik.",
+            "correct_options": [
+              "Rata-rata",
+              "Selisih",
+              "Nilai tertinggi"
+            ],
+            "wrong_options": [
+              "Jenis huruf tabel"
+            ]
+          },
+          "ordering": {
+            "question": "Urutkan cara membaca tabel angka.",
+            "items": [
+              "Identifikasi data",
+              "Tentukan operasi yang dibutuhkan",
+              "Hitung hasil",
+              "Periksa kembali angka"
+            ]
+          },
+          "matching": {
+            "question": "Pasangkan istilah statistik dasar dengan maknanya.",
+            "pairs": [
+              {
+                "prompt": "Rata-rata",
+                "answer": "Jumlah data dibagi banyak data"
+              },
+              {
+                "prompt": "Median",
+                "answer": "Nilai tengah"
+              },
+              {
+                "prompt": "Maksimum",
+                "answer": "Nilai terbesar"
+              },
+              {
+                "prompt": "Minimum",
+                "answer": "Nilai terkecil"
+              }
+            ]
+          },
+          "fill_in_blank": {
+            "question": "Rata-rata diperoleh dengan menjumlahkan seluruh data lalu membaginya dengan {{1}} data.",
+            "answers": [
+              {
+                "blank_number": 1,
+                "accepted_answers": [
+                  "banyaknya",
+                  "jumlah"
+                ],
+                "blank_points": 6
+              }
+            ]
+          }
+        }
       ]
     },
     {
-      "subject_code": "ENG-LIT",
-      "teacher_username": "sophia.bennett",
-      "category": "Literary Devices",
-      "question_text": "<p>Dalam sastra, apa yang dimaksud dengan metafora?</p>",
-      "difficulty_level": "easy",
-      "points": 5,
-      "explanation": "Metafora adalah perbandingan langsung tanpa memakai kata like atau as.",
-      "tags": ["english", "literary-devices", "plain"],
-      "options": [
-        {"text": "Perbandingan menggunakan like atau as", "is_correct": false},
-        {"text": "Perbandingan langsung tanpa like atau as", "is_correct": true},
-        {"text": "Pengulangan bunyi konsonan awal", "is_correct": false},
-        {"text": "Penggambaran yang dilebihkan", "is_correct": false}
+      "subject_code": "TKD-VRB",
+      "topics": [
+        {
+          "title": "Sinonim",
+          "difficulty": "easy",
+          "summary": "Soal sinonim menilai kemampuan menemukan kata dengan makna paling dekat dan nuansa yang tepat.",
+          "key_term": "Teliti",
+          "multiple_choice": {
+            "question": "Sinonim kata cermat adalah ...",
+            "correct_option": "Teliti",
+            "wrong_options": [
+              "Lalai",
+              "Lambat",
+              "Keras"
+            ]
+          },
+          "checkbox": {
+            "question": "Pilih kata yang bermakna dekat dengan teliti.",
+            "correct_options": [
+              "Cermat",
+              "Saksama",
+              "Akurat"
+            ],
+            "wrong_options": [
+              "Ceroboh"
+            ]
+          },
+          "ordering": {
+            "question": "Urutkan langkah menyelesaikan soal sinonim.",
+            "items": [
+              "Pahami arti kata",
+              "Bandingkan dengan pilihan",
+              "Singkirkan lawan kata",
+              "Pilih makna terdekat"
+            ]
+          },
+          "matching": {
+            "question": "Pasangkan kata dengan sinonimnya.",
+            "pairs": [
+              {
+                "prompt": "Cermat",
+                "answer": "Teliti"
+              },
+              {
+                "prompt": "Cepat",
+                "answer": "Lekas"
+              },
+              {
+                "prompt": "Jujur",
+                "answer": "Lurus hati"
+              },
+              {
+                "prompt": "Besar",
+                "answer": "Akbar"
+              }
+            ]
+          },
+          "fill_in_blank": {
+            "question": "Sinonim berarti kata yang memiliki makna {{1}}.",
+            "answers": [
+              {
+                "blank_number": 1,
+                "accepted_answers": [
+                  "mirip",
+                  "serupa"
+                ],
+                "blank_points": 6
+              }
+            ]
+          }
+        },
+        {
+          "title": "Antonim",
+          "difficulty": "easy",
+          "summary": "Antonim mengukur kemampuan mengenali lawan makna yang paling tepat sesuai konteks.",
+          "key_term": "Boros",
+          "multiple_choice": {
+            "question": "Antonim kata hemat adalah ...",
+            "correct_option": "Boros",
+            "wrong_options": [
+              "Cermat",
+              "Akurat",
+              "Sederhana"
+            ]
+          },
+          "checkbox": {
+            "question": "Pilih pasangan kata yang berlawanan makna.",
+            "correct_options": [
+              "Naik - turun",
+              "Cepat - lambat",
+              "Terang - gelap"
+            ],
+            "wrong_options": [
+              "Tepat - akurat"
+            ]
+          },
+          "ordering": {
+            "question": "Urutkan strategi menjawab soal antonim.",
+            "items": [
+              "Pahami makna kata",
+              "Cari lawan makna",
+              "Eliminasi pilihan sejenis",
+              "Pilih kebalikan paling tepat"
+            ]
+          },
+          "matching": {
+            "question": "Pasangkan kata dengan antonimnya.",
+            "pairs": [
+              {
+                "prompt": "Stabil",
+                "answer": "Labil"
+              },
+              {
+                "prompt": "Hemat",
+                "answer": "Boros"
+              },
+              {
+                "prompt": "Tinggi",
+                "answer": "Rendah"
+              },
+              {
+                "prompt": "Terbuka",
+                "answer": "Tertutup"
+              }
+            ]
+          },
+          "fill_in_blank": {
+            "question": "Antonim adalah kata yang memiliki makna {{1}}.",
+            "answers": [
+              {
+                "blank_number": 1,
+                "accepted_answers": [
+                  "berlawanan",
+                  "kebalikan"
+                ],
+                "blank_points": 6
+              }
+            ]
+          }
+        },
+        {
+          "title": "Analogi Kata",
+          "difficulty": "medium",
+          "summary": "Analogi kata menguji ketepatan memahami relasi antarkonsep seperti fungsi, bagian, sebab, dan urutan.",
+          "key_term": "Relasi setara",
+          "multiple_choice": {
+            "question": "Buku : membaca = garpu : ...",
+            "correct_option": "Makan",
+            "wrong_options": [
+              "Menulis",
+              "Mencuci",
+              "Merapikan"
+            ]
+          },
+          "checkbox": {
+            "question": "Pilih pasangan yang sama-sama menunjukkan relasi alat dan fungsi.",
+            "correct_options": [
+              "Pensil - menulis",
+              "Payung - berteduh",
+              "Garpu - makan"
+            ],
+            "wrong_options": [
+              "Panas - api"
+            ]
+          },
+          "ordering": {
+            "question": "Urutkan cara membaca soal analogi kata.",
+            "items": [
+              "Kenali pasangan awal",
+              "Tentukan relasi",
+              "Bandingkan ke pilihan",
+              "Pilih relasi paling setara"
+            ]
+          },
+          "matching": {
+            "question": "Pasangkan contoh pasangan dengan jenis relasinya.",
+            "pairs": [
+              {
+                "prompt": "Buku - membaca",
+                "answer": "Alat dan fungsi"
+              },
+              {
+                "prompt": "Guru - murid",
+                "answer": "Profesi dan objek layanan"
+              },
+              {
+                "prompt": "Padi - tanaman",
+                "answer": "Anggota dan kelompok"
+              },
+              {
+                "prompt": "Senin - Selasa",
+                "answer": "Urutan waktu"
+              }
+            ]
+          },
+          "fill_in_blank": {
+            "question": "Dalam analogi verbal, hubungan pasangan awal harus {{1}} dengan hubungan pada pilihan.",
+            "answers": [
+              {
+                "blank_number": 1,
+                "accepted_answers": [
+                  "setara"
+                ],
+                "blank_points": 6
+              }
+            ]
+          }
+        },
+        {
+          "title": "Pemahaman Bacaan",
+          "difficulty": "medium",
+          "summary": "Pemahaman bacaan menuntut kemampuan membaca ide pokok, detail pendukung, dan inferensi secara cepat.",
+          "key_term": "Ide pokok",
+          "multiple_choice": {
+            "question": "Dalam soal pemahaman bacaan, ide pokok paragraf biasanya ditemukan pada ...",
+            "correct_option": "Gagasan utama yang merangkum seluruh isi paragraf",
+            "wrong_options": [
+              "Kata paling panjang",
+              "Kalimat penutup saja",
+              "Judul buku sumber"
+            ]
+          },
+          "checkbox": {
+            "question": "Pilih langkah yang membantu memahami bacaan dengan cepat.",
+            "correct_options": [
+              "Mengenali kata kunci",
+              "Menentukan ide pokok",
+              "Membedakan fakta dan opini"
+            ],
+            "wrong_options": [
+              "Menghafal semua kalimat"
+            ]
+          },
+          "ordering": {
+            "question": "Urutkan cara membaca paragraf secara efektif.",
+            "items": [
+              "Baca cepat keseluruhan",
+              "Cari gagasan utama",
+              "Identifikasi detail penting",
+              "Jawab pertanyaan berdasarkan teks"
+            ]
+          },
+          "matching": {
+            "question": "Pasangkan istilah dengan fungsinya dalam pemahaman bacaan.",
+            "pairs": [
+              {
+                "prompt": "Ide pokok",
+                "answer": "Inti pembahasan paragraf"
+              },
+              {
+                "prompt": "Detail",
+                "answer": "Informasi pendukung"
+              },
+              {
+                "prompt": "Inferensi",
+                "answer": "Simpulan tidak tertulis langsung"
+              },
+              {
+                "prompt": "Kata kunci",
+                "answer": "Petunjuk fokus isi"
+              }
+            ]
+          },
+          "fill_in_blank": {
+            "question": "Informasi pendukung dalam paragraf disebut {{1}}.",
+            "answers": [
+              {
+                "blank_number": 1,
+                "accepted_answers": [
+                  "detail"
+                ],
+                "blank_points": 6
+              }
+            ]
+          }
+        },
+        {
+          "title": "Logika Verbal",
+          "difficulty": "medium",
+          "summary": "Logika verbal membutuhkan konsistensi premis, kesimpulan, dan ketelitian membaca makna implisit.",
+          "key_term": "Premis",
+          "multiple_choice": {
+            "question": "Jika semua analis teliti dan Dina adalah analis, maka Dina ...",
+            "correct_option": "Teliti",
+            "wrong_options": [
+              "Tidak teliti",
+              "Belum tentu teliti",
+              "Bukan analis"
+            ]
+          },
+          "checkbox": {
+            "question": "Pilih unsur penting pada penalaran verbal.",
+            "correct_options": [
+              "Premis",
+              "Kesimpulan",
+              "Konsistensi makna"
+            ],
+            "wrong_options": [
+              "Asumsi di luar pernyataan"
+            ]
+          },
+          "ordering": {
+            "question": "Urutkan tahapan memeriksa kebenaran kesimpulan verbal.",
+            "items": [
+              "Baca premis",
+              "Tandai hubungan",
+              "Uji kesimpulan",
+              "Pilih hasil yang pasti"
+            ]
+          },
+          "matching": {
+            "question": "Pasangkan istilah penalaran verbal dengan artinya.",
+            "pairs": [
+              {
+                "prompt": "Premis",
+                "answer": "Pernyataan dasar"
+              },
+              {
+                "prompt": "Kesimpulan",
+                "answer": "Hasil logis"
+              },
+              {
+                "prompt": "Inferensi",
+                "answer": "Penarikan makna dari pernyataan"
+              },
+              {
+                "prompt": "Kontradiksi",
+                "answer": "Pertentangan makna"
+              }
+            ]
+          },
+          "fill_in_blank": {
+            "question": "Kesimpulan verbal yang benar harus konsisten dengan {{1}} yang tersedia.",
+            "answers": [
+              {
+                "blank_number": 1,
+                "accepted_answers": [
+                  "premis"
+                ],
+                "blank_points": 6
+              }
+            ]
+          }
+        }
       ]
     },
     {
-      "subject_code": "ALG2",
-      "teacher_username": "olivia.carter",
-      "category": "Functions",
-      "question_text": "<p>Gunakan tabel berikut untuk menentukan gradien.</p><table><tr><th>x</th><th>y</th></tr><tr><td>0</td><td>3</td></tr><tr><td>1</td><td>5</td></tr><tr><td>2</td><td>7</td></tr></table><p>Gradien fungsi linear tersebut adalah ...</p>",
-      "difficulty_level": "medium",
-      "points": 5,
-      "explanation": "Nilai y bertambah 2 setiap x bertambah 1, jadi gradiennya 2.",
-      "tags": ["algebra", "functions", "table"],
-      "options": [
-        {"text": "1", "is_correct": false},
-        {"text": "2", "is_correct": true},
-        {"text": "3", "is_correct": false},
-        {"text": "5", "is_correct": false}
+      "subject_code": "TKP",
+      "topics": [
+        {
+          "title": "Pelayanan Publik",
+          "difficulty": "easy",
+          "summary": "Pelayanan publik yang baik menuntut empati, ketenangan, dan tindak lanjut yang sesuai prosedur.",
+          "key_term": "Pelayanan publik",
+          "multiple_choice": {
+            "question": "Saat menghadapi pengguna layanan yang marah, tindakan paling tepat adalah ...",
+            "correct_option": "Tetap tenang, mendengar, dan mencari solusi sesuai prosedur",
+            "wrong_options": [
+              "Membalas dengan nada tinggi",
+              "Mengabaikan keluhan",
+              "Langsung menyalahkan pengguna"
+            ]
+          },
+          "checkbox": {
+            "question": "Pilih perilaku yang menunjukkan orientasi pelayanan.",
+            "correct_options": [
+              "Mendengarkan kebutuhan pengguna",
+              "Menjelaskan prosedur dengan jelas",
+              "Menindaklanjuti kendala sampai selesai"
+            ],
+            "wrong_options": [
+              "Mempersulit proses agar terlihat berwenang"
+            ]
+          },
+          "ordering": {
+            "question": "Urutkan langkah pelayanan ketika menerima keluhan.",
+            "items": [
+              "Mendengar keluhan",
+              "Memverifikasi masalah",
+              "Menjelaskan solusi",
+              "Menindaklanjuti hasil"
+            ]
+          },
+          "matching": {
+            "question": "Pasangkan tindakan dengan tujuan pelayanan.",
+            "pairs": [
+              {
+                "prompt": "Mendengar aktif",
+                "answer": "Memahami inti masalah"
+              },
+              {
+                "prompt": "Memberi informasi jelas",
+                "answer": "Mengurangi kebingungan"
+              },
+              {
+                "prompt": "Menindaklanjuti",
+                "answer": "Memastikan solusi berjalan"
+              },
+              {
+                "prompt": "Bersikap sopan",
+                "answer": "Menjaga kepercayaan pengguna"
+              }
+            ]
+          },
+          "fill_in_blank": {
+            "question": "Dalam pelayanan, petugas harus tetap {{1}} dan fokus pada {{2}} pengguna.",
+            "answers": [
+              {
+                "blank_number": 1,
+                "accepted_answers": [
+                  "tenang"
+                ],
+                "blank_points": 3
+              },
+              {
+                "blank_number": 2,
+                "accepted_answers": [
+                  "kebutuhan"
+                ],
+                "blank_points": 3
+              }
+            ]
+          }
+        },
+        {
+          "title": "Integritas",
+          "difficulty": "medium",
+          "summary": "Integritas terlihat dari kejujuran, konsistensi tindakan, dan keberanian bertanggung jawab atas keputusan.",
+          "key_term": "Integritas",
+          "multiple_choice": {
+            "question": "Jika diminta memanipulasi data laporan, sikap paling tepat adalah ...",
+            "correct_option": "Menolak dan tetap menyampaikan data sesuai fakta",
+            "wrong_options": [
+              "Mengikuti perintah tanpa bertanya",
+              "Mengubah sedikit agar aman",
+              "Menyimpan data tanpa dilaporkan"
+            ]
+          },
+          "checkbox": {
+            "question": "Pilih perilaku yang menunjukkan integritas kerja.",
+            "correct_options": [
+              "Jujur pada data",
+              "Menolak gratifikasi",
+              "Berani bertanggung jawab"
+            ],
+            "wrong_options": [
+              "Menyembunyikan kesalahan demi citra"
+            ]
+          },
+          "ordering": {
+            "question": "Urutkan langkah yang tepat ketika menemukan pelanggaran etika.",
+            "items": [
+              "Pastikan fakta",
+              "Catat bukti relevan",
+              "Laporkan lewat jalur resmi",
+              "Ikuti tindak lanjut organisasi"
+            ]
+          },
+          "matching": {
+            "question": "Pasangkan istilah dengan makna integritas.",
+            "pairs": [
+              {
+                "prompt": "Jujur",
+                "answer": "Sesuai fakta"
+              },
+              {
+                "prompt": "Konsisten",
+                "answer": "Selaras antara ucapan dan tindakan"
+              },
+              {
+                "prompt": "Tanggung jawab",
+                "answer": "Berani menanggung akibat"
+              },
+              {
+                "prompt": "Etika",
+                "answer": "Pedoman perilaku benar"
+              }
+            ]
+          },
+          "fill_in_blank": {
+            "question": "Integritas berarti berkata dan bertindak secara {{1}} serta bertanggung jawab atas {{2}}.",
+            "answers": [
+              {
+                "blank_number": 1,
+                "accepted_answers": [
+                  "jujur"
+                ],
+                "blank_points": 3
+              },
+              {
+                "blank_number": 2,
+                "accepted_answers": [
+                  "keputusan",
+                  "tindakan"
+                ],
+                "blank_points": 3
+              }
+            ]
+          }
+        },
+        {
+          "title": "Kerja Tim",
+          "difficulty": "easy",
+          "summary": "Kerja tim yang sehat membutuhkan komunikasi terbuka, pembagian peran jelas, dan kemauan untuk saling membantu.",
+          "key_term": "Kerja tim",
+          "multiple_choice": {
+            "question": "Ketika target tim tertunda karena satu anggota kesulitan, tindakan terbaik adalah ...",
+            "correct_option": "Membantu anggota tersebut sambil menjaga koordinasi tim",
+            "wrong_options": [
+              "Meninggalkannya sendiri",
+              "Mengkritik di depan tim",
+              "Mengambil alih semua tugas tanpa komunikasi"
+            ]
+          },
+          "checkbox": {
+            "question": "Pilih unsur yang memperkuat kerja tim.",
+            "correct_options": [
+              "Komunikasi terbuka",
+              "Pembagian peran jelas",
+              "Saling membantu"
+            ],
+            "wrong_options": [
+              "Persaingan tidak sehat"
+            ]
+          },
+          "ordering": {
+            "question": "Urutkan alur koordinasi tim yang baik.",
+            "items": [
+              "Menetapkan tujuan",
+              "Membagi peran",
+              "Memantau progres",
+              "Mengevaluasi hasil"
+            ]
+          },
+          "matching": {
+            "question": "Pasangkan tindakan dengan manfaat kerja tim.",
+            "pairs": [
+              {
+                "prompt": "Koordinasi rutin",
+                "answer": "Mengurangi miskomunikasi"
+              },
+              {
+                "prompt": "Berbagi pengetahuan",
+                "answer": "Meningkatkan kapasitas tim"
+              },
+              {
+                "prompt": "Saling membantu",
+                "answer": "Mempercepat penyelesaian tugas"
+              },
+              {
+                "prompt": "Evaluasi bersama",
+                "answer": "Memperbaiki proses kerja"
+              }
+            ]
+          },
+          "fill_in_blank": {
+            "question": "Kerja tim yang efektif memerlukan komunikasi {{1}} dan tujuan {{2}}.",
+            "answers": [
+              {
+                "blank_number": 1,
+                "accepted_answers": [
+                  "terbuka"
+                ],
+                "blank_points": 3
+              },
+              {
+                "blank_number": 2,
+                "accepted_answers": [
+                  "bersama"
+                ],
+                "blank_points": 3
+              }
+            ]
+          }
+        },
+        {
+          "title": "Adaptasi",
+          "difficulty": "medium",
+          "summary": "Adaptasi dalam TKP berarti cepat belajar, menerima perubahan, dan menyesuaikan cara kerja tanpa kehilangan fokus.",
+          "key_term": "Adaptasi",
+          "multiple_choice": {
+            "question": "Ketika prosedur kerja berubah mendadak, sikap terbaik adalah ...",
+            "correct_option": "Cepat memahami perubahan dan menyesuaikan cara kerja",
+            "wrong_options": [
+              "Menolak tanpa mempelajari alasan",
+              "Menunggu orang lain menyelesaikan",
+              "Tetap memakai cara lama meski tidak sesuai"
+            ]
+          },
+          "checkbox": {
+            "question": "Pilih perilaku yang menunjukkan adaptabilitas.",
+            "correct_options": [
+              "Belajar alat baru",
+              "Menerima masukan",
+              "Menyesuaikan prioritas kerja"
+            ],
+            "wrong_options": [
+              "Bersikukuh pada kebiasaan lama"
+            ]
+          },
+          "ordering": {
+            "question": "Urutkan respons saat menghadapi perubahan sistem kerja.",
+            "items": [
+              "Memahami perubahan",
+              "Mencari informasi pendukung",
+              "Menguji cara kerja baru",
+              "Menerapkan dengan evaluasi"
+            ]
+          },
+          "matching": {
+            "question": "Pasangkan perilaku dengan hasil adaptasi yang tepat.",
+            "pairs": [
+              {
+                "prompt": "Belajar cepat",
+                "answer": "Transisi kerja lebih lancar"
+              },
+              {
+                "prompt": "Bertanya jika ragu",
+                "answer": "Mengurangi kesalahan"
+              },
+              {
+                "prompt": "Menguji pendekatan baru",
+                "answer": "Menemukan cara lebih efektif"
+              },
+              {
+                "prompt": "Mengevaluasi hasil",
+                "answer": "Perbaikan berkelanjutan"
+              }
+            ]
+          },
+          "fill_in_blank": {
+            "question": "Pegawai yang adaptif tidak terpaku pada cara lama, tetapi mau {{1}} dan {{2}}.",
+            "answers": [
+              {
+                "blank_number": 1,
+                "accepted_answers": [
+                  "belajar"
+                ],
+                "blank_points": 3
+              },
+              {
+                "blank_number": 2,
+                "accepted_answers": [
+                  "menyesuaikan diri",
+                  "beradaptasi"
+                ],
+                "blank_points": 3
+              }
+            ]
+          }
+        },
+        {
+          "title": "Kepemimpinan Situasional",
+          "difficulty": "medium",
+          "summary": "Kepemimpinan situasional menuntut kemampuan membaca kondisi, memberi arah, dan menyesuaikan dukungan pada kebutuhan tim.",
+          "key_term": "Kepemimpinan",
+          "multiple_choice": {
+            "question": "Saat tim kehilangan arah karena target berubah, pemimpin sebaiknya ...",
+            "correct_option": "Menjelaskan arah baru dan membagi prioritas dengan jelas",
+            "wrong_options": [
+              "Membiarkan tim menebak sendiri",
+              "Menunda keputusan terlalu lama",
+              "Menyalahkan anggota tim"
+            ]
+          },
+          "checkbox": {
+            "question": "Pilih tindakan yang menunjukkan kepemimpinan situasional yang baik.",
+            "correct_options": [
+              "Mengarahkan saat dibutuhkan",
+              "Mendukung anggota yang kesulitan",
+              "Menyesuaikan gaya komunikasi"
+            ],
+            "wrong_options": [
+              "Memberi instruksi sama tanpa melihat kondisi"
+            ]
+          },
+          "ordering": {
+            "question": "Urutkan langkah pemimpin saat menghadapi perubahan prioritas.",
+            "items": [
+              "Menilai situasi",
+              "Menetapkan prioritas baru",
+              "Mengomunikasikan keputusan",
+              "Memantau pelaksanaan"
+            ]
+          },
+          "matching": {
+            "question": "Pasangkan peran pemimpin dengan dampaknya.",
+            "pairs": [
+              {
+                "prompt": "Memberi arah",
+                "answer": "Tim memahami prioritas"
+              },
+              {
+                "prompt": "Memberi dukungan",
+                "answer": "Motivasi tim terjaga"
+              },
+              {
+                "prompt": "Mendelegasikan",
+                "answer": "Tugas tersebar efektif"
+              },
+              {
+                "prompt": "Memantau",
+                "answer": "Risiko hambatan cepat diketahui"
+              }
+            ]
+          },
+          "fill_in_blank": {
+            "question": "Pemimpin yang baik mampu memberi {{1}} dan tetap memperhatikan kondisi {{2}}.",
+            "answers": [
+              {
+                "blank_number": 1,
+                "accepted_answers": [
+                  "arah"
+                ],
+                "blank_points": 3
+              },
+              {
+                "blank_number": 2,
+                "accepted_answers": [
+                  "tim"
+                ],
+                "blank_points": 3
+              }
+            ]
+          }
+        }
       ]
     },
     {
-      "subject_code": "CS",
-      "teacher_username": "sophia.bennett",
-      "category": "HTML Basics",
-      "question_text": "<p>Perhatikan potongan kode berikut.</p><pre>&lt;table&gt;&lt;tr&gt;&lt;td&gt;42&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;</pre><p>Tag HTML yang dipakai untuk membuat tabel adalah ...</p>",
-      "difficulty_level": "easy",
-      "points": 5,
-      "explanation": "Elemen table digunakan untuk membentuk tabel HTML.",
-      "tags": ["computer-science", "html", "code"],
-      "options": [
-        {"text": "&lt;div&gt;", "is_correct": false},
-        {"text": "&lt;table&gt;", "is_correct": true},
-        {"text": "&lt;span&gt;", "is_correct": false},
-        {"text": "&lt;video&gt;", "is_correct": false}
+      "subject_code": "TWK",
+      "topics": [
+        {
+          "title": "Pancasila",
+          "difficulty": "easy",
+          "summary": "Pancasila menjadi dasar negara, pandangan hidup bangsa, dan pemersatu kehidupan berbangsa.",
+          "key_term": "Pancasila",
+          "multiple_choice": {
+            "question": "Dalam konteks TWK, dasar negara Indonesia adalah ...",
+            "correct_option": "Pancasila",
+            "wrong_options": [
+              "UUD 1945",
+              "Bhinneka Tunggal Ika",
+              "NKRI"
+            ]
+          },
+          "checkbox": {
+            "question": "Pilih pernyataan yang sesuai dengan materi Pancasila.",
+            "correct_options": [
+              "Menjadi dasar negara",
+              "Menjadi pandangan hidup bangsa",
+              "Menjadi sumber nilai kebangsaan"
+            ],
+            "wrong_options": [
+              "Menggantikan seluruh peraturan negara"
+            ]
+          },
+          "ordering": {
+            "question": "Urutkan empat sila pertama Pancasila dari sila ke-1 sampai sila ke-4.",
+            "items": [
+              "Ketuhanan Yang Maha Esa",
+              "Kemanusiaan yang Adil dan Beradab",
+              "Persatuan Indonesia",
+              "Kerakyatan yang Dipimpin oleh Hikmat Kebijaksanaan"
+            ]
+          },
+          "matching": {
+            "question": "Pasangkan sila dengan rumusan yang tepat.",
+            "pairs": [
+              {
+                "prompt": "Sila ke-1",
+                "answer": "Ketuhanan Yang Maha Esa"
+              },
+              {
+                "prompt": "Sila ke-2",
+                "answer": "Kemanusiaan yang Adil dan Beradab"
+              },
+              {
+                "prompt": "Sila ke-3",
+                "answer": "Persatuan Indonesia"
+              },
+              {
+                "prompt": "Sila ke-5",
+                "answer": "Keadilan Sosial bagi Seluruh Rakyat Indonesia"
+              }
+            ]
+          },
+          "fill_in_blank": {
+            "question": "Dasar negara Indonesia adalah {{1}} dan sila pertamanya berbunyi {{2}}.",
+            "answers": [
+              {
+                "blank_number": 1,
+                "accepted_answers": [
+                  "Pancasila"
+                ],
+                "blank_points": 3
+              },
+              {
+                "blank_number": 2,
+                "accepted_answers": [
+                  "Ketuhanan Yang Maha Esa"
+                ],
+                "blank_points": 3
+              }
+            ]
+          }
+        },
+        {
+          "title": "UUD 1945",
+          "difficulty": "easy",
+          "summary": "UUD 1945 adalah hukum dasar tertulis yang mengatur penyelenggaraan negara dan hak warga negara.",
+          "key_term": "UUD 1945",
+          "multiple_choice": {
+            "question": "Konstitusi negara Republik Indonesia adalah ...",
+            "correct_option": "UUD 1945",
+            "wrong_options": [
+              "KUHP",
+              "Peraturan Presiden",
+              "Tap MPR"
+            ]
+          },
+          "checkbox": {
+            "question": "Pilih fungsi UUD 1945 yang benar.",
+            "correct_options": [
+              "Menjadi hukum dasar tertulis",
+              "Menjadi acuan lembaga negara",
+              "Menjadi dasar pembentukan aturan turunan"
+            ],
+            "wrong_options": [
+              "Menghapus seluruh undang-undang biasa"
+            ]
+          },
+          "ordering": {
+            "question": "Urutkan hierarki sederhana dari konstitusi ke aturan yang lebih teknis.",
+            "items": [
+              "UUD 1945",
+              "Undang-Undang",
+              "Peraturan Pemerintah",
+              "Peraturan Presiden"
+            ]
+          },
+          "matching": {
+            "question": "Pasangkan istilah UUD 1945 dengan maknanya.",
+            "pairs": [
+              {
+                "prompt": "Pembukaan",
+                "answer": "Memuat tujuan negara"
+              },
+              {
+                "prompt": "Pasal",
+                "answer": "Aturan pokok tertulis"
+              },
+              {
+                "prompt": "Amandemen",
+                "answer": "Perubahan terhadap konstitusi"
+              },
+              {
+                "prompt": "Konstitusi",
+                "answer": "Hukum dasar negara"
+              }
+            ]
+          },
+          "fill_in_blank": {
+            "question": "Konstitusi Indonesia disebut {{1}} dan pertama kali ditetapkan pada tahun {{2}}.",
+            "answers": [
+              {
+                "blank_number": 1,
+                "accepted_answers": [
+                  "UUD 1945",
+                  "Undang-Undang Dasar 1945"
+                ],
+                "blank_points": 3
+              },
+              {
+                "blank_number": 2,
+                "accepted_answers": [
+                  "1945"
+                ],
+                "blank_points": 3
+              }
+            ]
+          }
+        },
+        {
+          "title": "Bhinneka Tunggal Ika",
+          "difficulty": "easy",
+          "summary": "Bhinneka Tunggal Ika menegaskan bahwa bangsa Indonesia tetap bersatu walau memiliki banyak perbedaan.",
+          "key_term": "Bhinneka Tunggal Ika",
+          "multiple_choice": {
+            "question": "Semboyan Bhinneka Tunggal Ika bermakna ...",
+            "correct_option": "Berbeda-beda tetapi tetap satu",
+            "wrong_options": [
+              "Sama rasa sama rata",
+              "Satu budaya satu bangsa",
+              "Bersatu karena seragam"
+            ]
+          },
+          "checkbox": {
+            "question": "Pilih sikap yang mencerminkan Bhinneka Tunggal Ika.",
+            "correct_options": [
+              "Menghormati perbedaan agama",
+              "Bekerja sama lintas suku",
+              "Menolak diskriminasi"
+            ],
+            "wrong_options": [
+              "Memaksa semua orang memiliki budaya yang sama"
+            ]
+          },
+          "ordering": {
+            "question": "Urutkan langkah membangun persatuan dalam keberagaman.",
+            "items": [
+              "Mengenali perbedaan",
+              "Menghormati perbedaan",
+              "Bekerja sama",
+              "Menjaga persatuan"
+            ]
+          },
+          "matching": {
+            "question": "Pasangkan perilaku dengan nilai keberagaman.",
+            "pairs": [
+              {
+                "prompt": "Toleransi",
+                "answer": "Menghormati keyakinan orang lain"
+              },
+              {
+                "prompt": "Kolaborasi",
+                "answer": "Bekerja sama meski berbeda latar"
+              },
+              {
+                "prompt": "Empati",
+                "answer": "Memahami perasaan pihak lain"
+              },
+              {
+                "prompt": "Persatuan",
+                "answer": "Menjaga tujuan bersama"
+              }
+            ]
+          },
+          "fill_in_blank": {
+            "question": "Semboyan nasional Indonesia adalah {{1}} yang berarti {{2}}.",
+            "answers": [
+              {
+                "blank_number": 1,
+                "accepted_answers": [
+                  "Bhinneka Tunggal Ika"
+                ],
+                "blank_points": 3
+              },
+              {
+                "blank_number": 2,
+                "accepted_answers": [
+                  "Berbeda-beda tetapi tetap satu"
+                ],
+                "blank_points": 3
+              }
+            ]
+          }
+        },
+        {
+          "title": "NKRI",
+          "difficulty": "medium",
+          "summary": "NKRI menegaskan bentuk negara kesatuan dengan satu pemerintahan pusat dan wilayah yang utuh.",
+          "key_term": "NKRI",
+          "multiple_choice": {
+            "question": "Bentuk negara Indonesia adalah ...",
+            "correct_option": "Negara Kesatuan Republik Indonesia",
+            "wrong_options": [
+              "Negara Federal Indonesia",
+              "Konfederasi Nusantara",
+              "Kerajaan Indonesia"
+            ]
+          },
+          "checkbox": {
+            "question": "Pilih ciri yang selaras dengan konsep NKRI.",
+            "correct_options": [
+              "Memiliki pemerintahan pusat",
+              "Menjaga kesatuan wilayah",
+              "Mengutamakan persatuan nasional"
+            ],
+            "wrong_options": [
+              "Setiap provinsi berdaulat penuh seperti negara tersendiri"
+            ]
+          },
+          "ordering": {
+            "question": "Urutkan wilayah administratif dari lingkup terbesar ke terkecil.",
+            "items": [
+              "Provinsi",
+              "Kabupaten/Kota",
+              "Kecamatan",
+              "Kelurahan/Desa"
+            ]
+          },
+          "matching": {
+            "question": "Pasangkan istilah dengan pengertiannya dalam konsep NKRI.",
+            "pairs": [
+              {
+                "prompt": "Kesatuan",
+                "answer": "Tidak terpecah menjadi negara bagian berdaulat"
+              },
+              {
+                "prompt": "Republik",
+                "answer": "Kepala negara tidak berdasarkan keturunan"
+              },
+              {
+                "prompt": "Wilayah",
+                "answer": "Ruang darat, laut, dan udara Indonesia"
+              },
+              {
+                "prompt": "Kedaulatan",
+                "answer": "Kekuasaan tertinggi negara"
+              }
+            ]
+          },
+          "fill_in_blank": {
+            "question": "Bentuk negara Indonesia adalah {{1}} dan singkatannya adalah {{2}}.",
+            "answers": [
+              {
+                "blank_number": 1,
+                "accepted_answers": [
+                  "Negara Kesatuan Republik Indonesia"
+                ],
+                "blank_points": 3
+              },
+              {
+                "blank_number": 2,
+                "accepted_answers": [
+                  "NKRI"
+                ],
+                "blank_points": 3
+              }
+            ]
+          }
+        },
+        {
+          "title": "Bela Negara",
+          "difficulty": "medium",
+          "summary": "Bela negara tercermin melalui disiplin, taat hukum, menjaga persatuan, dan bijak dalam ruang digital maupun sosial.",
+          "key_term": "Bela negara",
+          "multiple_choice": {
+            "question": "Sikap bela negara paling tepat ditunjukkan dengan ...",
+            "correct_option": "Menjaga persatuan, disiplin, dan taat hukum",
+            "wrong_options": [
+              "Menyebar hoaks demi kepentingan pribadi",
+              "Mengabaikan aturan negara",
+              "Mengutamakan kelompok sendiri"
+            ]
+          },
+          "checkbox": {
+            "question": "Pilih contoh perilaku bela negara dalam kehidupan sehari-hari.",
+            "correct_options": [
+              "Taat aturan",
+              "Menjaga fasilitas umum",
+              "Bijak menerima informasi"
+            ],
+            "wrong_options": [
+              "Menggunakan jabatan untuk kepentingan pribadi"
+            ]
+          },
+          "ordering": {
+            "question": "Urutkan respons yang tepat saat menerima informasi yang belum jelas kebenarannya.",
+            "items": [
+              "Memeriksa sumber",
+              "Membandingkan informasi",
+              "Menahan diri untuk tidak menyebarkan",
+              "Melaporkan jika meresahkan"
+            ]
+          },
+          "matching": {
+            "question": "Pasangkan tindakan dengan nilai bela negara yang sesuai.",
+            "pairs": [
+              {
+                "prompt": "Disiplin kerja",
+                "answer": "Menjaga tanggung jawab kepada negara"
+              },
+              {
+                "prompt": "Taat hukum",
+                "answer": "Menghormati aturan nasional"
+              },
+              {
+                "prompt": "Menjaga persatuan",
+                "answer": "Menghindari perpecahan"
+              },
+              {
+                "prompt": "Bijak bermedia",
+                "answer": "Mencegah penyebaran hoaks"
+              }
+            ]
+          },
+          "fill_in_blank": {
+            "question": "Salah satu bentuk bela negara di era digital adalah tidak menyebarkan {{1}} dan selalu memeriksa {{2}} informasi.",
+            "answers": [
+              {
+                "blank_number": 1,
+                "accepted_answers": [
+                  "hoaks",
+                  "berita bohong"
+                ],
+                "blank_points": 3
+              },
+              {
+                "blank_number": 2,
+                "accepted_answers": [
+                  "sumber"
+                ],
+                "blank_points": 3
+              }
+            ]
+          }
+        }
       ]
-    }
-  ],
-  "checkbox": [
-    {
-      "subject_code": "ALG2",
-      "teacher_username": "olivia.carter",
-      "category": "Expressions",
-      "question_text": "<p>Pilih semua ekspresi yang ekuivalen dengan <strong>2(x + 3)</strong>.</p>",
-      "difficulty_level": "medium",
-      "points": 6,
-      "checkbox_scoring": "partial_no_penalty",
-      "explanation": "Distribusikan angka 2 ke semua suku di dalam kurung.",
-      "tags": ["algebra", "distribution", "checkbox"],
-      "options": [
-        {"text": "2x + 6", "is_correct": true},
-        {"text": "6 + 2x", "is_correct": true},
-        {"text": "2x + 3", "is_correct": false},
-        {"text": "x + 6", "is_correct": false}
-      ]
-    },
-    {
-      "subject_code": "BIO",
-      "teacher_username": "michael.reed",
-      "category": "Characteristics of Life",
-      "question_text": "<p>Pilih semua ciri yang dimiliki makhluk hidup.</p>",
-      "difficulty_level": "easy",
-      "points": 6,
-      "checkbox_scoring": "partial",
-      "explanation": "Makhluk hidup tersusun atas sel, menggunakan energi, dan merespons rangsangan.",
-      "tags": ["biology", "life-science", "checkbox"],
-      "options": [
-        {"text": "Tersusun atas satu atau lebih sel", "is_correct": true},
-        {"text": "Menggunakan energi", "is_correct": true},
-        {"text": "Selalu berpindah tempat", "is_correct": false},
-        {"text": "Merespons rangsangan", "is_correct": true}
-      ]
-    },
-    {
-      "subject_code": "CS",
-      "teacher_username": "sophia.bennett",
-      "category": "Python Basics",
-      "question_text": "<p>Manakah yang termasuk tipe koleksi bawaan Python?</p>",
-      "difficulty_level": "easy",
-      "points": 6,
-      "checkbox_scoring": "all_or_nothing",
-      "explanation": "list, tuple, dan dictionary adalah tipe koleksi bawaan Python.",
-      "tags": ["computer-science", "python", "checkbox"],
-      "options": [
-        {"text": "list", "is_correct": true},
-        {"text": "tuple", "is_correct": true},
-        {"text": "dictionary", "is_correct": true},
-        {"text": "spreadsheet", "is_correct": false}
-      ]
-    },
-    {
-      "subject_code": "GEOM",
-      "teacher_username": "olivia.carter",
-      "category": "Quadrilaterals",
-      "question_text": "<p>Gunakan gambar bangun datar berikut lalu pilih semua pernyataan yang selalu benar untuk persegi panjang.</p>",
-      "question_image_url": "https://picsum.photos/seed/cbt-checkbox-rect/960/540",
-      "difficulty_level": "medium",
-      "points": 6,
-      "checkbox_scoring": "partial",
-      "explanation": "Persegi panjang punya empat sudut siku-siku, sisi berhadapan sejajar, dan diagonal sama panjang.",
-      "tags": ["geometry", "quadrilateral", "image"],
-      "options": [
-        {"text": "Memiliki empat sudut siku-siku", "is_correct": true},
-        {"text": "Sisi berhadapan sejajar", "is_correct": true},
-        {"text": "Semua sisinya harus sama panjang", "is_correct": false},
-        {"text": "Diagonalnya sama panjang", "is_correct": true}
-      ]
-    },
-    {
-      "subject_code": "CHEM",
-      "teacher_username": "michael.reed",
-      "category": "Lab Safety",
-      "question_text": "<p>Perhatikan situasi laboratorium pada gambar berikut. Pilih semua tindakan yang aman dilakukan.</p>",
-      "question_image_url": "https://picsum.photos/seed/cbt-checkbox-lab/960/540",
-      "difficulty_level": "easy",
-      "points": 6,
-      "checkbox_scoring": "partial_no_penalty",
-      "explanation": "Keselamatan lab menekankan APD, membaca label, dan mengikuti instruksi.",
-      "tags": ["chemistry", "lab-safety", "image"],
-      "options": [
-        {"text": "Memakai kacamata pelindung", "is_correct": true},
-        {"text": "Membaca label bahan sebelum digunakan", "is_correct": true},
-        {"text": "Mencicipi zat untuk mengidentifikasi", "is_correct": false},
-        {"text": "Mengikat rambut panjang saat eksperimen", "is_correct": true}
-      ]
-    },
-    {
-      "subject_code": "PHYS",
-      "teacher_username": "michael.reed",
-      "category": "Energy",
-      "question_text": "<p>Tonton klip video contoh berikut.</p><p><video controls width='480' height='270'><source src='https://www.w3schools.com/html/mov_bbb.mp4' type='video/mp4'></video></p><p>Pilih semua contoh perubahan energi yang benar.</p>",
-      "difficulty_level": "medium",
-      "points": 6,
-      "checkbox_scoring": "partial",
-      "video_play_limit": 1,
-      "explanation": "Energi dapat berubah bentuk, misalnya listrik ke cahaya dan potensial ke kinetik.",
-      "tags": ["physics", "energy", "video"],
-      "options": [
-        {"text": "Lampu menyala: energi listrik menjadi cahaya", "is_correct": true},
-        {"text": "Benda jatuh: energi potensial menjadi kinetik", "is_correct": true},
-        {"text": "Baterai: energi kimia menjadi listrik", "is_correct": true},
-        {"text": "Es mencair: energi panas menjadi massa", "is_correct": false}
-      ]
-    },
-    {
-      "subject_code": "USHIST",
-      "teacher_username": "sophia.bennett",
-      "category": "Bill of Rights",
-      "question_text": "<p>Gunakan tabel ringkas berikut.</p><table><tr><th>Amendment</th><th>Focus</th></tr><tr><td>First</td><td>Speech, religion, press</td></tr><tr><td>Second</td><td>Arms</td></tr><tr><td>Fourth</td><td>Search and seizure</td></tr></table><p>Pilih semua kebebasan yang dilindungi secara langsung oleh First Amendment.</p>",
-      "difficulty_level": "medium",
-      "points": 6,
-      "checkbox_scoring": "all_or_nothing",
-      "explanation": "First Amendment melindungi kebebasan beragama, berbicara, pers, berkumpul, dan petisi.",
-      "tags": ["history", "government", "table"],
-      "options": [
-        {"text": "Freedom of speech", "is_correct": true},
-        {"text": "Freedom of religion", "is_correct": true},
-        {"text": "Freedom of the press", "is_correct": true},
-        {"text": "Freedom from all taxes", "is_correct": false}
-      ]
-    },
-    {
-      "subject_code": "ENG-LIT",
-      "teacher_username": "sophia.bennett",
-      "category": "Poetry",
-      "question_text": "<p>Dengarkan audio contoh berikut lalu fokus pada ritmenya.</p><p><audio controls src='https://www.w3schools.com/html/horse.mp3'></audio></p><p>Pilih semua ciri yang dapat muncul dalam puisi bebas.</p>",
-      "difficulty_level": "medium",
-      "points": 6,
-      "checkbox_scoring": "partial",
-      "audio_play_limit": 2,
-      "explanation": "Free verse tidak harus berpola rima tetap, tetapi tetap bisa memakai citraan dan enjambment.",
-      "tags": ["english", "poetry", "audio"],
-      "options": [
-        {"text": "Tidak wajib memiliki pola rima tetap", "is_correct": true},
-        {"text": "Dapat memakai citraan", "is_correct": true},
-        {"text": "Harus selalu 14 baris", "is_correct": false},
-        {"text": "Dapat menggunakan enjambment", "is_correct": true}
-      ]
-    },
-    {
-      "subject_code": "BIO",
-      "teacher_username": "michael.reed",
-      "category": "Ecology",
-      "question_text": "<p>Perhatikan ilustrasi ekosistem berikut.</p><p><img src='https://picsum.photos/seed/cbt-checkbox-ecology/960/420' alt='Ilustrasi ekosistem' /></p><p>Pilih semua komponen biotik dalam suatu ekosistem.</p>",
-      "difficulty_level": "easy",
-      "points": 6,
-      "checkbox_scoring": "partial_no_penalty",
-      "explanation": "Komponen biotik adalah bagian hidup dari ekosistem.",
-      "tags": ["biology", "ecology", "embedded-image"],
-      "options": [
-        {"text": "Rumput", "is_correct": true},
-        {"text": "Batu", "is_correct": false},
-        {"text": "Jamur", "is_correct": true},
-        {"text": "Serangga", "is_correct": true}
-      ]
-    },
-    {
-      "subject_code": "CS",
-      "teacher_username": "sophia.bennett",
-      "category": "HTML Media",
-      "question_text": "<p>Perhatikan contoh media berikut.</p><p><audio controls src='https://www.w3schools.com/html/horse.mp3'></audio></p><p><video controls width='320' height='180'><source src='https://www.w3schools.com/html/mov_bbb.mp4' type='video/mp4'></video></p><p>Pilih semua tag HTML yang dipakai untuk menyisipkan media secara langsung.</p>",
-      "difficulty_level": "easy",
-      "points": 6,
-      "checkbox_scoring": "all_or_nothing",
-      "audio_play_limit": 2,
-      "video_play_limit": 1,
-      "explanation": "Elemen audio dan video adalah tag media HTML5, sedangkan source membantu mendefinisikan file sumber.",
-      "tags": ["computer-science", "html", "media"],
-      "options": [
-        {"text": "&lt;audio&gt;", "is_correct": true},
-        {"text": "&lt;video&gt;", "is_correct": true},
-        {"text": "&lt;source&gt;", "is_correct": true},
-        {"text": "&lt;table&gt;", "is_correct": false}
-      ]
-    }
-  ],
-  "ordering": [
-    {
-      "subject_code": "BIO",
-      "teacher_username": "michael.reed",
-      "category": "Organization in Biology",
-      "question_text": "<p>Urutkan tingkat organisasi kehidupan dari yang paling kecil ke paling besar.</p>",
-      "difficulty_level": "easy",
-      "points": 6,
-      "explanation": "Sel membentuk jaringan, jaringan membentuk organ, dan organ membentuk sistem organ.",
-      "tags": ["biology", "organization", "ordering"],
-      "ordering_items": ["Cell", "Tissue", "Organ", "Organ system"]
-    },
-    {
-      "subject_code": "USHIST",
-      "teacher_username": "sophia.bennett",
-      "category": "Civics Process",
-      "question_text": "<p>Urutkan tahapan umum bagaimana sebuah bill menjadi law di Amerika Serikat.</p>",
-      "difficulty_level": "medium",
-      "points": 6,
-      "explanation": "Bill diperkenalkan, dibahas dan disetujui, lalu dikirim ke presiden.",
-      "tags": ["history", "government", "ordering"],
-      "ordering_items": [
-        "A bill is introduced",
-        "The bill is debated and voted on in Congress",
-        "Both houses approve the bill",
-        "The president signs the bill"
-      ]
-    },
-    {
-      "subject_code": "CHEM",
-      "teacher_username": "michael.reed",
-      "category": "Scientific Method",
-      "question_text": "<p>Urutkan langkah-langkah dasar investigasi laboratorium.</p>",
-      "difficulty_level": "easy",
-      "points": 6,
-      "explanation": "Metode ilmiah biasanya diawali pertanyaan dan diakhiri analisis hasil.",
-      "tags": ["chemistry", "lab", "ordering"],
-      "ordering_items": [
-        "Ask a question",
-        "Form a hypothesis",
-        "Test the hypothesis",
-        "Analyze the results"
-      ]
-    },
-    {
-      "subject_code": "ALG2",
-      "teacher_username": "olivia.carter",
-      "category": "Equation Solving",
-      "question_text": "<p>Urutkan langkah yang benar untuk menyelesaikan persamaan <strong>3x - 4 = 11</strong>.</p>",
-      "difficulty_level": "easy",
-      "points": 6,
-      "explanation": "Tambahkan 4 ke kedua ruas lalu bagi 3.",
-      "tags": ["algebra", "solving-equations", "ordering"],
-      "ordering_items": [
-        "Add 4 to both sides",
-        "Get 3x = 15",
-        "Divide both sides by 3",
-        "Conclude that x = 5"
-      ]
-    },
-    {
-      "subject_code": "GEOM",
-      "teacher_username": "olivia.carter",
-      "category": "Proof Structure",
-      "question_text": "<p>Gunakan diagram berikut sebagai acuan lalu urutkan alur berpikir pembuktian sederhana.</p>",
-      "question_image_url": "https://picsum.photos/seed/cbt-ordering-proof/960/540",
-      "difficulty_level": "medium",
-      "points": 6,
-      "explanation": "Mulai dari identifikasi informasi, tentukan sifat relevan, lalu simpulkan.",
-      "tags": ["geometry", "proof", "image"],
-      "ordering_items": [
-        "Identify the given information",
-        "State the relevant geometry property",
-        "Apply the property to the diagram",
-        "Write the conclusion"
-      ]
-    },
-    {
-      "subject_code": "PHYS",
-      "teacher_username": "michael.reed",
-      "category": "Experimental Design",
-      "question_text": "<p>Tonton video contoh berikut.</p><p><video controls width='480' height='270'><source src='https://www.w3schools.com/html/mov_bbb.mp4' type='video/mp4'></video></p><p>Urutkan langkah kerja eksperimen sederhana dari awal sampai akhir.</p>",
-      "difficulty_level": "medium",
-      "points": 6,
-      "video_play_limit": 1,
-      "explanation": "Eksperimen diawali tujuan, lalu pengukuran, pencatatan, dan interpretasi.",
-      "tags": ["physics", "experiment", "video"],
-      "ordering_items": [
-        "Define the goal of the experiment",
-        "Measure the needed quantities",
-        "Record the observations",
-        "Interpret the results"
-      ]
-    },
-    {
-      "subject_code": "CS",
-      "teacher_username": "sophia.bennett",
-      "category": "Software Development",
-      "question_text": "<p>Urutkan tahapan umum siklus pengembangan perangkat lunak.</p>",
-      "difficulty_level": "easy",
-      "points": 6,
-      "explanation": "Kebutuhan dikumpulkan terlebih dahulu, lalu desain, implementasi, dan pengujian.",
-      "tags": ["computer-science", "software-development", "ordering"],
-      "ordering_items": [
-        "Gather requirements",
-        "Design the solution",
-        "Implement the code",
-        "Test the software"
-      ]
-    },
-    {
-      "subject_code": "ENG-LIT",
-      "teacher_username": "sophia.bennett",
-      "category": "Plot Structure",
-      "question_text": "<p>Urutkan bagian umum struktur plot dari awal sampai akhir.</p>",
-      "difficulty_level": "easy",
-      "points": 6,
-      "explanation": "Plot lazim bergerak dari exposition menuju rising action, climax, dan resolution.",
-      "tags": ["english", "plot", "ordering"],
-      "ordering_items": [
-        "Exposition",
-        "Rising action",
-        "Climax",
-        "Resolution"
-      ]
-    },
-    {
-      "subject_code": "BIO",
-      "teacher_username": "michael.reed",
-      "category": "Cell Division",
-      "question_text": "<p>Perhatikan ilustrasi berikut lalu urutkan tahap mitosis.</p><p><img src='https://picsum.photos/seed/cbt-ordering-mitosis/960/420' alt='Ilustrasi mitosis' /></p>",
-      "difficulty_level": "medium",
-      "points": 6,
-      "explanation": "Urutan mitosis adalah prophase, metaphase, anaphase, lalu telophase.",
-      "tags": ["biology", "mitosis", "embedded-image"],
-      "ordering_items": ["Prophase", "Metaphase", "Anaphase", "Telophase"]
-    },
-    {
-      "subject_code": "USHIST",
-      "teacher_username": "sophia.bennett",
-      "category": "Civil Rights",
-      "question_text": "<p>Urutkan peristiwa berikut dari yang paling awal ke yang paling akhir.</p><table><tr><th>Event</th><th>Clue</th></tr><tr><td>Brown v. Board of Education</td><td>1954</td></tr><tr><td>Civil Rights Act</td><td>1964</td></tr><tr><td>Voting Rights Act</td><td>1965</td></tr><tr><td>March on Washington</td><td>1963</td></tr></table>",
-      "difficulty_level": "medium",
-      "points": 6,
-      "explanation": "Gunakan tahun untuk menyusun kronologi yang benar.",
-      "tags": ["history", "civil-rights", "table"],
-      "ordering_items": [
-        "Brown v. Board of Education",
-        "March on Washington",
-        "Civil Rights Act",
-        "Voting Rights Act"
-      ]
-    }
-  ],
-  "matching": [
-    {
-      "subject_code": "GEOM",
-      "teacher_username": "olivia.carter",
-      "category": "Geometry Vocabulary",
-      "question_text": "<p>Cocokkan istilah geometri dengan definisinya.</p>",
-      "difficulty_level": "medium",
-      "points": 8,
-      "explanation": "Setiap istilah memiliki definisi standar dalam geometri.",
-      "tags": ["geometry", "vocabulary", "matching"],
-      "matching_pairs": [
-        {"prompt_text": "Radius", "answer_text": "A segment from the center of a circle to a point on the circle"},
-        {"prompt_text": "Diameter", "answer_text": "A segment passing through the center of a circle with endpoints on the circle"},
-        {"prompt_text": "Chord", "answer_text": "A segment with both endpoints on a circle"}
-      ]
-    },
-    {
-      "subject_code": "PHYS",
-      "teacher_username": "michael.reed",
-      "category": "Units and Quantities",
-      "question_text": "<p>Cocokkan setiap besaran fisika dengan satuan SI yang tepat.</p>",
-      "difficulty_level": "easy",
-      "points": 8,
-      "explanation": "Sistem SI memasangkan besaran dasar dengan satuan baku.",
-      "tags": ["physics", "units", "matching"],
-      "matching_pairs": [
-        {"prompt_text": "Length", "answer_text": "meter"},
-        {"prompt_text": "Mass", "answer_text": "kilogram"},
-        {"prompt_text": "Time", "answer_text": "second"}
-      ]
-    },
-    {
-      "subject_code": "ENG-LIT",
-      "teacher_username": "sophia.bennett",
-      "category": "Literary Devices",
-      "question_text": "<p>Cocokkan setiap perangkat sastra dengan penjelasan terbaiknya.</p>",
-      "difficulty_level": "easy",
-      "points": 8,
-      "explanation": "Perangkat sastra membantu penulis membentuk gaya dan makna.",
-      "tags": ["english", "literary-devices", "matching"],
-      "matching_pairs": [
-        {"prompt_text": "Simile", "answer_text": "A comparison using like or as"},
-        {"prompt_text": "Hyperbole", "answer_text": "An intentional exaggeration for emphasis"},
-        {"prompt_text": "Alliteration", "answer_text": "The repetition of initial consonant sounds"}
-      ]
-    },
-    {
-      "subject_code": "CHEM",
-      "teacher_username": "michael.reed",
-      "category": "Elements",
-      "question_text": "<p>Cocokkan simbol unsur dengan nama unsurnya.</p><table><tr><th>Symbol</th><th>Hint</th></tr><tr><td>Na</td><td>common in table salt</td></tr><tr><td>K</td><td>important for nerves</td></tr><tr><td>Fe</td><td>used in steel</td></tr></table>",
-      "difficulty_level": "easy",
-      "points": 8,
-      "explanation": "Simbol unsur adalah singkatan standar pada tabel periodik.",
-      "tags": ["chemistry", "elements", "table"],
-      "matching_pairs": [
-        {"prompt_text": "Na", "answer_text": "Sodium"},
-        {"prompt_text": "K", "answer_text": "Potassium"},
-        {"prompt_text": "Fe", "answer_text": "Iron"}
-      ]
-    },
-    {
-      "subject_code": "CS",
-      "teacher_username": "sophia.bennett",
-      "category": "Data Structures",
-      "question_text": "<p>Cocokkan struktur data dengan contoh penggunaan paling tepat.</p>",
-      "difficulty_level": "medium",
-      "points": 8,
-      "explanation": "Setiap struktur data lebih cocok untuk pola data tertentu.",
-      "tags": ["computer-science", "data-structures", "matching"],
-      "matching_pairs": [
-        {"prompt_text": "Queue", "answer_text": "Processing tasks in first-in first-out order"},
-        {"prompt_text": "Stack", "answer_text": "Undo history in a text editor"},
-        {"prompt_text": "Dictionary", "answer_text": "Fast lookup by key"}
-      ]
-    },
-    {
-      "subject_code": "BIO",
-      "teacher_username": "michael.reed",
-      "category": "Organelles",
-      "question_text": "<p>Perhatikan ilustrasi sel berikut lalu cocokkan organel dengan fungsinya.</p><p><img src='https://picsum.photos/seed/cbt-matching-organelles/960/420' alt='Ilustrasi organel' /></p>",
-      "difficulty_level": "medium",
-      "points": 8,
-      "explanation": "Organel sel memiliki fungsi spesifik yang saling melengkapi.",
-      "tags": ["biology", "organelles", "embedded-image"],
-      "matching_pairs": [
-        {"prompt_text": "Mitochondrion", "answer_text": "Produces ATP for the cell"},
-        {"prompt_text": "Ribosome", "answer_text": "Builds proteins"},
-        {"prompt_text": "Golgi apparatus", "answer_text": "Modifies and packages molecules"}
-      ]
-    },
-    {
-      "subject_code": "USHIST",
-      "teacher_username": "sophia.bennett",
-      "category": "Founding Documents",
-      "question_text": "<p>Cocokkan dokumen sejarah dengan deskripsi yang tepat.</p>",
-      "difficulty_level": "medium",
-      "points": 8,
-      "explanation": "Dokumen-dokumen utama ini berperan besar dalam sejarah awal Amerika Serikat.",
-      "tags": ["history", "founding-documents", "matching"],
-      "matching_pairs": [
-        {"prompt_text": "Declaration of Independence", "answer_text": "Announced separation from Britain"},
-        {"prompt_text": "Articles of Confederation", "answer_text": "Created an early national government"},
-        {"prompt_text": "Constitution", "answer_text": "Established the current federal framework"}
-      ]
-    },
-    {
-      "subject_code": "ALG2",
-      "teacher_username": "olivia.carter",
-      "category": "Function Forms",
-      "question_text": "<p>Cocokkan bentuk fungsi dengan deskripsinya.</p><table><tr><th>Form</th><th>Example</th></tr><tr><td>Slope-intercept</td><td>y = mx + b</td></tr><tr><td>Standard</td><td>Ax + By = C</td></tr><tr><td>Vertex</td><td>y = a(x - h)^2 + k</td></tr></table>",
-      "difficulty_level": "medium",
-      "points": 8,
-      "explanation": "Setiap bentuk persamaan menonjolkan informasi yang berbeda.",
-      "tags": ["algebra", "functions", "table"],
-      "matching_pairs": [
-        {"prompt_text": "Slope-intercept form", "answer_text": "Highlights slope and y-intercept"},
-        {"prompt_text": "Standard form", "answer_text": "Often used for linear equations with integer coefficients"},
-        {"prompt_text": "Vertex form", "answer_text": "Highlights the vertex of a parabola"}
-      ]
-    },
-    {
-      "subject_code": "PHYS",
-      "teacher_username": "michael.reed",
-      "category": "Waves",
-      "question_text": "<p>Dengarkan audio contoh berikut.</p><p><audio controls src='https://www.w3schools.com/html/horse.mp3'></audio></p><p>Cocokkan istilah gelombang dengan maknanya.</p>",
-      "difficulty_level": "easy",
-      "points": 8,
-      "audio_play_limit": 2,
-      "explanation": "Istilah dasar gelombang membantu menjelaskan perilaku bunyi dan cahaya.",
-      "tags": ["physics", "waves", "audio"],
-      "matching_pairs": [
-        {"prompt_text": "Amplitude", "answer_text": "The maximum displacement from equilibrium"},
-        {"prompt_text": "Frequency", "answer_text": "The number of cycles per second"},
-        {"prompt_text": "Wavelength", "answer_text": "The distance between matching points on consecutive cycles"}
-      ]
-    },
-    {
-      "subject_code": "CS",
-      "teacher_username": "sophia.bennett",
-      "category": "HTML Media",
-      "question_text": "<p>Cocokkan tag HTML dengan tujuan utamanya.</p><p><video controls width='320' height='180'><source src='https://www.w3schools.com/html/mov_bbb.mp4' type='video/mp4'></video></p>",
-      "difficulty_level": "easy",
-      "points": 8,
-      "video_play_limit": 1,
-      "explanation": "Tag HTML memiliki fungsi semantik yang berbeda-beda.",
-      "tags": ["computer-science", "html", "media"],
-      "matching_pairs": [
-        {"prompt_text": "&lt;audio&gt;", "answer_text": "Embeds playable audio"},
-        {"prompt_text": "&lt;video&gt;", "answer_text": "Embeds playable video"},
-        {"prompt_text": "&lt;source&gt;", "answer_text": "Specifies a media file for audio or video"}
-      ]
-    }
-  ],
-  "fill_in_blank": [
-    {
-      "subject_code": "CHEM",
-      "teacher_username": "michael.reed",
-      "category": "Chemical Basics",
-      "question_text": "<p>The chemical formula for water is {{1}}, and its freezing point in Celsius is {{2}}.</p>",
-      "difficulty_level": "easy",
-      "points": 8,
-      "explanation": "Water is written as H2O and freezes at 0 degrees Celsius under standard conditions.",
-      "tags": ["chemistry", "compounds", "fill-in-blank"],
-      "blank_answers": [
-        {"blank_number": 1, "accepted_answers": ["H2O", "h2o"], "blank_points": 4},
-        {"blank_number": 2, "accepted_answers": ["0", "zero"], "blank_points": 4}
-      ]
-    },
-    {
-      "subject_code": "USHIST",
-      "teacher_username": "sophia.bennett",
-      "category": "Founding Era",
-      "question_text": "<p>The Declaration of Independence was adopted in {{1}}.</p>",
-      "difficulty_level": "easy",
-      "points": 5,
-      "explanation": "The Continental Congress adopted the Declaration in 1776.",
-      "tags": ["history", "founding-documents", "fill-in-blank"],
-      "blank_answers": [
-        {"blank_number": 1, "accepted_answers": ["1776"], "blank_points": 5}
-      ]
-    },
-    {
-      "subject_code": "CS",
-      "teacher_username": "sophia.bennett",
-      "category": "Programming Fundamentals",
-      "question_text": "<p>In Python, a loop that continues while a condition is true is called a {{1}} loop.</p>",
-      "difficulty_level": "easy",
-      "points": 5,
-      "explanation": "A while loop repeats while its condition evaluates to true.",
-      "tags": ["computer-science", "python", "fill-in-blank"],
-      "blank_answers": [
-        {"blank_number": 1, "accepted_answers": ["while"], "blank_points": 5}
-      ]
-    },
-    {
-      "subject_code": "ALG2",
-      "teacher_username": "olivia.carter",
-      "category": "Linear Functions",
-      "question_text": "<p>In the slope-intercept form <strong>y = mx + b</strong>, the letter {{1}} represents the slope and the letter {{2}} represents the y-intercept.</p>",
-      "difficulty_level": "easy",
-      "points": 6,
-      "explanation": "The form y = mx + b highlights m for slope and b for intercept.",
-      "tags": ["algebra", "linear-functions", "fill-in-blank"],
-      "blank_answers": [
-        {"blank_number": 1, "accepted_answers": ["m"], "blank_points": 3},
-        {"blank_number": 2, "accepted_answers": ["b"], "blank_points": 3}
-      ]
-    },
-    {
-      "subject_code": "BIO",
-      "teacher_username": "michael.reed",
-      "category": "Photosynthesis",
-      "question_text": "<p>Photosynthesis mainly takes place in the {{1}} and uses the pigment {{2}} to capture light energy.</p>",
-      "difficulty_level": "medium",
-      "points": 6,
-      "explanation": "Chloroplasts are the site of photosynthesis and chlorophyll captures light.",
-      "tags": ["biology", "photosynthesis", "fill-in-blank"],
-      "blank_answers": [
-        {"blank_number": 1, "accepted_answers": ["chloroplast", "chloroplasts"], "blank_points": 3},
-        {"blank_number": 2, "accepted_answers": ["chlorophyll"], "blank_points": 3}
-      ]
-    },
-    {
-      "subject_code": "PHYS",
-      "teacher_username": "michael.reed",
-      "category": "Motion",
-      "question_text": "<p>Use the table below.</p><table><tr><th>Distance</th><th>Time</th></tr><tr><td>100 m</td><td>20 s</td></tr></table><p>Speed is calculated as {{1}} divided by {{2}}.</p>",
-      "difficulty_level": "easy",
-      "points": 6,
-      "explanation": "Average speed is distance divided by time.",
-      "tags": ["physics", "motion", "table"],
-      "blank_answers": [
-        {"blank_number": 1, "accepted_answers": ["distance"], "blank_points": 3},
-        {"blank_number": 2, "accepted_answers": ["time"], "blank_points": 3}
-      ]
-    },
-    {
-      "subject_code": "ENG-LIT",
-      "teacher_username": "sophia.bennett",
-      "category": "Literary Devices",
-      "question_text": "<p>A comparison that uses the words like or as is called a {{1}}.</p>",
-      "difficulty_level": "easy",
-      "points": 5,
-      "explanation": "A simile compares two unlike things using like or as.",
-      "tags": ["english", "literary-devices", "fill-in-blank"],
-      "blank_answers": [
-        {"blank_number": 1, "accepted_answers": ["simile"], "blank_points": 5}
-      ]
-    },
-    {
-      "subject_code": "GEOM",
-      "teacher_username": "olivia.carter",
-      "category": "Triangles",
-      "question_text": "<p>Perhatikan gambar segitiga berikut.</p><p><img src='https://picsum.photos/seed/cbt-fill-triangle/960/420' alt='Segitiga' /></p><p>The sum of the interior angles of a triangle is {{1}} degrees.</p>",
-      "difficulty_level": "easy",
-      "points": 5,
-      "explanation": "Every triangle has an interior angle sum of 180 degrees.",
-      "tags": ["geometry", "triangles", "embedded-image"],
-      "blank_answers": [
-        {"blank_number": 1, "accepted_answers": ["180"], "blank_points": 5}
-      ]
-    },
-    {
-      "subject_code": "CS",
-      "teacher_username": "sophia.bennett",
-      "category": "HTML Media",
-      "question_text": "<p>Perhatikan media berikut.</p><p><audio controls src='https://www.w3schools.com/html/horse.mp3'></audio></p><p><video controls width='320' height='180'><source src='https://www.w3schools.com/html/mov_bbb.mp4' type='video/mp4'></video></p><p>The HTML tags used to embed the media above are {{1}} and {{2}}.</p>",
-      "difficulty_level": "easy",
-      "points": 6,
-      "audio_play_limit": 2,
-      "video_play_limit": 1,
-      "explanation": "HTML5 uses audio and video elements for embedded media.",
-      "tags": ["computer-science", "html", "media"],
-      "blank_answers": [
-        {"blank_number": 1, "accepted_answers": ["audio", "<audio>", "&lt;audio&gt;"], "blank_points": 3},
-        {"blank_number": 2, "accepted_answers": ["video", "<video>", "&lt;video&gt;"], "blank_points": 3}
-      ]
-    },
-    {
-      "subject_code": "CHEM",
-      "teacher_username": "michael.reed",
-      "category": "Periodic Table",
-      "question_text": "<p>Complete the symbols: sodium is {{1}} and gold is {{2}}.</p>",
-      "question_image_url": "https://picsum.photos/seed/cbt-fill-periodic/960/540",
-      "difficulty_level": "medium",
-      "points": 6,
-      "explanation": "Sodium uses the symbol Na and gold uses Au.",
-      "tags": ["chemistry", "periodic-table", "image"],
-      "blank_answers": [
-        {"blank_number": 1, "accepted_answers": ["Na", "na"], "blank_points": 3},
-        {"blank_number": 2, "accepted_answers": ["Au", "au"], "blank_points": 3}
-      ]
-    }
-  ],
-  "essay": [
-    {
-      "subject_code": "ENG-LIT",
-      "teacher_username": "sophia.bennett",
-      "category": "Theme Analysis",
-      "question_text": "<p>Explain how a story's theme can be different from its plot. Use one example from any text you have read.</p>",
-      "difficulty_level": "medium",
-      "points": 10,
-      "explanation": "Strong responses distinguish events from the deeper message or insight.",
-      "tags": ["english", "theme", "essay"],
-      "answer_text": "Theme is the central message or idea, while plot is the sequence of events that happens in the story.",
-      "keywords": ["theme", "plot", "message", "events"],
-      "max_word_count": 150
-    },
-    {
-      "subject_code": "USHIST",
-      "teacher_username": "sophia.bennett",
-      "category": "American Revolution",
-      "question_text": "<p>Describe two causes of growing colonial resistance before the American Revolution.</p>",
-      "difficulty_level": "medium",
-      "points": 10,
-      "explanation": "Students should mention taxation, representation, British control, or punitive acts.",
-      "tags": ["history", "revolution", "essay"],
-      "answer_text": "Possible causes include taxation without representation, the Stamp Act, the Tea Act, and tighter British control over the colonies.",
-      "keywords": ["taxation", "representation", "Stamp Act", "Tea Act", "control"],
-      "max_word_count": 160
-    },
-    {
-      "subject_code": "BIO",
-      "teacher_username": "michael.reed",
-      "category": "Cell Structures",
-      "question_text": "<p>Compare the function of a cell membrane and a cell wall.</p>",
-      "difficulty_level": "medium",
-      "points": 10,
-      "explanation": "The membrane regulates transport, while the wall provides extra structure and support.",
-      "tags": ["biology", "cells", "essay"],
-      "answer_text": "The cell membrane controls what enters and leaves the cell, while the cell wall provides rigid support and protection in certain organisms.",
-      "keywords": ["membrane", "cell wall", "support", "transport", "protection"],
-      "max_word_count": 140
-    },
-    {
-      "subject_code": "PHYS",
-      "teacher_username": "michael.reed",
-      "category": "Forces",
-      "question_text": "<p>Tonton video contoh berikut.</p><p><video controls width='480' height='270'><source src='https://www.w3schools.com/html/mov_bbb.mp4' type='video/mp4'></video></p><p>Explain Newton's Third Law in your own words and provide one real-life example.</p>",
-      "difficulty_level": "medium",
-      "points": 10,
-      "video_play_limit": 1,
-      "explanation": "Answers should include action-reaction force pairs.",
-      "tags": ["physics", "forces", "video", "essay"],
-      "answer_text": "Newton's Third Law says that for every action force there is an equal and opposite reaction force. For example, a rocket pushes gas downward and the gas pushes the rocket upward.",
-      "keywords": ["equal", "opposite", "action", "reaction", "example"],
-      "max_word_count": 150
-    },
-    {
-      "subject_code": "CS",
-      "teacher_username": "sophia.bennett",
-      "category": "Algorithms",
-      "question_text": "<p>Use the flowchart image below as context. Explain why breaking a problem into steps helps programmers write better code.</p>",
-      "question_image_url": "https://picsum.photos/seed/cbt-essay-flowchart/960/540",
-      "difficulty_level": "easy",
-      "points": 10,
-      "explanation": "Good answers discuss clarity, debugging, testing, and maintainability.",
-      "tags": ["computer-science", "algorithms", "image", "essay"],
-      "answer_text": "Breaking a problem into steps makes the logic clearer, easier to test, easier to debug, and simpler to explain to others.",
-      "keywords": ["steps", "logic", "debug", "test", "clear"],
-      "max_word_count": 140
-    },
-    {
-      "subject_code": "GEOM",
-      "teacher_username": "olivia.carter",
-      "category": "Area Reasoning",
-      "question_text": "<p>Use the diagram below. Explain why the area formula for a triangle includes the factor one-half.</p>",
-      "question_image_url": "https://picsum.photos/seed/cbt-essay-triangle/960/540",
-      "difficulty_level": "medium",
-      "points": 10,
-      "explanation": "Students should relate the triangle to a rectangle or parallelogram with the same base and height.",
-      "tags": ["geometry", "area", "image", "essay"],
-      "answer_text": "A triangle with a given base and height takes up half the area of a rectangle or parallelogram with the same base and height, so the formula uses one-half.",
-      "keywords": ["half", "rectangle", "parallelogram", "base", "height"],
-      "max_word_count": 150
-    },
-    {
-      "subject_code": "CHEM",
-      "teacher_username": "michael.reed",
-      "category": "Lab Safety",
-      "question_text": "<p>Read the table and explain how a student should respond if an unknown chemical spills on the lab bench.</p><table><tr><th>Rule</th><th>Reason</th></tr><tr><td>Alert the teacher</td><td>Get trained support</td></tr><tr><td>Keep others away</td><td>Reduce exposure</td></tr><tr><td>Use proper cleanup tools</td><td>Prevent injury</td></tr></table>",
-      "difficulty_level": "medium",
-      "points": 10,
-      "explanation": "Good answers mention notifying the teacher and following safety procedures rather than improvising.",
-      "tags": ["chemistry", "lab-safety", "table", "essay"],
-      "answer_text": "The student should notify the teacher immediately, keep classmates away, and follow the approved cleanup procedure with proper safety equipment.",
-      "keywords": ["teacher", "safety", "cleanup", "equipment", "alert"],
-      "max_word_count": 150
-    },
-    {
-      "subject_code": "ALG2",
-      "teacher_username": "olivia.carter",
-      "category": "Graph Interpretation",
-      "question_text": "<p>Study the graph below and explain how you would identify the y-intercept and the slope from it.</p>",
-      "question_image_url": "https://picsum.photos/seed/cbt-essay-graph/960/540",
-      "difficulty_level": "medium",
-      "points": 10,
-      "explanation": "Students should identify where the line crosses the y-axis and how rise over run shows slope.",
-      "tags": ["algebra", "graphs", "image", "essay"],
-      "answer_text": "The y-intercept is the point where the line crosses the y-axis, and the slope is found by comparing the vertical change to the horizontal change between two points on the line.",
-      "keywords": ["y-axis", "intercept", "rise", "run", "slope"],
-      "max_word_count": 150
-    },
-    {
-      "subject_code": "ENG-LIT",
-      "teacher_username": "sophia.bennett",
-      "category": "Tone and Imagery",
-      "question_text": "<p>Dengarkan audio contoh berikut sebagai pemicu suasana.</p><p><audio controls src='https://www.w3schools.com/html/horse.mp3'></audio></p><p>Explain how imagery can shape the tone of a poem or short passage.</p>",
-      "difficulty_level": "medium",
-      "points": 10,
-      "audio_play_limit": 2,
-      "explanation": "Students should connect sensory details to emotional effect.",
-      "tags": ["english", "imagery", "audio", "essay"],
-      "answer_text": "Imagery shapes tone by using sensory details that make the reader feel a certain mood, such as calm, fear, or excitement.",
-      "keywords": ["imagery", "tone", "mood", "sensory", "details"],
-      "max_word_count": 150
-    },
-    {
-      "subject_code": "USHIST",
-      "teacher_username": "sophia.bennett",
-      "category": "Civil Rights Movement",
-      "question_text": "<p>Explain one major impact of the Civil Rights Act of 1964 on American society.</p>",
-      "difficulty_level": "medium",
-      "points": 10,
-      "explanation": "Strong answers should address legal segregation, discrimination, or expanded protections.",
-      "tags": ["history", "civil-rights", "essay"],
-      "answer_text": "The Civil Rights Act of 1964 helped end legal segregation and banned discrimination in many public spaces and workplaces.",
-      "keywords": ["segregation", "discrimination", "rights", "law", "protections"],
-      "max_word_count": 150
-    }
-  ],
-  "short_answer": [
-    {
-      "subject_code": "CHEM",
-      "teacher_username": "michael.reed",
-      "category": "Atomic Structure",
-      "question_text": "<p>Which subatomic particle has a negative charge?</p>",
-      "difficulty_level": "easy",
-      "points": 4,
-      "explanation": "Electrons carry a negative charge.",
-      "tags": ["chemistry", "atoms", "short-answer"],
-      "answer_text": "electron",
-      "keywords": ["electron"],
-      "is_case_sensitive": false,
-      "max_word_count": 3
-    },
-    {
-      "subject_code": "CS",
-      "teacher_username": "sophia.bennett",
-      "category": "Python Basics",
-      "question_text": "<p>What keyword is used to define a function in Python?</p>",
-      "difficulty_level": "easy",
-      "points": 4,
-      "explanation": "Python functions begin with the def keyword.",
-      "tags": ["computer-science", "python", "short-answer"],
-      "answer_text": "def",
-      "keywords": ["def"],
-      "is_case_sensitive": false,
-      "max_word_count": 2
-    },
-    {
-      "subject_code": "ALG2",
-      "teacher_username": "olivia.carter",
-      "category": "Expressions",
-      "question_text": "<p>In the expression <strong>3x + 7</strong>, what is the coefficient of x?</p>",
-      "difficulty_level": "easy",
-      "points": 4,
-      "explanation": "The coefficient is the number multiplying the variable.",
-      "tags": ["algebra", "expressions", "short-answer"],
-      "answer_text": "3",
-      "keywords": ["3"],
-      "is_case_sensitive": false,
-      "max_word_count": 2
-    },
-    {
-      "subject_code": "GEOM",
-      "teacher_username": "olivia.carter",
-      "category": "Triangles",
-      "question_text": "<p>How many degrees are in the interior angle sum of a triangle?</p>",
-      "difficulty_level": "easy",
-      "points": 4,
-      "explanation": "All triangles have an interior angle sum of 180 degrees.",
-      "tags": ["geometry", "triangles", "short-answer"],
-      "answer_text": "180",
-      "keywords": ["180"],
-      "is_case_sensitive": false,
-      "max_word_count": 3
-    },
-    {
-      "subject_code": "BIO",
-      "teacher_username": "michael.reed",
-      "category": "Cell Biology",
-      "question_text": "<p>Which organelle produces most of a cell's ATP?</p>",
-      "difficulty_level": "easy",
-      "points": 4,
-      "explanation": "Mitochondria produce ATP through cellular respiration.",
-      "tags": ["biology", "cells", "short-answer"],
-      "answer_text": "mitochondrion",
-      "keywords": ["mitochondrion", "mitochondria"],
-      "is_case_sensitive": false,
-      "max_word_count": 3
-    },
-    {
-      "subject_code": "PHYS",
-      "teacher_username": "michael.reed",
-      "category": "Forces",
-      "question_text": "<p>What is the SI unit of force?</p>",
-      "difficulty_level": "easy",
-      "points": 4,
-      "explanation": "Force is measured in newtons.",
-      "tags": ["physics", "forces", "short-answer"],
-      "answer_text": "newton",
-      "keywords": ["newton", "newtons", "N"],
-      "is_case_sensitive": false,
-      "max_word_count": 3
-    },
-    {
-      "subject_code": "ENG-LIT",
-      "teacher_username": "sophia.bennett",
-      "category": "Literary Devices",
-      "question_text": "<p>What literary device compares two things using the words like or as?</p>",
-      "difficulty_level": "easy",
-      "points": 4,
-      "explanation": "A simile compares unlike things using like or as.",
-      "tags": ["english", "literary-devices", "short-answer"],
-      "answer_text": "simile",
-      "keywords": ["simile"],
-      "is_case_sensitive": false,
-      "max_word_count": 3
-    },
-    {
-      "subject_code": "USHIST",
-      "teacher_username": "sophia.bennett",
-      "category": "Founding Documents",
-      "question_text": "<p>What is the common name for the first ten amendments to the U.S. Constitution?</p>",
-      "difficulty_level": "easy",
-      "points": 4,
-      "explanation": "The first ten amendments are called the Bill of Rights.",
-      "tags": ["history", "constitution", "short-answer"],
-      "answer_text": "Bill of Rights",
-      "keywords": ["bill of rights"],
-      "is_case_sensitive": false,
-      "max_word_count": 4
-    },
-    {
-      "subject_code": "CS",
-      "teacher_username": "sophia.bennett",
-      "category": "HTML Basics",
-      "question_text": "<p>Which HTML tag inserts a line break?</p>",
-      "difficulty_level": "easy",
-      "points": 4,
-      "explanation": "The br tag inserts a line break in HTML.",
-      "tags": ["computer-science", "html", "short-answer"],
-      "answer_text": "br",
-      "keywords": ["br", "<br>", "&lt;br&gt;"],
-      "is_case_sensitive": false,
-      "max_word_count": 3
-    },
-    {
-      "subject_code": "CHEM",
-      "teacher_username": "michael.reed",
-      "category": "Chemical Formulas",
-      "question_text": "<p>Use the image below as a periodic-table reminder. What is the formula for carbon dioxide?</p>",
-      "question_image_url": "https://picsum.photos/seed/cbt-short-periodic/960/540",
-      "difficulty_level": "easy",
-      "points": 4,
-      "explanation": "Carbon dioxide is written as CO2.",
-      "tags": ["chemistry", "formulas", "image", "short-answer"],
-      "answer_text": "CO2",
-      "keywords": ["CO2", "co2"],
-      "is_case_sensitive": false,
-      "max_word_count": 3
     }
   ]
 }

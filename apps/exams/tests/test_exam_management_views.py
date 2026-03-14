@@ -165,6 +165,7 @@ class ExamManagementViewTests(TestCase):
                 "require_microphone": "on",
                 "detect_tab_switch": "on",
                 "disable_right_click": "on",
+                "block_copy_paste": "on",
                 "enable_screenshot_proctoring": "on",
                 "screenshot_interval_seconds": 300,
                 "max_violations_allowed": 3,
@@ -182,6 +183,7 @@ class ExamManagementViewTests(TestCase):
         self.assertEqual(float(exam.total_points), 12.0)
         self.assertTrue(exam.require_camera)
         self.assertTrue(exam.require_microphone)
+        self.assertTrue(exam.block_copy_paste)
 
     def test_exam_create_form_shows_all_question_type_filters(self):
         self.client.force_login(self.teacher)
@@ -207,6 +209,7 @@ class ExamManagementViewTests(TestCase):
         self.assertContains(response, "Persyaratan Perangkat & Fokus")
         self.assertContains(response, "Pemantauan")
         self.assertContains(response, "Blokir klik kanan")
+        self.assertContains(response, "Blokir copy, cut, dan paste")
         self.assertContains(response, 'id="availableQuestionList"')
         self.assertContains(response, 'id="selectedQuestionList" class="list-group"')
         self.assertContains(response, 'class="form-check"', html=False)
@@ -226,6 +229,7 @@ class ExamManagementViewTests(TestCase):
         self.assertContains(response, "Persyaratan Perangkat & Fokus")
         self.assertContains(response, "Pemantauan")
         self.assertContains(response, "Blokir klik kanan")
+        self.assertContains(response, "Blokir copy, cut, dan paste")
         self.assertNotContains(response, "form-switch")
         self.assertNotContains(response, 'role="switch"', html=False)
         self.assertNotContains(response, "Kelola Template")
@@ -252,6 +256,17 @@ class ExamManagementViewTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Blokir Klik Kanan: Ya")
+
+    def test_exam_detail_shows_copy_paste_anticheat_setting(self):
+        exam = self._create_exam(status="draft")
+        exam.block_copy_paste = True
+        exam.save(update_fields=["block_copy_paste", "updated_at"])
+        self.client.force_login(self.teacher)
+
+        response = self.client.get(reverse("exam_detail", kwargs={"pk": exam.pk}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Blokir Copy/Cut/Paste: Ya")
 
     def test_teacher_can_publish_and_unpublish_exam(self):
         exam = self._create_exam(status="draft")

@@ -445,6 +445,13 @@
                                 </div>
                                 <div id="examRightClickHelp" class="form-text">Jika aktif, menu klik kanan browser akan diblokir selama ujian berlangsung.</div>
                             </div>
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    {{ form.block_copy_paste }}
+                                    <label class="form-check-label" for="{{ form.block_copy_paste.id_for_label }}">{{ form.block_copy_paste.label }}</label>
+                                </div>
+                                <div id="examCopyPasteHelp" class="form-text">Jika aktif, aksi copy, cut, dan paste dari browser akan diblokir selama ujian berlangsung.</div>
+                            </div>
                         </div>
                     </div>
                 </fieldset>

@@ -76,6 +76,7 @@ class Exam(BaseModelSoftDelete):
     require_microphone = models.BooleanField(default=True)
     detect_tab_switch = models.BooleanField(default=True)
     disable_right_click = models.BooleanField(default=True)
+    block_copy_paste = models.BooleanField(default=False)
     enable_screenshot_proctoring = models.BooleanField(default=False)
     screenshot_interval_seconds = models.IntegerField(default=300)
     max_violations_allowed = models.IntegerField(default=3)
