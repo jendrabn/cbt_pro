@@ -104,16 +104,16 @@ class ExamManagementViewTests(TestCase):
         self.assertContains(response, "2x")
         self.assertNotContains(response, "🔁")
 
-    def test_exam_list_uses_bootstrap_view_switch(self):
+    def test_exam_list_uses_cards_only_without_view_switch(self):
         self._create_exam(status="draft")
         self.client.force_login(self.teacher)
 
-        response = self.client.get(reverse("exam_list"))
+        response = self.client.get(reverse("exam_list"), {"view": "table"})
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'btn-group btn-group-sm')
-        self.assertNotContains(response, "Mode Tampilan")
-        self.assertNotContains(response, "Menampilkan 1 ujian pada halaman ini.")
+        self.assertContains(response, 'class="card border-0 shadow-sm h-100 exam-card"', html=False)
+        self.assertNotContains(response, "Tampilan tabel")
+        self.assertNotContains(response, "Tampilan kartu")
 
     def test_non_teacher_forbidden_exam_list(self):
         self.client.force_login(self.student)

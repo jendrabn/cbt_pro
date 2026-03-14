@@ -342,9 +342,7 @@ class ExamListView(TeacherExamBaseView, ListView):
         rows = build_exam_list_rows(page_obj.object_list if page_obj else context.get("object_list"))
         querydict = self.request.GET.copy()
         querydict.pop("page", None)
-        querydict_no_view = self.request.GET.copy()
-        querydict_no_view.pop("page", None)
-        querydict_no_view.pop("view", None)
+        querydict.pop("view", None)
         context.update(
             {
                 "exam_rows": rows,
@@ -352,8 +350,6 @@ class ExamListView(TeacherExamBaseView, ListView):
                 "subjects": Subject.objects.filter(is_active=True).order_by("name"),
                 "status_choices": STATUS_LABELS.items(),
                 "querystring": querydict.urlencode(),
-                "querystring_without_view": querydict_no_view.urlencode(),
-                "view_mode": getattr(self.current_filters, "view_mode", "table"),
             }
         )
         return context

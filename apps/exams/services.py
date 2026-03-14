@@ -180,7 +180,6 @@ class ExamFilterState:
     subject: str = ""
     date_from: str = ""
     date_to: str = ""
-    view_mode: str = "table"
 
 
 def get_teacher_exam_queryset(teacher):
@@ -206,7 +205,6 @@ def filter_teacher_exams(queryset, params):
         subject=(params.get("subject") or "").strip(),
         date_from=(params.get("date_from") or "").strip(),
         date_to=(params.get("date_to") or "").strip(),
-        view_mode=(params.get("view") or "table").strip(),
     )
 
     if filters.q:
@@ -228,9 +226,6 @@ def filter_teacher_exams(queryset, params):
     if date_to:
         dt_to = timezone.make_aware(datetime.combine(date_to, time.max), current_tz)
         queryset = queryset.filter(end_time__lte=dt_to)
-    if filters.view_mode not in {"table", "cards"}:
-        filters.view_mode = "table"
-
     return queryset.order_by("-start_time"), filters
 
 
