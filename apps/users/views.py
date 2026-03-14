@@ -773,6 +773,7 @@ class TeacherStudentListView(TeacherStudentBaseView, ListView):
             if base_student_ids
             else 0
         )
+        related_class_ids = _teacher_related_class_ids(teacher)
         sort_query = self.request.GET.copy()
         sort_query.pop("sort", None)
         sort_query.pop("page", None)
@@ -789,8 +790,7 @@ class TeacherStudentListView(TeacherStudentBaseView, ListView):
                 "querystring": self._current_querystring_without_page(),
                 "sort_querystring": sort_query.urlencode(),
                 "available_classes": Class.objects.filter(
-                    id__in=_teacher_related_class_ids(teacher),
-                    is_active=True,
+                    id__in=related_class_ids,
                 ).order_by("grade_level", "name"),
                 "summary": {
                     "total": base_queryset.count(),
