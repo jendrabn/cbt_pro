@@ -1,7 +1,7 @@
 {% extends base_layout %}
 {% load cbt_extras %}
 
-{% block title %}Template Sertifikat{% endblock %}
+{% block title %}Template Sertifikat - {{ branding.institution_name|default:"CBT Pro" }}{% endblock %}
 
 {% block topbar %}
     {% if is_admin_mode %}

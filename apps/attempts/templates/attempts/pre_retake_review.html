@@ -1,7 +1,7 @@
 {% extends "layouts/base_student.html" %}
 {% load static %}
 
-{% block title %}Review Sebelum Retake - CBT{% endblock %}
+{% block title %}Review Sebelum Retake - {{ branding.institution_name|default:"CBT Pro" }}{% endblock %}
 
 {% block topbar %}
     {% include "partials/topbar_student.html" with parent_label="Daftar Ujian" parent_url="/student/exams/" current_label="Review Sebelum Retake" %}

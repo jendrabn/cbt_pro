@@ -1,7 +1,7 @@
 {% extends "layouts/base_teacher.html" %}
 {% load static %}
 
-{% block title %}Dashboard Analitik Hasil - CBT{% endblock %}
+{% block title %}Dashboard Analitik Hasil - {{ branding.institution_name|default:"CBT Pro" }}{% endblock %}
 
 {% block topbar %}
     {% include "partials/topbar_teacher.html" with parent_label="Hasil Ujian" parent_url="/teacher/results/" current_label="Dashboard Analitik Hasil" %}

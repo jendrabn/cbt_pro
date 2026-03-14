@@ -1,6 +1,6 @@
 {% extends "layouts/base_error.html" %}
 
-{% block title %}500 - Terjadi Gangguan Server{% endblock %}
+{% block title %}500 - Terjadi Gangguan Server - {{ branding.institution_name|default:"CBT Pro" }}{% endblock %}
 {% block icon_class %}ri-alarm-warning-line text-danger{% endblock %}
 {% block heading %}500 - Terjadi Gangguan Server{% endblock %}
 {% block message %}Server mengalami kendala saat memproses permintaan Anda. Silakan coba beberapa saat lagi.{% endblock %}

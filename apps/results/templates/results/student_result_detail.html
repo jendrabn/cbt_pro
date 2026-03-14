@@ -1,7 +1,7 @@
 {% extends "layouts/base_student.html" %}
 {% load static cbt_extras %}
 
-{% block title %}Detail Hasil Ujian - Siswa{% endblock %}
+{% block title %}Detail Hasil Ujian - Siswa - {{ branding.institution_name|default:"CBT Pro" }}{% endblock %}
 
 {% block topbar %}
     {% include "partials/topbar_student.html" with parent_label="Hasil Ujian" parent_url="/student/results/" current_label=exam.title %}

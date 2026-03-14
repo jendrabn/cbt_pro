@@ -1,7 +1,7 @@
 {% extends "layouts/base_dashboard.html" %}
 {% load cbt_extras %}
 
-{% block title %}Profil Pengguna - CBT Pro{% endblock %}
+{% block title %}Profil Pengguna - {{ branding.institution_name|default:"CBT Pro" }}{% endblock %}
 
 {% block body_classes %}
     {% if request.user.role == 'admin' or request.user.role == 'teacher' or request.user.role == 'student' %} cbt-has-sidebar{% endif %}

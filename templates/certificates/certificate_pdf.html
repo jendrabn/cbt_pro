@@ -2,7 +2,9 @@
 <html lang="id">
 <head>
     <meta charset="utf-8">
-    <title>{{ certificate.certificate_number }}</title>
+    <meta name="application-name" content="{{ branding.institution_name|default:'Sistem CBT' }}">
+    <meta name="theme-color" content="{{ branding.primary_color|default:'#0d6efd' }}">
+    <title>{{ certificate.certificate_number }} - {{ branding.institution_name|default:"CBT Pro" }}</title>
     {% with preset=template.layout_preset|default:'classic_formal' %}
     <style>
         @page {

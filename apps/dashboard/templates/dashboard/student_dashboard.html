@@ -1,7 +1,7 @@
 {% extends "layouts/base_student.html" %}
 {% load static cbt_extras %}
 
-{% block title %}Dashboard Siswa - CBT{% endblock %}
+{% block title %}Dashboard Siswa - {{ branding.institution_name|default:"CBT Pro" }}{% endblock %}
 
 {% block topbar %}
     {% include "partials/topbar_student.html" with current_label="Dashboard Siswa" %}

@@ -1,7 +1,7 @@
 {% extends "layouts/base_admin.html" %}
 {% load static %}
 
-{% block title %}Analitik & Laporan - CBT{% endblock %}
+{% block title %}Analitik & Laporan - {{ branding.institution_name|default:"CBT Pro" }}{% endblock %}
 
 {% block topbar %}
     {% include "partials/topbar_admin.html" with current_label="Analitik & Laporan" %}

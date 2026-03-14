@@ -1,7 +1,7 @@
 {% extends "layouts/base_student.html" %}
 {% load static %}
 
-{% block title %}Konfirmasi Submit Ujian - CBT{% endblock %}
+{% block title %}Konfirmasi Submit Ujian - {{ branding.institution_name|default:"CBT Pro" }}{% endblock %}
 
 {% block topbar %}
     {% include "partials/topbar_student.html" with parent_label="Daftar Ujian" parent_url="/student/exams/" current_label="Konfirmasi Submit Ujian" %}

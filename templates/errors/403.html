@@ -1,6 +1,6 @@
 {% extends "layouts/base_error.html" %}
 
-{% block title %}403 - Akses Ditolak{% endblock %}
+{% block title %}403 - Akses Ditolak - {{ branding.institution_name|default:"CBT Pro" }}{% endblock %}
 {% block icon_class %}ri-shield-keyhole-line text-danger{% endblock %}
 {% block heading %}403 - Akses Ditolak{% endblock %}
 {% block message %}Anda tidak memiliki hak akses ke halaman ini. Pastikan Anda menggunakan akun dengan role yang sesuai.{% endblock %}

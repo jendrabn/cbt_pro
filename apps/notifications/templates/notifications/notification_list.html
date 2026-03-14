@@ -1,7 +1,7 @@
 {% extends role_layout.base_layout %}
 {% load cbt_extras %}
 
-{% block title %}Notifikasi{% endblock %}
+{% block title %}Notifikasi - {{ branding.institution_name|default:"CBT Pro" }}{% endblock %}
 
 {% block topbar %}
     {% include role_layout.topbar_partial with current_label="Notifikasi" %}

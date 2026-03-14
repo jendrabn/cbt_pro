@@ -1,7 +1,7 @@
 {% extends "layouts/base_admin.html" %}
 {% load static %}
 
-{% block title %}Hapus Mata Pelajaran - CBT{% endblock %}
+{% block title %}Hapus Mata Pelajaran - {{ branding.institution_name|default:"CBT Pro" }}{% endblock %}
 
 {% block topbar %}
     {% include "partials/topbar_admin.html" with parent_label="Mata Pelajaran" parent_url="/admin/subjects/" current_label="Hapus Mata Pelajaran" %}

@@ -1,7 +1,7 @@
 {% extends "layouts/base_admin.html" %}
 {% load static cbt_extras %}
 
-{% block title %}Manajemen Mata Pelajaran - CBT{% endblock %}
+{% block title %}Manajemen Mata Pelajaran - {{ branding.institution_name|default:"CBT Pro" }}{% endblock %}
 
 {% block topbar %}
     {% include "partials/topbar_admin.html" with current_label="Manajemen Mata Pelajaran" %}

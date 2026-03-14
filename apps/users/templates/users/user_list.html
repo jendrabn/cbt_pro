@@ -1,7 +1,7 @@
 {% extends "layouts/base_admin.html" %}
 {% load static cbt_extras %}
 
-{% block title %}Manajemen Pengguna - CBT{% endblock %}
+{% block title %}Manajemen Pengguna - {{ branding.institution_name|default:"CBT Pro" }}{% endblock %}
 
 {% block topbar %}
     {% include "partials/topbar_admin.html" with current_label="Manajemen Pengguna" %}

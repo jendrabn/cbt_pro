@@ -1,7 +1,7 @@
 {% extends "layouts/base_teacher.html" %}
 {% load static cbt_extras %}
 
-{% block title %}Detail Siswa - CBT{% endblock %}
+{% block title %}Detail Siswa - {{ branding.institution_name|default:"CBT Pro" }}{% endblock %}
 
 {% block topbar %}
     {% include "partials/topbar_teacher.html" with parent_label="Data Siswa" parent_url="/teacher/students/" current_label="Detail Siswa" %}

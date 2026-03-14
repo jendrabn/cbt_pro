@@ -1,7 +1,7 @@
 {% extends "layouts/base_exam.html" %}
 {% load static %}
 
-{% block title %}Ruang Ujian - CBT{% endblock %}
+{% block title %}Ruang Ujian - {{ branding.institution_name|default:"CBT Pro" }}{% endblock %}
 
 {% block body_classes %}exam-room-body{% endblock %}
 

@@ -1,7 +1,7 @@
 {% extends "layouts/base_teacher.html" %}
 {% load static %}
 
-{% block title %}{{ page_title }} - CBT{% endblock %}
+{% block title %}{{ page_title }} - {{ branding.institution_name|default:"CBT Pro" }}{% endblock %}
 
 {% block topbar %}
     {% include "partials/topbar_teacher.html" with parent_label="Bank Soal" parent_url="/teacher/question-bank/" current_label=page_title %}

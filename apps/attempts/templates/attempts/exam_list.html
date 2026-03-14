@@ -1,7 +1,7 @@
 {% extends "layouts/base_student.html" %}
 {% load static cbt_extras %}
 
-{% block title %}Daftar Ujian Siswa - CBT{% endblock %}
+{% block title %}Daftar Ujian Siswa - {{ branding.institution_name|default:"CBT Pro" }}{% endblock %}
 
 {% block topbar %}
     {% include "partials/topbar_student.html" with current_label="Daftar Ujian" %}

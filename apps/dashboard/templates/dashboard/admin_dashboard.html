@@ -1,7 +1,7 @@
 {% extends "layouts/base_admin.html" %}
 {% load static cbt_extras %}
 
-{% block title %}Dashboard Admin - CBT{% endblock %}
+{% block title %}Dashboard Admin - {{ branding.institution_name|default:"CBT Pro" }}{% endblock %}
 
 {% block topbar %}
     {% include "partials/topbar_admin.html" with current_label="Ringkasan Sistem CBT" %}

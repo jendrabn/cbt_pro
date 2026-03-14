@@ -1,7 +1,7 @@
 {% extends "layouts/base_admin.html" %}
 {% load static %}
 
-{% block title %}{{ page_title }} - CBT{% endblock %}
+{% block title %}{{ page_title }} - {{ branding.institution_name|default:"CBT Pro" }}{% endblock %}
 
 {% block topbar %}
     {% include "partials/topbar_admin.html" with parent_label="Kelas" parent_url="/admin/classes/" current_label=page_title %}

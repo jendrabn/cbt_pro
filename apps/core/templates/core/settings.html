@@ -1,7 +1,7 @@
 {% extends "layouts/base_admin.html" %}
 {% load static %}
 
-{% block title %}Pengaturan Sistem - CBT{% endblock %}
+{% block title %}Pengaturan Sistem - {{ branding.institution_name|default:"CBT Pro" }}{% endblock %}
 
 {% block topbar %}
     {% include "partials/topbar_admin.html" with current_label="Pengaturan Sistem" %}

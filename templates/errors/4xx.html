@@ -1,6 +1,6 @@
 {% extends "layouts/base_error.html" %}
 
-{% block title %}{{ status_code }} - Permintaan Tidak Dapat Diproses{% endblock %}
+{% block title %}{{ status_code }} - Permintaan Tidak Dapat Diproses - {{ branding.institution_name|default:"CBT Pro" }}{% endblock %}
 {% block icon_class %}ri-error-warning-line text-warning{% endblock %}
 {% block heading %}{{ status_code }} - Permintaan Tidak Dapat Diproses{% endblock %}
 {% block message %}Permintaan Anda tidak dapat diproses. Silakan periksa kembali tautan atau data yang dikirim.{% endblock %}

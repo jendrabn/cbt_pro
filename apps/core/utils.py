@@ -4,6 +4,7 @@ from django.conf import settings
 from django.http import HttpResponse
 from django.template.loader import select_template
 
+from apps.core.services import get_branding_settings
 
 ERROR_TITLES = {
     400: "Permintaan Tidak Valid",
@@ -31,6 +32,7 @@ def render_error_page(request, status_code):
         status_code // 100,
         ("errors/5xx.html", "Terjadi Kesalahan"),
     )
+    branding = get_branding_settings()
     template = select_template([f"errors/{status_code}.html", fallback_template])
     response = HttpResponse(
         template.render(
@@ -38,6 +40,7 @@ def render_error_page(request, status_code):
                 "status_code": status_code,
                 "error_title": ERROR_TITLES.get(status_code, fallback_title),
                 "asset_version": _asset_version(),
+                "branding": branding,
             }
         ),
         status=status_code,

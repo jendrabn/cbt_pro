@@ -1,6 +1,6 @@
 {% extends "layouts/base_teacher.html" %}
 
-{% block title %}{{ page_title }}{% endblock %}
+{% block title %}{{ page_title }} - {{ branding.institution_name|default:"CBT Pro" }}{% endblock %}
 
 {% block topbar %}
     {% include "partials/topbar_teacher.html" with parent_label="Template Sertifikat" parent_url=back_url current_label=page_title %}

@@ -1,7 +1,7 @@
 {% extends "layouts/base_admin.html" %}
 {% load static cbt_extras %}
 
-{% block title %}Anggota Kelas - CBT{% endblock %}
+{% block title %}Anggota Kelas - {{ branding.institution_name|default:"CBT Pro" }}{% endblock %}
 
 {% block topbar %}
     {% include "partials/topbar_admin.html" with parent_label="Kelas" parent_url="/admin/classes/" current_label="Anggota Kelas" %}

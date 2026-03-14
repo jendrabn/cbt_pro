@@ -1,7 +1,7 @@
 {% extends "layouts/base_teacher.html" %}
 {% load static cbt_extras %}
 
-{% block title %}Review Jawaban Siswa - CBT{% endblock %}
+{% block title %}Review Jawaban Siswa - {{ branding.institution_name|default:"CBT Pro" }}{% endblock %}
 
 {% block extra_css %}
 <style>

@@ -1,7 +1,7 @@
 {% extends "layouts/base_teacher.html" %}
 {% load static cbt_extras %}
 
-{% block title %}Monitoring Siswa - {{ exam.title }}{% endblock %}
+{% block title %}Monitoring Siswa - {{ exam.title }} - {{ branding.institution_name|default:"CBT Pro" }}{% endblock %}
 
 {% block topbar %}
     {% include "partials/topbar_teacher.html" with parent_label="Kelola Ujian" parent_url="/teacher/exams/" current_label=exam.title %}

@@ -1,7 +1,7 @@
 {% extends "layouts/base_admin.html" %}
 {% load static %}
 
-{% block title %}Manajemen Kelas - CBT{% endblock %}
+{% block title %}Manajemen Kelas - {{ branding.institution_name|default:"CBT Pro" }}{% endblock %}
 
 {% block topbar %}
     {% include "partials/topbar_admin.html" with current_label="Manajemen Kelas" %}

@@ -1,7 +1,7 @@
 {% extends "layouts/base_teacher.html" %}
 {% load static cbt_extras %}
 
-{% block title %}Manajemen Ujian Guru - CBT{% endblock %}
+{% block title %}Manajemen Ujian Guru - {{ branding.institution_name|default:"CBT Pro" }}{% endblock %}
 
 {% block topbar %}
     {% include "partials/topbar_teacher.html" with current_label="Manajemen Ujian" %}

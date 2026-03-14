@@ -1,7 +1,7 @@
 {% extends "layouts/base_student.html" %}
 {% load cbt_extras %}
 
-{% block title %}Detail Sertifikat{% endblock %}
+{% block title %}Detail Sertifikat - {{ branding.institution_name|default:"CBT Pro" }}{% endblock %}
 
 {% block topbar %}
     {% include "partials/topbar_student.html" with parent_label="Sertifikat Saya" parent_url="/student/certificates/" current_label=certificate.certificate_number %}

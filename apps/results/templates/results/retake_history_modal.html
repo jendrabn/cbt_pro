@@ -1,7 +1,7 @@
 {% extends "layouts/base_teacher.html" %}
 {% load static cbt_extras %}
 
-{% block title %}Riwayat Attempt - {{ student.get_full_name|default:student.username }}{% endblock %}
+{% block title %}Riwayat Attempt - {{ student.get_full_name|default:student.username }} - {{ branding.institution_name|default:"CBT Pro" }}{% endblock %}
 
 {% block topbar %}
     {% include "partials/topbar_teacher.html" with parent_label="Hasil Ujian" parent_url="/teacher/results/" current_label="Riwayat Attempt" %}

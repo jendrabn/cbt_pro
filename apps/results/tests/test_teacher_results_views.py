@@ -240,6 +240,13 @@ class TeacherResultsViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Hasil & Analitik")
 
+    def test_teacher_results_list_uses_cards_layout(self):
+        self.client.force_login(self.teacher)
+        response = self.client.get(reverse("teacher_results"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'class="card border-0 shadow-sm h-100 exam-card"', html=False)
+        self.assertNotContains(response, '<table class="table table-hover align-middle mb-0">', html=False)
+
     def test_teacher_results_list_flags_exam_with_pending_manual_grading(self):
         StudentAnswer.objects.create(
             attempt=self.attempt_three,

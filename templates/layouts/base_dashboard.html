@@ -4,7 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Dashboard - CBT{% endblock %}</title>
+    <meta name="application-name" content="{{ branding.institution_name|default:'Sistem CBT' }}">
+    <meta name="theme-color" content="{{ branding.primary_color|default:'#0d6efd' }}">
+    <title>{% block title %}Dashboard - {{ branding.institution_name|default:"CBT Pro" }}{% endblock %}</title>
     <link rel="icon" href="{{ branding.institution_favicon_url|default:'/static/images/favicon.ico' }}">
     <style>
         :root {

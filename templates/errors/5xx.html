@@ -1,6 +1,6 @@
 {% extends "layouts/base_error.html" %}
 
-{% block title %}{{ status_code }} - Terjadi Gangguan pada Server{% endblock %}
+{% block title %}{{ status_code }} - Terjadi Gangguan pada Server - {{ branding.institution_name|default:"CBT Pro" }}{% endblock %}
 {% block icon_class %}ri-alarm-warning-line text-danger{% endblock %}
 {% block heading %}{{ status_code }} - Terjadi Gangguan pada Server{% endblock %}
 {% block message %}Terjadi gangguan pada server. Silakan coba beberapa saat lagi.{% endblock %}

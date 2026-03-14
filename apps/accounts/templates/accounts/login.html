@@ -1,7 +1,7 @@
 {% extends "layouts/base_auth.html" %}
 {% load static %}
 
-{% block title %}Login - {{ branding.institution_name|default:"Sistem CBT" }}{% endblock %}
+{% block title %}Login - {{ branding.institution_name|default:"CBT Pro" }}{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -96,7 +96,7 @@
             <p class="login-hero-subtitle">{{ branding.login_page_subheadline|default:"Kelola ujian, bank soal, dan sesi siswa." }}</p>
             <div class="login-campus-pill">
                 <i class="ri-school-line" aria-hidden="true"></i>
-                <span>{{ branding.institution_name|default:"Sistem CBT" }}</span>
+                <span>{{ branding.institution_name|default:"CBT Pro" }}</span>
             </div>
         </header>
 
