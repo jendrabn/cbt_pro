@@ -49,7 +49,7 @@ class QuestionBankViewTests(TestCase):
             role="student",
             is_active=True,
         )
-        cls.subject = Subject.objects.create(name="Matematika", code="MAT", is_active=True)
+        cls.subject = Subject.objects.create(name="Matematika", code="MAT")
         cls.category = QuestionCategory.objects.create(name="Aljabar", is_active=True)
 
     def _create_sample_question(self):

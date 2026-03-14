@@ -5,7 +5,6 @@ from html import unescape
 
 from django import forms
 from django.core.exceptions import ValidationError
-from django.db.models import Q
 from django.utils.html import strip_tags
 
 from apps.subjects.models import Subject
@@ -211,9 +210,7 @@ class QuestionForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        subject_queryset = Subject.objects.filter(is_active=True).only("id", "name")
-        if self.instance and self.instance.pk and self.instance.subject_id:
-            subject_queryset = Subject.objects.filter(Q(is_active=True) | Q(id=self.instance.subject_id)).only("id", "name")
+        subject_queryset = Subject.objects.only("id", "name")
         self.fields["subject"].queryset = subject_queryset.order_by("name")
         self.fields["category"].queryset = QuestionCategory.objects.filter(is_active=True).only("id", "name").order_by("name")
         self.fields["question_type"].choices = [

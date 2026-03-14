@@ -48,12 +48,11 @@ def _coerce_nullable_bool(value):
 class ClassForm(forms.ModelForm):
     class Meta:
         model = Class
-        fields = ["name", "grade_level", "academic_year", "is_active"]
+        fields = ["name", "grade_level", "academic_year"]
         labels = {
             "name": "Nama Kelas",
             "grade_level": "Tingkat",
             "academic_year": "Tahun Ajaran",
-            "is_active": "Status Aktif",
         }
 
     def __init__(self, *args, **kwargs):
@@ -193,10 +192,7 @@ class ExamWizardForm(forms.ModelForm):
         self.teacher = kwargs.pop("teacher", None)
         super().__init__(*args, **kwargs)
 
-        subject_queryset = Subject.objects.filter(is_active=True)
-        if self.instance and self.instance.pk and self.instance.subject_id:
-            subject_queryset = Subject.objects.filter(Q(is_active=True) | Q(id=self.instance.subject_id))
-        self.fields["subject"].queryset = subject_queryset.order_by("name")
+        self.fields["subject"].queryset = Subject.objects.order_by("name")
 
         for field in self.fields.values():
             _bootstrap_widget(field)
@@ -247,7 +243,6 @@ class ExamWizardForm(forms.ModelForm):
             )
             self.available_question_subjects = (
                 Subject.objects.filter(
-                    is_active=True,
                     questions__created_by=self.teacher,
                     questions__is_deleted=False,
                     questions__is_active=True,
@@ -257,7 +252,6 @@ class ExamWizardForm(forms.ModelForm):
             )
             self.available_classes = (
                 Class.objects.filter(
-                    is_active=True,
                     students__student__role="student",
                     students__student__is_active=True,
                     students__student__is_deleted=False,
@@ -537,7 +531,7 @@ class ExamWizardForm(forms.ModelForm):
 
             valid_class_ids = set(
                 str(item.id)
-                for item in Class.objects.filter(id__in=class_ids, is_active=True)
+                for item in Class.objects.filter(id__in=class_ids)
             )
             valid_student_ids = set(
                 str(item.id)

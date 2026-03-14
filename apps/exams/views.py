@@ -18,7 +18,7 @@ from apps.questions.models import Question
 from apps.subjects.models import Subject
 
 from .forms import ClassForm, ExamWizardForm
-from .models import Class, ClassStudent, Exam
+from .models import Class, ClassStudent, Exam, ExamAssignment
 from .services import (
     STATUS_LABELS,
     annotate_class_usage,
@@ -67,7 +67,6 @@ class ClassListView(AdminClassBaseView, ListView):
     def get_queryset(self):
         queryset = self.get_base_queryset()
         q = (self.request.GET.get("q") or "").strip()
-        status = (self.request.GET.get("status") or "").strip()
         sort = (self.request.GET.get("sort") or "name").strip()
 
         if q:
@@ -76,10 +75,6 @@ class ClassListView(AdminClassBaseView, ListView):
                 | Q(grade_level__icontains=q)
                 | Q(academic_year__icontains=q)
             )
-
-        status_value = _as_status_filter(status)
-        if status_value is not None:
-            queryset = queryset.filter(is_active=status_value)
 
         allowed_sort = {
             "name": "name",
@@ -114,7 +109,6 @@ class ClassListView(AdminClassBaseView, ListView):
             "Sinkronisasi kelas selesai. "
             f"Siswa diproses: {result['students_processed']}, "
             f"kelas baru: {result['classes_created']}, "
-            f"kelas diaktifkan ulang: {result['classes_reactivated']}, "
             f"anggota ditambah: {result['memberships_created']}, "
             f"anggota diperbarui: {result['memberships_updated']}.",
         )
@@ -128,15 +122,14 @@ class ClassListView(AdminClassBaseView, ListView):
                 "querystring": _querystring_without_page(self.request),
                 "filters": {
                     "q": self.request.GET.get("q", ""),
-                    "status": self.request.GET.get("status", ""),
                     "sort": self.request.GET.get("sort", "name"),
                 },
                 "summary": {
                     "total": all_classes.count(),
-                    "active": all_classes.filter(is_active=True).count(),
-                    "inactive": all_classes.filter(is_active=False).count(),
+                    "assignments": ExamAssignment.objects.count(),
                     "memberships": ClassStudent.objects.count(),
                 },
+                "create_form": ClassForm(),
             }
         )
         return context
@@ -148,6 +141,9 @@ class ClassCreateView(AdminClassBaseView, CreateView):
     template_name = "exams/class_form.html"
     success_url = reverse_lazy("class_list")
 
+    def get(self, request, *args, **kwargs):
+        return redirect("class_list")
+
     def form_valid(self, form):
         response = super().form_valid(form)
         messages.success(self.request, f"Kelas '{self.object.name}' berhasil ditambahkan.")
@@ -155,7 +151,10 @@ class ClassCreateView(AdminClassBaseView, CreateView):
 
     def form_invalid(self, form):
         messages.error(self.request, "Gagal menambahkan kelas. Periksa kembali data yang diisi.")
-        return super().form_invalid(form)
+        for field_errors in form.errors.values():
+            for error in field_errors:
+                messages.error(self.request, error)
+        return redirect("class_list")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -176,6 +175,9 @@ class ClassUpdateView(AdminClassBaseView, UpdateView):
     context_object_name = "class_obj"
     success_url = reverse_lazy("class_list")
 
+    def get(self, request, *args, **kwargs):
+        return redirect("class_list")
+
     def form_valid(self, form):
         response = super().form_valid(form)
         messages.success(self.request, f"Kelas '{self.object.name}' berhasil diperbarui.")
@@ -183,7 +185,10 @@ class ClassUpdateView(AdminClassBaseView, UpdateView):
 
     def form_invalid(self, form):
         messages.error(self.request, "Gagal memperbarui kelas. Periksa kembali data yang diisi.")
-        return super().form_invalid(form)
+        for field_errors in form.errors.values():
+            for error in field_errors:
+                messages.error(self.request, error)
+        return redirect("class_list")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -204,6 +209,9 @@ class ClassDeleteView(AdminClassBaseView, TemplateView):
         self.class_obj = get_object_or_404(Class, pk=kwargs["pk"])
         return super().dispatch(request, *args, **kwargs)
 
+    def get(self, request, *args, **kwargs):
+        return redirect("class_list")
+
     def post(self, request, *args, **kwargs):
         confirm_name = (request.POST.get("confirm_name") or "").strip()
         if confirm_name != self.class_obj.name:
@@ -212,20 +220,11 @@ class ClassDeleteView(AdminClassBaseView, TemplateView):
                 "Konfirmasi penghapusan tidak cocok. "
                 f"Ketik persis nama kelas: {self.class_obj.name}",
             )
-            return redirect("class_delete", pk=self.class_obj.pk)
-
-        usage = get_class_usage_summary(self.class_obj)
-        if usage["exam_assignment_count"] > 0:
-            messages.error(
-                request,
-                "Kelas tidak dapat dihapus karena masih dipakai pada "
-                f"{usage['exam_assignment_count']} penugasan ujian. Nonaktifkan kelas saja bila perlu.",
-            )
-            return redirect("class_delete", pk=self.class_obj.pk)
+            return redirect("class_list")
 
         class_name = self.class_obj.name
         self.class_obj.delete()
-        messages.success(request, f"Kelas '{class_name}' berhasil dihapus.")
+        messages.success(request, f"Kelas '{class_name}' berhasil dihapus permanen.")
         return redirect("class_list")
 
     def get_context_data(self, **kwargs):
@@ -347,7 +346,7 @@ class ExamListView(TeacherExamBaseView, ListView):
             {
                 "exam_rows": rows,
                 "filters": getattr(self, "current_filters", None),
-                "subjects": Subject.objects.filter(is_active=True).order_by("name"),
+                "subjects": Subject.objects.order_by("name"),
                 "status_choices": STATUS_LABELS.items(),
                 "querystring": querydict.urlencode(),
             }

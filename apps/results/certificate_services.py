@@ -145,10 +145,6 @@ def _generate_unique_verification_token():
 
 
 def check_eligibility_for_attempt(attempt):
-    settings_data = get_certificate_feature_settings()
-    if not settings_data.get("certificates_enabled", True):
-        return {"eligible": False, "reason": "Fitur sertifikat nonaktif."}
-
     exam = attempt.exam
     if not exam.certificate_enabled:
         return {"eligible": False, "reason": "Sertifikat tidak diaktifkan untuk ujian ini."}

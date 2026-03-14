@@ -174,10 +174,10 @@ def export_import_template_excel():
 
     guide = workbook.create_sheet("Panduan")
     guide.append(["Kolom", "Wajib", "Aturan Nilai"])
-    subject_names = list(Subject.objects.filter(is_active=True).order_by("name").values_list("name", flat=True))
+    subject_names = list(Subject.objects.order_by("name").values_list("name", flat=True))
     subject_text = ", ".join(subject_names) if subject_names else "-"
     guide_rows = [
-        ("subject", "YA", f"Nama/kode subject aktif. Daftar subject: {subject_text}"),
+        ("subject", "YA", f"Nama/kode subject yang tersedia. Daftar subject: {subject_text}"),
         ("question_type", "YA", "multiple_choice, checkbox, ordering, matching, fill_in_blank, essay, short_answer"),
         ("question_text", "YA", "Teks soal"),
         ("difficulty_level", "TIDAK", "easy, medium, hard"),

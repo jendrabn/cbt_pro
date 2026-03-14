@@ -233,7 +233,6 @@ class NotificationSettingsForm(SettingsForm):
 
 
 class CertificateSettingsForm(SettingsForm):
-    certificates_enabled = forms.BooleanField(label="Aktifkan fitur sertifikat", required=False)
     certificate_number_prefix = forms.CharField(label="Prefix nomor sertifikat", max_length=12, required=False)
     certificate_pdf_dpi = forms.IntegerField(label="Resolusi PDF (DPI)", min_value=72, max_value=600)
     certificate_storage_path = forms.CharField(label="Path penyimpanan sertifikat", max_length=255, required=False)

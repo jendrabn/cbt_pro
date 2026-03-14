@@ -7,12 +7,11 @@ from .models import Subject
 class SubjectForm(forms.ModelForm):
     class Meta:
         model = Subject
-        fields = ["name", "code", "description", "is_active"]
+        fields = ["name", "code", "description"]
         labels = {
             "name": "Nama Mata Pelajaran",
             "code": "Kode",
             "description": "Deskripsi",
-            "is_active": "Status Aktif",
         }
         widgets = {
             "description": forms.Textarea(attrs={"rows": 3}),

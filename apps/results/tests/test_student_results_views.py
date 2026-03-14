@@ -43,7 +43,7 @@ class StudentResultsViewTests(TestCase):
             is_active=True,
         )
 
-        cls.subject = Subject.objects.create(name="Kimia", code="KIM", is_active=True)
+        cls.subject = Subject.objects.create(name="Kimia", code="KIM")
         now = timezone.now()
 
         cls.exam_review_on = Exam.objects.create(

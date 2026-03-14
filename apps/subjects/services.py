@@ -45,7 +45,5 @@ def get_subject_usage_summary(subject_id):
 
 def list_subjects_for_dropdown(active_only=True):
     queryset = Subject.objects.all()
-    if active_only:
-        queryset = queryset.filter(is_active=True)
     return queryset.order_by("name")
 

@@ -53,7 +53,7 @@ class MonitoringViewTests(TestCase):
             is_active=True,
         )
 
-        cls.subject = Subject.objects.create(name="Kimia", code="KIM", is_active=True)
+        cls.subject = Subject.objects.create(name="Kimia", code="KIM")
         cls.question = Question.objects.create(
             created_by=cls.teacher,
             subject=cls.subject,

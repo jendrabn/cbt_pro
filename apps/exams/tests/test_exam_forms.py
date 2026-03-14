@@ -64,8 +64,8 @@ class ExamWizardFormTests(TestCase):
             ordered=True,
         )
         self.assertEqual(form.available_students.count(), 3)
-        self.assertEqual(Class.objects.filter(name="XII IPA 1", is_active=True).count(), 1)
-        self.assertEqual(Class.objects.filter(name="XI IPS 2", is_active=True).count(), 1)
+        self.assertEqual(Class.objects.filter(name="XII IPA 1").count(), 1)
+        self.assertEqual(Class.objects.filter(name="XI IPS 2").count(), 1)
 
         class_names_by_student = {
             membership.student.username: membership.class_obj.name
@@ -106,7 +106,7 @@ class ExamWizardFormTests(TestCase):
                 self.assertNotIn("role", attrs)
 
     def test_form_requires_camera_when_screenshot_proctoring_enabled(self):
-        subject = Subject.objects.create(name="Biologi", code="BIO", is_active=True)
+        subject = Subject.objects.create(name="Biologi", code="BIO")
         question = Question.objects.create(
             created_by=self.teacher,
             subject=subject,
@@ -148,7 +148,7 @@ class ExamWizardFormTests(TestCase):
         self.assertIn("require_camera", form.errors)
 
     def test_form_initial_payload_strips_html_from_selected_question_text(self):
-        subject = Subject.objects.create(name="Kimia", code="KIM", is_active=True)
+        subject = Subject.objects.create(name="Kimia", code="KIM")
         question = Question.objects.create(
             created_by=self.teacher,
             subject=subject,
@@ -181,7 +181,7 @@ class ExamWizardFormTests(TestCase):
         self.assertNotIn("<sub>", payload[0]["question_text"])
 
     def test_form_initial_uses_browser_datetime_local_format_for_edit(self):
-        subject = Subject.objects.create(name="Sejarah", code="SEJ", is_active=True)
+        subject = Subject.objects.create(name="Sejarah", code="SEJ")
         now = timezone.now()
         exam = Exam.objects.create(
             created_by=self.teacher,

@@ -170,9 +170,9 @@ def _parse_int(value, field_label):
 
 
 def _build_subject_maps():
-    active_subjects = Subject.objects.filter(is_active=True).only("id", "name", "code")
-    subject_by_code = {subject.code.lower(): subject for subject in active_subjects if subject.code}
-    subject_by_name = {subject.name.lower(): subject for subject in active_subjects if subject.name}
+    subjects = Subject.objects.only("id", "name", "code")
+    subject_by_code = {subject.code.lower(): subject for subject in subjects if subject.code}
+    subject_by_name = {subject.name.lower(): subject for subject in subjects if subject.name}
     return subject_by_code, subject_by_name
 
 

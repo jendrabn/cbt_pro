@@ -2,7 +2,7 @@ from datetime import timedelta
 from unittest.mock import patch
 
 from django.test import TestCase
-from django.urls import reverse
+from django.urls import NoReverseMatch, reverse
 from django.utils import timezone
 
 from apps.accounts.models import User
@@ -38,7 +38,7 @@ class CertificateFeatureTests(TestCase):
             first_name="Siswa",
             last_name="Sertifikat",
         )
-        subject = Subject.objects.create(name="Ekonomi", code="EKO", is_active=True)
+        subject = Subject.objects.create(name="Ekonomi", code="EKO")
         now = timezone.now()
         cls.exam = Exam.objects.create(
             created_by=cls.teacher,
@@ -155,14 +155,6 @@ class CertificateTemplateManagementTests(TestCase):
             password="TeacherPass123!",
             role="teacher",
             is_active=True,
-        )
-        cls.admin = User.objects.create_user(
-            username="admin_template_feature",
-            email="admin.template.feature@cbt.com",
-            password="AdminPass123!",
-            role="admin",
-            is_active=True,
-            is_staff=True,
         )
 
     def _template_payload(self, **overrides):
@@ -286,42 +278,11 @@ class CertificateTemplateManagementTests(TestCase):
         self.assertTrue(any(item.is_default for item in templates))
         self.assertFalse(any(item.template_name == "Template Guru Lain" for item in templates))
 
-    def test_admin_can_set_default_template(self):
-        current_default = CertificateTemplate.objects.create(
-            template_name="Default Lama",
-            created_by=self.teacher,
-            is_default=True,
-        )
-        target = CertificateTemplate.objects.create(
-            template_name="Default Baru",
-            created_by=self.other_teacher,
-            is_default=False,
-        )
-
-        self.client.force_login(self.admin)
-        response = self.client.post(
-            reverse("admin_certificate_template_set_default", kwargs={"pk": target.id}),
-        )
-        self.assertEqual(response.status_code, 302)
-
-        current_default.refresh_from_db()
-        target.refresh_from_db()
-        self.assertFalse(current_default.is_default)
-        self.assertTrue(target.is_default)
-
-    def test_admin_can_preview_template(self):
-        template_obj = CertificateTemplate.objects.create(
-            template_name="Template Preview",
-            created_by=self.teacher,
-            is_default=False,
-        )
-        self.client.force_login(self.admin)
-
-        response = self.client.get(
-            reverse("admin_certificate_template_preview", kwargs={"pk": template_obj.id})
-        )
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "CERT-202603-ABC123")
+    def test_admin_template_routes_removed(self):
+        with self.assertRaises(NoReverseMatch):
+            reverse("admin_certificate_template_set_default", kwargs={"pk": self.teacher.id})
+        with self.assertRaises(NoReverseMatch):
+            reverse("admin_certificate_template_preview", kwargs={"pk": self.teacher.id})
 
 
 class CertificatePhaseFiveTests(TestCase):
@@ -449,7 +410,7 @@ class TeacherCertificateExportTests(TestCase):
             role="student",
             is_active=True,
         )
-        subject = Subject.objects.create(name="Informatika", code="INF", is_active=True)
+        subject = Subject.objects.create(name="Informatika", code="INF")
         now = timezone.now()
         exam = Exam.objects.create(
             created_by=cls.teacher,
@@ -516,7 +477,7 @@ class TeacherCertificateManagementPolishTests(TestCase):
             first_name="Siswa",
             last_name="Kelola",
         )
-        cls.subject = Subject.objects.create(name="Fisika", code="FIS", is_active=True)
+        cls.subject = Subject.objects.create(name="Fisika", code="FIS")
         now = timezone.now()
         cls.exam_a = Exam.objects.create(
             created_by=cls.teacher,

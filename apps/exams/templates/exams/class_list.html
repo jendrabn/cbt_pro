@@ -21,9 +21,9 @@
                         <i class="ri-refresh-line me-1"></i>Sinkronkan Profil Siswa
                     </button>
                 </form>
-                <a href="{% url 'class_create' %}" class="btn btn-primary" title="Tambah kelas baru">
+                <button type="button" class="btn btn-primary" id="openCreateClassModalBtn" title="Tambah kelas baru">
                     <i class="ri-add-line me-1"></i>Tambah Kelas
-                </a>
+                </button>
             </div>
         </div>
     </section>
@@ -40,18 +40,15 @@
             </div>
         {% endif %}
 
-        <section class="row row-cols-2 row-cols-md-4 g-3 mb-4 cbt-stats-grid">
+        <section class="row row-cols-2 row-cols-md-3 g-3 mb-4 cbt-stats-grid">
             <div class="col">
                 {% include "partials/stats_card.html" with title="Total Kelas" value=summary.total icon="ri-community-line" tone="primary" %}
             </div>
             <div class="col">
-                {% include "partials/stats_card.html" with title="Aktif" value=summary.active icon="ri-checkbox-circle-line" tone="success" %}
-            </div>
-            <div class="col">
-                {% include "partials/stats_card.html" with title="Nonaktif" value=summary.inactive icon="ri-close-circle-line" tone="secondary" %}
-            </div>
-            <div class="col">
                 {% include "partials/stats_card.html" with title="Total Keanggotaan" value=summary.memberships icon="ri-team-line" tone="info" %}
+            </div>
+            <div class="col">
+                {% include "partials/stats_card.html" with title="Penugasan Ujian" value=summary.assignments icon="ri-file-list-3-line" tone="warning" %}
             </div>
         </section>
 
@@ -67,13 +64,6 @@
                             class="form-control"
                             placeholder="Cari nama, tingkat, atau tahun ajaran..."
                         >
-                    </div>
-                    <div class="cbt-inline-filter-select">
-                        <select name="status" class="form-select">
-                            <option value="">Semua Status</option>
-                            <option value="active" {% if filters.status == 'active' %}selected{% endif %}>Aktif</option>
-                            <option value="inactive" {% if filters.status == 'inactive' %}selected{% endif %}>Nonaktif</option>
-                        </select>
                     </div>
                     <div class="cbt-inline-filter-select">
                         <select name="sort" class="form-select">
@@ -102,28 +92,28 @@
                             <tr>
                                 <th style="width: 100px;">ID</th>
                                 <th>Nama Kelas</th>
-                                <th style="width: 120px;">Tingkat</th>
-                                <th style="width: 140px;">Tahun Ajaran</th>
-                                <th style="width: 120px;">Status</th>
-                                <th style="width: 120px;">Jumlah Siswa</th>
-                                <th style="width: 140px;">Penugasan Ujian</th>
+                                <th style="width: 140px;">Tingkat</th>
+                                <th style="width: 160px;">Tahun Ajaran</th>
+                                <th style="width: 130px;">Jumlah Siswa</th>
+                                <th style="width: 150px;">Penugasan Ujian</th>
                                 <th class="text-end" style="width: 220px;">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for class_obj in classes %}
-                            <tr>
+                            <tr
+                                data-class-name="{{ class_obj.name }}"
+                                data-class-grade="{{ class_obj.grade_level|default_if_none:'' }}"
+                                data-class-year="{{ class_obj.academic_year|default_if_none:'' }}"
+                                data-edit-url="{% url 'class_edit' class_obj.id %}"
+                                data-delete-url="{% url 'class_delete' class_obj.id %}"
+                                data-students="{{ class_obj.student_count }}"
+                                data-assignments="{{ class_obj.exam_assignment_count }}"
+                            >
                                 <td><small class="text-muted" title="{{ class_obj.id }}">{{ class_obj.id|truncatechars:8 }}</small></td>
                                 <td class="fw-semibold">{{ class_obj.name }}</td>
                                 <td>{{ class_obj.grade_level|default:"-" }}</td>
                                 <td>{{ class_obj.academic_year|default:"-" }}</td>
-                                <td>
-                                    {% if class_obj.is_active %}
-                                        <span class="cbt-status-badge is-success">Aktif</span>
-                                    {% else %}
-                                        <span class="cbt-status-badge is-secondary">Nonaktif</span>
-                                    {% endif %}
-                                </td>
                                 <td>{{ class_obj.student_count }}</td>
                                 <td>{{ class_obj.exam_assignment_count }}</td>
                                 <td class="text-end">
@@ -131,18 +121,18 @@
                                         <a href="{% url 'class_members' class_obj.id %}" class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip" data-bs-title="Kelola anggota kelas">
                                             <i class="ri-team-line"></i>
                                         </a>
-                                        <a href="{% url 'class_edit' class_obj.id %}" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" data-bs-title="Edit kelas">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary edit-class-btn" data-bs-toggle="tooltip" data-bs-title="Edit kelas">
                                             <i class="ri-edit-line"></i>
-                                        </a>
-                                        <a href="{% url 'class_delete' class_obj.id %}" class="btn btn-sm btn-outline-danger" data-bs-toggle="tooltip" data-bs-title="Hapus kelas">
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-danger delete-class-btn" data-bs-toggle="tooltip" data-bs-title="Hapus kelas permanen">
                                             <i class="ri-delete-bin-line"></i>
-                                        </a>
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="8" class="text-center text-muted py-5">Belum ada kelas untuk filter saat ini.</td>
+                                <td colspan="7" class="text-center text-muted py-5">Belum ada kelas untuk filter saat ini.</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -184,4 +174,182 @@
             </div>
             {% endif %}
         </section>
+{% endblock %}
+
+{% block vendor_js %}
+<div class="modal fade" id="classFormModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="h6 mb-0" id="classFormModalTitle">Tambah Kelas</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                </div>
+                <form method="post" id="classFormModalForm" action="{% url 'class_create' %}">
+                    <div class="modal-body">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label required">Nama Kelas</label>
+                            <input type="text" class="form-control" name="name" id="classFormName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Tingkat</label>
+                            <input type="text" class="form-control" name="grade_level" id="classFormGradeLevel" placeholder="Contoh: XII">
+                        </div>
+                        <div class="mb-0">
+                            <label class="form-label">Tahun Ajaran</label>
+                            <input type="text" class="form-control" name="academic_year" id="classFormAcademicYear" placeholder="Contoh: 2025/2026">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary" id="classFormSubmitBtn">Simpan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="classDeleteModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-danger">
+                <div class="modal-header">
+                    <h2 class="h6 mb-0 warning-title"><i class="ri-error-warning-line me-1"></i>Hapus Kelas - Tindakan Tidak Dapat Dibatalkan</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                </div>
+                <form method="post" id="classDeleteForm" action="">
+                    <div class="modal-body">
+                        {% csrf_token %}
+                        <p class="mb-2">Anda akan menghapus permanen:</p>
+                        <p class="fw-semibold mb-3" id="deleteClassTargetName">-</p>
+
+                        <div class="border rounded p-3 bg-light">
+                            <p class="mb-2 fw-semibold">Ringkasan data terdampak:</p>
+                            <ul class="mb-0 ps-3">
+                                <li>Jumlah siswa terhubung: <strong id="deleteClassStudentsCount">0</strong></li>
+                                <li>Jumlah penugasan ujian terdampak: <strong id="deleteClassAssignmentsCount">0</strong></li>
+                            </ul>
+                        </div>
+
+                        <p class="text-danger fw-semibold mt-3 mb-2">
+                            Seluruh relasi kelas akan dihapus permanen dan tidak dapat dipulihkan.
+                        </p>
+
+                        <label class="form-label small mb-1 required" id="deleteClassConfirmLabel">Ketik ulang nama kelas untuk konfirmasi</label>
+                        <input type="text" class="form-control" name="confirm_name" id="deleteClassConfirmInput" autocomplete="off" required>
+                        <div class="form-text">Konfirmasi harus sama persis dengan teks yang diminta.</div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-danger" id="confirmClassDeleteBtn" disabled>Hapus Permanen</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+<script>
+        (function () {
+            var classFormModalEl = document.getElementById("classFormModal");
+            var classFormModal = classFormModalEl ? new bootstrap.Modal(classFormModalEl) : null;
+            var classDeleteModalEl = document.getElementById("classDeleteModal");
+            var classDeleteModal = classDeleteModalEl ? new bootstrap.Modal(classDeleteModalEl) : null;
+
+            var classForm = document.getElementById("classFormModalForm");
+            var classModalTitle = document.getElementById("classFormModalTitle");
+            var classFormSubmitBtn = document.getElementById("classFormSubmitBtn");
+            var classNameInput = document.getElementById("classFormName");
+            var classGradeInput = document.getElementById("classFormGradeLevel");
+            var classYearInput = document.getElementById("classFormAcademicYear");
+
+            var deleteForm = document.getElementById("classDeleteForm");
+            var deleteTargetName = document.getElementById("deleteClassTargetName");
+            var deleteStudentsCount = document.getElementById("deleteClassStudentsCount");
+            var deleteAssignmentsCount = document.getElementById("deleteClassAssignmentsCount");
+            var deleteConfirmLabel = document.getElementById("deleteClassConfirmLabel");
+            var deleteConfirmInput = document.getElementById("deleteClassConfirmInput");
+            var confirmDeleteBtn = document.getElementById("confirmClassDeleteBtn");
+            var expectedConfirmText = "";
+
+            function resetClassForm() {
+                if (!classForm) {
+                    return;
+                }
+                classForm.action = "{% url 'class_create' %}";
+                classModalTitle.textContent = "Tambah Kelas";
+                classFormSubmitBtn.textContent = "Simpan";
+                classNameInput.value = "";
+                classGradeInput.value = "";
+                classYearInput.value = "";
+            }
+
+            function openEditModal(row) {
+                if (!classForm || !row || !classFormModal) {
+                    return;
+                }
+                classForm.action = row.getAttribute("data-edit-url");
+                classModalTitle.textContent = "Edit Kelas";
+                classFormSubmitBtn.textContent = "Simpan Perubahan";
+                classNameInput.value = row.getAttribute("data-class-name") || "";
+                classGradeInput.value = row.getAttribute("data-class-grade") || "";
+                classYearInput.value = row.getAttribute("data-class-year") || "";
+                classFormModal.show();
+            }
+
+            function parseIntSafe(value) {
+                var parsed = parseInt(value || "0", 10);
+                return Number.isNaN(parsed) ? 0 : parsed;
+            }
+
+            function setupDeleteModal(options) {
+                if (!deleteForm || !classDeleteModal) {
+                    return;
+                }
+                deleteForm.action = options.actionUrl;
+                deleteTargetName.textContent = options.targetLabel;
+                deleteStudentsCount.textContent = String(options.studentCount || 0);
+                deleteAssignmentsCount.textContent = String(options.assignmentCount || 0);
+                deleteConfirmLabel.textContent = "Ketik persis: " + options.expectedConfirmText;
+                deleteConfirmInput.value = "";
+                expectedConfirmText = options.expectedConfirmText;
+                confirmDeleteBtn.disabled = true;
+                classDeleteModal.show();
+            }
+
+            if (document.getElementById("openCreateClassModalBtn")) {
+                document.getElementById("openCreateClassModalBtn").addEventListener("click", function () {
+                    resetClassForm();
+                    if (classFormModal) {
+                        classFormModal.show();
+                    }
+                });
+            }
+
+            document.querySelectorAll(".edit-class-btn").forEach(function (button) {
+                button.addEventListener("click", function () {
+                    openEditModal(button.closest("tr"));
+                });
+            });
+
+            document.querySelectorAll(".delete-class-btn").forEach(function (button) {
+                button.addEventListener("click", function () {
+                    var row = button.closest("tr");
+                    if (!row) {
+                        return;
+                    }
+                    setupDeleteModal({
+                        actionUrl: row.getAttribute("data-delete-url"),
+                        targetLabel: row.getAttribute("data-class-name") || "-",
+                        studentCount: parseIntSafe(row.getAttribute("data-students")),
+                        assignmentCount: parseIntSafe(row.getAttribute("data-assignments")),
+                        expectedConfirmText: row.getAttribute("data-class-name") || "",
+                    });
+                });
+            });
+
+            if (deleteConfirmInput) {
+                deleteConfirmInput.addEventListener("input", function () {
+                    confirmDeleteBtn.disabled = (deleteConfirmInput.value !== expectedConfirmText);
+                });
+            }
+        })();
+    </script>
 {% endblock %}

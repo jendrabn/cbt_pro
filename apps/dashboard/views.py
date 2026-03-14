@@ -73,7 +73,7 @@ class AdminDashboardView(DashboardBaseView):
         student_count = User.objects.filter(role="student", is_active=True, is_deleted=False).count()
         total_users = teacher_count + student_count
         total_questions = Question.objects.filter(is_deleted=False).count()
-        total_active_subjects = Subject.objects.filter(is_active=True).count()
+        total_subjects = Subject.objects.count()
         active_exams = Exam.objects.filter(is_deleted=False, status__in=["published", "ongoing"]).count()
         completed_exams = Exam.objects.filter(is_deleted=False, status="completed").count()
 
@@ -120,7 +120,7 @@ class AdminDashboardView(DashboardBaseView):
                 "student_count": student_count,
                 "total_users": total_users,
                 "total_questions": total_questions,
-                "total_active_subjects": total_active_subjects,
+                "total_subjects": total_subjects,
                 "active_exams": active_exams,
                 "completed_exams": completed_exams,
                 "recent_activities": recent_activities,

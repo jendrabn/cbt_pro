@@ -330,14 +330,12 @@ class Command(BaseCommand):
                 defaults={
                     "name": row["name"],
                     "description": row.get("description", ""),
-                    "is_active": True,
                 },
             )
             changed_fields = []
             for field, value in {
                 "name": row["name"],
                 "description": row.get("description", ""),
-                "is_active": True,
             }.items():
                 if getattr(subject, field) != value:
                     setattr(subject, field, value)
@@ -351,8 +349,8 @@ class Command(BaseCommand):
 
     def sync_seed_classes(self):
         sync_classes_from_student_profiles()
-        classes = list(Class.objects.filter(is_active=True).order_by("name"))
-        self.stdout.write(self.style.SUCCESS(f"Prepared {len(classes)} active classes for exam assignment."))
+        classes = list(Class.objects.order_by("name"))
+        self.stdout.write(self.style.SUCCESS(f"Prepared {len(classes)} classes for exam assignment."))
         return classes
 
     def _get_or_create_category(self, name):

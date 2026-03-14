@@ -165,7 +165,6 @@ CERTIFICATE_FEATURE_CACHE_KEY = "cbt_certificate_features"
 CERTIFICATE_FEATURE_CACHE_TTL_SECONDS = 300
 
 CERTIFICATE_FEATURE_DEFAULTS = {
-    "certificates_enabled": True,
     "certificate_number_prefix": "CERT",
     "certificate_pdf_dpi": 150,
     "certificate_storage_path": "certificates/",

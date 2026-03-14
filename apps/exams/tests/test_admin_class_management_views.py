@@ -80,7 +80,6 @@ class AdminClassManagementViewTests(TestCase):
         self.assertEqual(response.status_code, 302)
 
         class_obj = Class.objects.get(name="XII IPA 3")
-        self.assertTrue(class_obj.is_active)
         member_usernames = set(
             ClassStudent.objects.filter(class_obj=class_obj).values_list("student__username", flat=True)
         )
@@ -88,7 +87,7 @@ class AdminClassManagementViewTests(TestCase):
         self.assertFalse(Class.objects.filter(name="XI IPS 1").exists())
 
     def test_admin_can_replace_class_members(self):
-        class_obj = Class.objects.create(name="Kelas Uji", is_active=True)
+        class_obj = Class.objects.create(name="Kelas Uji")
         ClassStudent.objects.create(class_obj=class_obj, student=self.student_one)
 
         self.client.force_login(self.admin)
@@ -103,9 +102,9 @@ class AdminClassManagementViewTests(TestCase):
         )
         self.assertEqual(member_usernames, {"student_class_mgmt_2"})
 
-    def test_delete_class_blocked_when_used_by_exam_assignment(self):
-        class_obj = Class.objects.create(name="X IPA 9", is_active=True)
-        subject = Subject.objects.create(name="Matematika Lanjut", code="MTKLJ", is_active=True)
+    def test_delete_class_permanent_when_used_by_exam_assignment(self):
+        class_obj = Class.objects.create(name="X IPA 9")
+        subject = Subject.objects.create(name="Matematika Lanjut", code="MTKLJ")
         exam = Exam.objects.create(
             created_by=self.teacher,
             subject=subject,
@@ -125,4 +124,4 @@ class AdminClassManagementViewTests(TestCase):
             data={"confirm_name": class_obj.name},
         )
         self.assertEqual(response.status_code, 302)
-        self.assertTrue(Class.objects.filter(pk=class_obj.pk).exists())
+        self.assertFalse(Class.objects.filter(pk=class_obj.pk).exists())

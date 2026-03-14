@@ -48,7 +48,7 @@ class StudentExamRoomViewTests(TestCase):
             is_active=True,
         )
 
-        cls.subject = Subject.objects.create(name="Fisika", code="FIS", is_active=True)
+        cls.subject = Subject.objects.create(name="Fisika", code="FIS")
         now = timezone.now()
         cls.exam = Exam.objects.create(
             created_by=cls.teacher,

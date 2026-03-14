@@ -63,8 +63,8 @@ class TeacherResultsViewTests(TestCase):
             is_staff=True,
         )
 
-        cls.subject = Subject.objects.create(name="Biologi", code="BIO", is_active=True)
-        cls.class_obj = Class.objects.create(name="XII IPA 3", is_active=True)
+        cls.subject = Subject.objects.create(name="Biologi", code="BIO")
+        cls.class_obj = Class.objects.create(name="XII IPA 3")
         now = timezone.now()
 
         cls.exam = Exam.objects.create(

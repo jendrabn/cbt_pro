@@ -905,7 +905,7 @@ class UserImportView(AdminUserBaseView, View):
     template_name = "users/user_import.html"
 
     def _build_context(self, request, **extra):
-        subjects = list(Subject.objects.filter(is_active=True).order_by("name").values_list("name", flat=True))
+        subjects = list(Subject.objects.order_by("name").values_list("name", flat=True))
         context = {
             "form": extra.get("form") or UserImportForm(),
             "import_result": extra.get("import_result"),

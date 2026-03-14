@@ -1,13 +1,10 @@
 from django.urls import path
 
 from .views import (
-    AdminCertificateTemplateListView,
-    AdminCertificateTemplatePreviewView,
     AnswerReviewView,
     ExamResultsDetailView,
     ExportResultsView,
     RetakeHistoryView,
-    SetDefaultTemplateView,
     TeacherCertificateTemplateCreateView,
     TeacherCertificateTemplateDetailView,
     TeacherCertificateTemplateListView,
@@ -110,21 +107,6 @@ urlpatterns = [
         "teacher/certificates/templates/<uuid:pk>/preview/",
         TeacherCertificateTemplatePreviewView.as_view(),
         name="teacher_certificate_template_preview",
-    ),
-    path(
-        "admin/certificates/templates/",
-        AdminCertificateTemplateListView.as_view(),
-        name="admin_certificate_template_list",
-    ),
-    path(
-        "admin/certificates/templates/<uuid:pk>/preview/",
-        AdminCertificateTemplatePreviewView.as_view(),
-        name="admin_certificate_template_preview",
-    ),
-    path(
-        "admin/certificates/templates/<uuid:pk>/set-default/",
-        SetDefaultTemplateView.as_view(),
-        name="admin_certificate_template_set_default",
     ),
     path(
         "certificates/verify/<str:token>/",

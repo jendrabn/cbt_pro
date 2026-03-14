@@ -142,13 +142,12 @@ class Class(BaseModel):
     name = models.CharField(max_length=100)
     grade_level = models.CharField(max_length=50, null=True, blank=True)
     academic_year = models.CharField(max_length=20, null=True, blank=True)
-    is_active = models.BooleanField(default=True)
     
     class Meta:
         db_table = 'classes'
         verbose_name_plural = 'classes'
         indexes = [
-            models.Index(fields=['name'], condition=models.Q(is_active=True), name='idx_classes_name'),
+            models.Index(fields=['name'], name='idx_classes_name'),
         ]
     
     def __str__(self):

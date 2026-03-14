@@ -24,9 +24,9 @@ class ImportTemplateExporter:
 
         if role == "teacher":
             guide.append(["teacher_id", "TIDAK", "NIP guru (opsional)"])
-            subject_names = list(Subject.objects.filter(is_active=True).order_by("name").values_list("name", flat=True))
+            subject_names = list(Subject.objects.order_by("name").values_list("name", flat=True))
             subject_text = ", ".join(subject_names) if subject_names else "-"
-            guide.append(["subject_specialization", "TIDAK", f"Gunakan nama subject aktif: {subject_text}"])
+            guide.append(["subject_specialization", "TIDAK", f"Gunakan nama subject yang tersedia: {subject_text}"])
         else:
             guide.append(["student_id", "YA", "NIS siswa"])
             guide.append(["class_grade", "YA", "Contoh: X IPA 1 / XI IPS 2"])

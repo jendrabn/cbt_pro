@@ -1,6 +1,7 @@
 import json
 import shutil
 from pathlib import Path
+from unittest.mock import Mock, patch
 from uuid import uuid4
 
 from django.conf import settings
@@ -8,7 +9,7 @@ from django.core.management import call_command
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.http import HttpResponse
 from django.template import Context, Template
-from django.test import SimpleTestCase, TestCase, override_settings
+from django.test import TestCase, override_settings
 from django.urls import path as url_path, reverse
 from django.views import View
 
@@ -243,6 +244,202 @@ class SystemSettingsViewTests(TestCase):
         self.assertFalse(SystemSetting.objects.get(setting_key="auth_enable_teacher_registration").get_value())
         self.assertTrue(SystemSetting.objects.get(setting_key="auth_enable_student_registration").get_value())
 
+    def test_save_branding_supports_all_upload_fields(self):
+        self.client.force_login(self.admin)
+        response = self.client.post(
+            reverse("system_settings"),
+            data={
+                "action": "save_branding",
+                "institution_logo_url": SimpleUploadedFile("logo.png", b"logo", content_type="image/png"),
+                "institution_logo_dark_url": SimpleUploadedFile("logo-dark.svg", b"dark", content_type="image/svg+xml"),
+                "institution_favicon_url": SimpleUploadedFile("favicon.ico", b"ico", content_type="image/x-icon"),
+                "login_page_background_url": SimpleUploadedFile("bg.jpg", b"bg", content_type="image/jpeg"),
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(
+            SystemSetting.objects.get(setting_key="institution_logo_url").setting_value.startswith("branding/logo/")
+        )
+        self.assertTrue(
+            SystemSetting.objects.get(setting_key="institution_logo_dark_url").setting_value.startswith(
+                "branding/logo_dark/"
+            )
+        )
+        self.assertTrue(
+            SystemSetting.objects.get(setting_key="institution_favicon_url").setting_value.startswith(
+                "branding/favicon/"
+            )
+        )
+        self.assertTrue(
+            SystemSetting.objects.get(setting_key="login_page_background_url").setting_value.startswith(
+                "branding/login_bg/"
+            )
+        )
+
+    def test_branding_rejects_invalid_upload_extension(self):
+        self.client.force_login(self.admin)
+        response = self.client.post(
+            reverse("system_settings"),
+            data={
+                "action": "save_branding",
+                "institution_logo_url": SimpleUploadedFile("logo.txt", b"not-image", content_type="text/plain"),
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Logo utama: format file tidak valid")
+        self.assertFalse(SystemSetting.objects.filter(setting_key="institution_logo_url").exists())
+
+    def test_save_email_keeps_existing_password_when_blank(self):
+        self.client.force_login(self.admin)
+        SystemSetting.objects.update_or_create(
+            setting_key="smtp_password",
+            defaults={
+                "setting_value": "existing-secret",
+                "setting_type": "string",
+                "category": "email",
+            },
+        )
+        response = self.client.post(
+            reverse("system_settings"),
+            data={
+                "action": "save_email",
+                "smtp_host": "smtp.example.com",
+                "smtp_port": 587,
+                "smtp_username": "mailer",
+                "smtp_password": "",
+                "default_from_email": "no-reply@example.com",
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(SystemSetting.objects.get(setting_key="smtp_password").setting_value, "existing-secret")
+        self.assertFalse(SystemSetting.objects.get(setting_key="smtp_use_tls").get_value())
+
+    @patch("apps.core.views.send_mail")
+    @patch("apps.core.views.get_connection")
+    def test_test_email_uses_submitted_configuration(self, mock_get_connection, mock_send_mail):
+        self.client.force_login(self.admin)
+        fake_connection = Mock()
+        mock_get_connection.return_value = fake_connection
+
+        response = self.client.post(
+            reverse("system_settings"),
+            data={
+                "action": "test_email",
+                "smtp_host": "smtp.example.com",
+                "smtp_port": 587,
+                "smtp_username": "mailer",
+                "smtp_password": "secret",
+                "smtp_use_tls": "on",
+                "default_from_email": "no-reply@example.com",
+                "test_email_recipient": "receiver@example.com",
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("?tab=email", response.url)
+        mock_get_connection.assert_called_once_with(
+            host="smtp.example.com",
+            port=587,
+            username="mailer",
+            password="secret",
+            use_tls=True,
+            fail_silently=False,
+        )
+        mock_send_mail.assert_called_once()
+
+    def test_save_exam_defaults_checkboxes_and_values(self):
+        self.client.force_login(self.admin)
+        response = self.client.post(
+            reverse("system_settings"),
+            data={
+                "action": "save_exam_defaults",
+                "default_exam_duration": 75,
+                "default_passing_score": "82.5",
+                "require_fullscreen_default": "on",
+                "max_violations_allowed_default": 4,
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(SystemSetting.objects.get(setting_key="default_exam_duration").get_value(), 75)
+        self.assertEqual(SystemSetting.objects.get(setting_key="default_passing_score").get_value(), 82.5)
+        self.assertTrue(SystemSetting.objects.get(setting_key="require_fullscreen_default").get_value())
+        self.assertFalse(SystemSetting.objects.get(setting_key="detect_tab_switch_default").get_value())
+
+    def test_save_notification_checkboxes(self):
+        self.client.force_login(self.admin)
+        response = self.client.post(
+            reverse("system_settings"),
+            data={
+                "action": "save_notifications",
+                "notify_exam_published_email": "on",
+                "notify_daily_summary": "on",
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(SystemSetting.objects.get(setting_key="notify_exam_published_email").get_value())
+        self.assertFalse(SystemSetting.objects.get(setting_key="notify_exam_result_email").get_value())
+        self.assertFalse(SystemSetting.objects.get(setting_key="notify_system_announcement").get_value())
+        self.assertTrue(SystemSetting.objects.get(setting_key="notify_daily_summary").get_value())
+
+    def test_save_certificate_settings_toggles(self):
+        self.client.force_login(self.admin)
+        response = self.client.post(
+            reverse("system_settings"),
+            data={
+                "action": "save_certificates",
+                "certificate_number_prefix": "acme",
+                "certificate_pdf_dpi": 200,
+                "certificate_storage_path": "my-certs",
+                "certificate_verify_public": "on",
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(SystemSetting.objects.get(setting_key="certificate_number_prefix").setting_value, "ACME")
+        self.assertEqual(SystemSetting.objects.get(setting_key="certificate_pdf_dpi").get_value(), 200)
+        self.assertEqual(SystemSetting.objects.get(setting_key="certificate_storage_path").setting_value, "my-certs/")
+        self.assertFalse(SystemSetting.objects.get(setting_key="certificate_email_enabled").get_value())
+        self.assertTrue(SystemSetting.objects.get(setting_key="certificate_verify_public").get_value())
+
+    def test_restore_backup_updates_settings(self):
+        self.client.force_login(self.admin)
+        backup_file = SimpleUploadedFile(
+            "settings_backup_test.json",
+            json.dumps(
+                {
+                    "settings": [
+                        {
+                            "setting_key": "timezone",
+                            "setting_value": "UTC",
+                            "setting_type": "string",
+                            "category": "general",
+                            "description": "Zona waktu aplikasi",
+                            "is_public": True,
+                        },
+                        {
+                            "setting_key": "landing_page_enabled",
+                            "setting_value": "false",
+                            "setting_type": "boolean",
+                            "category": "general",
+                            "description": "Aktifkan landing page pada URL root",
+                            "is_public": False,
+                        },
+                    ]
+                }
+            ).encode("utf-8"),
+            content_type="application/json",
+        )
+        response = self.client.post(
+            reverse("system_settings"),
+            data={
+                "action": "restore_backup",
+                "backup_file": backup_file,
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(SystemSetting.objects.get(setting_key="timezone").setting_value, "UTC")
+        self.assertFalse(SystemSetting.objects.get(setting_key="landing_page_enabled").get_value())
+
     def test_landing_redirects_to_login_when_disabled(self):
         SystemSetting.objects.update_or_create(
             setting_key="landing_page_enabled",
@@ -258,7 +455,7 @@ class SystemSettingsViewTests(TestCase):
         self.assertEqual(response.url, reverse("login"))
 
 
-class ErrorPageMiddlewareTests(SimpleTestCase):
+class ErrorPageMiddlewareTests(TestCase):
     @override_settings(DEBUG=True)
     def test_unknown_route_uses_custom_404_page_in_debug(self):
         response = self.client.get("/student/dashboard/sss")
@@ -283,6 +480,24 @@ class ErrorPageMiddlewareTests(SimpleTestCase):
         response = client.get("/crash/")
         self.assertEqual(response.status_code, 500)
         self.assertContains(response, "500 - Terjadi Gangguan Server", status_code=500)
+
+
+class MediaServingTests(TestCase):
+    def test_media_file_served_when_django_media_serving_enabled(self):
+        target = Path(settings.MEDIA_ROOT) / "branding" / "logo" / "media-serving-test.txt"
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text("ok", encoding="utf-8")
+
+        response = None
+        try:
+            response = self.client.get("/media/branding/logo/media-serving-test.txt")
+            self.assertEqual(response.status_code, 200)
+            body = b"".join(response.streaming_content)
+            self.assertEqual(body, b"ok")
+        finally:
+            if response is not None:
+                response.close()
+            target.unlink(missing_ok=True)
 
 
 class EnumBadgeHelpersTests(TestCase):

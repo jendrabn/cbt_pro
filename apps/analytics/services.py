@@ -455,13 +455,12 @@ def build_report_rows(exams_qs):
 
 
 def get_filter_options():
-    subjects = Subject.objects.all().order_by("name").values("id", "name", "is_active")
-    classes = list(Class.objects.filter(is_active=True).order_by("name").values("id", "name"))
+    subjects = Subject.objects.all().order_by("name").values("id", "name")
+    classes = list(Class.objects.order_by("name").values("id", "name"))
     subject_options = [
         {
             "id": str(item["id"]),
             "name": item["name"] or "-",
-            "is_active": item["is_active"],
         }
         for item in subjects
         if item["id"]

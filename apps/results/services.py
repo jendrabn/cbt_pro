@@ -696,7 +696,7 @@ def get_teacher_filter_options(teacher):
         .values_list("assignments__class_obj_id", flat=True)
         .distinct()
     )
-    class_rows = Class.objects.filter(id__in=class_ids, is_active=True).order_by("name").values("id", "name")
+    class_rows = Class.objects.filter(id__in=class_ids).order_by("name").values("id", "name")
 
     return {
         "subjects": [
@@ -816,7 +816,7 @@ def _sort_student_rows(rows, sort_by, direction):
 
 def _build_student_class_map(student_ids: Iterable):
     rows = (
-        ClassStudent.objects.filter(student_id__in=student_ids, class_obj__is_active=True)
+        ClassStudent.objects.filter(student_id__in=student_ids)
         .select_related("class_obj")
         .values("student_id", "class_obj__name")
     )

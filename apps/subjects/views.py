@@ -21,14 +21,6 @@ def _querystring_without_page(request):
     return querydict.urlencode()
 
 
-def _as_status_filter(value):
-    if value == "active":
-        return True
-    if value == "inactive":
-        return False
-    return None
-
-
 class AdminSubjectBaseView(RoleRequiredMixin):
     required_role = "admin"
     permission_denied_message = "Hanya admin yang dapat mengakses halaman manajemen mata pelajaran."
@@ -46,23 +38,16 @@ class SubjectListView(AdminSubjectBaseView, ListView):
     def get_queryset(self):
         queryset = self.get_base_queryset()
         q = (self.request.GET.get("q") or "").strip()
-        status = (self.request.GET.get("status") or "").strip()
         sort = (self.request.GET.get("sort") or "name").strip()
 
         if q:
             queryset = queryset.filter(Q(name__icontains=q) | Q(code__icontains=q))
-
-        status_bool = _as_status_filter(status)
-        if status_bool is not None:
-            queryset = queryset.filter(is_active=status_bool)
 
         allowed_sort = {
             "name": "name",
             "-name": "-name",
             "code": "code",
             "-code": "-code",
-            "status": "is_active",
-            "-status": "-is_active",
             "questions": "question_count",
             "-questions": "-question_count",
             "exams": "exam_count",
@@ -98,13 +83,10 @@ class SubjectListView(AdminSubjectBaseView, ListView):
                 "querystring": _querystring_without_page(self.request),
                 "filters": {
                     "q": self.request.GET.get("q", ""),
-                    "status": self.request.GET.get("status", ""),
                     "sort": self.request.GET.get("sort", "name"),
                 },
                 "summary": {
                     "total": all_subjects.count(),
-                    "active": all_subjects.filter(is_active=True).count(),
-                    "inactive": all_subjects.filter(is_active=False).count(),
                 },
                 "create_form": SubjectForm(),
             }
@@ -118,6 +100,9 @@ class SubjectCreateView(AdminSubjectBaseView, CreateView):
     template_name = "subjects/subject_form.html"
     success_url = reverse_lazy("subject_list")
 
+    def get(self, request, *args, **kwargs):
+        return redirect("subject_list")
+
     def form_valid(self, form):
         response = super().form_valid(form)
         messages.success(self.request, f"Mata pelajaran '{self.object.name}' berhasil ditambahkan.")
@@ -125,7 +110,10 @@ class SubjectCreateView(AdminSubjectBaseView, CreateView):
 
     def form_invalid(self, form):
         messages.error(self.request, "Gagal menambahkan mata pelajaran. Periksa kembali data yang diisi.")
-        return super().form_invalid(form)
+        for field_errors in form.errors.values():
+            for error in field_errors:
+                messages.error(self.request, error)
+        return redirect("subject_list")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -142,6 +130,9 @@ class SubjectUpdateView(AdminSubjectBaseView, UpdateView):
     success_url = reverse_lazy("subject_list")
     context_object_name = "subject"
 
+    def get(self, request, *args, **kwargs):
+        return redirect("subject_list")
+
     def form_valid(self, form):
         response = super().form_valid(form)
         messages.success(self.request, f"Mata pelajaran '{self.object.name}' berhasil diperbarui.")
@@ -149,7 +140,10 @@ class SubjectUpdateView(AdminSubjectBaseView, UpdateView):
 
     def form_invalid(self, form):
         messages.error(self.request, "Gagal memperbarui mata pelajaran. Periksa kembali data yang diisi.")
-        return super().form_invalid(form)
+        for field_errors in form.errors.values():
+            for error in field_errors:
+                messages.error(self.request, error)
+        return redirect("subject_list")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -165,6 +159,9 @@ class SubjectDeleteView(AdminSubjectBaseView, TemplateView):
     def dispatch(self, request, *args, **kwargs):
         self.subject_obj = get_object_or_404(Subject, pk=kwargs["pk"])
         return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        return redirect("subject_list")
 
     def post(self, request, *args, **kwargs):
         confirm_name = (request.POST.get("confirm_name") or "").strip()
@@ -203,12 +200,7 @@ class SubjectAPIView(RoleRequiredMixin, View):
     permission_denied_message = "Anda tidak memiliki akses untuk mengambil data mata pelajaran."
 
     def get(self, request):
-        active_only = True
-        include_inactive = (request.GET.get("include_inactive") or "").strip().lower() in {"1", "true", "yes"}
-        if request.user.role == "admin" and include_inactive:
-            active_only = False
-
-        queryset = list_subjects_for_dropdown(active_only=active_only)
+        queryset = list_subjects_for_dropdown(active_only=False)
         keyword = (request.GET.get("q") or "").strip()
         if keyword:
             queryset = queryset.filter(Q(name__icontains=keyword) | Q(code__icontains=keyword))
@@ -219,7 +211,6 @@ class SubjectAPIView(RoleRequiredMixin, View):
                 "name": subject.name,
                 "code": subject.code,
                 "description": subject.description or "",
-                "is_active": subject.is_active,
             }
             for subject in queryset
         ]

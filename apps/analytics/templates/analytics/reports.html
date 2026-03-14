@@ -50,7 +50,7 @@
                             <option value="">Semua Mata Pelajaran</option>
                             {% for subject in subjects %}
                             <option value="{{ subject.id }}" {% if filters.subject == subject.id %}selected{% endif %}>
-                                {{ subject.name }}{% if not subject.is_active %} (Nonaktif){% endif %}
+                                {{ subject.name }}
                             </option>
                             {% endfor %}
                         </select>

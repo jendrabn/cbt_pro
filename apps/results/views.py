@@ -270,11 +270,6 @@ class TeacherCertificatesBaseView(RoleRequiredMixin):
     permission_denied_message = "Hanya guru yang dapat mengakses manajemen sertifikat."
 
 
-class AdminCertificatesBaseView(RoleRequiredMixin):
-    required_role = "admin"
-    permission_denied_message = "Hanya admin yang dapat mengelola template default sertifikat."
-
-
 class TeacherResultsListView(TeacherResultsBaseView, ListView):
     model = Exam
     template_name = "results/results_list.html"
@@ -593,18 +588,8 @@ class TeacherCertificateTemplateListView(TeacherCertificatesBaseView, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context.update(
-            {
-                "is_admin_mode": False,
-                "create_url": reverse("teacher_certificate_template_create"),
-                "list_url": reverse("teacher_certificate_template_list"),
-                "preview_url_name": "teacher_certificate_template_preview",
-                "base_layout": "layouts/base_teacher.html",
-                "topbar_partial": "partials/topbar_teacher.html",
-                "header_eyebrow": "Panel Guru",
-                "header_title": "Template Sertifikat",
-            }
-        )
+        context["header_eyebrow"] = "Panel Guru"
+        context["header_title"] = "Template Sertifikat"
         return context
 
 
@@ -735,58 +720,6 @@ class TeacherCertificateTemplatePreviewView(TeacherCertificatesBaseView, View):
         context = _template_preview_context(template_obj)
         html = render_to_string("certificates/certificate_pdf.html", context=context, request=request)
         return HttpResponse(html)
-
-
-class AdminCertificateTemplateListView(AdminCertificatesBaseView, ListView):
-    model = CertificateTemplate
-    template_name = "certificates/template_list.html"
-    context_object_name = "templates"
-
-    def get_queryset(self):
-        return CertificateTemplate.objects.select_related("created_by").order_by(
-            "-is_default",
-            "template_name",
-        )
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context.update(
-            {
-                "is_admin_mode": True,
-                "list_url": reverse("admin_certificate_template_list"),
-                "create_url": "",
-                "preview_url_name": "admin_certificate_template_preview",
-                "base_layout": "layouts/base_admin.html",
-                "topbar_partial": "partials/topbar_admin.html",
-                "header_eyebrow": "Panel Admin",
-                "header_title": "Template Sertifikat",
-            }
-        )
-        return context
-
-
-class AdminCertificateTemplatePreviewView(AdminCertificatesBaseView, View):
-    def get(self, request, pk):
-        template_obj = get_object_or_404(CertificateTemplate, pk=pk)
-        context = _template_preview_context(template_obj)
-        html = render_to_string("certificates/certificate_pdf.html", context=context, request=request)
-        return HttpResponse(html)
-
-
-class SetDefaultTemplateView(AdminCertificatesBaseView, View):
-    @transaction.atomic
-    def post(self, request, pk):
-        target = get_object_or_404(CertificateTemplate, pk=pk)
-        CertificateTemplate.objects.filter(is_default=True).exclude(pk=target.pk).update(
-            is_default=False,
-            updated_at=timezone.now(),
-        )
-        if not target.is_default:
-            target.is_default = True
-            target.save(update_fields=["is_default", "updated_at"])
-        messages.success(request, f"Template '{target.template_name}' ditetapkan sebagai default sistem.")
-        next_url = (request.POST.get("next") or "").strip() or reverse("admin_certificate_template_list")
-        return redirect(next_url)
 
 
 class StudentResultsListView(StudentResultsBaseView, ListView):

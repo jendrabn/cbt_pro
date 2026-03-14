@@ -44,8 +44,8 @@ class StudentExamListViewTests(TestCase):
             is_active=True,
         )
 
-        subject = Subject.objects.create(name="Sejarah", code="SEJ", is_active=True)
-        class_obj = Class.objects.create(name="XI IPS 2", is_active=True)
+        subject = Subject.objects.create(name="Sejarah", code="SEJ")
+        class_obj = Class.objects.create(name="XI IPS 2")
         ClassStudent.objects.create(class_obj=class_obj, student=cls.student)
 
         question = Question.objects.create(

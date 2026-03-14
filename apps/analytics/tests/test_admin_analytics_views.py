@@ -44,8 +44,8 @@ class AdminAnalyticsViewTests(TestCase):
             is_active=True,
         )
 
-        subject = Subject.objects.create(name="Matematika", code="MATH", is_active=True)
-        class_obj = Class.objects.create(name="XII IPA 1", is_active=True)
+        subject = Subject.objects.create(name="Matematika", code="MATH")
+        class_obj = Class.objects.create(name="XII IPA 1")
         now = timezone.now()
         exam = Exam.objects.create(
             created_by=cls.teacher,

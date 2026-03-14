@@ -33,15 +33,12 @@
             </div>
         {% endif %}
 
-        <section class="row row-cols-2 row-cols-xl-3 g-3 mb-4 cbt-stats-grid">
+        <section class="row row-cols-1 row-cols-md-2 g-3 mb-4 cbt-stats-grid">
             <div class="col">
                 {% include "partials/stats_card.html" with title="Total Mata Pelajaran" value=summary.total icon="ri-book-open-line" tone="primary" %}
             </div>
             <div class="col">
-                {% include "partials/stats_card.html" with title="Aktif" value=summary.active icon="ri-checkbox-circle-line" tone="success" %}
-            </div>
-            <div class="col">
-                {% include "partials/stats_card.html" with title="Nonaktif" value=summary.inactive icon="ri-close-circle-line" tone="secondary" %}
+                {% include "partials/stats_card.html" with title="Mapel Ditampilkan" value=subject_rows|length icon="ri-list-check-2" tone="info" %}
             </div>
         </section>
 
@@ -57,13 +54,6 @@
                             class="form-control"
                             placeholder="Cari nama atau kode mata pelajaran..."
                         >
-                    </div>
-                    <div class="cbt-inline-filter-select">
-                        <select name="status" class="form-select">
-                            <option value="">Semua Status</option>
-                            <option value="active" {% if filters.status == 'active' %}selected{% endif %}>Aktif</option>
-                            <option value="inactive" {% if filters.status == 'inactive' %}selected{% endif %}>Nonaktif</option>
-                        </select>
                     </div>
                     <div class="cbt-inline-filter-select">
                         <select name="sort" class="form-select">
@@ -93,7 +83,6 @@
                                 <th style="width: 100px;">ID</th>
                                 <th>Nama</th>
                                 <th style="width: 120px;">Kode</th>
-                                <th style="width: 140px;">Status</th>
                                 <th style="width: 140px;">Jumlah Soal</th>
                                 <th style="width: 140px;">Jumlah Ujian</th>
                                 <th class="text-end" style="width: 180px;">Aksi</th>
@@ -105,7 +94,6 @@
                                 data-subject-name="{{ row.subject.name }}"
                                 data-subject-code="{{ row.subject.code }}"
                                 data-subject-description="{{ row.subject.description|default_if_none:'' }}"
-                                data-subject-active="{{ row.subject.is_active|yesno:'1,0' }}"
                                 data-edit-url="{% url 'subject_edit' row.subject.id %}"
                                 data-delete-url="{% url 'subject_delete' row.subject.id %}"
                                 data-questions="{{ row.usage.questions_count }}"
@@ -115,13 +103,6 @@
                                 <td><small class="text-muted" title="{{ row.subject.id }}">{{ row.subject.id|truncatechars:8 }}</small></td>
                                 <td class="fw-semibold">{{ row.subject.name }}</td>
                                 <td>{% soft_badge row.subject.code "secondary" %}</td>
-                                <td>
-                                    {% if row.subject.is_active %}
-                                        <span class="cbt-status-badge is-success">Aktif</span>
-                                    {% else %}
-                                        <span class="cbt-status-badge is-secondary">Nonaktif</span>
-                                    {% endif %}
-                                </td>
                                 <td>{{ row.question_count }}</td>
                                 <td>{{ row.exam_count }}</td>
                                 <td class="text-end">
@@ -137,7 +118,7 @@
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="7" class="text-center text-muted py-5">Belum ada mata pelajaran untuk filter saat ini.</td>
+                                <td colspan="6" class="text-center text-muted py-5">Belum ada mata pelajaran untuk filter saat ini.</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -205,10 +186,6 @@
                             <label class="form-label">Deskripsi</label>
                             <textarea class="form-control" name="description" id="subjectFormDescription" rows="3"></textarea>
                         </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="is_active" id="subjectFormIsActive" checked>
-                            <label class="form-check-label" for="subjectFormIsActive">Status Aktif</label>
-                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
@@ -271,7 +248,6 @@
             var subjectNameInput = document.getElementById("subjectFormName");
             var subjectCodeInput = document.getElementById("subjectFormCode");
             var subjectDescriptionInput = document.getElementById("subjectFormDescription");
-            var subjectActiveInput = document.getElementById("subjectFormIsActive");
 
             var deleteForm = document.getElementById("subjectDeleteForm");
             var deleteTargetName = document.getElementById("deleteTargetName");
@@ -293,7 +269,6 @@
                 subjectNameInput.value = "";
                 subjectCodeInput.value = "";
                 subjectDescriptionInput.value = "";
-                subjectActiveInput.checked = true;
             }
 
             function openEditModal(row) {
@@ -306,7 +281,6 @@
                 subjectNameInput.value = row.getAttribute("data-subject-name") || "";
                 subjectCodeInput.value = row.getAttribute("data-subject-code") || "";
                 subjectDescriptionInput.value = row.getAttribute("data-subject-description") || "";
-                subjectActiveInput.checked = (row.getAttribute("data-subject-active") === "1");
                 subjectFormModal.show();
             }
 

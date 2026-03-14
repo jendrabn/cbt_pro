@@ -113,7 +113,7 @@ class QuestionListView(TeacherQuestionBaseView, ListView):
         context.update(
             {
                 "filters": getattr(self, "current_filters", None),
-                "subjects": Subject.objects.filter(is_active=True).order_by("name"),
+                "subjects": Subject.objects.order_by("name"),
                 "categories": QuestionCategory.objects.filter(is_active=True).order_by("name"),
                 "question_type_choices": QUESTION_TYPE_LABELS.items(),
                 "difficulty_choices": DIFFICULTY_LABELS.items(),
@@ -288,7 +288,7 @@ class QuestionImportView(TeacherQuestionBaseView, View):
     template_name = "questions/question_import.html"
 
     def _build_context(self, **extra):
-        subjects = list(Subject.objects.filter(is_active=True).order_by("name").values_list("name", flat=True))
+        subjects = list(Subject.objects.order_by("name").values_list("name", flat=True))
         context = {
             "form": extra.get("form") or QuestionImportForm(),
             "import_result": extra.get("import_result"),

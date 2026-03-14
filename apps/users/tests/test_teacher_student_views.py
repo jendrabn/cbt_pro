@@ -75,9 +75,9 @@ class TeacherStudentViewTests(TestCase):
         UserProfile.objects.create(user=cls.student_direct, student_id="NIS-1002", class_grade="XII IPA 2")
         UserProfile.objects.create(user=cls.student_other, student_id="NIS-1003", class_grade="XII IPA 3")
 
-        cls.subject = Subject.objects.create(name="Matematika", code="MAT", is_active=True)
-        cls.class_obj = Class.objects.create(name="XII IPA 1", grade_level="XII", academic_year="2025/2026", is_active=True)
-        cls.other_class = Class.objects.create(name="XII IPA 3", grade_level="XII", academic_year="2025/2026", is_active=True)
+        cls.subject = Subject.objects.create(name="Matematika", code="MAT")
+        cls.class_obj = Class.objects.create(name="XII IPA 1", grade_level="XII", academic_year="2025/2026")
+        cls.other_class = Class.objects.create(name="XII IPA 3", grade_level="XII", academic_year="2025/2026")
         ClassStudent.objects.create(class_obj=cls.class_obj, student=cls.student_class)
         ClassStudent.objects.create(class_obj=cls.other_class, student=cls.student_other)
 

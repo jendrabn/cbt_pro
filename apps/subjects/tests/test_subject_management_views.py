@@ -63,16 +63,14 @@ class SubjectManagementViewTests(TestCase):
                 "name": "Matematika",
                 "code": "mtk",
                 "description": "Pelajaran Matematika",
-                "is_active": "on",
             },
         )
         self.assertEqual(response.status_code, 302)
         created = Subject.objects.get(name="Matematika")
         self.assertEqual(created.code, "MTK")
-        self.assertTrue(created.is_active)
 
     def test_delete_requires_exact_confirmation(self):
-        subject = Subject.objects.create(name="Kimia", code="KIM", is_active=True)
+        subject = Subject.objects.create(name="Kimia", code="KIM")
         self.client.force_login(self.admin)
         response = self.client.post(
             reverse("subject_delete", kwargs={"pk": subject.pk}),
@@ -81,9 +79,9 @@ class SubjectManagementViewTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertTrue(Subject.objects.filter(id=subject.id).exists())
 
-    def test_subject_api_returns_active_subjects_for_teacher(self):
-        Subject.objects.create(name="Fisika", code="FIS", is_active=True)
-        Subject.objects.create(name="Sejarah", code="SEJ", is_active=False)
+    def test_subject_api_returns_subjects_for_teacher(self):
+        Subject.objects.create(name="Fisika", code="FIS")
+        Subject.objects.create(name="Sejarah", code="SEJ")
 
         self.client.force_login(self.teacher)
         response = self.client.get(reverse("subject_api"))
@@ -91,10 +89,10 @@ class SubjectManagementViewTests(TestCase):
         payload = response.json()
         names = [item["name"] for item in payload["results"]]
         self.assertIn("Fisika", names)
-        self.assertNotIn("Sejarah", names)
+        self.assertIn("Sejarah", names)
 
     def test_cascade_delete_subject_removes_exam_and_attempt_related_data(self):
-        subject = Subject.objects.create(name="Ekonomi", code="EKO", is_active=True)
+        subject = Subject.objects.create(name="Ekonomi", code="EKO")
         question = Question.objects.create(
             created_by=self.teacher,
             subject=subject,

@@ -514,15 +514,6 @@
                             {% csrf_token %}
                             <input type="hidden" name="action" value="save_certificates">
                             <div class="row g-3">
-                                <div class="col-md-6 d-flex align-items-end">
-                                    <div class="form-check mb-0">
-                                        {{ certificate_form.certificates_enabled }}
-                                        <label class="form-check-label" for="{{ certificate_form.certificates_enabled.id_for_label }}">
-                                            {{ certificate_form.certificates_enabled.label }}
-                                        </label>
-                                        {% for error in certificate_form.certificates_enabled.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
-                                    </div>
-                                </div>
                                 <div class="col-md-6">
                                     <label class="form-label">{{ certificate_form.certificate_number_prefix.label }}</label>
                                     {{ certificate_form.certificate_number_prefix }}
@@ -558,9 +549,6 @@
                                 </div>
                             </div>
                             <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
-                                <a href="{% url 'admin_certificate_template_list' %}" class="btn btn-outline-secondary" title="Kelola template default sistem">
-                                    <i class="ri-award-line me-1"></i>Kelola Template Default
-                                </a>
                                 <button type="submit" class="btn btn-primary" title="Simpan pengaturan sertifikat">
                                     <i class="ri-save-line me-1"></i>Simpan
                                 </button>

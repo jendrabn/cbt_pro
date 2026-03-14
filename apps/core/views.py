@@ -212,13 +212,6 @@ SETTING_META = {
         True,
     ),
     "notify_daily_summary": ("boolean", "notifications", "Ringkasan harian", False, False),
-    "certificates_enabled": (
-        "boolean",
-        "certificates",
-        "Master switch fitur sertifikat",
-        False,
-        True,
-    ),
     "certificate_number_prefix": (
         "string",
         "certificates",
@@ -434,7 +427,6 @@ class SystemSettingsView(RoleRequiredMixin, TemplateView):
 
     def _save_certificate_settings(self, form):
         cleaned = form.cleaned_data
-        self._upsert_setting("certificates_enabled", cleaned["certificates_enabled"])
         self._upsert_setting("certificate_number_prefix", cleaned["certificate_number_prefix"])
         self._upsert_setting("certificate_pdf_dpi", cleaned["certificate_pdf_dpi"])
         self._upsert_setting("certificate_storage_path", cleaned["certificate_storage_path"])
@@ -577,7 +569,6 @@ class SystemSettingsView(RoleRequiredMixin, TemplateView):
                 "notify_daily_summary": self._setting_value("notify_daily_summary", setting_map),
             },
             "certificates": {
-                "certificates_enabled": self._setting_value("certificates_enabled", setting_map),
                 "certificate_number_prefix": self._setting_value("certificate_number_prefix", setting_map),
                 "certificate_pdf_dpi": self._setting_value("certificate_pdf_dpi", setting_map),
                 "certificate_storage_path": self._setting_value("certificate_storage_path", setting_map),

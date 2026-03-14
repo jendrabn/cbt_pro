@@ -41,8 +41,8 @@ class ExamManagementViewTests(TestCase):
             role="teacher",
             is_active=True,
         )
-        cls.subject = Subject.objects.create(name="Fisika", code="FIS", is_active=True)
-        cls.class_obj = Class.objects.create(name="XII IPA 2", is_active=True)
+        cls.subject = Subject.objects.create(name="Fisika", code="FIS")
+        cls.class_obj = Class.objects.create(name="XII IPA 2")
         cls.question = Question.objects.create(
             created_by=cls.teacher,
             subject=cls.subject,

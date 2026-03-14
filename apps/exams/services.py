@@ -34,7 +34,6 @@ def sync_classes_from_student_profiles():
         return {
             "students_processed": 0,
             "classes_created": 0,
-            "classes_reactivated": 0,
             "memberships_created": 0,
             "memberships_updated": 0,
         }
@@ -50,29 +49,18 @@ def sync_classes_from_student_profiles():
         return {
             "students_processed": len(students),
             "classes_created": 0,
-            "classes_reactivated": 0,
             "memberships_created": 0,
             "memberships_updated": 0,
         }
 
     existing_by_name = {item.name: item for item in Class.objects.filter(name__in=class_names)}
     missing_classes = [
-        Class(name=class_name, is_active=True)
+        Class(name=class_name)
         for class_name in class_names
         if class_name not in existing_by_name
     ]
     if missing_classes:
         Class.objects.bulk_create(missing_classes, ignore_conflicts=True)
-
-    classes_to_reactivate = [
-        class_obj
-        for class_name, class_obj in existing_by_name.items()
-        if class_name in class_names and not class_obj.is_active
-    ]
-    if classes_to_reactivate:
-        for class_obj in classes_to_reactivate:
-            class_obj.is_active = True
-        Class.objects.bulk_update(classes_to_reactivate, ["is_active"])
 
     class_by_name = {item.name: item for item in Class.objects.filter(name__in=class_names)}
     memberships_by_student = {}
@@ -105,7 +93,6 @@ def sync_classes_from_student_profiles():
     return {
         "students_processed": len(students),
         "classes_created": len(missing_classes),
-        "classes_reactivated": len(classes_to_reactivate),
         "memberships_created": len(to_create),
         "memberships_updated": len(to_update),
     }

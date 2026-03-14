@@ -29,7 +29,7 @@ class FinalScorePolicyServiceTests(TestCase):
             role="student",
             is_active=True,
         )
-        subject = Subject.objects.create(name="Geografi", code="GEO", is_active=True)
+        subject = Subject.objects.create(name="Geografi", code="GEO")
         now = timezone.now()
         cls.exam = Exam.objects.create(
             created_by=cls.teacher,

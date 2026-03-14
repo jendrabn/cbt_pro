@@ -16,6 +16,7 @@ from django.views import View
 from django.views.generic import FormView, TemplateView
 
 from apps.accounts.views import get_role_redirect_url
+from apps.core.services import get_branding_settings
 
 from .content import (
     FAQ_PREVIEW,
@@ -317,6 +318,12 @@ class LandingPageView(MarketingPageMixin, TemplateView):
     body_class = "page-landing"
     show_marketing_chrome = False
     use_minimal_main = False
+
+    def dispatch(self, request, *args, **kwargs):
+        branding = get_branding_settings()
+        if not branding.get("landing_page_enabled", True):
+            return redirect("login")
+        return super().dispatch(request, *args, **kwargs)
 
     def get_extra_schema(self) -> list[dict]:
         pricing_data = self.get_marketing_pricing_data()
