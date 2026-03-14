@@ -6,32 +6,36 @@
 {% block body_classes %}exam-room-body{% endblock %}
 
 {% block topbar %}
-<header class="topbar">
-    <div class="topbar-brand">
-        <div class="t-name">{{ exam.title }}</div>
-        <div class="t-sub">{{ exam.subject.name }}</div>
-    </div>
-
-    <div class="badge text-bg-light badge-timer timer-chip">
-        <i class="ri-time-line" aria-hidden="true"></i>
-        <span id="timer">00:00:00</span>
-    </div>
-
-    <div class="topbar-extras">
-        <div class="badge text-bg-danger badge-violation">
-            <i class="ri-error-warning-line" aria-hidden="true"></i>
-            <span id="violationCounterChip">0 Pelanggaran</span>
+<header class="topbar navbar fixed-top shadow-sm">
+    <div class="container-fluid px-3 px-lg-4 d-flex align-items-center gap-2 gap-lg-3">
+        <div class="topbar-brand flex-grow-1 min-w-0">
+            <div class="t-name">{{ exam.title }}</div>
+            <div class="t-sub">{{ exam.subject.name }}</div>
         </div>
-        <a href="{{ back_url }}" class="btn btn-outline-light btn-daftar" title="Kembali ke daftar ujian">
-            <i class="ri-list-check-3" aria-hidden="true"></i>
-            <span>Daftar Ujian</span>
-        </a>
-    </div>
 
-    <button type="button" class="btn btn-success btn-kirim" id="openSubmitModalBtn" title="Buka konfirmasi kirim ujian">
-        <i class="ri-send-plane-line" aria-hidden="true"></i>
-        <span class="lbl">Kirim Ujian</span>
-    </button>
+        <div class="topbar-controls d-flex align-items-center gap-2 gap-lg-3 ms-auto">
+            <div class="badge text-bg-light badge-timer timer-chip">
+                <i class="ri-time-line" aria-hidden="true"></i>
+                <span id="timer">00:00:00</span>
+            </div>
+
+            <div class="topbar-extras d-none d-md-flex align-items-center gap-2">
+                <div class="badge text-bg-danger badge-violation">
+                    <i class="ri-error-warning-line" aria-hidden="true"></i>
+                    <span id="violationCounterChip">0 Pelanggaran</span>
+                </div>
+                <a href="{{ back_url }}" class="btn btn-outline-light btn-daftar" title="Kembali ke daftar ujian">
+                    <i class="ri-list-check-3" aria-hidden="true"></i>
+                    <span>Daftar Ujian</span>
+                </a>
+            </div>
+
+            <button type="button" class="btn btn-success btn-kirim" id="openSubmitModalBtn" title="Buka konfirmasi kirim ujian">
+                <i class="ri-send-plane-line" aria-hidden="true"></i>
+                <span class="lbl">Kirim Ujian</span>
+            </button>
+        </div>
+    </div>
 </header>
 {% endblock %}
 
@@ -55,13 +59,13 @@
         </div>
         {% endif %}
 
-        <div class="q-header">
-            <div class="q-meta">
+        <div class="q-header d-flex flex-wrap align-items-center justify-content-between gap-2 gap-lg-3 border-bottom pb-3 mb-3">
+            <div class="q-meta d-flex flex-wrap align-items-center gap-2">
                 <div class="q-number" id="qNum">1</div>
                 <div class="badge text-bg-primary q-type-badge" id="qType">Memuat soal</div>
                 <div class="q-points" id="qPoints">0 poin</div>
             </div>
-            <div class="q-actions">
+            <div class="q-actions d-flex flex-wrap gap-2">
                 <button type="button" class="btn btn-outline-secondary btn-flag" id="flagQuestionBtn" title="Tandai soal ini untuk review">
                     <i class="ri-flag-line" aria-hidden="true"></i>
                     <span class="lbl">Tandai</span>
@@ -85,52 +89,73 @@
     </div>
 
     <aside class="sidebar">
-        <div class="sidebar-title">Navigasi Soal</div>
-        <div class="nav-grid" id="navGrid"></div>
+        <section class="sidebar-section">
+            <h2 class="sidebar-title sidebar-title--sub">Navigasi Soal</h2>
+            <nav aria-label="Navigasi soal">
+                <div class="nav-grid" id="navGrid"></div>
+            </nav>
+        </section>
 
-        <div class="divider"></div>
-        <div class="sidebar-title sidebar-title--sub">Status</div>
-        <div class="legend-item"><div class="legend-dot dot-current"></div> Saat ini</div>
-        <div class="legend-item"><div class="legend-dot dot-answered"></div> Terjawab</div>
-        <div class="legend-item"><div class="legend-dot dot-flagged"></div> Ditandai</div>
-        <div class="legend-item"><div class="legend-dot dot-empty"></div> Belum dijawab</div>
+        <hr class="sidebar-divider">
 
-        <div class="divider"></div>
-        <div class="sidebar-title sidebar-title--sub">Progres</div>
-        <div class="progress-label"><span>Terjawab</span><span id="progLabel">0/0</span></div>
-        <div class="progress-bar-wrap"><div class="progress-fill" id="progBar"></div></div>
-        <div class="progress-stats">
-            <div class="stat-row"><span class="stat-lbl">Terjawab</span><span class="stat-val sv-green" id="statAns">0</span></div>
-            <div class="stat-row"><span class="stat-lbl">Belum dijawab</span><span class="stat-val sv-red" id="statUnans">0</span></div>
-            <div class="stat-row"><span class="stat-lbl">Ditandai</span><span class="stat-val sv-orange" id="statFlag">0</span></div>
-        </div>
+        <section class="sidebar-section">
+            <h2 class="sidebar-title sidebar-title--sub">Status</h2>
+            <ul class="sidebar-list list-unstyled vstack gap-2 mb-0">
+                <li class="legend-item"><span class="legend-dot dot-current"></span><span>Saat ini</span></li>
+                <li class="legend-item"><span class="legend-dot dot-answered"></span><span>Terjawab</span></li>
+                <li class="legend-item"><span class="legend-dot dot-flagged"></span><span>Ditandai</span></li>
+                <li class="legend-item"><span class="legend-dot dot-empty"></span><span>Belum dijawab</span></li>
+            </ul>
+        </section>
 
-        <div class="divider"></div>
-        <div class="monitor-title">Pengawasan Ujian</div>
-        <div class="monitor-item"><i class="ri-shield-check-line ic-green" aria-hidden="true"></i><span id="antiCheatMediaRule">Perangkat pengawasan: -</span></div>
-        <div class="monitor-item"><i class="ri-fullscreen-line ic-green" aria-hidden="true"></i><span id="antiCheatFullscreenRule">Mode fullscreen: -</span></div>
-        <div class="monitor-item"><i class="ri-eye-line ic-green" aria-hidden="true"></i><span id="antiCheatTabRule">Deteksi perpindahan tab: -</span></div>
-        <div class="monitor-item"><i class="ri-forbid-line ic-green" aria-hidden="true"></i><span id="antiCheatRightClickRule">Klik kanan: -</span></div>
-        <div class="monitor-item"><i class="ri-camera-line ic-green" aria-hidden="true"></i><span id="antiCheatScreenshotRule">Screenshot berkala: -</span></div>
-        <div class="monitor-item"><i class="ri-error-warning-line ic-orange" aria-hidden="true"></i><span id="antiCheatLimitRule">Batas pelanggaran: -</span></div>
+        <hr class="sidebar-divider">
+
+        <section class="sidebar-section">
+            <h2 class="sidebar-title sidebar-title--sub">Progres</h2>
+            <div class="progress-label"><span>Terjawab</span><span id="progLabel">0/0</span></div>
+            <div class="progress sidebar-progress" role="progressbar" aria-label="Progress pengerjaan ujian" aria-valuemin="0" aria-valuemax="100">
+                <div class="progress-bar progress-fill bg-success" id="progBar" style="width: 0%"></div>
+            </div>
+            <div class="progress-stats d-grid gap-1 mt-3">
+                <div class="stat-row"><span class="stat-lbl">Terjawab</span><span class="stat-val sv-green" id="statAns">0</span></div>
+                <div class="stat-row"><span class="stat-lbl">Belum dijawab</span><span class="stat-val sv-red" id="statUnans">0</span></div>
+                <div class="stat-row"><span class="stat-lbl">Ditandai</span><span class="stat-val sv-orange" id="statFlag">0</span></div>
+            </div>
+        </section>
+
+        <hr class="sidebar-divider">
+
+        <section class="sidebar-section">
+            <h2 class="monitor-title h6 mb-3">Pengawasan Ujian</h2>
+            <ul class="sidebar-list list-unstyled vstack gap-2 mb-0">
+                <li class="monitor-item"><i class="ri-shield-check-line ic-green" aria-hidden="true"></i><span id="antiCheatMediaRule">Perangkat pengawasan: -</span></li>
+                <li class="monitor-item"><i class="ri-fullscreen-line ic-green" aria-hidden="true"></i><span id="antiCheatFullscreenRule">Mode fullscreen: -</span></li>
+                <li class="monitor-item"><i class="ri-eye-line ic-green" aria-hidden="true"></i><span id="antiCheatTabRule">Deteksi perpindahan tab: -</span></li>
+                <li class="monitor-item"><i class="ri-forbid-line ic-green" aria-hidden="true"></i><span id="antiCheatRightClickRule">Klik kanan: -</span></li>
+                <li class="monitor-item"><i class="ri-camera-line ic-green" aria-hidden="true"></i><span id="antiCheatScreenshotRule">Screenshot berkala: -</span></li>
+                <li class="monitor-item"><i class="ri-error-warning-line ic-orange" aria-hidden="true"></i><span id="antiCheatLimitRule">Batas pelanggaran: -</span></li>
+            </ul>
+        </section>
     </aside>
 </div>
 </div>
 
 <div class="footer-bar">
-    <button type="button" class="btn btn-outline-secondary btn-prev" id="prevQuestionBtn" title="Ke soal sebelumnya">
-        <i class="ri-arrow-left-s-line" aria-hidden="true"></i><span class="lbl">Sebelumnya</span>
-    </button>
+    <div class="container-fluid px-3 px-lg-4 d-flex align-items-center gap-2 gap-lg-3 w-100">
+        <button type="button" class="btn btn-outline-secondary btn-prev" id="prevQuestionBtn" title="Ke soal sebelumnya">
+            <i class="ri-arrow-left-s-line" aria-hidden="true"></i><span class="lbl">Sebelumnya</span>
+        </button>
 
-    <div class="q-counter" id="footerCounter">0 dari 0</div>
+        <div class="q-counter" id="footerCounter">0 dari 0</div>
 
-    <button type="button" class="btn btn-outline-primary btn-nav-mob" id="openMobileNavBtn" title="Buka navigasi soal">
-        <i class="ri-grid-fill" aria-hidden="true"></i> Nav
-    </button>
+        <button type="button" class="btn btn-outline-primary btn-nav-mob" id="openMobileNavBtn" title="Buka navigasi soal">
+            <i class="ri-grid-fill" aria-hidden="true"></i> Nav
+        </button>
 
-    <button type="button" class="btn btn-primary btn-next" id="nextQuestionBtn" title="Ke soal berikutnya">
-        <span class="lbl">Selanjutnya</span><i class="ri-arrow-right-s-line" aria-hidden="true"></i>
-    </button>
+        <button type="button" class="btn btn-primary btn-next" id="nextQuestionBtn" title="Ke soal berikutnya">
+            <span class="lbl">Selanjutnya</span><i class="ri-arrow-right-s-line" aria-hidden="true"></i>
+        </button>
+    </div>
 </div>
 
 <div class="mob-overlay" id="mobNav">
@@ -140,9 +165,7 @@
         <div class="mob-body">
             <div class="mob-header">
                 <span class="mob-title">Navigasi Soal</span>
-                <button type="button" class="btn-mob-x" id="closeMobileNavBtn" aria-label="Tutup navigasi soal">
-                    <i class="ri-close-line" aria-hidden="true"></i>
-                </button>
+                <button type="button" class="btn-close" id="closeMobileNavBtn" aria-label="Tutup navigasi soal"></button>
             </div>
 
             <div class="pills-row">
@@ -154,8 +177,8 @@
             <div class="progress-label progress-label-mobile">
                 <span>Progres</span><span id="mProg">0/0</span>
             </div>
-            <div class="progress-bar-wrap progress-bar-wrap-mobile">
-                <div class="progress-fill" id="mProgBar"></div>
+            <div class="progress sidebar-progress progress-bar-wrap-mobile" role="progressbar" aria-label="Progress pengerjaan ujian mobile" aria-valuemin="0" aria-valuemax="100">
+                <div class="progress-bar progress-fill bg-success" id="mProgBar" style="width: 0%"></div>
             </div>
 
             <div class="leg-row">
