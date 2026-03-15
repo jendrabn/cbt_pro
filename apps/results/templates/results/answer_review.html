@@ -89,16 +89,16 @@
                     </div>
                     <div class="col-md-6">
                         <div class="row g-2 cbt-stats-grid">
-                            <div class="col-6">
+                            <div class="col-6 col-md-4 col-xl-4 col-xxl-3">
                                 {% include "partials/stats_card.html" with title="Skor" value=result.total_score icon="ri-scales-3-line" tone="primary" card_class="cbt-stat-card--compact" %}
                             </div>
-                            <div class="col-6">
+                            <div class="col-6 col-md-4 col-xl-4 col-xxl-3">
                                 {% include "partials/stats_card.html" with title="Persentase" value=result.percentage value_suffix="%" icon="ri-line-chart-line" tone="success" card_class="cbt-stat-card--compact" %}
                             </div>
-                            <div class="col-6">
+                            <div class="col-6 col-md-4 col-xl-4 col-xxl-3">
                                 {% include "partials/stats_card.html" with title="Waktu Pengerjaan" value=result.time_taken_seconds value_suffix=" detik" icon="ri-time-line" tone="info" card_class="cbt-stat-card--compact" %}
                             </div>
-                            <div class="col-6">
+                            <div class="col-6 col-md-4 col-xl-4 col-xxl-3">
                                 {% include "partials/stats_card.html" with title="Pelanggaran" value=violation_total icon="ri-alarm-warning-line" tone="danger" card_class="cbt-stat-card--compact" %}
                             </div>
                         </div>

@@ -34,16 +34,16 @@
         {% endif %}
 
         <section class="row g-3 mb-4 cbt-stats-grid">
-            <div class="col-6 col-md-3">
+            <div class="col-6 col-md-4 col-xl-4 col-xxl-3">
                 {% include "partials/stats_card.html" with title="Total Anggota" value=summary.student_count icon="ri-team-line" tone="primary" %}
             </div>
-            <div class="col-6 col-md-3">
+            <div class="col-6 col-md-4 col-xl-4 col-xxl-3">
                 {% include "partials/stats_card.html" with title="Aktif" value=summary.active_student_count icon="ri-checkbox-circle-line" tone="success" %}
             </div>
-            <div class="col-6 col-md-3">
+            <div class="col-6 col-md-4 col-xl-4 col-xxl-3">
                 {% include "partials/stats_card.html" with title="Penugasan Ujian" value=summary.exam_assignment_count icon="ri-file-list-3-line" tone="warning" %}
             </div>
-            <div class="col-6 col-md-3">
+            <div class="col-6 col-md-4 col-xl-4 col-xxl-3">
                 {% include "partials/stats_card.html" with title="Sesuai Profil" value=summary.profile_match_count icon="ri-user-search-line" tone="info" %}
             </div>
         </section>

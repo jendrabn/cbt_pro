@@ -34,16 +34,16 @@
         {% endif %}
 
         <section class="row g-3 mb-4 cbt-stats-grid">
-            <div class="col-6 col-xl-3">
+            <div class="col-6 col-md-4 col-xl-4 col-xxl-3">
                 {% include "partials/stats_card.html" with title="Total Ujian" value=summary.total_exam icon="ri-file-list-3-line" tone="primary" %}
             </div>
-            <div class="col-6 col-xl-3">
+            <div class="col-6 col-md-4 col-xl-4 col-xxl-3">
                 {% include "partials/stats_card.html" with title="Total Peserta" value=summary.total_peserta icon="ri-group-line" tone="info" %}
             </div>
-            <div class="col-6 col-xl-3">
+            <div class="col-6 col-md-4 col-xl-4 col-xxl-3">
                 {% include "partials/stats_card.html" with title="Rata-rata Nilai" value=summary.rata_rata_nilai value_suffix="%" icon="ri-line-chart-line" tone="success" %}
             </div>
-            <div class="col-6 col-xl-3">
+            <div class="col-6 col-md-4 col-xl-4 col-xxl-3">
                 {% include "partials/stats_card.html" with title="Rata-rata Kelulusan" value=summary.rata_rata_kelulusan value_suffix="%" icon="ri-award-line" tone="warning" %}
             </div>
         </section>

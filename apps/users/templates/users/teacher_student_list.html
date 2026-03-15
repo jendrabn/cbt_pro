@@ -29,19 +29,19 @@
         {% endif %}
 
         <section class="row g-3 mb-4 cbt-stats-grid">
-            <div class="col-6 col-md-4 col-xl-3 col-xxl-2">
+            <div class="col-6 col-md-4 col-xl-4 col-xxl-3">
                 {% include "partials/stats_card.html" with title="Total Siswa" value=summary.total icon="ri-group-line" tone="primary" %}
             </div>
-            <div class="col-6 col-md-4 col-xl-3 col-xxl-2">
+            <div class="col-6 col-md-4 col-xl-4 col-xxl-3">
                 {% include "partials/stats_card.html" with title="Aktif" value=summary.active icon="ri-checkbox-circle-line" tone="success" %}
             </div>
-            <div class="col-6 col-md-4 col-xl-3 col-xxl-2">
+            <div class="col-6 col-md-4 col-xl-4 col-xxl-3">
                 {% include "partials/stats_card.html" with title="Nonaktif" value=summary.inactive icon="ri-user-unfollow-line" tone="secondary" %}
             </div>
-            <div class="col-6 col-md-4 col-xl-3 col-xxl-2">
+            <div class="col-6 col-md-4 col-xl-4 col-xxl-3">
                 {% include "partials/stats_card.html" with title="Sudah Attempt" value=summary.students_with_attempts icon="ri-timer-line" tone="info" %}
             </div>
-            <div class="col-6 col-md-4 col-xl-3 col-xxl-2">
+            <div class="col-6 col-md-4 col-xl-4 col-xxl-3">
                 {% include "partials/stats_card.html" with title="Rata-rata Nilai" value=summary.average_score value_suffix="%" icon="ri-line-chart-line" tone="warning" %}
             </div>
         </section>

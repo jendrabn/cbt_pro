@@ -37,31 +37,31 @@
         {% endif %}
 
         <section class="row g-3 mb-4 cbt-stats-grid">
-            <div class="col-6 col-xl-3">
+            <div class="col-6 col-md-4 col-xl-4 col-xxl-3">
                 {% include "partials/stats_card.html" with title="Total Hasil" value=summary.total_hasil icon="ri-file-chart-line" tone="primary" %}
             </div>
-            <div class="col-6 col-xl-3">
+            <div class="col-6 col-md-4 col-xl-4 col-xxl-3">
                 {% include "partials/stats_card.html" with title="Rata-rata Nilai" value=summary.rata_rata_nilai value_suffix="%" icon="ri-line-chart-line" tone="info" %}
             </div>
-            <div class="col-6 col-xl-3">
+            <div class="col-6 col-md-4 col-xl-4 col-xxl-3">
                 {% include "partials/stats_card.html" with title="Persentase Lulus" value=summary.persentase_lulus value_suffix="%" icon="ri-medal-line" tone="success" %}
             </div>
-            <div class="col-6 col-xl-3">
+            <div class="col-6 col-md-4 col-xl-4 col-xxl-3">
                 {% include "partials/stats_card.html" with title="Sertifikat Tersedia" value=summary.jumlah_sertifikat icon="ri-award-line" tone="warning" %}
             </div>
         </section>
 
         <section class="row g-3 mb-4 cbt-stats-grid">
-            <div class="col-6 col-xl-3">
+            <div class="col-6 col-md-4 col-xl-4 col-xxl-3">
                 {% include "partials/stats_card.html" with title="Total Benar" value=summary.total_benar icon="ri-checkbox-circle-line" tone="success" %}
             </div>
-            <div class="col-6 col-xl-3">
+            <div class="col-6 col-md-4 col-xl-4 col-xxl-3">
                 {% include "partials/stats_card.html" with title="Total Salah" value=summary.total_salah icon="ri-close-circle-line" tone="danger" %}
             </div>
-            <div class="col-6 col-xl-3">
+            <div class="col-6 col-md-4 col-xl-4 col-xxl-3">
                 {% include "partials/stats_card.html" with title="Total Tidak Dijawab" value=summary.total_kosong icon="ri-question-line" tone="secondary" %}
             </div>
-            <div class="col-6 col-xl-3">
+            <div class="col-6 col-md-4 col-xl-4 col-xxl-3">
                 {% include "partials/stats_card.html" with title="Rata-rata Efisiensi Waktu" value=summary.rata_rata_efisiensi value_suffix="%" icon="ri-time-line" tone="info" %}
             </div>
         </section>

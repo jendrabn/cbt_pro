@@ -66,16 +66,16 @@
                     </div>
                     <div class="card-body">
                         <div class="row g-2 mb-3 cbt-stats-grid">
-                            <div class="col-6">
+                            <div class="col-6 col-md-4 col-xl-4 col-xxl-3">
                                 {% include "partials/stats_card.html" with title="Total Baris" value=import_result.total_rows icon="ri-file-list-3-line" tone="primary" card_class="cbt-stat-card--compact" %}
                             </div>
-                            <div class="col-6">
+                            <div class="col-6 col-md-4 col-xl-4 col-xxl-3">
                                 {% include "partials/stats_card.html" with title="Berhasil" value=import_result.total_created icon="ri-checkbox-circle-line" tone="success" card_class="cbt-stat-card--compact" %}
                             </div>
-                            <div class="col-6">
+                            <div class="col-6 col-md-4 col-xl-4 col-xxl-3">
                                 {% include "partials/stats_card.html" with title="Dilewati" value=import_result.total_skipped icon="ri-skip-forward-line" tone="warning" card_class="cbt-stat-card--compact" %}
                             </div>
-                            <div class="col-6">
+                            <div class="col-6 col-md-4 col-xl-4 col-xxl-3">
                                 {% include "partials/stats_card.html" with title="Gagal" value=import_result.total_failed icon="ri-close-circle-line" tone="danger" card_class="cbt-stat-card--compact" %}
                             </div>
                         </div>

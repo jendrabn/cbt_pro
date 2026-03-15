@@ -70,16 +70,16 @@
                     </div>
                     <div class="col-lg-7">
                         <div class="row g-2 cbt-stats-grid">
-                            <div class="col-6 col-md-3">
+                            <div class="col-6 col-md-4 col-xl-4 col-xxl-3">
                                 {% include "partials/stats_card.html" with title="Persentase" value=percentage_value value_suffix="%" icon="ri-line-chart-line" tone="info" card_class="cbt-stat-card--compact" %}
                             </div>
-                            <div class="col-6 col-md-3">
+                            <div class="col-6 col-md-4 col-xl-4 col-xxl-3">
                                 {% include "partials/stats_card.html" with title="Peringkat" value=rank_label icon="ri-award-line" tone="primary" card_class="cbt-stat-card--compact" %}
                             </div>
-                            <div class="col-6 col-md-3">
+                            <div class="col-6 col-md-4 col-xl-4 col-xxl-3">
                                 {% include "partials/stats_card.html" with title="Waktu Pengerjaan" value=time_taken_human icon="ri-time-line" tone="warning" card_class="cbt-stat-card--compact" %}
                             </div>
-                            <div class="col-6 col-md-3">
+                            <div class="col-6 col-md-4 col-xl-4 col-xxl-3">
                                 {% include "partials/stats_card.html" with title="Efisiensi Waktu" value=time_efficiency value_suffix="%" icon="ri-timer-flash-line" tone="success" card_class="cbt-stat-card--compact" %}
                             </div>
                         </div>
@@ -103,16 +103,16 @@
                     </div>
                     <div class="card-body px-3 px-md-4">
                         <div class="row g-3 mb-3 cbt-stats-grid">
-                            <div class="col-6 col-md-3">
+                            <div class="col-6 col-md-4 col-xl-4 col-xxl-3">
                                 {% include "partials/stats_card.html" with title="Benar" value=result.correct_answers icon="ri-checkbox-circle-line" tone="success" %}
                             </div>
-                            <div class="col-6 col-md-3">
+                            <div class="col-6 col-md-4 col-xl-4 col-xxl-3">
                                 {% include "partials/stats_card.html" with title="Salah" value=result.wrong_answers icon="ri-close-circle-line" tone="danger" %}
                             </div>
-                            <div class="col-6 col-md-3">
+                            <div class="col-6 col-md-4 col-xl-4 col-xxl-3">
                                 {% include "partials/stats_card.html" with title="Tidak Dijawab" value=result.unanswered icon="ri-question-line" tone="secondary" %}
                             </div>
-                            <div class="col-6 col-md-3">
+                            <div class="col-6 col-md-4 col-xl-4 col-xxl-3">
                                 {% include "partials/stats_card.html" with title="Total Soal" value=result.total_questions icon="ri-file-list-3-line" tone="primary" %}
                             </div>
                         </div>
