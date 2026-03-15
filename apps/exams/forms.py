@@ -86,10 +86,6 @@ class ExamWizardForm(forms.ModelForm):
         "certificate_template": "examCertificateTemplateHelp",
         "override_question_navigation": "examNavigationOverrideHelp",
         "global_force_sequential": "examSequentialHelp",
-        "require_camera": "examCameraHelp",
-        "require_microphone": "examMicrophoneHelp",
-        "disable_right_click": "examRightClickHelp",
-        "block_copy_paste": "examCopyPasteHelp",
         "enable_screenshot_proctoring": "examScreenshotHelp",
         "screenshot_interval_seconds": "examScreenshotIntervalHelp",
         "max_violations_allowed": "examViolationsHelp",
@@ -209,6 +205,18 @@ class ExamWizardForm(forms.ModelForm):
         self.fields["retake_cooldown_minutes"].required = False
         self.fields["max_retake_attempts"].widget.attrs.update({"min": 1, "max": 10})
         self.fields["retake_cooldown_minutes"].widget.attrs.update({"min": 0})
+
+        if not (self.instance and self.instance.pk):
+            anti_cheat_requirements = (
+                "require_fullscreen",
+                "require_camera",
+                "require_microphone",
+                "detect_tab_switch",
+                "disable_right_click",
+                "block_copy_paste",
+            )
+            for field_name in anti_cheat_requirements:
+                self.initial[field_name] = False
 
         if "certificate_template" in self.fields:
             template_qs = CertificateTemplate.objects.filter(is_default=True)

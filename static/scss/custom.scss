@@ -3993,3 +3993,10 @@ body.login-page {
     font-size: 0.85rem;
 }
 
+/* User table avatar */
+.cbt-user-table-avatar {
+    width: 32px;
+    height: 32px;
+    object-fit: cover;
+}
+

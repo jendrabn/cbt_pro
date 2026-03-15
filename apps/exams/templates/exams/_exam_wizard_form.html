@@ -421,7 +421,6 @@
                                     {{ form.require_camera }}
                                     <label class="form-check-label" for="{{ form.require_camera.id_for_label }}">{{ form.require_camera.label }}</label>
                                 </div>
-                                <div id="examCameraHelp" class="form-text">Diperlukan jika pemantauan visual atau screenshot proctoring diaktifkan.</div>
                                 {% if form.require_camera.errors %}<div class="text-danger small mt-1">{{ form.require_camera.errors|join:", " }}</div>{% endif %}
                             </div>
                             <div class="col-md-6">
@@ -429,7 +428,6 @@
                                     {{ form.require_microphone }}
                                     <label class="form-check-label" for="{{ form.require_microphone.id_for_label }}">{{ form.require_microphone.label }}</label>
                                 </div>
-                                <div id="examMicrophoneHelp" class="form-text">Aktifkan jika ujian membutuhkan pemantauan audio selama pengerjaan.</div>
                                 {% if form.require_microphone.errors %}<div class="text-danger small mt-1">{{ form.require_microphone.errors|join:", " }}</div>{% endif %}
                             </div>
                             <div class="col-md-6">
@@ -443,14 +441,12 @@
                                     {{ form.disable_right_click }}
                                     <label class="form-check-label" for="{{ form.disable_right_click.id_for_label }}">{{ form.disable_right_click.label }}</label>
                                 </div>
-                                <div id="examRightClickHelp" class="form-text">Jika aktif, menu klik kanan browser akan diblokir selama ujian berlangsung.</div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-check">
                                     {{ form.block_copy_paste }}
                                     <label class="form-check-label" for="{{ form.block_copy_paste.id_for_label }}">{{ form.block_copy_paste.label }}</label>
                                 </div>
-                                <div id="examCopyPasteHelp" class="form-text">Jika aktif, aksi copy, cut, dan paste dari browser akan diblokir selama ujian berlangsung.</div>
                             </div>
                         </div>
                     </div>

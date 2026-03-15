@@ -205,3 +205,19 @@ class ExamWizardFormTests(TestCase):
         self.assertEqual(form.initial["end_time"], expected_end)
         self.assertEqual(form["start_time"].value(), expected_start)
         self.assertEqual(form["end_time"].value(), expected_end)
+
+    def test_form_create_initial_disables_anticheat_device_focus_requirements(self):
+        form = ExamWizardForm(teacher=self.teacher)
+
+        anti_cheat_requirements = (
+            "require_fullscreen",
+            "require_camera",
+            "require_microphone",
+            "detect_tab_switch",
+            "disable_right_click",
+            "block_copy_paste",
+        )
+        for field_name in anti_cheat_requirements:
+            with self.subTest(field_name=field_name):
+                self.assertFalse(form.initial[field_name])
+                self.assertFalse(form[field_name].value())
