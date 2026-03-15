@@ -12,7 +12,7 @@
 {% block page_header %}
     <section class="cbt-page-header">
         <div class="cbt-page-header-body">
-            {% include "partials/page_header.html" with eyebrow="Panel Guru" title=student_user.get_full_name|default:student_user.username subtitle=student_user.email %}
+            {% include "partials/page_header.html" with eyebrow="Panel Guru" title="Detail Siswa" subtitle=student_user.get_full_name|default:student_user.username %}
             <div class="d-flex align-items-center gap-2 cbt-page-header-actions">
                 <a href="{% url 'teacher_student_list' %}{% if back_querystring %}?{{ back_querystring }}{% endif %}" class="btn btn-outline-primary" data-bs-toggle="tooltip" data-bs-title="Kembali ke daftar siswa">
                     <i class="ri-arrow-left-line me-1"></i>Kembali ke List
@@ -23,6 +23,14 @@
 {% endblock %}
 
 {% block content %}
+        {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags|default:'info' }} py-2 mb-3" role="alert">
+                {{ message }}
+            </div>
+            {% endfor %}
+        {% endif %}
+
         <section class="row g-4 mb-4">
             <div class="col-xl-8">
                 <div class="card border-0 shadow-sm h-100">
@@ -41,7 +49,7 @@
                             </div>
                             <div class="col-md-6">
                                 <small class="text-muted d-block">Email</small>
-                                <strong>{{ student_user.email }}</strong>
+                                <strong>{{ student_user.email|default:"-" }}</strong>
                             </div>
                             <div class="col-md-6">
                                 <small class="text-muted d-block">Status</small>
@@ -60,7 +68,7 @@
                                 <strong>{{ profile.phone_number|default:"-" }}</strong>
                             </div>
                             <div class="col-md-6">
-                                <small class="text-muted d-block">Kelas Profil</small>
+                                <small class="text-muted d-block">Kelas</small>
                                 <strong>{{ profile.class_grade|default:"-" }}</strong>
                             </div>
                             <div class="col-md-6">
@@ -72,16 +80,6 @@
                                 <strong>{{ student_user.last_login|date:"d M Y H:i"|default:"-" }}</strong>
                             </div>
                         </div>
-
-                        <hr class="my-4">
-                        <h3 class="h6">Kelas Terkait dari Ujian Anda</h3>
-                        <div class="d-flex flex-wrap gap-2">
-                            {% for class_obj in related_classes %}
-                            <span class="cbt-status-badge is-secondary">{{ class_obj.name }}</span>
-                            {% empty %}
-                            <span class="text-muted">Siswa ini tidak terhubung lewat assignment kelas pada ujian Anda.</span>
-                            {% endfor %}
-                        </div>
                     </div>
                 </div>
             </div>
@@ -89,7 +87,24 @@
             <div class="col-xl-4">
                 <div class="card border-0 shadow-sm mb-4">
                     <div class="card-header bg-white border-0 pt-3">
-                        <h2 class="h6 mb-0">Kontrol Sesi Login</h2>
+                        <h2 class="h6 mb-0">Aksi Cepat</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <form method="post" action="{% url 'teacher_student_reset_session' student_user.id %}" onsubmit="return confirm('Reset sesi login siswa ini?');">
+                                {% csrf_token %}
+                                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                <button type="submit" class="btn btn-outline-warning text-start w-100" title="Reset sesi login siswa ini">
+                                    <i class="ri-restart-line me-2"></i>Reset Sesi Login
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white border-0 pt-3">
+                        <h2 class="h6 mb-0">Status Sesi Siswa</h2>
                     </div>
                     <div class="card-body">
                         <p class="mb-2">
@@ -104,122 +119,63 @@
                             <span class="text-muted">Aktivitas terakhir:</span>
                             <strong>{{ session_status.last_seen_at|date:"d M Y H:i"|default:"-" }}</strong>
                         </p>
-                        <p class="mb-3">
+                        <p class="mb-2">
                             <span class="text-muted">IP terakhir:</span>
                             <strong>{{ session_status.ip_address|default:"-" }}</strong>
                         </p>
-                        <form method="post" action="{% url 'teacher_student_reset_session' student_user.id %}" onsubmit="return confirm('Reset sesi login siswa ini?');">
-                            {% csrf_token %}
-                            <input type="hidden" name="next" value="{{ request.get_full_path }}">
-                            <button type="submit" class="btn btn-outline-warning w-100" title="Reset sesi login siswa ini">
-                                <i class="ri-restart-line me-1"></i>Reset Sesi Login
-                            </button>
-                        </form>
+                        <p class="mb-0">
+                            <span class="text-muted">Reset terakhir:</span>
+                            <strong>{{ session_status.reset_at|date:"d M Y H:i"|default:"-" }}</strong>
+                        </p>
                     </div>
                 </div>
 
-                <div class="card border-0 shadow-sm mb-4">
+                <div class="card border-0 shadow-sm">
                     <div class="card-header bg-white border-0 pt-3">
-                        <h2 class="h6 mb-0">Ringkasan Akademik</h2>
+                        <h2 class="h6 mb-0">Ringkasan Aktivitas Ujian</h2>
                     </div>
                     <div class="card-body">
                         <p class="mb-2">
-                            <span class="text-muted">Ujian terkait:</span>
-                            <strong>{{ stats.assigned_exam_count }}</strong>
+                            <span class="text-muted">Total attempt siswa:</span>
+                            <strong>{{ stats.exam_attempt_count }}</strong>
                         </p>
-                        <p class="mb-2">
-                            <span class="text-muted">Total attempt:</span>
-                            <strong>{{ stats.attempt_count }}</strong>
-                        </p>
-                        <p class="mb-2">
+                        <p class="mb-0">
                             <span class="text-muted">Attempt selesai:</span>
                             <strong>{{ stats.completed_attempt_count }}</strong>
                         </p>
-                        <p class="mb-2">
-                            <span class="text-muted">Rata-rata nilai:</span>
-                            <strong>{% if stats.average_score is not None %}{{ stats.average_score }}%{% else %}-{% endif %}</strong>
-                        </p>
-                        <p class="mb-2">
-                            <span class="text-muted">Nilai terbaik:</span>
-                            <strong>{% if stats.best_score is not None %}{{ stats.best_score }}%{% else %}-{% endif %}</strong>
-                        </p>
-                        <p class="mb-0">
-                            <span class="text-muted">Total pelanggaran:</span>
-                            <strong>{{ stats.total_violations }}</strong>
-                        </p>
                     </div>
-                </div>
-            </div>
-        </section>
-
-        <section class="card border-0 shadow-sm mb-4">
-            <div class="card-header bg-white border-0 pt-3">
-                <h2 class="h6 mb-0">Ujian yang Terkait</h2>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th class="ps-3">Ujian</th>
-                                <th>Mata Pelajaran</th>
-                                <th>Jadwal</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for exam in assigned_exams %}
-                            <tr>
-                                <td class="ps-3">{{ exam.title }}</td>
-                                <td>{{ exam.subject.name }}</td>
-                                <td>
-                                    <div class="small">{{ exam.start_time|date:"d M Y H:i" }}</div>
-                                    <div class="small text-muted">{{ exam.end_time|date:"d M Y H:i" }}</div>
-                                </td>
-                                <td>{% enum_badge "exam_status" exam.status %}</td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="4" class="text-center text-muted py-4">Belum ada ujian terkait untuk siswa ini.</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
                 </div>
             </div>
         </section>
 
         <section class="card border-0 shadow-sm">
-            <div class="card-header bg-white border-0 pt-3">
-                <h2 class="h6 mb-0">Riwayat Attempt pada Ujian Anda</h2>
+            <div class="card-header bg-white border-0 pt-3 d-flex justify-content-between align-items-center">
+                <h2 class="h6 mb-0">Log Aktivitas Pengguna</h2>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th class="ps-3">Ujian</th>
-                                <th>Attempt</th>
-                                <th>Status</th>
-                                <th>Nilai</th>
-                                <th>Submit</th>
+                                <th class="ps-3">Waktu</th>
+                                <th class="text-end pe-3">Aksi</th>
+                                <th class="pe-3">Deskripsi</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {% for attempt in attempt_rows %}
+                            {% for log in activity_logs %}
                             <tr>
-                                <td class="ps-3">
-                                    <p class="mb-1 fw-semibold">{{ attempt.exam.title }}</p>
-                                    <p class="small text-muted mb-0">{{ attempt.exam.subject.name }}</p>
+                                <td class="ps-3">{{ log.created_at|date:"d M Y H:i" }}</td>
+                                <td class="text-end pe-3">
+                                    <div class="d-flex justify-content-end gap-1">
+                                        {% soft_badge log.action "primary" %}
+                                    </div>
                                 </td>
-                                <td>{{ attempt.attempt_number }}</td>
-                                <td>{% enum_badge "attempt_status" attempt.status %}</td>
-                                <td>{{ attempt.percentage }}%</td>
-                                <td>{{ attempt.submit_time|date:"d M Y H:i"|default:"-" }}</td>
+                                <td class="pe-3 text-muted">{{ log.description|default:"-" }}</td>
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="5" class="text-center text-muted py-4">Belum ada attempt pada ujian Anda.</td>
+                                <td colspan="3" class="text-center text-muted py-4">Belum ada aktivitas tercatat.</td>
                             </tr>
                             {% endfor %}
                         </tbody>

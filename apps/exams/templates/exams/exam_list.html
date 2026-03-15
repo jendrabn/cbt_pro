@@ -89,6 +89,12 @@
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-start gap-2">
                             <div>
+                                <div class="small text-muted mb-1">
+                                    ID:
+                                    <small class="text-muted" data-bs-toggle="tooltip" data-bs-title="{{ row.exam.id }}">
+                                        {{ row.exam.id|truncatechars:8 }}
+                                    </small>
+                                </div>
                                 <h2 class="h6 mb-1">{{ row.exam.title }}</h2>
                                 {% if row.retake_badge %}
                                 <span class="cbt-status-badge is-secondary"><i class="ri-repeat-line me-1" aria-hidden="true"></i>{{ row.retake_badge }}</span>
@@ -105,7 +111,7 @@
                         </ul>
                         <div class="d-flex flex-wrap gap-1">
                             <a href="{% url 'exam_detail' row.exam.id %}" class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip" data-bs-title="Lihat detail ujian"><i class="ri-file-list-3-line"></i></a>
-                            <button type="button" class="btn btn-sm btn-outline-info preview-btn" data-preview-url="{% url 'exam_preview' row.exam.id %}" data-bs-toggle="modal" data-bs-target="#examPreviewModal" data-bs-toggle="tooltip" data-bs-title="Pratinjau ujian"><i class="ri-eye-line"></i></button>
+                            <button type="button" class="btn btn-sm btn-outline-info preview-btn" data-preview-url="{% url 'exam_preview' row.exam.id %}" data-bs-toggle="tooltip" data-bs-title="Pratinjau ujian"><i class="ri-eye-line"></i></button>
                             <a href="{% url 'monitoring_dashboard' row.exam.id %}" class="btn btn-sm btn-outline-dark" data-bs-toggle="tooltip" data-bs-title="Buka monitoring live ujian"><i class="ri-radar-line"></i></a>
                             <a href="{% url 'exam_results_detail' row.exam.id %}" class="btn btn-sm btn-outline-success" data-bs-toggle="tooltip" data-bs-title="Buka hasil &amp; analitik ujian"><i class="ri-bar-chart-line"></i></a>
                             <a href="{% url 'exam_edit' row.exam.id %}" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" data-bs-title="Edit ujian"><i class="ri-edit-line"></i></a>
@@ -116,8 +122,8 @@
                                     <i class="{% if row.exam.status == 'draft' %}ri-send-plane-line{% else %}ri-draft-line{% endif %}"></i>
                                 </button>
                             </form>
-                            <button type="button" class="btn btn-sm btn-outline-dark duplicate-btn" data-action-url="{% url 'exam_duplicate' row.exam.id %}" data-title="{{ row.exam.title }}" data-bs-toggle="modal" data-bs-target="#duplicateModal" data-bs-toggle="tooltip" data-bs-title="Duplikasi ujian"><i class="ri-file-copy-line"></i></button>
-                            <button type="button" class="btn btn-sm btn-outline-danger delete-btn" data-action-url="{% url 'exam_delete' row.exam.id %}" data-title="{{ row.exam.title }}" data-bs-toggle="modal" data-bs-target="#deleteModal" data-bs-toggle="tooltip" data-bs-title="Hapus ujian"><i class="ri-delete-bin-line"></i></button>
+                            <button type="button" class="btn btn-sm btn-outline-dark duplicate-btn" data-action-url="{% url 'exam_duplicate' row.exam.id %}" data-title="{{ row.exam.title }}" data-bs-toggle="tooltip" data-bs-title="Duplikasi ujian"><i class="ri-file-copy-line"></i></button>
+                            <button type="button" class="btn btn-sm btn-outline-danger delete-btn" data-action-url="{% url 'exam_delete' row.exam.id %}" data-title="{{ row.exam.title }}" data-bs-toggle="tooltip" data-bs-title="Hapus ujian"><i class="ri-delete-bin-line"></i></button>
                         </div>
                     </div>
                 </article>

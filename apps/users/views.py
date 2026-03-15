@@ -111,6 +111,161 @@ def _get_user_profile(user):
         return None
 
 
+def _format_user_datetime(value):
+    if not value:
+        return "—"
+    return timezone.localtime(value).strftime("%d %b %Y %H:%M")
+
+
+def _user_role_reference(user, profile):
+    if user.role == User.Role.TEACHER:
+        return f"NIP {profile.teacher_id}" if profile and profile.teacher_id else "Guru"
+    if user.role == User.Role.STUDENT:
+        return f"NIS {profile.student_id}" if profile and profile.student_id else "Siswa"
+    return "Akses penuh sistem"
+
+
+def _format_user_datetime(value):
+    if not value:
+        return "—"
+    return timezone.localtime(value).strftime("%d %b %Y %H:%M")
+
+
+def _user_role_reference(user, profile):
+    if user.role == User.Role.TEACHER:
+        return profile.teacher_id if profile and profile.teacher_id else "—"
+    if user.role == User.Role.STUDENT:
+        return profile.student_id if profile and profile.student_id else "—"
+    return "—"
+
+
+def _build_user_table_rows(users):
+    rows = []
+    for user in users:
+        profile = _get_user_profile(user)
+        display_name = user.get_full_name().strip() or user.username
+        rows.append(
+            {
+                "user": user,
+                "profile": profile,
+                "display_name": display_name,
+                "username_label": f"@{user.username}" if user.username else "—",
+                "email_label": user.email or "—",
+                "role_reference": _user_role_reference(user, profile),
+                "last_login_label": _format_user_datetime(user.last_login) if user.last_login else "Belum pernah login",
+                "date_joined_label": _format_user_datetime(user.date_joined),
+                "status_label": "Aktif" if user.is_active else "Nonaktif",
+                "status_tone": "success" if user.is_active else "secondary",
+            }
+        )
+    return rows
+
+
+def _format_user_datetime(value):
+    if not value:
+        return "-"
+    return timezone.localtime(value).strftime("%d %b %Y %H:%M")
+
+
+def _user_role_reference(user, profile):
+    if user.role == User.Role.TEACHER:
+        return profile.teacher_id if profile and profile.teacher_id else "-"
+    if user.role == User.Role.STUDENT:
+        return profile.student_id if profile and profile.student_id else "-"
+    return "-"
+
+
+def _build_user_table_rows(users):
+    rows = []
+    for user in users:
+        profile = _get_user_profile(user)
+        display_name = user.get_full_name().strip() or user.username
+        rows.append(
+            {
+                "user": user,
+                "profile": profile,
+                "display_name": display_name or "-",
+                "username_label": f"@{user.username}" if user.username else "-",
+                "email_label": user.email or "-",
+                "role_reference": _user_role_reference(user, profile),
+                "last_login_label": _format_user_datetime(user.last_login),
+                "status_label": "Aktif" if user.is_active else "Nonaktif",
+                "status_tone": "success" if user.is_active else "secondary",
+            }
+        )
+    return rows
+
+
+def _format_user_datetime(value):
+    if not value:
+        return "—"
+    return timezone.localtime(value).strftime("%d %b %Y %H:%M")
+
+
+def _user_role_reference(user, profile):
+    if user.role == User.Role.TEACHER:
+        return profile.teacher_id if profile and profile.teacher_id else "—"
+    if user.role == User.Role.STUDENT:
+        return profile.student_id if profile and profile.student_id else "—"
+    return "—"
+
+
+def _build_user_table_rows(users):
+    rows = []
+    for user in users:
+        profile = _get_user_profile(user)
+        display_name = user.get_full_name().strip() or user.username
+        rows.append(
+            {
+                "user": user,
+                "profile": profile,
+                "display_name": display_name or "—",
+                "username_label": f"@{user.username}" if user.username else "—",
+                "email_label": user.email or "—",
+                "role_reference": _user_role_reference(user, profile),
+                "last_login_label": _format_user_datetime(user.last_login),
+                "status_label": "Aktif" if user.is_active else "Nonaktif",
+                "status_tone": "success" if user.is_active else "secondary",
+            }
+        )
+    return rows
+
+
+def _format_user_datetime(value):
+    if not value:
+        return "-"
+    return timezone.localtime(value).strftime("%d %b %Y %H:%M")
+
+
+def _user_role_reference(user, profile):
+    if user.role == User.Role.TEACHER:
+        return profile.teacher_id if profile and profile.teacher_id else "-"
+    if user.role == User.Role.STUDENT:
+        return profile.student_id if profile and profile.student_id else "-"
+    return "-"
+
+
+def _build_user_table_rows(users):
+    rows = []
+    for user in users:
+        profile = _get_user_profile(user)
+        display_name = user.get_full_name().strip() or user.username
+        rows.append(
+            {
+                "user": user,
+                "profile": profile,
+                "display_name": display_name or "-",
+                "username_label": f"@{user.username}" if user.username else "-",
+                "email_label": user.email or "-",
+                "role_reference": _user_role_reference(user, profile),
+                "last_login_label": _format_user_datetime(user.last_login),
+                "status_label": "Aktif" if user.is_active else "Nonaktif",
+                "status_tone": "success" if user.is_active else "secondary",
+            }
+        )
+    return rows
+
+
 def _completed_attempt_statuses():
     return ["submitted", "auto_submitted", "completed"]
 
@@ -154,12 +309,8 @@ def _teacher_student_ids(teacher):
 
 
 def _teacher_student_queryset(teacher):
-    student_ids = _teacher_student_ids(teacher)
-    if not student_ids:
-        return User.objects.none()
     return (
         User.objects.filter(
-            id__in=student_ids,
             role="student",
             is_deleted=False,
         )
@@ -172,6 +323,8 @@ def _filter_teacher_student_queryset(request, queryset):
     q = (request.GET.get("q") or "").strip()
     status = (request.GET.get("status") or "").strip()
     class_id = (request.GET.get("class_id") or "").strip()
+    date_from = parse_date((request.GET.get("date_from") or "").strip()) if request.GET.get("date_from") else None
+    date_to = parse_date((request.GET.get("date_to") or "").strip()) if request.GET.get("date_to") else None
 
     if q:
         queryset = queryset.filter(
@@ -190,6 +343,11 @@ def _filter_teacher_student_queryset(request, queryset):
     if class_id:
         queryset = queryset.filter(classes__class_obj_id=class_id)
 
+    if date_from:
+        queryset = queryset.filter(date_joined__date__gte=date_from)
+    if date_to:
+        queryset = queryset.filter(date_joined__date__lte=date_to)
+
     sort = request.GET.get("sort", "username")
     allowed_sort = {
         "username",
@@ -198,6 +356,8 @@ def _filter_teacher_student_queryset(request, queryset):
         "-first_name",
         "email",
         "-email",
+        "is_active",
+        "-is_active",
         "date_joined",
         "-date_joined",
         "last_login",
@@ -314,6 +474,39 @@ def _teacher_student_metrics_map(teacher, student_ids):
         metrics["total_violations"] = row["total_violations"]
 
     return metrics_map
+
+
+def _format_teacher_student_datetime(value):
+    if not value:
+        return "-"
+    return timezone.localtime(value).strftime("%d %b %Y %H:%M")
+
+
+def _build_teacher_student_table_rows(teacher, students):
+    student_ids = [student.id for student in students]
+    classes_map = _teacher_student_classes_map(teacher, student_ids)
+
+    rows = []
+    for student in students:
+        profile = _get_user_profile(student)
+        related_classes = classes_map.get(student.id, [])
+        display_name = student.get_full_name().strip() or student.username or "-"
+        rows.append(
+            {
+                "user": student,
+                "display_name": display_name,
+                "username_label": f"@{student.username}" if student.username else "-",
+                "email_label": student.email or "-",
+                "student_id_label": getattr(profile, "student_id", "") or "-",
+                "class_label": ", ".join(class_obj.name for class_obj in related_classes)
+                or getattr(profile, "class_grade", "")
+                or "-",
+                "last_login_label": _format_teacher_student_datetime(student.last_login),
+                "status_label": "Aktif" if student.is_active else "Nonaktif",
+                "status_tone": "success" if student.is_active else "secondary",
+            }
+        )
+    return rows
 
 
 def _user_rows(queryset):
@@ -503,11 +696,13 @@ class UserListView(AdminUserBaseView, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         all_users = self.get_base_queryset()
+        page_users = list(context["page_obj"].object_list) if context.get("page_obj") else list(context["users"])
         sort_query = self.request.GET.copy()
         sort_query.pop("sort", None)
         sort_query.pop("page", None)
         context.update(
             {
+                "user_rows": _build_user_table_rows(page_users),
                 "filters": {
                     "q": self.request.GET.get("q", ""),
                     "role": self.request.GET.get("role", ""),
@@ -718,86 +913,31 @@ class TeacherStudentListView(TeacherStudentBaseView, ListView):
         teacher = self.request.user
         base_queryset = self.get_base_queryset()
         page_students = list(context["page_obj"].object_list) if context.get("page_obj") else list(context["students"])
-        student_ids = [student.id for student in page_students]
-
-        assignment_map = _teacher_student_assignment_map(teacher, student_ids)
-        classes_map = _teacher_student_classes_map(teacher, student_ids)
-        metrics_map = _teacher_student_metrics_map(teacher, student_ids)
-
-        student_rows = []
-        for student in page_students:
-            profile = _get_user_profile(student)
-            related_classes = classes_map.get(student.id, [])
-            metrics = metrics_map.get(student.id, {})
-            assigned_exam_ids = assignment_map.get(student.id, set())
-            student_rows.append(
-                {
-                    "user": student,
-                    "profile": profile,
-                    "related_classes": related_classes,
-                    "class_names": ", ".join(class_obj.name for class_obj in related_classes)
-                    or getattr(profile, "class_grade", "")
-                    or "-",
-                    "assigned_exam_count": len(assigned_exam_ids),
-                    "attempt_count": metrics.get("attempt_count", 0),
-                    "completed_attempt_count": metrics.get("completed_attempt_count", 0),
-                    "average_score": round(float(metrics["average_score"]), 1)
-                    if metrics.get("average_score") is not None
-                    else None,
-                    "best_score": round(float(metrics["best_score"]), 1)
-                    if metrics.get("best_score") is not None
-                    else None,
-                    "total_violations": metrics.get("total_violations", 0),
-                }
-            )
-
-        base_student_ids = list(base_queryset.values_list("id", flat=True))
-        overall_avg_score = (
-            ExamResult.objects.filter(
-                exam__created_by=teacher,
-                exam__is_deleted=False,
-                student_id__in=base_student_ids,
-            ).aggregate(avg=Avg("percentage"))["avg"]
-            if base_student_ids
-            else None
-        )
-        students_with_attempts = (
-            ExamAttempt.objects.filter(
-                exam__created_by=teacher,
-                exam__is_deleted=False,
-                student_id__in=base_student_ids,
-            )
-            .values("student_id")
-            .distinct()
-            .count()
-            if base_student_ids
-            else 0
-        )
-        related_class_ids = _teacher_related_class_ids(teacher)
         sort_query = self.request.GET.copy()
         sort_query.pop("sort", None)
         sort_query.pop("page", None)
 
         context.update(
             {
-                "student_rows": student_rows,
+                "student_rows": _build_teacher_student_table_rows(teacher, page_students),
                 "filters": {
                     "q": self.request.GET.get("q", ""),
                     "status": self.request.GET.get("status", ""),
                     "class_id": self.request.GET.get("class_id", ""),
+                    "date_from": self.request.GET.get("date_from", ""),
+                    "date_to": self.request.GET.get("date_to", ""),
                     "sort": self.request.GET.get("sort", "username"),
                 },
                 "querystring": self._current_querystring_without_page(),
                 "sort_querystring": sort_query.urlencode(),
                 "available_classes": Class.objects.filter(
-                    id__in=related_class_ids,
-                ).order_by("grade_level", "name"),
+                    students__student__role=User.Role.STUDENT,
+                    students__student__is_deleted=False,
+                ).distinct().order_by("grade_level", "name"),
                 "summary": {
                     "total": base_queryset.count(),
                     "active": base_queryset.filter(is_active=True).count(),
                     "inactive": base_queryset.filter(is_active=False).count(),
-                    "students_with_attempts": students_with_attempts,
-                    "average_score": round(float(overall_avg_score or 0), 1),
                 },
             }
         )
@@ -814,43 +954,20 @@ class TeacherStudentDetailView(TeacherStudentBaseView, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        teacher = self.request.user
         student_user = self.object
         profile = _get_user_profile(student_user)
-
-        assignment_map = _teacher_student_assignment_map(teacher, [student_user.id])
-        classes_map = _teacher_student_classes_map(teacher, [student_user.id])
-        metrics_map = _teacher_student_metrics_map(teacher, [student_user.id])
-
-        assigned_exam_ids = assignment_map.get(student_user.id, set())
-        related_classes = classes_map.get(student_user.id, [])
-        metrics = metrics_map.get(student_user.id, {})
-
-        attempt_rows = ExamAttempt.objects.filter(
-            exam__created_by=teacher,
-            exam__is_deleted=False,
-            student=student_user,
-        ).select_related("exam__subject").order_by("-created_at", "-attempt_number")[:10]
-        assigned_exams = Exam.objects.filter(id__in=assigned_exam_ids).select_related("subject").order_by("-start_time")[:8]
+        attempt_qs = ExamAttempt.objects.filter(student=student_user)
 
         context.update(
             {
                 "profile": profile,
                 "session_status": get_student_session_status(student_user),
-                "related_classes": related_classes,
-                "assigned_exams": assigned_exams,
-                "attempt_rows": attempt_rows,
+                "activity_logs": student_user.activity_logs.order_by("-created_at")[:20],
                 "stats": {
-                    "assigned_exam_count": len(assigned_exam_ids),
-                    "attempt_count": metrics.get("attempt_count", 0),
-                    "completed_attempt_count": metrics.get("completed_attempt_count", 0),
-                    "average_score": round(float(metrics["average_score"]), 1)
-                    if metrics.get("average_score") is not None
-                    else None,
-                    "best_score": round(float(metrics["best_score"]), 1)
-                    if metrics.get("best_score") is not None
-                    else None,
-                    "total_violations": metrics.get("total_violations", 0),
+                    "exam_attempt_count": attempt_qs.count(),
+                    "completed_attempt_count": attempt_qs.filter(
+                        status__in=["submitted", "auto_submitted", "completed"]
+                    ).count(),
                 },
                 "back_querystring": urlencode(
                     {

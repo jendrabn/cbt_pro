@@ -12,7 +12,7 @@
 {% block page_header %}
     <section class="cbt-page-header">
         <div class="cbt-page-header-body">
-            {% include "partials/page_header.html" with eyebrow="Panel Guru" title="Data Siswa" subtitle="Lihat daftar siswa yang terhubung ke ujian Anda beserta ringkasan progresnya." %}
+            {% include "partials/page_header.html" with eyebrow="Panel Guru" title="Data Siswa" subtitle="Lihat seluruh data siswa dalam sistem." %}
         </div>
     </section>
 {% endblock %}
@@ -38,12 +38,6 @@
             <div class="col-6 col-md-4 col-xl-4 col-xxl-3">
                 {% include "partials/stats_card.html" with title="Nonaktif" value=summary.inactive icon="ri-user-unfollow-line" tone="secondary" %}
             </div>
-            <div class="col-6 col-md-4 col-xl-4 col-xxl-3">
-                {% include "partials/stats_card.html" with title="Sudah Attempt" value=summary.students_with_attempts icon="ri-timer-line" tone="info" %}
-            </div>
-            <div class="col-6 col-md-4 col-xl-4 col-xxl-3">
-                {% include "partials/stats_card.html" with title="Rata-rata Nilai" value=summary.average_score value_suffix="%" icon="ri-line-chart-line" tone="warning" %}
-            </div>
         </section>
 
         <section class="card filter-card border-0 shadow-sm mb-4">
@@ -61,7 +55,7 @@
                     </div>
                     <div class="cbt-inline-filter-select">
                         <select name="class_id" class="form-select">
-                            <option value="">Semua Kelas Terkait</option>
+                            <option value="">Semua Kelas</option>
                             {% for class_item in available_classes %}
                             <option value="{{ class_item.id }}" {% if filters.class_id == class_item.id|stringformat:'s' %}selected{% endif %}>{{ class_item.name }}</option>
                             {% endfor %}
@@ -74,11 +68,24 @@
                             <option value="inactive" {% if filters.status == 'inactive' %}selected{% endif %}>Nonaktif</option>
                         </select>
                     </div>
+                    <div class="cbt-inline-filter-range">
+                        <div class="cbt-inline-filter-date">
+                            <input type="date" name="date_from" value="{{ filters.date_from }}" class="form-control">
+                        </div>
+                        <span class="cbt-inline-filter-range-sep">-</span>
+                        <div class="cbt-inline-filter-date">
+                            <input type="date" name="date_to" value="{{ filters.date_to }}" class="form-control">
+                        </div>
+                    </div>
                     <div class="cbt-inline-filter-select">
                         <select name="sort" class="form-select">
                             <option value="username" {% if filters.sort == 'username' %}selected{% endif %}>Username A-Z</option>
                             <option value="-username" {% if filters.sort == '-username' %}selected{% endif %}>Username Z-A</option>
                             <option value="first_name" {% if filters.sort == 'first_name' %}selected{% endif %}>Nama A-Z</option>
+                            <option value="email" {% if filters.sort == 'email' %}selected{% endif %}>Email A-Z</option>
+                            <option value="-email" {% if filters.sort == '-email' %}selected{% endif %}>Email Z-A</option>
+                            <option value="is_active" {% if filters.sort == 'is_active' %}selected{% endif %}>Status Aktif</option>
+                            <option value="-is_active" {% if filters.sort == '-is_active' %}selected{% endif %}>Status Nonaktif</option>
                             <option value="-date_joined" {% if filters.sort == '-date_joined' %}selected{% endif %}>Terbaru Bergabung</option>
                             <option value="-last_login" {% if filters.sort == '-last_login' %}selected{% endif %}>Login Terakhir</option>
                         </select>
@@ -96,58 +103,59 @@
         <section class="card border-0 shadow-sm">
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
+                    <table class="table table-hover align-middle mb-0 cbt-user-table">
                         <thead class="table-light">
                             <tr>
-                                <th class="ps-3">Siswa</th>
-                                <th>NIS</th>
-                                <th>Kelas Terkait</th>
+                                <th>ID</th>
+                                <th>Pengguna</th>
                                 <th>Email</th>
+                                <th>NIS</th>
+                                <th>Kelas</th>
+                                <th>Last Login</th>
                                 <th>Status</th>
-                                <th>Ujian Terkait</th>
-                                <th>Attempt</th>
-                                <th>Rata-rata</th>
-                                <th class="text-end pe-3">Aksi</th>
+                                <th class="text-end pe-3 cbt-col-actions">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for row in student_rows %}
                             <tr>
-                                <td class="ps-3">
-                                    <p class="mb-1 fw-semibold">{{ row.user.get_full_name|default:row.user.username }}</p>
-                                    <p class="small text-muted mb-0">@{{ row.user.username }}</p>
-                                </td>
-                                <td>{{ row.profile.student_id|default:"-" }}</td>
-                                <td>{{ row.class_names }}</td>
-                                <td>{{ row.user.email }}</td>
+                                <td class="text-muted">{{ row.user.id }}</td>
                                 <td>
-                                    {% if row.user.is_active %}
-                                    {% soft_badge "Aktif" "success" %}
-                                    {% else %}
-                                    {% soft_badge "Nonaktif" "secondary" %}
-                                    {% endif %}
+                                    <div class="d-flex align-items-center gap-3">
+                                        <img
+                                            src="{% user_avatar_url row.user %}"
+                                            alt="Avatar {{ row.display_name }}"
+                                            class="cbt-user-table-avatar rounded-circle border bg-light flex-shrink-0"
+                                        >
+                                        <div class="flex-grow-1 overflow-hidden">
+                                            <div class="fw-semibold">{{ row.display_name }}</div>
+                                            <div class="small text-muted">{{ row.username_label }}</div>
+                                        </div>
+                                    </div>
                                 </td>
-                                <td>{{ row.assigned_exam_count }}</td>
-                                <td>
-                                    <span class="d-block">{{ row.attempt_count }} total</span>
-                                    <small class="text-muted">{{ row.completed_attempt_count }} selesai</small>
-                                </td>
-                                <td>
-                                    {% if row.average_score is not None %}
-                                    <span class="fw-semibold">{{ row.average_score }}%</span>
-                                    {% else %}
-                                    <span class="text-muted">-</span>
-                                    {% endif %}
-                                </td>
-                                <td class="text-end pe-3">
-                                    <a href="{% url 'teacher_student_detail' row.user.id %}{% if querystring %}?{{ querystring }}{% endif %}" class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip" data-bs-title="Lihat detail siswa">
-                                        <i class="ri-eye-line"></i>
-                                    </a>
+                                <td>{{ row.email_label }}</td>
+                                <td>{{ row.student_id_label }}</td>
+                                <td>{{ row.class_label }}</td>
+                                <td>{{ row.last_login_label }}</td>
+                                <td>{% soft_badge row.status_label row.status_tone %}</td>
+                                <td class="text-end pe-3 cbt-col-actions">
+                                    <div class="d-flex justify-content-end gap-1">
+                                        <a href="{% url 'teacher_student_detail' row.user.id %}{% if querystring %}?{{ querystring }}{% endif %}" class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip" data-bs-title="Lihat detail siswa">
+                                            <i class="ri-eye-line"></i>
+                                        </a>
+                                        <form method="post" action="{% url 'teacher_student_reset_session' row.user.id %}" class="d-inline" onsubmit="return confirm('Reset sesi login siswa ini?');">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                            <button type="submit" class="btn btn-sm btn-outline-warning" data-bs-toggle="tooltip" data-bs-title="Reset sesi login siswa">
+                                                <i class="ri-restart-line"></i>
+                                            </button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="9" class="text-center py-5 text-muted">Belum ada siswa yang terhubung ke ujian Anda.</td>
+                                <td colspan="8" class="text-center py-5 text-muted">Belum ada data siswa.</td>
                             </tr>
                             {% endfor %}
                         </tbody>

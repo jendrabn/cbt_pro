@@ -37,9 +37,6 @@
             <div class="col-6 col-md-4 col-xl-4 col-xxl-3">
                 {% include "partials/stats_card.html" with title="Total Mata Pelajaran" value=summary.total icon="ri-book-open-line" tone="primary" %}
             </div>
-            <div class="col-6 col-md-4 col-xl-4 col-xxl-3">
-                {% include "partials/stats_card.html" with title="Mapel Ditampilkan" value=subject_rows|length icon="ri-list-check-2" tone="info" %}
-            </div>
         </section>
 
         <section class="card border-0 shadow-sm mb-4">
@@ -102,7 +99,7 @@
                             >
                                 <td><small class="text-muted" title="{{ row.subject.id }}">{{ row.subject.id|truncatechars:8 }}</small></td>
                                 <td class="fw-semibold">{{ row.subject.name }}</td>
-                                <td>{% soft_badge row.subject.code "secondary" %}</td>
+                                <td class="text-uppercase">{{ row.subject.code|default:"-" }}</td>
                                 <td>{{ row.question_count }}</td>
                                 <td>{{ row.exam_count }}</td>
                                 <td class="text-end">

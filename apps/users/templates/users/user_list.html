@@ -136,15 +136,14 @@
                     </div>
 
                     <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
+                        <table class="table table-hover align-middle mb-0 cbt-user-table">
                             <thead class="table-light">
                                 <tr>
-                                    <th></th>
+                                    <th class="cbt-col-select"></th>
                                     <th>ID</th>
                                     <th>
-                                        <a class="text-decoration-none text-dark" href="?{% if sort_querystring %}{{ sort_querystring }}&{% endif %}sort=username">Username</a>
+                                        <a class="text-decoration-none text-dark" href="?{% if sort_querystring %}{{ sort_querystring }}&{% endif %}sort=username">Pengguna</a>
                                     </th>
-                                    <th>Nama</th>
                                     <th>
                                         <a class="text-decoration-none text-dark" href="?{% if sort_querystring %}{{ sort_querystring }}&{% endif %}sort=email">Email</a>
                                     </th>
@@ -152,48 +151,65 @@
                                         <a class="text-decoration-none text-dark" href="?{% if sort_querystring %}{{ sort_querystring }}&{% endif %}sort=role">Role</a>
                                     </th>
                                     <th>
-                                        <a class="text-decoration-none text-dark" href="?{% if sort_querystring %}{{ sort_querystring }}&{% endif %}sort=is_active">Status</a>
+                                        NIP/NIS
                                     </th>
                                     <th>
-                                        <a class="text-decoration-none text-dark" href="?{% if sort_querystring %}{{ sort_querystring }}&{% endif %}sort=-date_joined">Gabung</a>
+                                        <a class="text-decoration-none text-dark" href="?{% if sort_querystring %}{{ sort_querystring }}&{% endif %}sort=last_login">Last Login</a>
                                     </th>
-                                    <th>Login Terakhir</th>
-                                    <th class="text-end pe-3">Aksi</th>
+                                    <th>
+                                        <a class="text-decoration-none text-dark" href="?{% if sort_querystring %}{{ sort_querystring }}&{% endif %}sort=is_active">Status</a>
+                                    </th>
+                                    <th class="text-end pe-3 cbt-col-actions">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for user in users %}
+                                {% for row in user_rows %}
                                 <tr>
-                                    <td><input class="form-check-input row-check" type="checkbox" name="selected_ids" value="{{ user.id }}"></td>
-                                    <td><small class="text-muted" title="{{ user.id }}">{{ user.id|truncatechars:8 }}</small></td>
-                                    <td class="fw-semibold">{{ user.username }}</td>
-                                    <td>{{ user.get_full_name|default:"-" }}</td>
-                                    <td>{{ user.email }}</td>
-                                    <td>{% enum_badge "user_role" user.role %}</td>
-                                    <td>
-                                        {% if user.is_active %}
-                                        {% soft_badge "Aktif" "success" %}
-                                        {% else %}
-                                        {% soft_badge "Nonaktif" "secondary" %}
-                                        {% endif %}
+                                    <td class="cbt-col-select">
+                                        <input
+                                            class="form-check-input row-check"
+                                            type="checkbox"
+                                            name="selected_ids"
+                                            value="{{ row.user.id }}"
+                                            aria-label="Pilih {{ row.display_name|default:'pengguna' }}"
+                                        >
                                     </td>
-                                    <td>{{ user.date_joined|date:"d M Y" }}</td>
-                                    <td>{{ user.last_login|date:"d M Y H:i"|default:"-" }}</td>
-                                    <td class="text-end pe-3">
+                                    <td class="text-muted">{{ row.user.id }}</td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <img
+                                                src="{% user_avatar_url row.user %}"
+                                                alt="Avatar {{ row.display_name }}"
+                                                class="cbt-user-table-avatar rounded-circle border bg-light flex-shrink-0"
+                                            >
+                                            <div class="flex-grow-1 overflow-hidden">
+                                                <div class="fw-semibold">{{ row.display_name|default:"-" }}</div>
+                                                <div class="small text-muted">{{ row.username_label }}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>{{ row.email_label }}</td>
+                                    <td>
+                                        {% enum_badge "user_role" row.user.role %}
+                                    </td>
+                                    <td>{{ row.role_reference }}</td>
+                                    <td>{{ row.last_login_label }}</td>
+                                    <td>{% soft_badge row.status_label row.status_tone %}</td>
+                                    <td class="text-end pe-3 cbt-col-actions">
                                         <div class="d-flex justify-content-end gap-1">
-                                            <a href="{% url 'user_detail' user.id %}" class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip" data-bs-title="Lihat detail pengguna">
+                                            <a href="{% url 'user_detail' row.user.id %}" class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip" data-bs-title="Lihat detail pengguna">
                                                 <i class="ri-eye-line"></i>
                                             </a>
-                                            <a href="{% url 'user_edit' user.id %}" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" data-bs-title="Edit data pengguna">
+                                            <a href="{% url 'user_edit' row.user.id %}" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" data-bs-title="Edit data pengguna">
                                                 <i class="ri-edit-line"></i>
                                             </a>
                                             <button
                                                 type="submit"
-                                                formaction="{% url 'user_toggle_status' user.id %}"
+                                                formaction="{% url 'user_toggle_status' row.user.id %}"
                                                 formmethod="post"
-                                                class="btn btn-sm {% if user.is_active %}btn-outline-dark{% else %}btn-outline-success{% endif %}"
-                                                data-bs-toggle="tooltip" data-bs-title="{% if user.is_active %}Nonaktifkan pengguna{% else %}Aktifkan pengguna{% endif %}">
-                                                {% if user.is_active %}
+                                                class="btn btn-sm {% if row.user.is_active %}btn-outline-dark{% else %}btn-outline-success{% endif %}"
+                                                data-bs-toggle="tooltip" data-bs-title="{% if row.user.is_active %}Nonaktifkan pengguna{% else %}Aktifkan pengguna{% endif %}">
+                                                {% if row.user.is_active %}
                                                 <i class="ri-user-unfollow-line"></i>
                                                 {% else %}
                                                 <i class="ri-user-follow-line"></i>
@@ -201,7 +217,7 @@
                                             </button>
                                             <button
                                                 type="submit"
-                                                formaction="{% url 'user_delete' user.id %}"
+                                                formaction="{% url 'user_delete' row.user.id %}"
                                                 formmethod="post"
                                                 class="btn btn-sm btn-outline-danger"
                                                 data-bs-toggle="tooltip" data-bs-title="Hapus pengguna"
@@ -213,7 +229,7 @@
                                 </tr>
                                 {% empty %}
                                 <tr>
-                                    <td colspan="10" class="text-center py-4 text-muted">Data pengguna tidak ditemukan.</td>
+                                    <td colspan="9" class="text-center py-4 text-muted">Data pengguna tidak ditemukan.</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -265,14 +281,14 @@
         const toggleSelectAllLabel = document.querySelector('.toggle-select-all-label');
 
         const updateToggleButton = () => {
-            if (!toggleSelectAll) return;
-
             const totalRows = rowChecks.length;
             const checkedRows = Array.from(rowChecks).filter((item) => item.checked).length;
             const allSelected = totalRows > 0 && checkedRows === totalRows;
 
-            toggleSelectAll.dataset.allSelected = allSelected ? 'true' : 'false';
-            toggleSelectAll.title = allSelected ? 'Batalkan semua pilihan pengguna' : 'Pilih semua pengguna';
+            if (toggleSelectAll) {
+                toggleSelectAll.dataset.allSelected = allSelected ? 'true' : 'false';
+                toggleSelectAll.title = allSelected ? 'Batalkan semua pilihan pengguna' : 'Pilih semua pengguna';
+            }
             if (toggleSelectAllLabel) {
                 toggleSelectAllLabel.textContent = allSelected ? 'Batalkan Semua' : 'Pilih Semua';
             }

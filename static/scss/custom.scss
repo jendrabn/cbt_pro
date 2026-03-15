@@ -823,6 +823,11 @@ body.dashboard-body.cbt-sidebar-collapsed .cbt-sidebar-link {
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 3;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    line-height: 1.4;
+    max-height: calc(1.4em * 3);
     overflow: hidden;
 }
 
