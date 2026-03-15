@@ -15,10 +15,27 @@
         return typeof window.Chart !== "undefined";
     }
 
+    function themePrimaryColor() {
+        const styles = window.getComputedStyle(document.documentElement);
+        return (
+            styles.getPropertyValue("--cbt-primary").trim() ||
+            styles.getPropertyValue("--bs-primary").trim() ||
+            "#1B3A6B"
+        );
+    }
+
+    function themePrimaryRgb() {
+        const styles = window.getComputedStyle(document.documentElement);
+        return styles.getPropertyValue("--cbt-primary-rgb").trim() || "27, 58, 107";
+    }
+
     document.addEventListener("DOMContentLoaded", function () {
         if (!hasChartLibrary()) {
             return;
         }
+
+        const primaryColor = themePrimaryColor();
+        const primarySoft = `rgba(${themePrimaryRgb()}, 0.14)`;
 
         const trendData = parseData("student-results-trend-data");
         const subjectData = parseData("student-results-subject-data");
@@ -34,8 +51,8 @@
                         {
                             label: "Nilai (%)",
                             data: trendData.values || [],
-                            borderColor: "#0d6efd",
-                            backgroundColor: "rgba(13, 110, 253, 0.14)",
+                            borderColor: primaryColor,
+                            backgroundColor: primarySoft,
                             tension: 0.3,
                             fill: true,
                             pointRadius: 4

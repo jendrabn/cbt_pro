@@ -234,11 +234,25 @@
             return raw ? JSON.parse(raw.textContent) : {labels: [], values: []};
         }
 
+        function themePrimaryColor() {
+            const styles = window.getComputedStyle(document.documentElement);
+            return styles.getPropertyValue('--cbt-primary').trim()
+                || styles.getPropertyValue('--bs-primary').trim()
+                || '#1B3A6B';
+        }
+
+        function themePrimaryRgb() {
+            const styles = window.getComputedStyle(document.documentElement);
+            return styles.getPropertyValue('--cbt-primary-rgb').trim() || '27, 58, 107';
+        }
+
         const trendData = parseData('analytics-performance-data');
         const subjectData = parseData('analytics-subject-data');
         const activityData = parseData('analytics-activity-data');
         const distributionData = parseData('analytics-distribution-data');
         const certificateStatusData = parseData('analytics-certificate-status-data');
+        const primaryColor = themePrimaryColor();
+        const primarySoft = `rgba(${themePrimaryRgb()}, 0.12)`;
 
         new Chart(document.getElementById('performanceTrendChart'), {
             type: 'line',
@@ -247,8 +261,8 @@
                 datasets: [{
                     label: 'Nilai Rata-rata',
                     data: trendData.values,
-                    borderColor: '#0d6efd',
-                    backgroundColor: 'rgba(13,110,253,0.12)',
+                    borderColor: primaryColor,
+                    backgroundColor: primarySoft,
                     fill: true,
                     tension: 0.35
                 }]
@@ -262,7 +276,7 @@
                 labels: subjectData.labels,
                 datasets: [{
                     data: subjectData.values,
-                    backgroundColor: ['#0d6efd', '#20c997', '#ffc107', '#dc3545', '#6f42c1', '#fd7e14']
+                    backgroundColor: [primaryColor, '#20c997', '#ffc107', '#dc3545', '#6f42c1', '#fd7e14']
                 }]
             },
             options: { responsive: true }
@@ -275,7 +289,7 @@
                 datasets: [{
                     label: 'Jumlah Aktivitas',
                     data: activityData.values,
-                    backgroundColor: ['#0d6efd', '#20c997', '#ffc107']
+                    backgroundColor: [primaryColor, '#20c997', '#ffc107']
                 }]
             },
             options: { responsive: true, scales: { y: { beginAtZero: true, precision: 0 } } }

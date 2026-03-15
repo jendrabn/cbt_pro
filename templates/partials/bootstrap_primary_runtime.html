@@ -1,0 +1,147 @@
+<style>
+    :root {
+        --cbt-primary: {{ branding.primary_color|default:"#1B3A6B" }};
+        --cbt-primary-rgb: {{ branding.primary_color_rgb|default:"27, 58, 107" }};
+        --bs-primary: var(--cbt-primary);
+        --bs-primary-rgb: var(--cbt-primary-rgb);
+        --bs-link-color: var(--cbt-primary);
+        --bs-link-color-rgb: var(--cbt-primary-rgb);
+        --bs-primary-text-emphasis: var(--cbt-primary);
+        --bs-primary-bg-subtle: rgba(var(--cbt-primary-rgb), 0.12);
+        --bs-primary-border-subtle: rgba(var(--cbt-primary-rgb), 0.3);
+        --bs-focus-ring-color: rgba(var(--cbt-primary-rgb), 0.25);
+    }
+
+    .btn-primary {
+        --bs-btn-bg: var(--cbt-primary);
+        --bs-btn-border-color: var(--cbt-primary);
+        --bs-btn-hover-bg: var(--cbt-primary);
+        --bs-btn-hover-border-color: var(--cbt-primary);
+        --bs-btn-active-bg: var(--cbt-primary);
+        --bs-btn-active-border-color: var(--cbt-primary);
+        --bs-btn-disabled-bg: var(--cbt-primary);
+        --bs-btn-disabled-border-color: var(--cbt-primary);
+        --bs-btn-focus-shadow-rgb: var(--cbt-primary-rgb);
+    }
+
+    .btn-outline-primary {
+        --bs-btn-color: var(--cbt-primary);
+        --bs-btn-border-color: var(--cbt-primary);
+        --bs-btn-hover-bg: var(--cbt-primary);
+        --bs-btn-hover-border-color: var(--cbt-primary);
+        --bs-btn-active-bg: var(--cbt-primary);
+        --bs-btn-active-border-color: var(--cbt-primary);
+        --bs-btn-disabled-color: var(--cbt-primary);
+        --bs-btn-disabled-border-color: var(--cbt-primary);
+        --bs-btn-focus-shadow-rgb: var(--cbt-primary-rgb);
+    }
+
+    .nav-pills {
+        --bs-nav-pills-link-active-bg: var(--cbt-primary);
+    }
+
+    .dropdown-menu {
+        --bs-dropdown-link-active-bg: var(--cbt-primary);
+    }
+
+    .pagination {
+        --bs-pagination-focus-box-shadow: 0 0 0 0.25rem rgba(var(--cbt-primary-rgb), 0.25);
+        --bs-pagination-active-bg: var(--cbt-primary);
+        --bs-pagination-active-border-color: var(--cbt-primary);
+    }
+
+    .list-group {
+        --bs-list-group-active-bg: var(--cbt-primary);
+        --bs-list-group-active-border-color: var(--cbt-primary);
+    }
+
+    .progress,
+    .progress-stacked {
+        --bs-progress-bar-bg: var(--cbt-primary);
+    }
+
+    .accordion {
+        --bs-accordion-btn-focus-box-shadow: 0 0 0 0.25rem rgba(var(--cbt-primary-rgb), 0.25);
+    }
+
+    .form-check-input:checked {
+        background-color: var(--cbt-primary);
+        border-color: var(--cbt-primary);
+    }
+
+    .form-check-input:focus {
+        border-color: rgba(var(--cbt-primary-rgb), 0.42);
+        box-shadow: 0 0 0 0.25rem rgba(var(--cbt-primary-rgb), 0.25);
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: rgba(var(--cbt-primary-rgb), 0.35);
+        box-shadow: 0 0 0 0.2rem rgba(var(--cbt-primary-rgb), 0.14);
+    }
+
+    .login-page .form-control:focus,
+    .login-page .form-select:focus {
+        border-color: rgba(var(--cbt-primary-rgb), 0.5);
+        box-shadow: 0 0 0 0.2rem rgba(var(--cbt-primary-rgb), 0.15);
+    }
+
+    .form-range:focus::-webkit-slider-thumb {
+        box-shadow: 0 0 0 1px #fff, 0 0 0 0.25rem rgba(var(--cbt-primary-rgb), 0.25);
+    }
+
+    .form-range:focus::-moz-range-thumb {
+        box-shadow: 0 0 0 1px #fff, 0 0 0 0.25rem rgba(var(--cbt-primary-rgb), 0.25);
+    }
+
+    .form-range::-webkit-slider-thumb {
+        background-color: var(--cbt-primary);
+    }
+
+    .form-range::-moz-range-thumb {
+        background-color: var(--cbt-primary);
+    }
+
+    .form-range::-webkit-slider-thumb:active {
+        background-color: rgba(var(--cbt-primary-rgb), 0.45);
+    }
+
+    .form-range::-moz-range-thumb:active {
+        background-color: rgba(var(--cbt-primary-rgb), 0.45);
+    }
+
+    .btn-close {
+        --bs-btn-close-focus-shadow: 0 0 0 0.25rem rgba(var(--cbt-primary-rgb), 0.25);
+    }
+
+    .cbt-status-badge.is-primary,
+    .badge-soft-primary,
+    .badge.text-bg-primary {
+        background: rgba(var(--cbt-primary-rgb), 0.1) !important;
+        border-color: rgba(var(--cbt-primary-rgb), 0.24) !important;
+        color: var(--cbt-primary) !important;
+    }
+
+    .countdown-chip {
+        background-color: rgba(var(--cbt-primary-rgb), 0.1);
+        color: var(--cbt-primary);
+    }
+
+    #questionTypeBadge {
+        background: rgba(var(--cbt-primary-rgb), 0.1) !important;
+        border-color: rgba(var(--cbt-primary-rgb), 0.24) !important;
+        color: var(--cbt-primary) !important;
+    }
+
+    .review-answer-card .question-richtext {
+        border-left-color: var(--cbt-primary);
+    }
+
+    .result-score-hero {
+        background: linear-gradient(
+            135deg,
+            rgba(var(--cbt-primary-rgb), 0.05) 0%,
+            rgba(var(--cbt-primary-rgb), 0.12) 100%
+        );
+    }
+</style>

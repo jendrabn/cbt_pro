@@ -110,7 +110,7 @@ SETTING_META = {
         True,
         "",
     ),
-    "primary_color": ("string", "branding", "Warna utama UI (HEX)", True, "#0d6efd"),
+    "primary_color": ("string", "branding", "Warna utama UI (HEX)", True, "#1B3A6B"),
     "smtp_host": (
         "string",
         "email",

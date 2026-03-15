@@ -28,7 +28,7 @@ BRANDING_DEFAULTS: dict[str, Any] = {
     "login_page_headline": "Selamat Datang",
     "login_page_subheadline": "",
     "login_page_background_url": "",
-    "primary_color": "#0d6efd",
+    "primary_color": "#1B3A6B",
     "landing_page_enabled": True,
 }
 
@@ -55,6 +55,14 @@ def _normalize_primary_color(value: Any) -> str:
     if HEX_COLOR_PATTERN.match(text):
         return text
     return BRANDING_DEFAULTS["primary_color"]
+
+
+def _hex_to_rgb_string(value: str) -> str:
+    normalized = _normalize_primary_color(value)
+    red = int(normalized[1:3], 16)
+    green = int(normalized[3:5], 16)
+    blue = int(normalized[5:7], 16)
+    return f"{red}, {green}, {blue}"
 
 
 def _normalize_boolean(value: Any, default: bool) -> bool:
@@ -102,6 +110,7 @@ def get_branding_settings() -> dict[str, Any]:
             branding["institution_logo_url"] = legacy_logo_row.get_value()
 
     branding["primary_color"] = _normalize_primary_color(branding.get("primary_color"))
+    branding["primary_color_rgb"] = _hex_to_rgb_string(str(branding["primary_color"]))
     branding["landing_page_enabled"] = _normalize_boolean(
         branding.get("landing_page_enabled"),
         bool(BRANDING_DEFAULTS["landing_page_enabled"]),

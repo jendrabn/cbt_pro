@@ -192,14 +192,53 @@ class SystemSettingsViewTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'name="primary_color"', html=False)
-        self.assertContains(response, 'placeholder="#0d6efd"', html=False)
+        self.assertContains(response, 'placeholder="#1B3A6B"', html=False)
         self.assertContains(response, 'aria-describedby="primaryColorHelp"', html=False)
         self.assertContains(response, 'id="primaryColorHelp"', html=False)
         self.assertContains(response, 'class="form-text"', html=False)
-        self.assertContains(response, "Gunakan format HEX, contoh: #0d6efd.")
+        self.assertContains(response, "Gunakan format HEX, contoh: #1B3A6B.")
         self.assertNotContains(response, 'type="color"', html=False)
         self.assertNotContains(response, "primaryColorPreview")
         self.assertNotContains(response, "text-muted d-block")
+
+    def test_dashboard_layout_applies_bootstrap_primary_from_branding_color(self):
+        SystemSetting.objects.update_or_create(
+            setting_key="primary_color",
+            defaults={
+                "setting_value": "#112233",
+                "setting_type": "string",
+                "category": "branding",
+            },
+        )
+        invalidate_branding_cache()
+
+        self.client.force_login(self.admin)
+        response = self.client.get(reverse("system_settings"), {"tab": "branding"})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "--cbt-primary: #112233;", html=False)
+        self.assertContains(response, "--cbt-primary-rgb: 17, 34, 51;", html=False)
+        self.assertContains(response, ".btn-primary", html=False)
+        self.assertContains(response, "--bs-btn-bg: var(--cbt-primary);", html=False)
+
+    def test_auth_layout_applies_bootstrap_primary_from_branding_color(self):
+        SystemSetting.objects.update_or_create(
+            setting_key="primary_color",
+            defaults={
+                "setting_value": "#445566",
+                "setting_type": "string",
+                "category": "branding",
+            },
+        )
+        invalidate_branding_cache()
+
+        response = self.client.get(reverse("login"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "--cbt-primary: #445566;", html=False)
+        self.assertContains(response, "--cbt-primary-rgb: 68, 85, 102;", html=False)
+        self.assertContains(response, ".btn-primary", html=False)
+        self.assertContains(response, "--bs-btn-bg: var(--cbt-primary);", html=False)
 
     def test_create_backup_file(self):
         SystemSetting.objects.update_or_create(

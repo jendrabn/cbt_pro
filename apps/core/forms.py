@@ -63,7 +63,7 @@ class BrandingSettingsForm(SettingsForm):
         required=False,
         widget=forms.TextInput(
             attrs={
-                "placeholder": "#0d6efd",
+                "placeholder": "#1B3A6B",
                 "maxlength": "7",
                 "spellcheck": "false",
                 "autocomplete": "off",
@@ -97,9 +97,9 @@ class BrandingSettingsForm(SettingsForm):
     def clean_primary_color(self):
         value = (self.cleaned_data.get("primary_color") or "").strip()
         if not value:
-            return "#0d6efd"
+            return "#1B3A6B"
         if not self.HEX_COLOR_PATTERN.match(value):
-            raise forms.ValidationError("Format warna harus HEX, contoh: #0d6efd")
+            raise forms.ValidationError("Format warna harus HEX, contoh: #1B3A6B")
         return value
 
     def clean_institution_logo_url(self):

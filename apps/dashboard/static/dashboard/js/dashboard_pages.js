@@ -10,6 +10,20 @@ function parseJsonScript(id) {
     }
 }
 
+function getThemePrimaryColor() {
+    const styles = window.getComputedStyle(document.documentElement);
+    return (
+        styles.getPropertyValue("--cbt-primary").trim() ||
+        styles.getPropertyValue("--bs-primary").trim() ||
+        "#1B3A6B"
+    );
+}
+
+function getThemePrimaryRgb() {
+    const styles = window.getComputedStyle(document.documentElement);
+    return styles.getPropertyValue("--cbt-primary-rgb").trim() || "27, 58, 107";
+}
+
 function initSidebarShell() {
     const body = document.body;
     if (!body || !body.classList.contains("dashboard-body")) return;
@@ -80,6 +94,8 @@ function initActivityFilter() {
 
 function initAdminCharts() {
     if (!window.Chart) return;
+    const primaryColor = getThemePrimaryColor();
+    const primarySoft = `rgba(${getThemePrimaryRgb()}, 0.1)`;
 
     const growthCtx = document.getElementById("adminUserGrowthChart");
     const growthData = parseJsonScript("admin-user-growth-data");
@@ -91,8 +107,8 @@ function initAdminCharts() {
                 datasets: [{
                     label: "Pengguna Baru",
                     data: growthData.values || [],
-                    borderColor: "#0d6efd",
-                    backgroundColor: "rgba(13,110,253,0.1)",
+                    borderColor: primaryColor,
+                    backgroundColor: primarySoft,
                     fill: true,
                     tension: 0.35,
                     pointRadius: 3,
@@ -115,7 +131,7 @@ function initAdminCharts() {
                 labels: statusData.labels || [],
                 datasets: [{
                     data: statusData.values || [],
-                    backgroundColor: ["#94a3b8", "#3b82f6", "#22c55e", "#0ea5e9", "#ef4444"],
+                    backgroundColor: ["#94a3b8", primaryColor, "#22c55e", "#0ea5e9", "#ef4444"],
                 }],
             },
             options: {
@@ -129,6 +145,7 @@ function initAdminCharts() {
 
 function initTeacherChart() {
     if (!window.Chart) return;
+    const primaryRgb = getThemePrimaryRgb();
     const ctx = document.getElementById("teacherExamPerformanceChart");
     const data = parseJsonScript("teacher-exam-performance-data");
     if (!ctx || !data) return;
@@ -140,7 +157,7 @@ function initTeacherChart() {
             datasets: [{
                 label: "Rata-rata Nilai (%)",
                 data: data.values || [],
-                backgroundColor: "rgba(13,110,253,0.8)",
+                backgroundColor: `rgba(${primaryRgb}, 0.8)`,
                 borderRadius: 8,
                 borderSkipped: false,
             }],

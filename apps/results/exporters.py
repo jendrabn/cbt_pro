@@ -61,6 +61,7 @@ def _branding_payload():
         "institution_type": branding.get("institution_type") or "",
         "institution_address": branding.get("institution_address") or "",
         "institution_logo_url": branding.get("institution_logo_url") or "",
+        "primary_color": branding.get("primary_color") or "#1B3A6B",
     }
 
 
@@ -249,7 +250,7 @@ def export_results_to_pdf(exam, rows, summary):
     table.setStyle(
         TableStyle(
             [
-                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#0d6efd")),
+                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor(str(branding["primary_color"]))),
                 ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
                 ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
                 ("GRID", (0, 0), (-1, -1), 0.4, colors.HexColor("#ced4da")),

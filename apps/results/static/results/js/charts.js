@@ -15,10 +15,31 @@
         return typeof window.Chart !== "undefined";
     }
 
+    function themePrimaryColor() {
+        const styles = window.getComputedStyle(document.documentElement);
+        return (
+            styles.getPropertyValue("--cbt-primary").trim() ||
+            styles.getPropertyValue("--bs-primary").trim() ||
+            "#1B3A6B"
+        );
+    }
+
+    function themePrimaryRgb() {
+        const styles = window.getComputedStyle(document.documentElement);
+        return styles.getPropertyValue("--cbt-primary-rgb").trim() || "27, 58, 107";
+    }
+
+    function rgbaFromTheme(alpha) {
+        return `rgba(${themePrimaryRgb()}, ${alpha})`;
+    }
+
     document.addEventListener("DOMContentLoaded", function () {
         if (!hasChartLibrary()) {
             return;
         }
+
+        const primaryColor = themePrimaryColor();
+        const primarySoft = rgbaFromTheme(0.12);
 
         const distributionData = parseData("result-score-distribution-data");
         const passFailData = parseData("result-pass-fail-data");
@@ -35,7 +56,7 @@
                         {
                             label: "Jumlah Siswa",
                             data: distributionData.values || [],
-                            backgroundColor: ["#dc3545", "#fd7e14", "#ffc107", "#0d6efd", "#198754"],
+                            backgroundColor: ["#dc3545", "#fd7e14", "#ffc107", primaryColor, "#198754"],
                             borderRadius: 6,
                             borderSkipped: false
                         }
@@ -80,7 +101,7 @@
                         {
                             label: "Rata-rata Nilai (%)",
                             data: examComparisonData.avg_scores || [],
-                            backgroundColor: "#0d6efd"
+                            backgroundColor: primaryColor
                         },
                         {
                             label: "Tingkat Lulus (%)",
@@ -136,8 +157,8 @@
                         {
                             label: "Rata-rata Nilai",
                             data: analyticsTrendData.values || [],
-                            borderColor: "#0d6efd",
-                            backgroundColor: "rgba(13, 110, 253, 0.12)",
+                            borderColor: primaryColor,
+                            backgroundColor: primarySoft,
                             fill: true,
                             tension: 0.25
                         }

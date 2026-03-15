@@ -55,6 +55,16 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.0.0/fonts/remixicon.css" rel="stylesheet">
     <link href="{% static 'css/marketing.css' %}?v={{ marketing_asset_version }}" rel="stylesheet">
+    <style>
+        :root {
+            --cbt-primary: {{ theme_color|default:branding.primary_color|default:'#1B3A6B' }};
+            --cbt-primary-rgb: {{ branding.primary_color_rgb|default:'27, 58, 107' }};
+            --c-blue: var(--cbt-primary);
+            --c-blue-dk: var(--cbt-primary);
+            --c-blue-lt: rgba(var(--cbt-primary-rgb), 0.09);
+            --c-blue-br: rgba(var(--cbt-primary-rgb), 0.24);
+        }
+    </style>
     {% block extra_head %}{% endblock %}
 </head>
 <body class="marketing-shell {{ body_class }}">

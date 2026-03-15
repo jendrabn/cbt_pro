@@ -5,13 +5,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="application-name" content="{{ branding.institution_name|default:'Sistem CBT' }}">
-    <meta name="theme-color" content="{{ branding.primary_color|default:'#0d6efd' }}">
+    <meta name="theme-color" content="{{ branding.primary_color|default:'#1B3A6B' }}">
     <title>{% block title %}Masuk - {{ branding.institution_name|default:"CBT Pro" }}{% endblock %}</title>
     <link rel="icon" href="{{ branding.institution_favicon_url|default:'/static/images/favicon.ico' }}">
     <style>
         :root {
             --login-bg: #f3f7fb;
-            --login-primary: {{ branding.primary_color|default:"#0d6efd" }};
+            --login-primary: var(--cbt-primary);
             --login-card: #ffffff;
             --login-border: #d9e3ee;
             --login-text: #0f2038;
@@ -28,6 +28,7 @@
         }
     </style>
     <link href="{% static 'css/custom.css' %}?v={{ asset_version }}" rel="stylesheet">
+    {% include "partials/bootstrap_primary_runtime.html" %}
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.0.0/fonts/remixicon.css" rel="stylesheet">
     {% block extra_css %}{% endblock %}
 </head>

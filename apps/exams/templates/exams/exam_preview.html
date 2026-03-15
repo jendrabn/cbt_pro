@@ -5,10 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="application-name" content="{{ branding.institution_name|default:'Sistem CBT' }}">
-    <meta name="theme-color" content="{{ branding.primary_color|default:'#0d6efd' }}">
+    <meta name="theme-color" content="{{ branding.primary_color|default:'#1B3A6B' }}">
     <title>Pratinjau Ujian - {{ exam.title }} - {{ branding.institution_name|default:"CBT Pro" }}</title>
     <link rel="icon" href="{{ branding.institution_favicon_url|default:'/static/images/favicon.ico' }}">
     <link href="{% static 'css/custom.css' %}?v={{ asset_version }}" rel="stylesheet">
+    {% include "partials/bootstrap_primary_runtime.html" %}
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.0.0/fonts/remixicon.css" rel="stylesheet">
 </head>
 <body class="bg-light">

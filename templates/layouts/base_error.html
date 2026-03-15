@@ -5,16 +5,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="application-name" content="{{ branding.institution_name|default:'Sistem CBT' }}">
-    <meta name="theme-color" content="{{ branding.primary_color|default:'#0d6efd' }}">
+    <meta name="theme-color" content="{{ branding.primary_color|default:'#1B3A6B' }}">
     <title>{% block title %}{{ status_code }} - {{ error_title }} - {{ branding.institution_name|default:"CBT Pro" }}{% endblock %}</title>
     <link rel="icon" href="{{ branding.institution_favicon_url|default:'/static/images/favicon.ico' }}">
     <link href="{% static 'css/custom.css' %}?v={{ asset_version }}" rel="stylesheet">
+    {% include "partials/bootstrap_primary_runtime.html" %}
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.0.0/fonts/remixicon.css" rel="stylesheet">
-    <style>
-        :root {
-            --cbt-primary: {{ branding.primary_color|default:'#0d6efd' }};
-        }
-    </style>
 </head>
 <body class="bg-light">
     <main class="container min-vh-100 d-flex align-items-center justify-content-center py-5">
