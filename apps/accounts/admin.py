@@ -19,13 +19,12 @@ class UserAdmin(DjangoUserAdmin):
     list_filter = ("role", "is_active", "is_staff", "is_superuser", "is_deleted", "groups")
     search_fields = ("username", "email", "first_name", "last_name")
     ordering = ("-date_joined",)
-
-    fieldsets = DjangoUserAdmin.fieldsets + (
+    fieldsets = list(DjangoUserAdmin.fieldsets) + [
         ("CBT Fields", {"fields": ("role", "is_deleted")}),
-    )
-    add_fieldsets = DjangoUserAdmin.add_fieldsets + (
+    ]
+    add_fieldsets = list(DjangoUserAdmin.add_fieldsets) + [
         ("CBT Fields", {"fields": ("role",)}),
-    )
+    ]
 
 
 @admin.register(UserProfile)
