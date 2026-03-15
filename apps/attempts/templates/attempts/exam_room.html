@@ -51,13 +51,7 @@
 
 <div class="exam-wrapper">
     <div class="question-area">
-        {% if messages %}
-        <div class="mb-3">
-            {% for message in messages %}
-            <div class="alert alert-{{ message.tags|default:'info' }} py-2 mb-2">{{ message }}</div>
-            {% endfor %}
-        </div>
-        {% endif %}
+        {% include "partials/alerts.html" %}
 
         <div class="q-header d-flex flex-wrap align-items-center justify-content-between gap-2 gap-lg-3 border-bottom pb-3 mb-3">
             <div class="q-meta d-flex flex-wrap align-items-center gap-2">

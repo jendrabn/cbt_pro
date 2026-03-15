@@ -10,14 +10,7 @@
             <p class="text-muted mb-0">{{ role_description }}</p>
         </header>
 
-        {% if messages %}
-            {% for message in messages %}
-            <div class="alert alert-{{ message.tags|default:'info' }} py-2 d-flex align-items-center gap-2" role="alert">
-                <i class="ri-information-line"></i>
-                <span>{{ message }}</span>
-            </div>
-            {% endfor %}
-        {% endif %}
+        {% include "partials/alerts.html" with form=form %}
 
         <form method="post" novalidate>
             {% csrf_token %}

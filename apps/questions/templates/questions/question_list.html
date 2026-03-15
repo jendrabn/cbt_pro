@@ -32,13 +32,7 @@
 {% endblock %}
 
 {% block content %}
-    {% if messages %}
-        <div class="mb-3">
-            {% for message in messages %}
-            <div class="alert alert-{{ message.tags|default:'info' }} py-2 mb-2">{{ message }}</div>
-            {% endfor %}
-        </div>
-    {% endif %}
+    {% include "partials/alerts.html" %}
 
     <section class="row g-3 mb-4 cbt-stats-grid">
         <div class="col-6 col-md-4 col-xl-4 col-xxl-3">

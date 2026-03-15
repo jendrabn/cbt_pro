@@ -100,21 +100,7 @@
             </div>
         </header>
 
-        {% if messages %}
-            {% for message in messages %}
-            <div class="alert alert-{{ message.tags|default:'info' }} py-2 d-flex align-items-center gap-2" role="alert">
-                <i class="ri-information-line"></i>
-                <span>{{ message }}</span>
-            </div>
-            {% endfor %}
-        {% endif %}
-
-        {% if form.non_field_errors %}
-        <div class="alert alert-danger py-2 d-flex align-items-center gap-2" role="alert">
-            <i class="ri-error-warning-line"></i>
-            <span>{{ form.non_field_errors.0 }}</span>
-        </div>
-        {% endif %}
+        {% include "partials/alerts.html" with form=form %}
 
         {% if demo_mode and demo_accounts %}
         <div class="alert alert-warning border-0 py-3 mb-4" role="alert">

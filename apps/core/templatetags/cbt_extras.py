@@ -12,6 +12,32 @@ from apps.questions.richtext import sanitize_richtext_html
 register = template.Library()
 
 
+@register.filter(name="bootstrap_alert_tone")
+def bootstrap_alert_tone(value: str) -> str:
+    """Map Django message tags and aliases to Bootstrap alert tones."""
+    raw_tags = str(value or "").strip().lower().split()
+    tags = set(raw_tags)
+
+    if "error" in tags or "danger" in tags:
+        return "danger"
+    if "success" in tags:
+        return "success"
+    if "warning" in tags:
+        return "warning"
+    if "info" in tags:
+        return "info"
+    if "primary" in tags:
+        return "primary"
+    if "secondary" in tags:
+        return "secondary"
+    if "light" in tags:
+        return "light"
+    if "dark" in tags:
+        return "dark"
+
+    return "info"
+
+
 @register.filter(name="initials")
 def initials(value: str) -> str:
     parts = [part for part in str(value or "").strip().split() if part]
